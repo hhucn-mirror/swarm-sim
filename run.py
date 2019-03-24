@@ -10,10 +10,7 @@ from datetime import datetime
 
 from lib import  sim
 
-
-#visualization=True
-
-def core(argv):
+def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
     the simulator and the sim object is created. Afterwards the run method of the simulator
     is called in which the simlator is going to start to run"""
@@ -37,11 +34,13 @@ def core(argv):
     size_y = config.getint("Simulator", "size_y")
     window_size_x = config.getint("Simulator", "window_size_x")
     window_size_y = config.getint("Simulator", "window_size_y")
+    border = config.getint("Simulator", "border")
     max_particles = config.getint("Simulator", "max_particles")
-    mm_limitation = config.getboolean("Matter", "mm_limitation")
-    mm_particle = config.getint("Matter", "particle_mm_size")
-    mm_tile= config.getint("Matter", "tile_mm_size")
-    mm_location=config.getint("Matter", "location_mm_size")
+    mm_limitation = config.getboolean("matter", "mm_limitation")
+    mm_particle = config.getint("matter", "particle_mm_size")
+    mm_tile= config.getint("matter", "tile_mm_size")
+    mm_location=config.getint("matter", "location_mm_size")
+    tile_color_map = config.getboolean("matter", "tile_color_map")
 
     multiple_sim=0
 
@@ -93,12 +92,12 @@ def core(argv):
                            max_particles=max_particles, mm_limitation=mm_limitation,
                            particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
                            dir=directory, random_order=random_order,
-                          visualization=visualization)
+                          visualization=visualization,  border=border, window_size_x=window_size_x, window_size_y=window_size_y,)
 
     simulator.run()
     logging.info('Finished')
 
 
 if __name__ == "__main__":
-    core(sys.argv[1:])
+    swarm_sim(sys.argv[1:])
 
