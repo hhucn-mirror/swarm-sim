@@ -1,0 +1,15 @@
+,Round Number,Seed,solution,Location Counter,Location Created,Location Created Sum,Location Deleted,Location Deleted Sum,Location Read,Location Read Sum,Location Write,Location Write Sum,Memory Read,Memory Read Sum,Memory Write,Memory Write Sum,Particle Counter,Particles Created,Particles Created Sum,Particles Deleted,Particles Deleted Sum,Particles Dropped,Particles Dropped Sum,Particle Read,Particle Read Sum,Particle Steps,Particle Steps Sum,Particles Taken,Particles Taken Sum,Particle Write,Particle Write Sum,Success Counter,Success Round,Tile Counter,Tiles Created,Tiles Created Sum,Tiles Deleted,Tiles Deleted Sum,Tiles Dropped,Tiles Dropped Sum,Tile Read,Tile Read Sum,Tiles Taken,Tiles Taken Sum,Tile Write,Tile Write Sum
+,1,12,marking,148,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,2,12,marking,150,4,4,4,4,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,3,12,marking,152,4,8,4,8,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,8,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,4,12,marking,153,4,12,4,12,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,3,11,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,5,12,marking,153,4,16,4,16,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,15,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,6,12,marking,153,4,20,4,20,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,3,18,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,7,12,marking,155,4,24,4,24,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,22,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,8,12,marking,158,4,28,4,28,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,26,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,9,12,marking,162,4,32,4,32,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,3,29,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,10,12,marking,163,4,36,4,36,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,33,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,11,12,marking,166,4,40,4,40,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,37,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,12,12,marking,167,4,44,4,44,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,3,40,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,13,12,marking,171,4,48,4,48,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,3,43,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
+,14,12,marking,173,4,52,4,52,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,47,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0
