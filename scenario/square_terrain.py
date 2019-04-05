@@ -9,7 +9,7 @@ cyan = 8
 violett = 9
 
 
-def create_scenario(sim):
+def scenario(sim):
 
     # Top Border
     sim.add_location(-11.5, 13, color=black)
@@ -152,15 +152,15 @@ def create_scenario(sim):
 
     sim.add_location(8.5, 11, color=black)
     sim.add_location(9, 10, color=black)
-    # sim.add_location(9.5, 9, color=black)
-    # sim.add_location(10.5, 9, color=black)
+    sim.add_location(9.5, 9, color=black)
+    sim.add_location(10.5, 9, color=black)
     sim.add_location(7.5, 11, color=black)
     sim.add_location(6.5, 11, color=black)
     sim.add_location(5.5, 11, color=black)
     sim.add_location(4.5, 11, color=black)
     sim.add_location(3.5, 11, color=black)
-    # sim.add_location(2.5, 11, color=black)
-    # sim.add_location(1.5, 11, color=black)
+    sim.add_location(2.5, 11, color=black)
+    sim.add_location(1.5, 11, color=black)
     # sim.add_location(0.5, 11, color=black)
 
 
@@ -175,10 +175,12 @@ def create_scenario(sim):
     sim.add_particle(-9.5, 11, color=blue)
     sim.add_particle(-10, 10, color=black)
     sim.add_particle(-9, 10, color=red)
-    # sim.add_particle(-9, 10, color=green)
-
     sim.add_particle(-8.5, 11, color=green)
-    # sim.add_particle(-11, 12, color=blue)
+    # sim.add_particle(-11, 12, color=yellow)
+    # sim.add_particle(-11, 10, color=violett)
+    # sim.add_particle(-10, 12, color=cyan)
+    # sim.add_particle(-9, 12, color=orange)
+    # sim.add_particle(-10.5, 11, color=gray)
     # sim.add_particle(10, 10, color=cyan)
     # sim.add_particle(10, 10, color=cyan)
     # sim.add_particle(-1, 0, color=violett)
@@ -190,6 +192,6 @@ def create_scenario(sim):
     ###################################################
 
     # Tiles
-    sim.add_tile(11, 12, color=black)
+    # sim.add_tile(11, 12, color=black)
 
 
