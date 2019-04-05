@@ -9,7 +9,7 @@ SW = 2
 W = 3
 NW = 4
 NE = 5
-S = 6  # S for stop and not south
+# S = 6  # S for stop and not south
 
 black = 1
 gray = 2
