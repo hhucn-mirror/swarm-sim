@@ -177,31 +177,6 @@ class VisWindow(pyglet.window.Window):
                 self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                 self.update_tiles(True)
 
-    # def on_mouse_press(self, x, y, button, modifiers):
-    #     if modifiers & key.MOD_CTRL:
-    #         # get correct coordinates
-    #         sim_coords = window_to_sim(x, y, self.view)
-    #         coords_coords = sim_to_coords(sim_coords[0], sim_coords[1])
-    #         rounded_coords=0
-    #         if coords_coords[1]%2!=0:
-    #             rounded_coords = round(coords_coords[0],0) + 0.5
-    #         else:
-    #             rounded_coords =round(coords_coords[0], 0)
-    #         if (rounded_coords,coords_coords[1]) not in self.sim.location_map_coords:
-    #             # add tile and vertices
-    #             if self.sim.add_location_vis(rounded_coords, coords_coords[1]):
-    #                 self.location_vertex_list.resize(4 * len(self.sim.locations), 4 * len(self.sim.locations))
-    #                 #self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
-    #                 self.location_vertex_list.indices[4 * (len(self.sim.locations) - 1) : 4 * (len(self.sim.locations) - 1) + 4] = range(4 * (len(self.sim.locations) - 1), 4 * (len(self.sim.locations) - 1) + 4)
-    #                # self.tile_vertex_list.indices = list(range(0, 8 * len(self.sim.tiles)))
-    #                # self.update_tile(len(self.sim.tiles) - 1, tile)
-    #                 self.update_locations(True)
-    #         else:
-    #             # delete tile
-    #             self.sim.remove_location_on((rounded_coords,coords_coords[1]))
-    #             self.location_vertex_list.resize(4 * len(self.sim.locations), 4 * len(self.sim.locations))
-    #             self.update_locations(True)
-
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)

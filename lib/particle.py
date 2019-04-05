@@ -36,7 +36,7 @@ class Particle(matter.matter):
 
     def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0):
         """Initializing the location constructor"""
-        super().__init__( sim, x, y, color, alpha, type="particle", mm_limit=mm_limit, mm_size=mm_size)
+        super().__init__(sim, x, y, color, alpha, type="particle", mm_limit=mm_limit, mm_size=mm_size)
         global particle_counter
         particle_counter+=1
         self.number=particle_counter
@@ -121,7 +121,7 @@ class Particle(matter.matter):
         #sim = self.sim_to_coords(dir_coord[0], dir_coord[1])
         #print ("sim actual coord "+ str(sim))
         if self.sim.border==1:
-            if abs(dir_coord[0]) > self.sim.get_sim_x_size() or  abs(dir_coord[1]) > self.sim.get_sim_y_size() :
+            if abs(dir_coord[0]) > self.sim.get_sim_x_size() or abs(dir_coord[1]) > self.sim.get_sim_y_size():
                 dir = dir - 3 if dir > 2 else dir + 3
                 dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
@@ -134,7 +134,7 @@ class Particle(matter.matter):
             if not self.coords in self.sim.particle_map_coords:
                 self.sim.particle_map_coords[self.coords] = self
                 logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.sim.csv_round_writer.update_metrics( steps=1)
+                self.sim.csv_round_writer.update_metrics(steps=1)
                 self.csv_particle_writer.write_particle(steps=1)
                 self.touch()
                 if self.carried_tile is not None:
@@ -162,39 +162,6 @@ class Particle(matter.matter):
             # 'bounce' off the wall
             n_dir = dir - 3 if dir > 2 else dir + 3
             self.move_to(n_dir)
-
-    def move_to_coord(self, dir_coord):
-        """
-        Moves the particle to the given direction
-
-        :param dir_coord: Neighbouring coords
-        :return: True: Success Moving;  False: Non moving
-        """
-        # world = self.world_to_coords(dir_coord[0], dir_coord[1])
-        # print ("World actual coord "+ str(world))
-        # print("Particle moved to: " + str(dir_coord))
-        if self.sim.check_coords(dir_coord[0], dir_coord[1]):
-
-            try:  # cher: added so the program does not crashed if it does not find any entries in the map
-                del self.sim.particle_map_coords[self.coords]
-            except KeyError:
-                # print("Move error")
-                pass
-            self.coords = dir_coord
-            self.sim.particle_map_coords[self.coords] = self
-            logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-            self.sim.csv_round_writer.update_metrics(steps=1)
-            self.csv_particle_writer.write_particle(steps=1)
-            self.touch()
-            if self.carried_tile is not None:
-                self.carried_tile.coords = self.coords
-                self.carried_tile.touch()
-            elif self.carried_particle is not None:
-                self.carried_particle.coords = self.coords
-                self.carried_particle.touch()
-            return True
-        else:
-            return False
 
 
     def read_from_with(self, matter, key=None):
@@ -300,41 +267,6 @@ class Particle(matter.matter):
     def get_location_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords():
             return self.sim.get_location_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-
-
-
-
-    def write_to_with(self, matter, key=None, data=None):
-        """
-        Writes data with given a keyword directly on the matters (paricle, tile, or location object) memory
-
-        :param matter: The matter can be either a particle, tile, or location
-        :param key: A string keyword so to order the data that is written into the memory
-        :param data: The data that should be stored into the memory
-        :return: True: Successful written into the memory; False: Unsuccessful
-        """
-        wrote=False
-        if data != None:
-            wrote=False
-            if key==None:
-                wrote=matter.write_memory(data)
-            else:
-                wrote= matter.write_memory_with(key, data)
-            if  wrote==True:
-                if matter.type == "particle":
-                    self.sim.csv_round_writer.update_metrics( particle_write=1)
-                    self.csv_particle_writer.write_particle(particle_write=1)
-                elif matter.type == "tile":
-                    self.sim.csv_round_writer.update_metrics( tile_write=1)
-                    self.csv_particle_writer.write_particle(tile_write=1)
-                elif matter.type == "location":
-                    self.sim.csv_round_writer.update_metrics( location_write=1)
-                    self.csv_particle_writer.write_particle(location_write=1)
-                return True
-            else:
-                return False
-        else:
-            return False
 
     def if_matter_in_dir(self, matter="tile", dir=E):
         if matter=="tile":

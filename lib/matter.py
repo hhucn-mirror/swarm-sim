@@ -150,10 +150,10 @@ class matter():
             #write csv
 
 
-    def delete_memeory_with(self, key):
+    def delete_memory_with(self, key):
         del self._memory[key]
 
-    def delete_whole_memeory(self):
+    def delete_whole_memory(self):
          self._memory.clear()
 
 

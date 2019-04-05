@@ -191,7 +191,7 @@ class Sim:
 
         :return: The actual number of Particles
         """
-        return self.tiles_num
+        return self.particle_num
 
     def get_particle_list(self):
         """
@@ -344,6 +344,7 @@ class Sim:
                 return False
             else:
                 return True
+
     def coords_to_sim(self, coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)
 
@@ -492,6 +493,32 @@ class Sim:
             else:
                 logging.info("on x %f and y %f coordinates is a tile already", x, y)
                 return False
+
+    def add_location_vis(self, x, y, color=black, alpha=1):
+        """
+        Adds a tile to the sim database
+
+        :param color:
+        :param x: the x coordinates on which the tile should be added
+        :param y: the y coordinates on which the tile should be added
+        :return: True: Successful added; False: Unsuccsessful
+        """
+        if self.check_coords(x, y) == True:
+            if (x, y) not in self.location_map_coords:
+                self.new_location = location.Location(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
+                self.locations.append(self.new_location)
+
+                self.location_map_coords[self.new_location.coords] = self.new_location
+                self.location_map_id[self.new_location.get_id()] = self.new_location
+
+                print("sim.add_location",self.new_tile.coords)
+                logging.info("Created location with tile id %s on coords %s", str(self.new_location.get_id()),
+                             str(self.new_location.coords))
+                return True
+            else:
+                logging.info("on x %f and y %f coordinates is a location already", x, y)
+                return False
+
 
     def remove_tile(self,id):
         """
