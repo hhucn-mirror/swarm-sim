@@ -177,7 +177,7 @@ def create_scenario(sim):
     sim.add_particle(-9, 10, color=red)
     # sim.add_particle(-9, 10, color=green)
 
-    # sim.add_particle(-8.5, 11, color=green)
+    sim.add_particle(-8.5, 11, color=green)
     # sim.add_particle(-11, 12, color=blue)
     # sim.add_particle(10, 10, color=cyan)
     # sim.add_particle(10, 10, color=cyan)

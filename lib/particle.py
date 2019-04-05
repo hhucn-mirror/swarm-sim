@@ -163,6 +163,40 @@ class Particle(matter.matter):
             n_dir = dir - 3 if dir > 2 else dir + 3
             self.move_to(n_dir)
 
+    def move_to_coord(self, dir_coord):
+        """
+        Moves the particle to the given direction
+
+        :param dir_coord: Neighbouring coords
+        :return: True: Success Moving;  False: Non moving
+        """
+        # world = self.world_to_coords(dir_coord[0], dir_coord[1])
+        # print ("World actual coord "+ str(world))
+        # print("Particle moved to: " + str(dir_coord))
+        if self.sim.check_coords(dir_coord[0], dir_coord[1]):
+
+            try:  # cher: added so the program does not crashed if it does not find any entries in the map
+                del self.sim.particle_map_coords[self.coords]
+            except KeyError:
+                # print("Move error")
+                pass
+            self.coords = dir_coord
+            self.sim.particle_map_coords[self.coords] = self
+            logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
+            self.sim.csv_round_writer.update_metrics(steps=1)
+            self.csv_particle_writer.write_particle(steps=1)
+            self.touch()
+            if self.carried_tile is not None:
+                self.carried_tile.coords = self.coords
+                self.carried_tile.touch()
+            elif self.carried_particle is not None:
+                self.carried_particle.coords = self.coords
+                self.carried_particle.touch()
+            return True
+        else:
+            return False
+
+
     def read_from_with(self, matter, key=None):
         """
         Read the memories from the matters (paricle, tile, or location object) memories with a given keyword
