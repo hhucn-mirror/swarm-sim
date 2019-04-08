@@ -120,30 +120,31 @@ class Particle(matter.matter):
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         #sim = self.sim_to_coords(dir_coord[0], dir_coord[1])
         #print ("sim actual coord "+ str(sim))
-        if self.sim.border==1:
+        if self.sim.border == 1:
             if abs(dir_coord[0]) > self.sim.get_sim_x_size() or abs(dir_coord[1]) > self.sim.get_sim_y_size():
                 dir = dir - 3 if dir > 2 else dir + 3
                 dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
+
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
 
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.sim.particle_map_coords[self.coords]
             except KeyError:
                 pass
+
             self.coords = dir_coord
-            if not self.coords in self.sim.particle_map_coords:
-                self.sim.particle_map_coords[self.coords] = self
-                logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.sim.csv_round_writer.update_metrics(steps=1)
-                self.csv_particle_writer.write_particle(steps=1)
-                self.touch()
-                if self.carried_tile is not None:
-                    self.carried_tile.coords = self.coords
-                    self.carried_tile.touch()
-                elif self.carried_particle is not None:
-                    self.carried_particle.coords = self.coords
-                    self.carried_particle.touch()
-                return True
+            self.sim.particle_map_coords[self.coords] = self
+            logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
+            self.sim.csv_round_writer.update_metrics(steps=1)
+            self.csv_particle_writer.write_particle(steps=1)
+            self.touch()
+            if self.carried_tile is not None:
+                self.carried_tile.coords = self.coords
+                self.carried_tile.touch()
+            elif self.carried_particle is not None:
+                self.carried_particle.coords = self.coords
+                self.carried_particle.touch()
+            return True
         return False
 
     def move_to_in_bounds(self, dir):
