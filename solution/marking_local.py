@@ -1,7 +1,6 @@
 import random
 from random import randint
 import math
-import itertools
 
 E = 0
 SE = 1
@@ -21,15 +20,23 @@ orange = 7
 cyan = 8
 violet = 9
 
-directions = [E, SE, SW, W, NW, NE]
+dirs = [E, SE, SW, W, NW, NE]
 x_offset = [0.5, 1,  0.5, -0.5, -1, -0.5]
 y_offset = [1, 0, -1, -1,  0, 1]
 
 # TODO: (OPTIMIZATION) Add more sequences in dir_coords_array to randomize particle movement and rotation direction
-dir_coords_array = [[(0.5, 1), (1, 0), (0.5, -1), (-0.5, -1), (-1, 0), (-0.5, 1)],
-                    [(1, 0), (0.5, -1), (-0.5, -1), (-1, 0), (-0.5, 1), (0.5, 1)],
-                    [(-0.5, 1), (-1, 0), (-0.5, -1), (0.5, -1), (1, 0), (0.5, 1)],
-                    [(-1, 0), (-0.5, -1), (0.5, -1), (1, 0), (0.5, 1), (-0.5, 1)]]
+dirs_array = [[E, SE, SW, W, NW, NE]]#,
+                # [SE, SW, W, NW, NE, E],
+                # [SW, W, NW, NE, E, SE],
+                # [W, NW, NE, E, SE, SW],
+                # [NW, NE, E, SE, SW, W],
+                # [NE, E, SE, SW, W, NW],
+                # [E, NE, NW, W, SW, SE],
+                # [NE, NW, W, SW, SE, E],
+                # [NW, W, SW, SE, E, NE],
+                # [W, SW, SE, E, NE, NW],
+                # [SW, SE, E, NE, NW, W],
+                # [SE, E, NE, NW, W, SW]]
 
 
 # -1 = DFS, 0 = BFS
@@ -39,13 +46,13 @@ search_algorithms = [-1, 0]
 # TODO (core):
 # 1) Use move_to and move_in_dir instead of move_to_coords                              DONE
 # 2) Change locations to Locations                                                      DONE
-# 3) Alternative solution for get_distance and get_next_best_location
+# 3) Alternative solution for get_distance and get_next_best_location                   X (Is get_distance allowed?)
 # 4) When is the simulation successful? Evaluate metrics                                DONE
 # 5) write down what solutions features and limitation
 # 6) develop an automated simulation tool
 
 # TODO (Research):
-# 1) Global vs Local (graph, visited and unvisited)
+# 1) Global vs Local (graph, visited and unvisited)                                     DONE
 # 2) 1 vs swarm
 # 3) Memory limitations and computational power
 # 4) Alternative solutions for stuck particles
@@ -69,6 +76,7 @@ class Location:
         return str(self.coords) + ' | Adjacent: ' + str([item.coords for item in self.adjacent])
 
 
+# Checks if a location exists in a graph
 def location_exists(graph, coords):
     for location in graph:
         if location.coords == coords:
@@ -76,6 +84,7 @@ def location_exists(graph, coords):
     return False
 
 
+# Returns the location from a graph given the coordinates
 def get_location_with_coords(graph, coords):
     for location in graph:
         if location.coords == coords:
@@ -83,6 +92,7 @@ def get_location_with_coords(graph, coords):
     return False
 
 
+# Returns the direction of a location relative to the current location
 def get_dir(current_location, target_location):
     if target_location.coords[0] == current_location.coords[0] + x_offset[0] and target_location.coords[1] == current_location.coords[1] + y_offset[0]:
         return 0
@@ -103,12 +113,13 @@ def get_dir(current_location, target_location):
         return 5
 
 
+# Adds a new location to a graph
 def add_location_to_graph(sim, graph, location):
     if location in graph:
         return
     graph.append(location)
 
-    for direction in directions:
+    for direction in dirs:
         adjacent_location_coords = sim.get_coords_in_dir(location.coords, direction)
         if location_exists(graph, adjacent_location_coords):
             if location in get_location_with_coords(graph, adjacent_location_coords).adjacent:
@@ -117,11 +128,12 @@ def add_location_to_graph(sim, graph, location):
 
 
 def random_walk(particle):
-    dir = directions.copy()
+    dir = dirs.copy()
     new_dir = random.choice(dir)
     particle.move_to_in_bounds(new_dir)
 
 
+# Checks if the given coordinates are valid simulator coordinates
 def valid_sim_location(sim, coords):
     if sim.check_coords(coords[0], coords[1]):
         sim_coord = sim.coords_to_sim(coords)
@@ -131,22 +143,24 @@ def valid_sim_location(sim, coords):
     return False
 
 
-def check_border(sim, coords):
+# Checks if the location at the given coordinates is a border or not
+def is_border(sim, coords):
     for location in sim.get_location_list():
         if coords == location.coords:
             if location.color == [0, 0, 0]:
-                return False
-    return True
+                return True
+    return False
 
 
+# Initializes the new custom particle attributes
 def set_particle_attributes(particle):
-    dir_coord_array = dir_coords_array.copy()
+    directions = dirs_array.copy()
     search_algo = search_algorithms.copy()
 
-    dir_coords = random.choice(dir_coord_array)
+    direction = random.choice(directions)
     search_algorithm = random.choice(search_algo)
 
-    setattr(particle, "dir_coords", dir_coords)
+    setattr(particle, "direction", direction)
     setattr(particle, "search_algorithm", search_algorithm)
 
     setattr(particle, "unvisited_queue", [])
@@ -166,14 +180,15 @@ def set_particle_attributes(particle):
     setattr(particle, "done", False)
 
 
+# Discovers the adjacent (Neighbour) locations relative to the particle's current location
 def discover_adjacent_locations(sim, particle):
-    for direction in directions:
+    for direction in particle.direction:
         adjacent_location_coords = sim.get_coords_in_dir(particle.current_location.coords, direction)
 
         if not valid_sim_location(sim, adjacent_location_coords):
             continue
 
-        if not check_border(sim, adjacent_location_coords):
+        if is_border(sim, adjacent_location_coords):
             continue
 
         if location_exists(particle.graph, adjacent_location_coords):
@@ -189,6 +204,7 @@ def discover_adjacent_locations(sim, particle):
         add_location_to_graph(sim, particle.graph, new_location)
 
 
+# Marks the particle's current location as visited and removes it from the particle's unvisited queue
 def mark_location_as_visited(particle):
     particle.current_location.visited = True
     particle.visited.append(particle.current_location)
@@ -198,6 +214,7 @@ def mark_location_as_visited(particle):
     particle.create_location(color=cyan)
 
 
+# Returns the distance between 2 locations ########### IS THE USAGE OF THIS FUNCTION CONSIDERED GPS????????????????
 def get_distance(location1, location2):
     x1 = location1.coords[0]
     x2 = location2.coords[0]
@@ -208,6 +225,7 @@ def get_distance(location1, location2):
     return abs(math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2)))
 
 
+# Returns the nearest location in the particle's unvisited queue relative to the particle's current location
 def get_nearest_unvisited(particle):
     possible_unvisited_locations = []
     for location in particle.unvisited_queue:
@@ -216,6 +234,7 @@ def get_nearest_unvisited(particle):
     return min(possible_unvisited_locations, key=lambda t: t[0])[1]
 
 
+# Returns the next best possible move if the particle's target location is not adjacent to it (path generator)
 def get_next_best_location(current_location, target_location, stuck_locations):
     possible_moves = []
 
@@ -226,13 +245,14 @@ def get_next_best_location(current_location, target_location, stuck_locations):
             possible_moves.append((get_distance(location, target_location), location))
 
     if len(possible_moves) is 0:
-        return current_location.adjacent[randint(0, len(current_location.adjacent)-1)]
+        return current_location.adjacent[randint(0, len(current_location.adjacent) - 1)]
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
 
     return best_location
 
 
+# Returns the next closest unvisited location relative to the particle's current location
 def get_next_unvisited(particle, search_algorithm):
     if particle.unvisited_queue[search_algorithm] not in particle.current_location.adjacent:
         return get_next_best_location(particle.current_location, get_nearest_unvisited(particle), particle.stuck_locations)
@@ -241,15 +261,18 @@ def get_next_unvisited(particle, search_algorithm):
         return particle.unvisited_queue[search_algorithm]
 
 
-def communicate(particle):
+# Enables the particles to create packets with their own data and send them to one another if they are within range
+def communicate(particle, range):
+    # TODO(OPTIMIZATION) should the particles exchange unvisited locations as well? What would be the benefit?
     packet = (particle.graph, particle.visited, particle.unvisited_queue)
-    found_particles = particle.scan_for_particle_within(hop=5)
+    # TODO(OPTIMIZATION) What should the communication range be?
+    found_particles = particle.scan_for_particle_within(hop=range)
 
     if found_particles is None:
         return
 
-    for found_particle in found_particles:
-        particle.write_to_with(found_particle, particle.get_id(), packet)
+    for particle in found_particles:
+        particle.write_to_with(particle, particle.get_id(), packet)
 
 
 def solution(sim):
@@ -263,31 +286,40 @@ def solution(sim):
             add_location_to_graph(sim, particle.graph, particle.current_location)
             discover_adjacent_locations(sim, particle)
 
-        if sim.get_actual_round() % 15 == 0:
-            communicate(particle)
-            # pass
+        else:
+            # TODO(OPTIMIZATION) How often should the particles communicate if they are within range?
+            if sim.get_actual_round() > 25:
+                if sim.get_actual_round() % 15 == 0:
+                    communicate(particle, 5)
+                    # pass
 
-        if particle.read_whole_memory():
-            for particle_id in particle.read_whole_memory():
-                for location in particle.read_whole_memory()[particle_id][0]:
-                    if location not in particle.graph:
-                        add_location_to_graph(sim, particle.graph, location)
-                particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if location not in particle.visited])
-            particle.delete_whole_memory()
+            if particle.read_whole_memory():
+                for particle_id in particle.read_whole_memory():
+                    for location in particle.read_whole_memory()[particle_id][0]:
+                        if location not in particle.graph:
+                            add_location_to_graph(sim, particle.graph, location)
+                    particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if
+                                             location not in particle.visited])
+                particle.delete_whole_memory()
 
-        if sim.get_actual_round() % 20 == 0:
-            particle.stuck_locations.clear()
+            # TODO(OPTIMIZATION) How many locations should form the stuck cycle? Is there a better solution?
+            if sim.get_actual_round() % 20 == 0:
+                particle.stuck_locations.clear()
 
-        if sim.get_actual_round() > 1:
+            # if len(particle.stuck_locations) >= 20:
+            #     particle.stuck_locations.clear()
+
             try:
                 next_location = get_next_unvisited(particle, particle.search_algorithm)  # 0 for BFS, -1 for DFS
 
                 if next_location in particle.last_visited_locations:
                     if next_location in particle.stuck_locations:
-                        next_location = particle.current_location.adjacent[randint(0, 5)]
+                        next_location = particle.current_location.adjacent[randint(0, len(particle.current_location.adjacent) - 1)]
                         particle.stuck = True
                     else:
-                        particle.stuck_locations.append(next_location)
+                        # if len(particle.stuck_locations) >= 10:
+                            particle.stuck_locations.append(next_location)
+                            # particle.stuck_locations.pop(0)
                 else:
                     particle.last_visited_locations.append(next_location)
 
@@ -307,23 +339,27 @@ def solution(sim):
                     particle.done = True
                     continue
                 else:
-                    next_location = get_next_best_location(particle.current_location, particle.target_location, particle.stuck_locations)
+                    particle.current_location = get_location_with_coords(particle.graph, particle.coords)
+                    try:
+                        next_location = get_next_best_location(particle.current_location, particle.target_location, particle.stuck_locations)
 
-                    if next_location in particle.last_visited_locations:
-                        if next_location in particle.stuck_locations:
-                            next_location = particle.current_location.adjacent[
-                                randint(0, len(particle.current_location.adjacent) - 1)]
-                            particle.stuck = True
+                        if next_location in particle.last_visited_locations:
+                            if next_location in particle.stuck_locations:
+                                next_location = particle.current_location.adjacent[
+                                    randint(0, len(particle.current_location.adjacent) - 1)]
+                                particle.stuck = True
+                            else:
+                                particle.stuck_locations.append(next_location)
                         else:
-                            particle.stuck_locations.append(next_location)
-                    else:
-                        particle.last_visited_locations.append(next_location)
+                            particle.last_visited_locations.append(next_location)
 
-                    next_direction = get_dir(particle.current_location, next_location)
-                    particle.current_location = next_location
+                        next_direction = get_dir(particle.current_location, next_location)
+                        particle.current_location = next_location
 
-                    if location_exists(particle.graph, next_location.coords):
-                        particle.move_to(next_direction)
+                        if location_exists(particle.graph, next_location.coords):
+                            particle.move_to(next_direction)
+                    except ValueError:
+                        discover_adjacent_locations(sim, particle)
 
     if done_particles == len(sim.get_particle_list()):
         print(sim.get_actual_round())
