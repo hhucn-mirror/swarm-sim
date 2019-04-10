@@ -220,8 +220,8 @@ def solution(sim):
 
         elif sim.get_actual_round() % cycle_no == 0:
             moving_decision(particle, sim)
-            # if check_termination(sim):
-            #     return
+            if check_termination(sim):
+                return
 
 
 
