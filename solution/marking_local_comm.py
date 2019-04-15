@@ -8,7 +8,6 @@ SW = 2
 W = 3
 NW = 4
 NE = 5
-# S = 6  # S for stop and not south
 
 black = 1
 gray = 2
@@ -38,21 +37,13 @@ dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, E, NE, NW, W, SW]]
 
 
-# -1 = DFS, 0 = BFS
-search_algorithms = [-1, 0]
+search_algorithms = [-1, 0]  # -1 = DFS, 0 = BFS
 
 
-# TODO (core):
-# 1) Use move_to and move_in_dir instead of move_to_coords                              DONE
-# 2) Change locations to Locations                                                      DONE
-# 3) Alternative solution for get_distance and get_next_best_location                   X (Is get_distance allowed?)
-# 4) When is the simulation successful? Evaluate metrics                                DONE
-# 5) write down what solutions features and limitation                                  DONE
-# 6) develop an automated simulation tool
 
 # TODO (Research):
 # 1) Global vs Local (graph, visited and unvisited)                                     DONE
-# 2) 1 vs swarm
+# 2) 1 vs swarm                                                                         DONE
 # 3) Memory limitations and computational power
 # 4) Alternative solutions for stuck particles
 # 5) What do particles do when they are done?
@@ -282,18 +273,17 @@ def communicate(particle, communication_range):
 
 # Enables the particle to extend its own data with the data received from other particles
 def analyse_memory(sim, particle):
-    if particle.read_whole_memory():
-        for particle_id in particle.read_whole_memory():
-            for location in particle.read_whole_memory()[particle_id][0]:
-                if location not in particle.graph:
-                    add_location_to_graph(sim, particle.graph, location)
-            particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if
-                                     location not in particle.visited])
-        particle.delete_whole_memory()
+    for particle_id in particle.read_whole_memory():
+        for location in particle.read_whole_memory()[particle_id][0]:
+            if location not in particle.graph:
+                add_location_to_graph(sim, particle.graph, location)
+        particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if
+                                 location not in particle.visited])
+    particle.delete_whole_memory()
 
 
 # Checks if the particle's next location is in a stuck cycle or not
-def next_location_in_stuck_nodes(particle, next_location):
+def location_in_stuck_nodes(particle, next_location):
     if next_location in particle.last_visited_locations:
         if next_location in particle.stuck_locations:
             particle.stuck = True
@@ -311,13 +301,13 @@ def next_location_in_stuck_nodes(particle, next_location):
 def solution(sim):
     done_particles = 0
 
-    communication = True
-
     # ***** Research Variables ***** #
+    communication = True
     start_communication_round = 30
     communication_frequency = 15
     communication_range = 5
-    clear_cycle_frequency = 20
+    clear_cycle_frequency = 25
+    ##################################
 
     for particle in sim.get_particle_list():
 
@@ -329,35 +319,38 @@ def solution(sim):
 
         else:
             # TODO(OPTIMIZATION) How often should the particles communicate if they are within range?
-            if sim.get_actual_round() > start_communication_round:
-                if communication:
+            if communication:
+                if sim.get_actual_round() > start_communication_round:
                     if sim.get_actual_round() % communication_frequency == 0:
-                        communicate(particle, communication_range)
+                            communicate(particle, communication_range)
 
-            analyse_memory(sim, particle)
+                if particle.read_whole_memory():
+                    analyse_memory(sim, particle)
 
             # TODO(OPTIMIZATION) How many locations should form the stuck cycle? Is there a better solution?
             # if len(particle.stuck_locations) >= clear_cycle_frequency:
             if sim.get_actual_round() % clear_cycle_frequency == 0:
                 particle.stuck_locations.clear()
 
-            try:
-                next_location = get_next_unvisited(particle)  # 0 for BFS, -1 for DFS
+            if len(particle.unvisited_queue) > 0:
 
-                if next_location_in_stuck_nodes(particle, next_location):
-                    next_location = particle.current_location.adjacent[
-                        randint(0, len(particle.current_location.adjacent) - 1)]
+                try:
+                    next_location = get_next_unvisited(particle)
 
-                next_direction = get_dir(particle.current_location, next_location)
-                particle.current_location = next_location
-                discover_adjacent_locations(sim, particle)
-                mark_location(sim, particle)
-                particle.move_to(next_direction)
+                    if location_in_stuck_nodes(particle, next_location):
+                        next_location = particle.current_location.adjacent[
+                            randint(0, len(particle.current_location.adjacent) - 1)]
+                    next_direction = get_dir(particle.current_location, next_location)
+                    particle.current_location = next_location
+                    discover_adjacent_locations(sim, particle)
+                    mark_location(sim, particle)
 
-            except ValueError:
-                discover_adjacent_locations(sim, particle)
+                    particle.move_to(next_direction)
 
-            except IndexError:
+                except ValueError:
+                    discover_adjacent_locations(sim, particle)
+
+            else:
                 particle.current_location = get_location_with_coords(particle.graph, particle.coords)
                 discover_adjacent_locations(sim, particle)
                 mark_location(sim, particle)
@@ -366,7 +359,6 @@ def solution(sim):
                     particle.stuck_locations.clear()
                     done_particles += 1
                     particle.done = True
-                    # particle.csv_particle_writer.success()
                     continue
 
                 else:
@@ -375,7 +367,7 @@ def solution(sim):
                     try:
                         next_location = get_next_best_location(particle.current_location, particle.target_location, particle.stuck_locations)
 
-                        if next_location_in_stuck_nodes(particle, next_location):
+                        if location_in_stuck_nodes(particle, next_location):
                             next_location = particle.current_location.adjacent[
                                 randint(0, len(particle.current_location.adjacent) - 1)]
 
