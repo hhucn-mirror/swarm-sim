@@ -1,18 +1,146 @@
 Started
-Created particle at (0, 0)
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 3
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 2
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 5
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 4
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 5
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 2
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 1
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 3
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 0
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 2
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 3
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 2
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 5
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 3
-particle 2996d6aa-2470-4f63-9ee6-27f6dfcd5e63 successfully moved to 5
+Created tile with tile id 83265da6-de07-4cce-82df-2526a78d1003 on coords (0, 0)
+Created tile with tile id 6a6b7c33-ef67-4dab-abef-68b520b40464 on coords (-1.0, 0.0)
+Created tile with tile id eca4a255-5213-4d2c-a90b-0d57f30971db on coords (-0.5, 1.0)
+Created location with id e58bcc0a-9b48-42d1-88f0-1e155419fabb on coords (0.5, 1)
+Created location with id 796a70fb-36dc-4663-bc7b-c11c27bf7c5e on coords (0.5, -1)
+Created location with id cb7cf75a-196c-484f-8b68-dfee108b2e2c on coords (-0.5, 1)
+Created location with id 3c966c9d-1560-4afe-b5df-87c21e0e2931 on coords (-0.5, -1)
+Created location with id e8b273e1-d135-47ee-875c-444c70f43104 on coords (1, 0)
+Created location with id c7967678-429b-43e2-931a-cf2014976db6 on coords (-1, 0)
+on x -0.500000 and y 1.000000 coordinates is a location already
+on x -0.500000 and y -1.000000 coordinates is a location already
+Created location with id b3d4ce2e-7ccc-44d7-9a1f-ca33f8669ed4 on coords (-1.5, 1.0)
+Created location with id bdbf7e57-0ddd-421e-8fd3-d4389715d636 on coords (-1.5, -1.0)
+Created location with id 22a44597-2df8-4b6f-8025-7ac96a4b113f on coords (0.0, 0.0)
+Created location with id 493ffd50-51fa-40eb-b081-76d90b0d46c6 on coords (-2.0, 0.0)
+Created location with id b8497b5a-761f-49c7-85f1-084ec8d9d41e on coords (0.0, 2.0)
+on x 0.000000 and y 0.000000 coordinates is a location already
+Created location with id a833aefc-2218-4c33-a5b9-0519dddc4867 on coords (-1.0, 2.0)
+on x -1.000000 and y 0.000000 coordinates is a location already
+on x 0.500000 and y 1.000000 coordinates is a location already
+on x -1.500000 and y 1.000000 coordinates is a location already
+Created particle at (1.5, 1.0)
+Created particle at (0.5, 1.0)
+Created particle at (1.0, -0.0)
+Created particle at (0.5, -1.0)
+Created particle at (1.5, -1.0)
+Created particle at (2.0, 0.0)
+Created particle at (2.5, 1.0)
+Created particle at (2.5, -1.0)
+Created particle at (2.0, 2.0)
+Created particle at (3.0, 2.0)
+Created particle at (3.5, 1.0)
+Created particle at (4.0, -0.0)
+Created particle at (4.5, -1.0)
+Created particle at (3.5, -1.0)
+Created particle at (3.0, -2.0)
+Created particle at (2.0, -2.0)
+Created particle at (1.0, -2.0)
+Created particle at (1.0, 2.0)
+Created particle at (3.0, -0.0)
+particle 67cd21eb-6527-43cf-9448-fcfee7302f20 successfully moved to 5
+particle dab71ad4-7ab6-4b87-afc5-d85396e03c44 successfully moved to 4
+particle 77ab8fd0-57e8-44e9-b3c3-1a1c3d40e8c6 successfully moved to 5
+particle b19419db-45d9-4ef7-8018-87f71e73739d successfully moved to 5
+particle 67cd21eb-6527-43cf-9448-fcfee7302f20 successfully moved to 4
+particle 2aa1bd7a-4782-4a03-9b6b-2a4ae6f9d4f5 successfully moved to 4
+particle 77ab8fd0-57e8-44e9-b3c3-1a1c3d40e8c6 successfully moved to 0
+particle b19419db-45d9-4ef7-8018-87f71e73739d successfully moved to 5
+particle 77ab8fd0-57e8-44e9-b3c3-1a1c3d40e8c6 successfully moved to 5
+particle af68f6d0-ff64-4405-8b46-dae69513c350 successfully moved to 4
+particle 9dd22926-b19b-4c18-b8de-19472fb4c65b successfully moved to 4
+particle 2aa1bd7a-4782-4a03-9b6b-2a4ae6f9d4f5 successfully moved to 0
+particle 3b54f616-f63e-42f7-a678-9cad88e65052 successfully moved to 4
+particle 67cd21eb-6527-43cf-9448-fcfee7302f20 successfully moved to 3
+particle ba7df55f-bcb5-4d81-a70d-6ccbcabaea8f successfully moved to 3
+particle b19419db-45d9-4ef7-8018-87f71e73739d successfully moved to 4
+particle dab71ad4-7ab6-4b87-afc5-d85396e03c44 successfully moved to 4
+particle c142e68b-22af-40b1-8dc7-b3f2cb3cdeca successfully moved to 4
+particle 77ab8fd0-57e8-44e9-b3c3-1a1c3d40e8c6 successfully moved to 5
+particle a8cc09c6-a5bc-4a65-9087-7fb0725286ac successfully moved to 5
+particle 355199ff-53a6-4510-99b5-d334bea13dc0 successfully moved to 4
+particle 2b6658c7-daef-460a-9320-ebd8749e9b03 successfully moved to 4
+particle 3fd0d00b-d101-4b18-a95a-f4c4b327bfb6 successfully moved to 5
+particle d9373f8b-5d0f-4ce6-a4f7-d374d0a83061 successfully moved to 4
+Created location with id 1e7b4d7b-3f78-4dc9-b363-aff5b288d7e0 on coords (1.0, 2)
+on x 1.000000 and y 0.000000 coordinates is a location already
+on x 0.000000 and y 2.000000 coordinates is a location already
+Created location with id 0f41dbad-286d-4bb2-87df-f70616fbb56f on coords (particle b19419db-45d9-4ef7-8018-87f71e73739d successfully moved to 3
+particle 92225377-0bc7-4a23-bbdb-9bb0df8286cc successfully moved to 4
+particle 5e209b48-8d8d-4e9e-b308-4f7f3d0d4f7a successfully moved to 4
+particle 77ab8fd0-57e8-44e9-b3c3-1a1c3d40e8c6 successfully moved to 4
+particle ad309756-4541-49ae-815c-7187b3addf62 successfully moved to 4
+particle 3b54f616-f63e-42f7-a678-9cad88e65052 successfully moved to 5
+particle 2aa1bd7a-4782-4a03-9b6b-2a4ae6f9d4f5 successfully moved to 5
+particle 82dac42b-5d3d-4376-bcde-5677ba5ae1e6 successfully moved to 4
+Created location with id 96f8814b-7b31-4266-a6b5-07abef743a12 on coords (1.0, 2)
+on x 1.000000 and y 0.000000 coordinates is a location already
+on x 0.000000 and y 2.000000 coordinates is a location already
+Created location with id c0c8e360-1e98-4a17-a9c1-63b4897077bf on coords (0.0, 0)
+Created location with id 9c9f73b4-ac8c-4151-85b5-e9d52a66b5dd on coords (1.5, 1)
+Created location with id 9bff8832-0474-4bae-bff8-e43dc8feb1cc on coords (-0.5, 1)
+on x 1.000000 and y 0.000000 coordinates is a location already
+Created location with id f32c8c64-b539-4f82-9e77-4054fab6b771 on coords (1.0, -2)
+on x 0.000000 and y 0.000000 coordinates is a location already
+Created location with id 669caf20-fd5e-4130-a958-0dc172c5f72c on coords (0.0, -2)
+Created location with id 94791ae0-3f8f-4de8-923a-bf0414182127 on coords (1.5, -1)
+on x -0.500000 and y -1.000000 coordinates is a location already
+on x 0.000000 and y 0.000000 coordinates is a location already
+on x 0.000000 and y -2.000000 coordinates is a location already
+Created location with id 0e62b727-b9bc-40fe-bfc6-5682dd517ee7 on coords (-1.0, 0)
+Created location with id 2563f7b9-92da-4f83-b8b2-336251d7e4e4 on coords (-1.0, -2)
+on x 0.500000 and y -1.000000 coordinates is a location already
+on x -1.500000 and y -1.000000 coordinates is a location already
+on x 1.500000 and y 1.000000 coordinates is a location already
+on x 1.500000 and y -1.000000 coordinates is a location already
+on x 0.500000 and y 1.000000 coordinates is a location already
+on x 0.500000 and y -1.000000 coordinates is a location already
+Created location with id 38ac4d17-d781-4e8d-a17a-bdba2969daf6 on coords (2, 0)
+on x 0.000000 and y 0.000000 coordinates is a location already
+on x -1.000000 and y 2.000000 coordinates is a location already
+on x -1.000000 and y 0.000000 coordinates is a location already
+Created location with id 780da1af-a4d7-488b-849c-5138bc855c1e on coords (-2.0, 2.0)
+on x -2.000000 and y 0.000000 coordinates is a location already
+on x -0.500000 and y 1.000000 coordinates is a location already
+Created location with id 777d56a5-5fe4-4f6a-9789-07a6a1d1750a on coords (-2.5, 1.0)
+on x -1.000000 and y 0.000000 coordinates is a location already
+on x -1.000000 and y -2.000000 coordinates is a location already
+on x -2.000000 and y 0.000000 coordinates is a location already
+Created location with id a43d8ccb-a458-427c-bdd8-9196b028dce8 on coords (-2.0, -2.0)
+on x -0.500000 and y -1.000000 coordinates is a location already
+Created location with id 5c929da2-8781-4363-b754-62510eaa423b on coords (-2.5, -1.0)
+on x -1.500000 and y 1.000000 coordinates is a location already
+on x -1.500000 and y -1.000000 coordinates is a location already
+on x -2.500000 and y 1.000000 coordinates is a location already
+on x -2.500000 and y -1.000000 coordinates is a location already
+on x -1.000000 and y 0.000000 coordinates is a location already
+Created location with id c8041301-6110-4138-9d68-de35dcadb144 on coords (-3.0, 0.0)
+Created location with id 17cdea59-c5d1-4151-a07c-8352f07e6bd6 on coords (0.5, 3.0)
+on x 0.500000 and y 1.000000 coordinates is a location already
+Created location with id 3c3bd2e8-3db5-4772-93b9-f1e39b2c63df on coords (-0.5, 3.0)
+on x -0.500000 and y 1.000000 coordinates is a location already
+on x 1.000000 and y 2.000000 coordinates is a location already
+on x -1.000000 and y 2.000000 coordinates is a location already
+on x -0.500000 and y 3.000000 coordinates is a location already
+on x -0.500000 and y 1.000000 coordinates is a location already
+Created location with id 44f0d612-db1b-4dc3-aaaf-a946af8cf33b on coords (-1.5, 3.0)
+on x -1.500000 and y 1.000000 coordinates is a location already
+on x 0.000000 and y 2.000000 coordinates is a location already
+on x -2.000000 and y 2.000000 coordinates is a location already
+Created particle at (2, 0)
+Created particle at (3, 0)
+Created particle at (4, 0)
+Created particle at (5, 0)
+Created particle at (6, 0)
+Created particle at (7, 0)
+Created particle at (8, 0)
+Created particle at (9, 0)
+Created particle at (10, 0)
+Created particle at (11, 0)
+Created particle at (12, 0)
+Created particle at (13, 0)
+Created particle at (14, 0)
+Created particle at (15, 0)
+Created particle at (16, 0)
 Finished

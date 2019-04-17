@@ -82,8 +82,8 @@ def dir_str(dir):
         return "Error"
 
 
-debug = False
-debug2 = False
+debug = True
+debug2 = True
 
 
 class neighbors:
@@ -117,7 +117,7 @@ def reset_attributes(particle):
 cycle_no = 4
 
 exit_start = False
-exit_cnt = 60
+exit_cnt = 0
 
 def solution(sim):
     """
@@ -289,6 +289,7 @@ def data_setting(particle):
 
 def get_own_dist(particle):
     if particle.t_cnt > 0:
+        print ("P ", particle.number, "got the distance 1")
         particle.own_dist = 1
         return True
     elif particle.own_dist != 10000:
@@ -487,8 +488,8 @@ def data_receiving(particle):
 
 
 def data_updating(particle):
-    if particle.own_dist == 10000:
-        get_own_dist_from_nh(particle)
+    # if particle.own_dist == 10000:
+    get_own_dist_from_nh(particle)
     update_nh_dict(particle)
     comparing_fl_p_dist(particle)
 
@@ -505,7 +506,9 @@ def get_own_dist_from_nh(particle):
     if p_dist_dict:
         # Give yourself a distance if you are not beside a tile
         # particle.own_dist = min(p_dist_list, key=p_dist_list.get)+1
-        particle.own_dist = min(p_dist_dict.values()) + 1
+        print (" P", particle.number, "changed its distance from", particle.own_dist, " to ", min(p_dist_dict.values()) + 1)
+        if min(p_dist_dict.values()) + 1 < particle.own_dist :
+            particle.own_dist = min(p_dist_dict.values()) + 1
         return True
         # print("min is Equal ", p_fl_min_dist_dict.values())
     return False
@@ -699,8 +702,13 @@ def need_to_move(particle):
                 if particle.NH_dict[dir].dist == particle.own_dist:
                     if particle.prev_dir != dir:
                         if not particle.particle_in(dir):
+                            if debug:
+                                print("\n P", particle.number, " coords before moving ", particle.coords)
                             particle.move_to(dir)
                             particle.prev_dir = invert_dir(dir)
+                            if debug:
+                                print("\n P", particle.number, "moved to ", dir_str(particle.fl_dir), particle.fl_dir)
+                                print("\n P", particle.number, " coords after moving ", particle.coords)
                             data_clearing(particle)
                             return
 
