@@ -552,6 +552,10 @@ def find_min_fl(dir, particle):
 
 
 def find_max_p(dir, particle):
+    if particle.p_max_dist == -1 and particle.rcv_buf[dir].own_dist < particle.own_dist:
+        particle.p_max_dist = particle.own_dist
+        particle.p_dir = None
+        particle.p_hop = 0
     if particle.rcv_buf[dir].own_dist != 10000 and particle.rcv_buf[dir].own_dist > particle.p_max_dist:
         particle.p_max_dist = particle.rcv_buf[dir].own_dist
         particle.p_dir = invert_dir(dir)
@@ -735,7 +739,7 @@ def check_fl_dir(particle):
     if not particle.particle_in(particle.fl_dir) and not particle.tile_in(particle.fl_dir):
         if particle.fl_dir != particle.prev_dir or particle.fl_cnt==1:
             if check_dir_dist(particle, particle.fl_dir):
-                if particle.p_max_dist != -1 and particle.p_max_dist != particle.own_dist :
+                if particle.p_max_dist != -1 and particle.own_dist <= particle.p_max_dist:
                     if debug:
                        print("\n P", particle.number, " coords before moving ", particle.coords)
                     particle.move_to(particle.fl_dir)
@@ -744,7 +748,14 @@ def check_fl_dir(particle):
                         print("\n P", particle.number, "moved to ", dir_str(particle.fl_dir), particle.fl_dir)
                         print("\n P", particle.number, " coords after moving ", particle.coords)
                     data_clearing(particle)
-
+                else:
+                    print(particle.number, ": I do not have a maximal distance or my distance is the same with neighborhood ")
+            else:
+                print(particle.number, ": my neighborhood distance is highter than mine")
+        else:
+            print(particle.number,":I do not go back or when I'm beside a tile")
+    else:
+        print(particle.number,":Particle or tile is infront of me")
         #search for another free location
 
 def check_dir_dist(particle, dir):
