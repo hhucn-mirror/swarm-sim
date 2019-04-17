@@ -707,11 +707,11 @@ def need_to_move(particle):
                     if particle.prev_dir != dir:
                         if not particle.particle_in(dir):
                             if debug:
-                                print("\n P", particle.number, " coords before moving ", particle.coords)
+                                print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
                             particle.move_to(dir)
                             particle.prev_dir = invert_dir(dir)
                             if debug:
-                                print("\n P", particle.number, "moved to ", dir_str(particle.fl_dir), particle.fl_dir)
+                                print("\n P", particle.number, "moved to ", dir_str(dir), dir)
                                 print("\n P", particle.number, " coords after moving ", particle.coords)
                             data_clearing(particle)
                             return
@@ -720,17 +720,33 @@ def check_between_tiles(particle):
     for dir in direction:
         if particle.NH_dict[dir].type == "p" and  particle.NH_dict[invert_dir(dir)].type == "fl":
             if invert_dir(dir) != particle.prev_dir:
+                if debug:
+                    print("\nin T P", particle.number, " coords before moving ", particle.coords)
                 particle.prev_dir = dir
                 particle.move_to(invert_dir(dir))
+                if debug:
+                    print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
+                    print("\n P", particle.number, " coords after moving ", particle.coords)
+                data_clearing(particle)
                 return
         elif particle.NH_dict[dir].type == "fl" and  particle.NH_dict[invert_dir(dir+3)].type == "fl":
             if dir != particle.prev_dir and not particle.particle_in(dir) and not particle.tile_in(dir):
+                if debug:
+                    print("\nin T  P", particle.number, " coords before moving ", particle.coords)
                 particle.prev_dir = invert_dir(dir)
                 particle.move_to(dir)
-                return
+                if debug:
+                    print("\n P", particle.number, "moved to ", dir_str(dir), dir)
+                    print("\n P", particle.number, " coords after moving ", particle.coords)
             elif not particle.particle_in(invert_dir(dir)) and not particle.tile_in(invert_dir(dir)) :
+                    if debug:
+                        print("\nin T  P", particle.number, " coords before moving ", particle.coords)
                     particle.prev_dir = dir
                     particle.move_to(invert_dir(dir))
+                    if debug:
+                        print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
+                        print("\n P", particle.number, " coords after moving ", particle.coords)
+            data_clearing(particle)
             return
     if particle.fl_dir is not None:
         check_fl_dir(particle)
@@ -741,7 +757,7 @@ def check_fl_dir(particle):
             if check_dir_dist(particle, particle.fl_dir):
                 if particle.p_max_dist != -1 and particle.own_dist <= particle.p_max_dist:
                     if debug:
-                       print("\n P", particle.number, " coords before moving ", particle.coords)
+                       print("\nin Fl P", particle.number, " coords before moving ", particle.coords)
                     particle.move_to(particle.fl_dir)
                     particle.prev_dir = invert_dir(particle.fl_dir)
                     if debug:
