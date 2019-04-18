@@ -10,11 +10,14 @@ violett = 9
 
 
 def scenario(sim):
+    draw_terrain(sim)
 
+    # Particles
     sim.add_particle(6, 14, color=black)
     sim.add_particle(6.5, 13, color=red)
-    sim.add_particle(-12, 0, color=blue)
 
+
+def draw_terrain(sim):
     sim.add_location(6.5, 15.0)
     sim.add_location(5.5, 15.0)
     sim.add_location(5.0, 14.0)
@@ -153,5 +156,3 @@ def scenario(sim):
     sim.add_location(7.0, -8.0)
     sim.add_location(7.5, -9.0)
     sim.add_location(7.0, -10.0)
-
-

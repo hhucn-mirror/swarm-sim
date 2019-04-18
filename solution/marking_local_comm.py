@@ -1,6 +1,10 @@
 import random
 from random import randint
 import math
+import configparser
+from lib import config_data as cd
+
+
 
 E = 0
 SE = 1
@@ -39,19 +43,12 @@ dirs_array = [[E, SE, SW, W, NW, NE],
 
 search_algorithms = [-1, 0]  # -1 = DFS, 0 = BFS
 
+all_marked = False
 
-
-# TODO (Research):
-# 1) Global vs Local (graph, visited and unvisited)                                     DONE
-# 2) 1 vs swarm                                                                         DONE
-# 3) Memory limitations and computational power
-# 4) Alternative solutions for stuck particles
-# 5) What do particles do when they are done?
-
-# TODO (Ideas):
-# 1) P2P swarm idea
-# 2) "Can" overload of zones (Kalman lectures)
-
+location_count = {"constricted_terrain": 363,
+                  "square_terrain": 527,
+                  "edgy_terrain": 315,
+                  "cressent_terrain": 149}
 
 class Location:
     def __init__(self, coords):
@@ -210,7 +207,6 @@ def mark_location(sim, particle):
 
 
 # Returns the distance between 2 locations
-# TODO(CORE) Is the usage of this distance function considered a GPS tier ability?
 def get_distance(location1, location2):
     x1 = location1.coords[0]
     x2 = location2.coords[0]
@@ -261,7 +257,6 @@ def get_next_unvisited(particle):
 def communicate(particle, communication_range):
     # TODO(OPTIMIZATION) should the particles exchange unvisited locations as well? What would be the benefit?
     packet = (particle.graph, particle.visited, particle.unvisited_queue)
-    # TODO(OPTIMIZATION) What should the communication range be?
     found_particles = particle.scan_for_particle_within(hop=communication_range)
 
     if found_particles is None:
@@ -273,7 +268,7 @@ def communicate(particle, communication_range):
 
 # Enables the particle to extend its own data with the data received from other particles
 def analyse_memory(sim, particle):
-    for particle_id in particle.read_whole_memory():
+    for particle_id in particle.read_from_with(particle):
         for location in particle.read_whole_memory()[particle_id][0]:
             if location not in particle.graph:
                 add_location_to_graph(sim, particle.graph, location)
@@ -298,16 +293,32 @@ def location_in_stuck_nodes(particle, next_location):
         return False
 
 
+# Checks if all markable sim locations have already been marked
+def check_all_marked(sim, scenario_location_count):
+    all_locations = sim.get_location_list()
+    marked_locations = [location for location in all_locations if location.color == [0.0, 0.8, 0.8]]
+
+    if len(marked_locations) == scenario_location_count:
+        return True
+
+    return False
+
+
 def solution(sim):
+    global all_marked
+
     done_particles = 0
 
-    # ***** Research Variables ***** #
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read("config.ini")
+    config_data = cd.ConfigData(config)
+    scenario_name = config_data.scenario
+
     communication = True
-    start_communication_round = 30
-    communication_frequency = 15
-    communication_range = 5
-    clear_cycle_frequency = 25
-    ##################################
+    start_communication_round = config_data.start_communication_round
+    communication_frequency = config_data.communication_frequency
+    communication_range = config_data.communication_range
+    clear_cycle_frequency = config_data.clear_cycle_frequency
 
     for particle in sim.get_particle_list():
 
@@ -318,16 +329,22 @@ def solution(sim):
             discover_adjacent_locations(sim, particle)
 
         else:
-            # TODO(OPTIMIZATION) How often should the particles communicate if they are within range?
+            if not all_marked:
+                if check_all_marked(sim, location_count[scenario_name]):
+                    all_marked = True
+                    sim.csv_round_writer.marking_success()
+                    sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
+
             if communication:
                 if sim.get_actual_round() > start_communication_round:
                     if sim.get_actual_round() % communication_frequency == 0:
-                            communicate(particle, communication_range)
+                        communicate(particle, communication_range)
+                        particle.received_data = True
 
-                if particle.read_whole_memory():
-                    analyse_memory(sim, particle)
+                    # if sim.get_actual_round() % (communication_frequency + 1) == 0:
+                    if len(particle.read_whole_memory()) > 0:
+                        analyse_memory(sim, particle)
 
-            # TODO(OPTIMIZATION) How many locations should form the stuck cycle? Is there a better solution?
             # if len(particle.stuck_locations) >= clear_cycle_frequency:
             if sim.get_actual_round() % clear_cycle_frequency == 0:
                 particle.stuck_locations.clear()
@@ -356,6 +373,8 @@ def solution(sim):
                 mark_location(sim, particle)
 
                 if particle.current_location is particle.target_location:
+                    if particle.done is False:
+                        particle.csv_particle_writer.set_task_success_round(sim.get_actual_round())
                     particle.stuck_locations.clear()
                     done_particles += 1
                     particle.done = True
@@ -380,8 +399,6 @@ def solution(sim):
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
 
-    # TODO(OPTIMIZATION) Should the simulation succeed when all locations have been marked or when all particles are back to nest?
     if done_particles == len(sim.get_particle_list()):
-        print(sim.get_actual_round())
         sim.success_termination()
 

@@ -102,8 +102,8 @@ class matter():
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
-        if self._memory != None :
-          return self._memory
+        if self._memory is not None :
+            return self._memory
         else:
             return None
 

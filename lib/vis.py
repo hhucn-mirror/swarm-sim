@@ -28,7 +28,7 @@ show_grid = True
 rotate_thirty_degree = False  # the grid is not drawn correctly if the view is rotated!
 
 # rendering parameters
-target_frame_rate = 140
+target_frame_rate = 60
 busy_waiting_time = 0.0015
 print_frame_stats = False
 
@@ -177,7 +177,6 @@ class VisWindow(pyglet.window.Window):
                 self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                 self.update_tiles(True)
 
-
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
         self.view.setDimensions(width, height)
@@ -316,7 +315,7 @@ class VisWindow(pyglet.window.Window):
             tile_alpha = 1
         else:
             texLeft = 7 / 8
-            texRight = 8 / 8
+            texRight = 1 # 8/8
             texBottom = 4 / 8
             texTop = 5 / 8
             tile_alpha = 0.5
@@ -408,7 +407,7 @@ class VisWindow(pyglet.window.Window):
         self.location_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
                                                                 y + weird, x - weird, y + weird]
         texLeft = 7/8
-        texRight = 8/8
+        texRight = 1 #8/8
         texBottom = 0/8
         texTop = 1/8
 

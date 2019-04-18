@@ -47,7 +47,7 @@ class Particle(matter.matter):
         self.__isCarried = False
         self.steps = 0
         self.created = False
-        self.csv_particle_writer = csv_generator.CsvParticleData( self.get_id(), self.number)
+        self.csv_particle_writer = csv_generator.CsvParticleData(self.get_id(), self.number)
 
     def coords_to_sim(self, coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)
@@ -132,19 +132,20 @@ class Particle(matter.matter):
             except KeyError:
                 pass
 
-            self.coords = dir_coord
-            self.sim.particle_map_coords[self.coords] = self
-            logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-            self.sim.csv_round_writer.update_metrics(steps=1)
-            self.csv_particle_writer.write_particle(steps=1)
-            self.touch()
-            if self.carried_tile is not None:
-                self.carried_tile.coords = self.coords
-                self.carried_tile.touch()
-            elif self.carried_particle is not None:
-                self.carried_particle.coords = self.coords
-                self.carried_particle.touch()
-            return True
+            if not self.coords in self.sim.particle_map_coords:
+                self.coords = dir_coord
+                self.sim.particle_map_coords[self.coords] = self
+                logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
+                self.sim.csv_round_writer.update_metrics(steps=1)
+                self.csv_particle_writer.write_particle(steps=1)
+                self.touch()
+                if self.carried_tile is not None:
+                    self.carried_tile.coords = self.coords
+                    self.carried_tile.touch()
+                elif self.carried_particle is not None:
+                    self.carried_particle.coords = self.coords
+                    self.carried_particle.touch()
+                return True
         return False
 
     def move_to_in_bounds(self, dir):
@@ -164,7 +165,6 @@ class Particle(matter.matter):
             n_dir = dir - 3 if dir > 2 else dir + 3
             self.move_to(n_dir)
 
-
     def read_from_with(self, matter, key=None):
         """
         Read the memories from the matters (paricle, tile, or location object) memories with a given keyword
@@ -178,7 +178,7 @@ class Particle(matter.matter):
         else:
             tmp_memory =  matter.read_whole_memory()
 
-        if tmp_memory != None and len(tmp_memory) > 0 :
+        if tmp_memory != None and len(tmp_memory) > 0:
             if matter.type == "particle":
                 self.sim.csv_round_writer.update_metrics( particle_read=1)
                 self.csv_particle_writer.write_particle(particle_read=1)
@@ -201,14 +201,15 @@ class Particle(matter.matter):
         :param data: The data that should be stored into the memory
         :return: True: Successful written into the memory; False: Unsuccessful
         """
-        wrote=False
+        wrote = False
+
         if data != None:
-            wrote=False
+            wrote = False
             if key==None:
                 wrote=matter.write_memory(data)
             else:
                 wrote= matter.write_memory_with(key, data)
-            if  wrote==True:
+            if wrote==True:
                 if matter.type == "particle":
                     self.sim.csv_round_writer.update_metrics( particle_write=1)
                     self.csv_particle_writer.write_particle(particle_write=1)
@@ -278,6 +279,7 @@ class Particle(matter.matter):
             return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords()
 
 
+
     def get_matter_in_dir(self, matter="tile", dir=E):
         if matter=="tile":
             if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
@@ -288,18 +290,6 @@ class Particle(matter.matter):
         if matter=="location":
             if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords():
                 return self.sim.get_location_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def scan_for_matter_within(self, matter='all', hop=1):
@@ -1851,6 +1841,17 @@ class Particle(matter.matter):
         else:
             logging.info("Could not delet location")
             return False
+
+    # def set_location_color(self, new_color):
+    #     """
+    #     Changes the color of the location on which the particle is currently located
+    #     :return:
+    #     """
+    #     logging.info("Particle %s is", self.get_id())
+    #     logging.info("is changing the color of the current location to ", new_color)
+    #
+    #     if self.coords in self.sim.get_location_map_coords():
+
 
     def delete_location_with(self, location_id):
         """

@@ -1,6 +1,9 @@
 import random
 from random import randint
 import math
+import configparser
+from lib import config_data as cd
+
 
 E = 0
 SE = 1
@@ -38,6 +41,13 @@ dirs_array = [[E, SE, SW, W, NW, NE],
 
 
 search_algorithms = [-1, 0]  # -1 = DFS, 0 = BFS
+
+all_marked = False
+
+location_count = {"constricted_terrain": 363,
+                  "square_terrain": 527,
+                  "edgy_terrain": 315,
+                  "cressent_terrain": 149}
 
 
 class Location:
@@ -197,7 +207,6 @@ def mark_location(sim, particle):
 
 
 # Returns the distance between 2 locations
-# TODO(CORE) Is the usage of this distance function considered a GPS tier ability?
 def get_distance(location1, location2):
     x1 = location1.coords[0]
     x2 = location2.coords[0]
@@ -260,12 +269,26 @@ def location_in_stuck_nodes(particle, next_location):
         return False
 
 
+# Checks if all markable sim locations have already been marked
+def check_all_marked(sim, scenario_location_count):
+    all_locations = sim.get_location_list()
+    marked_locations = [location for location in all_locations if location.color == [0.0, 0.8, 0.8]]
+
+    if len(marked_locations) == scenario_location_count:
+        return True
+
+
 def solution(sim):
+    global all_marked
+
     done_particles = 0
 
-    # ***** Research Variables ***** #
-    clear_cycle_frequency = 25
-    ##################################
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read("config.ini")
+    config_data = cd.ConfigData(config)
+    scenario_name = config_data.scenario
+
+    clear_cycle_frequency = config_data.clear_cycle_frequency
 
     for particle in sim.get_particle_list():
 
@@ -276,8 +299,12 @@ def solution(sim):
             discover_adjacent_locations(sim, particle)
 
         else:
+            if not all_marked:
+                if check_all_marked(sim, location_count[scenario_name]):
+                    all_marked = True
+                    sim.csv_round_writer.marking_success()
+                    sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
 
-            # TODO(OPTIMIZATION) How many locations should form the stuck cycle? Is there a better solution?
             # if len(particle.stuck_locations) >= clear_cycle_frequency:
             if sim.get_actual_round() % clear_cycle_frequency == 0:
                 particle.stuck_locations.clear()
@@ -306,6 +333,8 @@ def solution(sim):
                 mark_location(sim, particle)
 
                 if particle.current_location is particle.target_location:
+                    if particle.done is False:
+                        particle.csv_particle_writer.set_task_success_round(sim.get_actual_round())
                     particle.stuck_locations.clear()
                     done_particles += 1
                     particle.done = True
@@ -330,8 +359,6 @@ def solution(sim):
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
 
-    # TODO(OPTIMIZATION) Should the simulation succeed when all locations have been marked or when all particles are back to nest?
     if done_particles == len(sim.get_particle_list()):
-        print(sim.get_actual_round())
         sim.success_termination()
 
