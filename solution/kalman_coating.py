@@ -474,10 +474,10 @@ def set_min_max_data(particle):
                 particle.p_hop = 1
         if particle.NH_dict[dir].type == "fl":
             if particle.NH_dict[dir].dist < particle.fl_min_dist:
-                if particle.prev_dir != dir or  particle.fl_cnt == 1:
-                    particle.fl_min_dist = particle.NH_dict[dir].dist
-                    particle.fl_dir = dir
-                    particle.fl_hop = 1
+                # if particle.prev_dir != dir or  particle.fl_cnt == 1:
+                particle.fl_min_dist = particle.NH_dict[dir].dist
+                particle.fl_dir = dir
+                particle.fl_hop = 1
 
 
 def data_receiving(particle):
@@ -505,10 +505,12 @@ def get_own_dist_from_nh(particle):
 
     if p_dist_dict:
         # Give yourself a distance if you are not beside a tile
-        # particle.own_dist = min(p_dist_list, key=p_dist_list.get)+1
-        print (" P", particle.number, "changed its distance from", particle.own_dist, " to ", min(p_dist_dict.values()) + 1)
+        # particle.own_dist = min(p_dist_list, key=p_dist_list.get)+
         if min(p_dist_dict.values()) + 1 < particle.own_dist :
             particle.own_dist = min(p_dist_dict.values()) + 1
+            if debug2:
+                print (" P", particle.number, "changed its distance from", particle.own_dist, " to ",
+                       min(p_dist_dict.values()) + 1)
         return True
         # print("min is Equal ", p_fl_min_dist_dict.values())
     return False
@@ -571,10 +573,13 @@ def find_max_p(dir, particle):
 
 
 def new_fl(dir, particle):
-    if particle.prev_dir != invert_dir(dir):
-        particle.fl_min_dist = particle.rcv_buf[dir].fl_min_dist
-        particle.fl_dir = invert_dir(dir)
-        particle.fl_hop = particle.rcv_buf[dir].fl_hop + 1
+    #if particle.prev_dir != invert_dir(dir):
+    if debug2:
+        print (" P", particle.number, "changed fl_min from ", particle.fl_min_dist, " to ",
+               particle.rcv_buf[dir].fl_min_dist)
+    particle.fl_min_dist = particle.rcv_buf[dir].fl_min_dist
+    particle.fl_dir = invert_dir(dir)
+    particle.fl_hop = particle.rcv_buf[dir].fl_hop + 1
 
 
 def hop_compare(dir, particle):
@@ -715,6 +720,10 @@ def need_to_move(particle):
                                 print("\n P", particle.number, " coords after moving ", particle.coords)
                             data_clearing(particle)
                             return
+                        else:
+                            print(particle.number, ":Particle or tile is infront of me")
+                    else:
+                        print(particle.number, ": Cannot go to the previous direction")
 
 def check_between_tiles(particle):
     for dir in direction:

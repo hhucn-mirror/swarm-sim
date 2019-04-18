@@ -2,10 +2,30 @@ import sys, getopt, subprocess
 from datetime import datetime
 import os
 import configparser
+import multiprocessing
+import concurrent.futures
 
+def runflac(idx, out, max_round, nTime ):
+    """Use the flac(1) program to convert a music file to FLAC format.
+
+    Arguments:
+        idx: track index (starts from 0)
+        data: album data dictionary
+
+    Returns:
+        A tuple containing the track index and return value of flac.
+    """
+
+    num = idx + 1
+    process = "python3.6", "run.py", "-n" + str(max_round), "-m 1", "-d" + str(nTime), \
+                                 "-r"+ str(num), "-v" + str(0)
+    #     #p = subprocess.Popen(process, stdout=out, stderr=out)
+
+    rv = subprocess.call(process, stdout=out, stderr=out)
+    return (idx, rv)
 
 def main(argv):
-    max_round = 2000
+    max_round = 2500
     seedvalue = 10
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -41,15 +61,29 @@ def main(argv):
           solution_file.rsplit('.', 1)[0]
     if not os.path.exists(dir):
         os.makedirs(dir)
-    out = open(dir+"/multiprocess.txt", "w")
+    out = open(dir + "/multiprocess.txt", "w")
     child_processes = []
+    #idx=1
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as tp:
+    #     print(os.cpu_count() )
+    #     for idx in range(seedvalue):
+    #         tp.map(runflac, idx, out, max_round, nTime)
+    round = 0
+    round_cnt=0
     for seed in range(1, seedvalue+1):
         process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d"+str(nTime),\
                               "-r"+ str(seed), "-v" + str(0)
+        if round == os.cpu_count():
+            for cp in child_processes:
+                cp.wait()
+            round = 0
         p = subprocess.Popen(process, stdout=out, stderr=out)
-        print("Round Nr. ", round ,"finished")
-        child_processes.append(p)
+        #p = multiprocessing.Process(target=process)
         round += 1
+        round_cnt += 1
+        print("Round Nr. ", round_cnt ,"started")
+        child_processes.append(p)
+
 
     for cp in child_processes:
         cp.wait()

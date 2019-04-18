@@ -15,6 +15,15 @@ def scenario(sim):
     sim.add_tile(-1.0, -0.0)
     sim.add_tile(-1.5, -1.0)
     sim.add_tile(0.5, -1.0)
+    sim.add_tile(-2.5, -1.0)
+    sim.add_tile(-3.0, 0.0)
+    sim.add_tile(-4.0, 0.0)
+    sim.add_tile(-4.5, -1.0)
+    sim.add_tile(-5.0, 0.0)
+    sim.add_tile(-6.0, -0.0)
+    sim.add_tile(-6.5, 1.0)
+    sim.add_tile(-7.5, 1.0)
+    sim.add_tile(-8.0, -0.0)
 
     for tile in sim.tiles:
         sim.add_location(tile.coords[0] + 0.5, tile.coords[1] + 1)
@@ -40,7 +49,7 @@ def scenario(sim):
                 sim.remove_location_on(location.coords)
 
     for i in range (1, len(sim.locations)+1):
-        if i % 2 == 0:
+        if i == 2:
             sim.add_particle(i, 0, color=3)
         else:
             sim.add_particle(i, 0)
