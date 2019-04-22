@@ -1,5 +1,8 @@
-import logging
-import random
+'''
+
+bad solution
+
+'''
 
 NE = 0
 E = 1

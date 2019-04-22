@@ -20,9 +20,9 @@ tileY = None
 def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if formation == "hexagon":
-        solution_hexagon(sim, sim)
+        solution_hexagon(sim)
     elif formation == "line":
-        solution_line(sim, sim)
+        solution_line(sim)
 
 def solution_hexagon(sim):
     if formed == True:
