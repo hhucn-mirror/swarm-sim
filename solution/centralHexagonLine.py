@@ -1,11 +1,3 @@
-'''
-
-Hi ich bin ein Test.
-
-'''
-
-import logging
-import random
 
 NE = 0
 E = 1
