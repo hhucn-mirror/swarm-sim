@@ -8,19 +8,19 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(sim, world):
+def solution(sim):
     print("Runde = ",  sim.get_actual_round())
     if (sim.get_actual_round() == 1):
-        initialize(world)
+        initialize(sim)
 
-    for particle in world.get_particle_list():
+    for particle in sim.get_particle_list():
         check_nb(particle)
 ##################################################################################
 
 # initialize the memory of every particle, first delete whole and then only reserve
 # memory for direction
-def initialize(world):
-    for particle in world.get_particle_list():
+def initialize(sim):
+    for particle in sim.get_particle_list():
         particle.delete_whole_memeory()
         particle.write_memory_with("Direction", "None")
 ###################################################################################
@@ -34,7 +34,7 @@ def check_nb(particle):
     if nbLen == 2: two_nb(particle)
     if nbLen == 3: three_nb(particle)
     if nbLen == 4: four_nb(particle)
-    #if nbLen == 5: five_nb(particle)
+    if nbLen == 5: five_nb(particle)
     if nbLen == 6: print()#six_nb(particle)
 
 ##################################################################################
@@ -49,8 +49,8 @@ def move_and_refresh_mem(particle):
 
 # calculate the movement for particle with 1 neighbour
 def one_nb(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         if particle.get_particle_in(dir) != None and dir != W and dir != E:
             particle.write_memory_with("Direction", (dir - 1) % 6)
             move_and_refresh_mem(particle)
@@ -67,8 +67,8 @@ def two_nb(particle):
     if two_nb_case3(particle): return
 
 def two_nb_case1(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir+1) % 6)
 
@@ -79,8 +79,8 @@ def two_nb_case1(particle):
         dir = dir + 1
     return False
 def two_nb_case2(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 2) % 6)
 
@@ -101,8 +101,8 @@ def three_nb(particle):
     if three_nb_case4(particle): return
 
 def three_nb_case1(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 2) % 6)
@@ -114,8 +114,8 @@ def three_nb_case1(particle):
         dir = dir + 1
     return  False
 def three_nb_case2(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 3) % 6)
@@ -127,8 +127,8 @@ def three_nb_case2(particle):
         dir = dir + 1
     return  False
 def three_nb_case3(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 3) % 6)
@@ -149,8 +149,8 @@ def four_nb(particle):
     if four_nb_case3(particle): return
 
 def four_nb_case1(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 2) % 6)
@@ -163,8 +163,8 @@ def four_nb_case1(particle):
         dir = dir + 1
     return False
 def four_nb_case2(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 2) % 6)
@@ -181,8 +181,8 @@ def four_nb_case3(particle):
 
 # calculate the movement for particle with 5 neighbour
 def five_nb(particle):
-    dir = 0
-    while dir < 6:
+    dir = 2
+    while dir < 4:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 2) % 6)

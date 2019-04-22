@@ -1,5 +1,3 @@
-import logging
-import random
 
 NE = 0
 E = 1
@@ -14,10 +12,10 @@ direction = [NE, E, SE, SW, W, NW]
 leaders = []
 have_to_move = []
 
-def solution(sim, world):
+def solution(sim):
     print("Runde = ",  sim.get_actual_round())
     if (sim.get_actual_round() == 1):
-        initialize(world)
+        initialize(sim)
 
     if (sim.get_actual_round() % 2 == 1):
         calc_movement()
@@ -27,12 +25,12 @@ def solution(sim, world):
 ##################################################################################
 
 # initialize the first leader
-def initialize(world):
-    for particle in world.get_particle_list():
+def initialize(sim):
+    for particle in sim.get_particle_list():
         particle.write_memory_with("Leader", "False")
         particle.write_memory_with("Mark", "False")
         particle.write_memory_with("Direction", "None")
-    leader = world.get_particle_list()[0]
+    leader = sim.get_particle_list()[0]
     leader.write_memory_with("Leader", "True")
     leader.write_memory_with("Mark", "True")
     leaders.append(leader)

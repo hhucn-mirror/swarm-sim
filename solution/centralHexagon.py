@@ -31,12 +31,10 @@ def initialize(sim):
         particle.write_memory_with("Mark", "False")
         particle.write_memory_with("Direction", "None")
     leader = sim.get_particle_list()[0]
-    #leader = sim.get_particle_map_coords()[2.5, -1.0]
+    #leader = sim.get_particle_map_coords()[0.5, -7.0]
     leader.write_memory_with("Leader", "True")
     leader.write_memory_with("Mark", "True")
     leaders.append(leader)
-
-##################################################################################
 
 # calculates how p2 has to move to replace p1
 def calc_dir(p1, p2):
@@ -57,7 +55,7 @@ def calc_movement():
             if nb != None and  next_nb == None and nb.read_memory_with("Leader") == "False":
                 dir = (i+2) % 6
                 dictate(nb, dir)
-                return check_if_nb_of_leader(particle, have_to_move[len(have_to_move) - 1])
+                return check_if_nb_of_leader(particle, have_to_move[len(have_to_move)-1])
             i = i + 1
         appoint_leaders()
 
@@ -85,27 +83,34 @@ def replace_me(particle, particle2):
         if p.read_memory_with("Leader") == "False" and p.read_memory_with("Mark") == "False":
             return replace_me(particle2, p)
 
-##################################################################################
-
-# appoints next leaders only if all current leaders are a square
+# appoints next leaders only if all current leaders are an hexagon
 def appoint_leaders():
     for l in leaders:
-        b_r = l.get_particle_in(SE)
-        b_l = l.get_particle_in(SW)
-        if b_r == None or b_l == None:
+        neighbours = l.scan_for_particle_within(hop=1)
+        if len (neighbours) != 6:
             return
 
     new_leaders = []
     for l in leaders:
-        i = 2
-        while i < 4:
-            p = l.get_particle_in(i)
-            if p.read_memory_with("Leader") == "False":
-                p.write_memory_with("Leader", "True")
-                p.write_memory_with("Mark", "True")
-                new_leaders.append(p)
-            i = i + 1
+        neighbours = l.scan_for_particle_within(hop=1)
+        for nb in neighbours:
+            if nb.read_memory_with("Leader") == "False":
+                nb.write_memory_with("Leader", "True")
+                nb.write_memory_with("Mark", "True")
+                new_leaders.append(nb)
+    leaders.clear()
     leaders.extend(new_leaders)
+
+# check if last particle in have_to_move is a nb of a leader
+def check_if_nb_of_leader(leader, particle):
+    if particle != None and len(have_to_move) > 1:
+        neighbours = particle.scan_for_particle_within(hop=1)
+        for nb in neighbours:
+            if leader == nb:
+                particle.set_color(1)
+                particle.write_memory_with("Direction", "None")
+                particle.write_memory_with("Mark", "False")
+                have_to_move.remove(particle)
 
 ##################################################################################
 
@@ -119,13 +124,3 @@ def move_and_refresh_mem():
     have_to_move.clear()
 
 ##################################################################################
-
-def check_if_nb_of_leader(leader, particle):
-    if particle != None and len(have_to_move) > 1:
-        neighbours = particle.scan_for_particle_within(hop=1)
-        for nb in neighbours:
-            if leader == nb:
-                particle.set_color(1)
-                particle.write_memory_with("Direction", "None")
-                particle.write_memory_with("Mark", "False")
-                have_to_move.remove(particle)

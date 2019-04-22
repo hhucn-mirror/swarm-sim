@@ -104,7 +104,7 @@ class Sim:
                                                            tiles_num=0, particle_num=0,
                                                            steps=0, directory=dir)
 
-        mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
+        mod = importlib.import_module('scenario.' + scenario_name.rsplit('.', 1)[0])
         mod.scenario(self)
         if random_order:
             random.shuffle(self.particles)

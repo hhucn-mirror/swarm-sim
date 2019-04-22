@@ -1,9 +1,9 @@
-def create_world(world):
+def scenario(sim):
 	x = 0
 	y = 0
 	i = 0
 	while i < 19:
-		world.add_particle(x, y)
+		sim.add_particle(x, y)
 		x = x + 0.5
 		y = y - 1
 		i = i + 1

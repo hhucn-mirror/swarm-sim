@@ -12,11 +12,11 @@ leaders = []
 have_to_move = []
 leaders_to_move = []
 
-def solution(sim, world):
+def solution(sim):
     print("Runde = ",  sim.get_actual_round())
 
     if (sim.get_actual_round() == 1):
-        initialize(world)
+        initialize(sim)
 
     if (sim.get_actual_round() % 2 == 1):
         calc_movement()
@@ -25,13 +25,13 @@ def solution(sim, world):
 
 ##################################################################################
 
-# initialize the world
-def initialize(world):
-    for particle in world.get_particle_list():
+# initialize the sim
+def initialize(sim):
+    for particle in sim.get_particle_list():
         particle.write_memory_with("Leader", "False")
         particle.write_memory_with("Direction", "None")
         particle.write_memory_with("Mark", "False")
-    look_for_leaders(world.get_particle_list()[0])
+    look_for_leaders(sim.get_particle_list()[0])
 
 # if and horizantal line already exists from the beginning,
 # every particle of that is directly a leader

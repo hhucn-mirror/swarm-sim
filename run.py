@@ -91,11 +91,10 @@ def swarm_sim(argv):
 
 
     simulator=sim.Sim(seed=seedvalue, max_round=max_round, solution=solution_file.rsplit('.',1)[0],
-                          size_x=size_x, size_y=size_y, scenario_name=scenario_file,
-                           max_particles=max_particles, mm_limitation=mm_limitation,
-                           particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
-                           dir=directory, random_order=random_order,
-                          visualization=visualization,  border=border, window_size_x=window_size_x, window_size_y=window_size_y,)
+                      size_x=size_x, size_y=size_y, scenario_name=scenario_file, max_particles=max_particles,
+                      mm_limitation=mm_limitation, particle_mm_size=mm_particle, tile_mm_size=mm_tile,
+                      location_mm_size=mm_location, dir=directory, random_order=random_order, visualization=visualization,
+                      border=border, window_size_x=window_size_x, window_size_y=window_size_y)
 
     simulator.run()
     logging.info('Finished')

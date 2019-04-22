@@ -17,39 +17,39 @@ formation = "hexagon"
 formed = False
 tileY = None
 
-def solution(sim, world):
+def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if formation == "hexagon":
-        solution_hexagon(sim, world)
+        solution_hexagon(sim, sim)
     elif formation == "line":
-        solution_line(sim, world)
+        solution_line(sim, sim)
 
-def solution_hexagon(sim, world):
+def solution_hexagon(sim):
     if formed == True:
         if (sim.get_actual_round() % 2 == 1):
-            scan_for_tiles(world.get_particle_list(), sim)
+            scan_for_tiles(sim.get_particle_list(), sim)
     else:
         if (sim.get_actual_round() == startRound):
-            delete_memories(world.get_particle_list())
-            initialize_hexagon(world.get_particle_list())
+            delete_memories(sim.get_particle_list())
+            initialize_hexagon(sim.get_particle_list())
 
         if (sim.get_actual_round() % 2 == 1):
-            if is_formed(world.get_particle_list()): return
+            if is_formed(sim.get_particle_list()): return
             calc_movement_hexagon()
         else:
             move_and_refresh_mem_hexagon()
 
-def solution_line(sim, world):
+def solution_line(sim):
     if formed:
         if (sim.get_actual_round() % 2 == 1):
-            scan_for_tiles(world.get_particle_list(), sim)
+            scan_for_tiles(sim.get_particle_list(), sim)
     else:
         if (sim.get_actual_round() == startRound):
-            delete_memories(world.get_particle_list())
-            initialize_line(world.get_particle_list())
+            delete_memories(sim.get_particle_list())
+            initialize_line(sim.get_particle_list())
 
         if (sim.get_actual_round() % 2 == 1):
-            if is_formed(world.get_particle_list()): return
+            if is_formed(sim.get_particle_list()): return
             calc_movement_line()
         else:
             move_and_refresh_mem_line()
@@ -100,7 +100,7 @@ def initialize_hexagon(particleList):
         particle.write_memory_with("Mark", "False")
         particle.write_memory_with("Direction", "None")
     leader = particleList[0]
-    #leader = world.get_particle_map_coords()[0.5, -7.0]
+    #leader = sim.get_particle_map_coords()[0.5, -7.0]
     leader.write_memory_with("Leader", "True")
     leader.write_memory_with("Mark", "True")
     leaders.append(leader)
@@ -174,7 +174,7 @@ def move_and_refresh_mem_hexagon():
 
 ############################################################################# LINE BEGIN
 
-# initialize the world
+# initialize the sim
 def initialize_line(particleList):
     leaders.clear()
     for particle in particleList:
