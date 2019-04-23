@@ -158,6 +158,7 @@ venv.bak/
 
 system.log
 config.ini
-run.sh
+
 .dropbox
 outputs/
+lib/__pycache__
