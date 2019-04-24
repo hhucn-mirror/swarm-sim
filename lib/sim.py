@@ -376,7 +376,7 @@ class Sim:
                     self.init_particles.append(new_particle)
                     new_particle.created=True
                     logging.info("Created particle at %s", new_particle.coords)
-                    return True
+                    return new_particle
                 else:
                     print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
@@ -460,7 +460,7 @@ class Sim:
                 print("Afer adding ", len(self.tiles), self.new_tile.coords )
                 logging.info("Created tile with tile id %s on coords %s",str(self.new_tile.get_id()), str(self.new_tile.coords))
                 self.new_tile.touch()
-                return True
+                return self.new_tile
             else:
                 logging.info ("on x %f and y %f coordinates is a tile already", x, y)
                 return False

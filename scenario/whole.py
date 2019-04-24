@@ -40,7 +40,7 @@ def scenario(sim):
                 sim.remove_location_on(location.coords)
 
     for i in range (1, len(sim.locations)+1):
-        if i % 2 == 0:
+        if i == 2:
             sim.add_particle(i, 0, color=3)
         else:
             sim.add_particle(i, 0)
