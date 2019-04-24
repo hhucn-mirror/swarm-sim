@@ -556,7 +556,7 @@ class Sim:
         :param color:
         :param x: the x coordinates on which the tile should be added
         :param y: the y coordinates on which the tile should be added
-        :return: True: Successful added; False: Unsuccsessful
+        :return: Successful added matter; False: Unsuccsessful
         """
         if alpha < 0 or alpha >1:
             alpha = 1
@@ -577,6 +577,7 @@ class Sim:
                 return False
         else:
             logging.info("for x %f and y %f not possible to draw ", x, y)
+            return False
 
     def remove_location(self, id):
         """
