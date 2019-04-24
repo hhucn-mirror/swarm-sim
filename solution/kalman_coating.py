@@ -93,7 +93,7 @@ class neighbors:
 
 
 class info_package:
-    def __init__(self, own_dist, fl_min_dist, fl_dir, fl_hop, p_max_dist, p_dir, p_hop, happy):
+    def __init__(self, own_dist, fl_min_dist, fl_dir, fl_hop, p_max_dist, p_dir, p_hop):
         self.own_dist = own_dist
         self.fl_min_dist = fl_min_dist
         self.fl_dir = fl_dir
@@ -101,7 +101,6 @@ class info_package:
         self.p_max_dist = p_max_dist
         self.p_dir = p_dir
         self.p_hop = p_hop
-        self.happy = happy
 
 
 def reset_attributes(particle):
@@ -255,7 +254,6 @@ def initialize_particle(particle):
     # stores the previous (prev) direction
     setattr(particle, "prev_dir", -1)
     setattr(particle, "wait", False)
-    setattr(particle, "happy", False)
 
 
 
@@ -558,18 +556,18 @@ def find_max_p(dir, particle):
         particle.p_max_dist = particle.own_dist
         particle.p_dir = None
         particle.p_hop = 0
-    if particle.rcv_buf[dir].own_dist != 10000 and particle.rcv_buf[dir].own_dist > particle.p_max_dist:
-        particle.p_max_dist = particle.rcv_buf[dir].own_dist
-        particle.p_dir = invert_dir(dir)
-        particle.p_hop = particle.rcv_buf[dir].p_hop + 1
-    elif particle.rcv_buf[dir].p_max_dist > particle.p_max_dist:
+    if particle.rcv_buf[dir].own_dist != 10000 and (particle.rcv_buf[dir].p_max_dist-1) ==  particle.own_dist:
         particle.p_max_dist = particle.rcv_buf[dir].p_max_dist
         particle.p_dir = invert_dir(dir)
         particle.p_hop = particle.rcv_buf[dir].p_hop + 1
-    elif particle.rcv_buf[dir].p_max_dist == particle.p_max_dist:
-        if (particle.rcv_buf[dir].p_hop + 1) < particle.p_hop:
-            particle.p_dir = invert_dir(dir)
-            particle.p_hop = particle.rcv_buf[dir].p_hop + 1
+# elif particle.rcv_buf[dir].p_max_dist > particle.p_max_dist:
+#     particle.p_max_dist = particle.rcv_buf[dir].p_max_dist
+#     particle.p_dir = invert_dir(dir)
+#     particle.p_hop = particle.rcv_buf[dir].p_hop + 1
+# elif particle.rcv_buf[dir].p_max_dist == particle.p_max_dist:
+#     if (particle.rcv_buf[dir].p_hop + 1) < particle.p_hop:
+#         particle.p_dir = invert_dir(dir)
+#         particle.p_hop = particle.rcv_buf[dir].p_hop + 1
 
 
 def new_fl(dir, particle):
@@ -663,8 +661,6 @@ def check_termination(sim):
         actual_locations = copy.copy(sim.locations)
         location_cnt=0
         first_round=True
-        for particle in sim.particles:
-            particle.happy = True
         for location in actual_locations:
             if sim.add_location(location.coords[0] + 0.5, location.coords[1] + 1):
                 location_cnt += 1
@@ -695,11 +691,11 @@ def check_termination(sim):
             print(coords[0])
             start_i= int(coords[0] - 0.5)
             for i in range(start_i , location_cnt+start_i):
-                new_particle=sim.add_particle(i + 1.5, coords[1])
+                new_particle = sim.add_particle(i + 1.5, coords[1])
                 initialize_particle(new_particle)
         else:
             for i in range(int(coords[0]) , location_cnt+int(coords[0])):
-                new_particle=sim.add_particle(i + 1, coords[1])
+                new_particle = sim.add_particle(i + 1, coords[1])
                 initialize_particle(new_particle)
         print("Loc:", len(sim.locations), " Part:", len(sim.particles))
         exit_start=True
@@ -713,11 +709,11 @@ def need_to_move(particle):
                     if particle.prev_dir != dir:
                         if not particle.particle_in(dir):
                             if debug:
-                                print("\n P", particle.number, " coords before moving ", particle.coords)
+                                print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
                             particle.move_to(dir)
                             particle.prev_dir = invert_dir(dir)
                             if debug:
-                                print("\n P", particle.number, "moved to ", dir_str(particle.fl_dir), particle.fl_dir)
+                                print("\n P", particle.number, "moved to ", dir_str(dir), dir)
                                 print("\n P", particle.number, " coords after moving ", particle.coords)
                             data_clearing(particle)
                             return
@@ -726,17 +722,33 @@ def check_between_tiles(particle):
     for dir in direction:
         if particle.NH_dict[dir].type == "p" and  particle.NH_dict[invert_dir(dir)].type == "fl":
             if invert_dir(dir) != particle.prev_dir:
+                if debug:
+                    print("\nin T P", particle.number, " coords before moving ", particle.coords)
                 particle.prev_dir = dir
                 particle.move_to(invert_dir(dir))
+                if debug:
+                    print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
+                    print("\n P", particle.number, " coords after moving ", particle.coords)
+                data_clearing(particle)
                 return
         elif particle.NH_dict[dir].type == "fl" and  particle.NH_dict[invert_dir(dir+3)].type == "fl":
             if dir != particle.prev_dir and not particle.particle_in(dir) and not particle.tile_in(dir):
+                if debug:
+                    print("\nin T  P", particle.number, " coords before moving ", particle.coords)
                 particle.prev_dir = invert_dir(dir)
                 particle.move_to(dir)
-                return
+                if debug:
+                    print("\n P", particle.number, "moved to ", dir_str(dir), dir)
+                    print("\n P", particle.number, " coords after moving ", particle.coords)
             elif not particle.particle_in(invert_dir(dir)) and not particle.tile_in(invert_dir(dir)) :
+                    if debug:
+                        print("\nin T  P", particle.number, " coords before moving ", particle.coords)
                     particle.prev_dir = dir
                     particle.move_to(invert_dir(dir))
+                    if debug:
+                        print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
+                        print("\n P", particle.number, " coords after moving ", particle.coords)
+            data_clearing(particle)
             return
     if particle.fl_dir is not None:
         check_fl_dir(particle)
@@ -747,7 +759,7 @@ def check_fl_dir(particle):
             if check_dir_dist(particle, particle.fl_dir):
                 if particle.p_max_dist != -1 and particle.own_dist <= particle.p_max_dist:
                     if debug:
-                       print("\n P", particle.number, " coords before moving ", particle.coords)
+                       print("\nin Fl P", particle.number, " coords before moving ", particle.coords)
                     particle.move_to(particle.fl_dir)
                     particle.prev_dir = invert_dir(particle.fl_dir)
                     if debug:
