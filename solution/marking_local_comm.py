@@ -1,9 +1,7 @@
 import random
-from random import randint
 import math
 import configparser
 from lib import config_data as cd
-
 
 
 E = 0
@@ -48,7 +46,7 @@ all_marked = False
 location_count = {"constricted_terrain": 363,
                   "square_terrain": 527,
                   "edgy_terrain": 315,
-                  "cressent_terrain": 149}
+                  "crescent_terrain": 149}
 
 class Location:
     def __init__(self, coords):
@@ -227,17 +225,16 @@ def get_nearest_unvisited(particle):
 
 
 # Returns the next best possible move if the particle's target location is not adjacent to it (path generator)
-def get_next_best_location(current_location, target_location, stuck_locations):
+def get_next_best_location(particle, target_location, stuck_locations):
     possible_moves = []
+    all_moves = []
 
-    for location in current_location.adjacent:
+    for location in particle.current_location.adjacent:
+        all_moves.append((get_distance(location, target_location), location))
         if location in stuck_locations:
             continue
         else:
             possible_moves.append((get_distance(location, target_location), location))
-
-    if len(possible_moves) is 0:
-        return current_location.adjacent[randint(0, len(current_location.adjacent) - 1)]
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
 
@@ -247,7 +244,7 @@ def get_next_best_location(current_location, target_location, stuck_locations):
 # Returns the next closest unvisited location relative to the particle's current location
 def get_next_unvisited(particle):
     if particle.unvisited_queue[particle.search_algorithm] not in particle.current_location.adjacent:
-        return get_next_best_location(particle.current_location, get_nearest_unvisited(particle), particle.stuck_locations)
+        return get_next_best_location(particle, get_nearest_unvisited(particle), particle.stuck_locations)
 
     else:
         return particle.unvisited_queue[particle.search_algorithm]
@@ -255,7 +252,6 @@ def get_next_unvisited(particle):
 
 # Enables the particles to create packets with their own data and send them to one another if they are within range
 def communicate(particle, communication_range):
-    # TODO(OPTIMIZATION) should the particles exchange unvisited locations as well? What would be the benefit?
     packet = (particle.graph, particle.visited, particle.unvisited_queue)
     found_particles = particle.scan_for_particle_within(hop=communication_range)
 
@@ -278,15 +274,13 @@ def analyse_memory(sim, particle):
 
 
 # Checks if the particle's next location is in a stuck cycle or not
-def location_in_stuck_nodes(particle, next_location):
+def manage_stuck_locations(particle, next_location):
     if next_location in particle.last_visited_locations:
         if next_location in particle.stuck_locations:
             particle.stuck = True
             return True
         else:
-            # if len(particle.stuck_locations) >= 10:
             particle.stuck_locations.append(next_location)
-            # particle.stuck_locations.pop(0)
             return False
     else:
         particle.last_visited_locations.append(next_location)
@@ -304,6 +298,28 @@ def check_all_marked(sim, scenario_location_count):
     return False
 
 
+# Removes locations from the particle's stuck_locations list
+def decay_stuck_location(particle):
+    particle.last_visited_locations.clear()
+    if particle.stuck_locations[-1] in particle.current_location.adjacent:
+        particle.stuck_locations.pop(-1)
+    else:
+        particle.stuck_locations.pop(0)
+
+
+# Handles the navigation of the particle through the terrain
+def navigate(sim, particle, next_location):
+
+    if manage_stuck_locations(particle, next_location):
+        pass
+
+    next_direction = get_dir(particle.current_location, next_location)
+    particle.current_location = next_location
+    discover_adjacent_locations(sim, particle)
+    mark_location(sim, particle)
+    particle.move_to(next_direction)
+
+
 def solution(sim):
     global all_marked
 
@@ -314,11 +330,13 @@ def solution(sim):
     config_data = cd.ConfigData(config)
     scenario_name = config_data.scenario
 
-    communication = True
     start_communication_round = config_data.start_communication_round
     communication_frequency = config_data.communication_frequency
     communication_range = config_data.communication_range
-    clear_cycle_frequency = config_data.clear_cycle_frequency
+
+    sim.csv_round_writer.set_start_communication_round(start_communication_round)
+    sim.csv_round_writer.set_communication_frequency(communication_frequency)
+    sim.csv_round_writer.set_communication_range(communication_range)
 
     for particle in sim.get_particle_list():
 
@@ -335,37 +353,22 @@ def solution(sim):
                     sim.csv_round_writer.marking_success()
                     sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
 
-            if communication:
-                if sim.get_actual_round() > start_communication_round:
-                    if sim.get_actual_round() % communication_frequency == 0:
-                        communicate(particle, communication_range)
-                        particle.received_data = True
+            if sim.get_actual_round() > start_communication_round:
+                if sim.get_actual_round() % communication_frequency == 0:
+                    communicate(particle, communication_range)
+                    particle.received_data = True
 
-                    # if sim.get_actual_round() % (communication_frequency + 1) == 0:
-                    if len(particle.read_whole_memory()) > 0:
-                        analyse_memory(sim, particle)
-
-            # if len(particle.stuck_locations) >= clear_cycle_frequency:
-            if sim.get_actual_round() % clear_cycle_frequency == 0:
-                particle.stuck_locations.clear()
+                if len(particle.read_whole_memory()) > 0:
+                    analyse_memory(sim, particle)
 
             if len(particle.unvisited_queue) > 0:
-
                 try:
                     next_location = get_next_unvisited(particle)
-
-                    if location_in_stuck_nodes(particle, next_location):
-                        next_location = particle.current_location.adjacent[
-                            randint(0, len(particle.current_location.adjacent) - 1)]
-                    next_direction = get_dir(particle.current_location, next_location)
-                    particle.current_location = next_location
-                    discover_adjacent_locations(sim, particle)
-                    mark_location(sim, particle)
-
-                    particle.move_to(next_direction)
+                    navigate(sim, particle, next_location)
 
                 except ValueError:
                     discover_adjacent_locations(sim, particle)
+                    decay_stuck_location(particle)
 
             else:
                 particle.current_location = get_location_with_coords(particle.graph, particle.coords)
@@ -381,23 +384,13 @@ def solution(sim):
                     continue
 
                 else:
-                    particle.current_location = get_location_with_coords(particle.graph, particle.coords)
-
                     try:
-                        next_location = get_next_best_location(particle.current_location, particle.target_location, particle.stuck_locations)
-
-                        if location_in_stuck_nodes(particle, next_location):
-                            next_location = particle.current_location.adjacent[
-                                randint(0, len(particle.current_location.adjacent) - 1)]
-
-                        next_direction = get_dir(particle.current_location, next_location)
-                        particle.current_location = next_location
-
-                        if location_exists(particle.graph, next_location.coords):
-                            particle.move_to(next_direction)
+                        next_location = get_next_best_location(particle, particle.target_location, particle.stuck_locations)
+                        navigate(sim, particle, next_location)
 
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
+                        decay_stuck_location(particle)
 
     if done_particles == len(sim.get_particle_list()):
         sim.success_termination()
