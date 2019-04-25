@@ -12,13 +12,54 @@ violett = 9
 def scenario(sim):
     draw_terrain(sim)
 
-    # Particles
-    sim.add_particle(-9.5, 11, color=blue)
-    sim.add_particle(-10, 10, color=black)
-    sim.add_particle(-9, 10, color=red)
-    sim.add_particle(-8.5, 11, color=green)
-    sim.add_particle(-10.5, 11, color=yellow)
+    # Particles TopLeft
+    # sim.add_particle(-9.5, 11, color=blue)
+    # sim.add_particle(-10, 10, color=black)
+    # sim.add_particle(-9, 10, color=red)
+    # sim.add_particle(-8.5, 11, color=green)
+    # sim.add_particle(-10.5, 11, color=yellow)
     # sim.add_particle(-11, 10, color=violett)
+
+    # Particles TopRight
+    # sim.add_particle(9.5, 11.0)
+    # sim.add_particle(10.5, 11.0)
+    # sim.add_particle(11.0, 10.0)
+    # sim.add_particle(10.0, 10.0)
+    # sim.add_particle(10.5, 9.0)
+    # sim.add_particle(9.0, 10.0)
+
+    # Particles BottomLeft
+    # sim.add_particle(-10.5, -11.0)
+    # sim.add_particle(-9.5, -11.0)
+    # sim.add_particle(-10.0, -10.0)
+    # sim.add_particle(-11.0, -10.0)
+    # sim.add_particle(-10.5, -9.0)
+    # sim.add_particle(-9.0, -10.0)
+
+    # Particles BottomRight
+    sim.add_particle(10.5, -11.0)
+    sim.add_particle(11.0, -10.0)
+    sim.add_particle(9.5, -11.0)
+    sim.add_particle(10.0, -10.0)
+    sim.add_particle(10.5, -9.0)
+    sim.add_particle(9.0, -10.0)
+
+    # Particles Random1
+    # sim.add_particle(-6.5, 5.0)
+    # sim.add_particle(-7.0, 4.0)
+    # sim.add_particle(-6.0, 4.0)
+    # sim.add_particle(-5.5, 3.0)
+    # sim.add_particle(-6.5, 3.0)
+    # sim.add_particle(-6.0, 2.0)
+
+    # Particles Random2
+    # sim.add_particle(10.5, 1.0)
+    # sim.add_particle(11.0, 0.0)
+    # sim.add_particle(10.5, -1.0)
+    # sim.add_particle(9.5, -1.0)
+    # sim.add_particle(10.0, 0.0)
+    # sim.add_particle(9.0, -0.0)
+
 
 def draw_terrain(sim):
     # Left Border
