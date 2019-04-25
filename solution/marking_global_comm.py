@@ -40,7 +40,7 @@ dirs_array = [[E, SE, SW, W, NW, NE],
 
 
 # -1 = DFS, 0 = BFS
-search_algorithms = [0]
+search_algorithms = [-1, 0]
 
 graph = []
 visited = []

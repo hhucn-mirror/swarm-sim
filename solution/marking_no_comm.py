@@ -39,7 +39,7 @@ dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, E, NE, NW, W, SW]]
 
 
-search_algorithms = [0]  # -1 = DFS, 0 = BFS
+search_algorithms = [-1, 0]  # -1 = DFS, 0 = BFS
 
 all_marked = False
 
