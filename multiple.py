@@ -6,7 +6,7 @@ import configparser
 
 def main(argv):
     max_round = 2000
-    seedvalue = 100
+    seedvalue = 25
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
     scenario = config.get ("File", "scenario")

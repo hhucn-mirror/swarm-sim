@@ -36,4 +36,3 @@ class ConfigData:
         self.start_communication_round = config.getint("Marking", "start_communication_round")
         self.communication_frequency = config.getint("Marking", "communication_frequency")
         self.communication_range = config.getint("Marking", "communication_range")
-        self.clear_cycle_frequency = config.getint("Marking", "clear_cycle_frequency")

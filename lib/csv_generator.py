@@ -89,6 +89,9 @@ class CsvRoundData:
         self.location_deleted_sum = 0
         self.success_round = 0
         self.all_marked_round = None
+        self.start_communication_round = 0
+        self.communication_frequency = 0
+        self.communication_range = 0
         self.success_counter = 0
         self.directory = directory
         self.file_name = directory + '/rounds.csv'
@@ -119,6 +122,15 @@ class CsvRoundData:
 
     def set_marking_success_round(self, actual_round):
         self.all_marked_round = actual_round
+
+    def set_start_communication_round(self, start_communication_round):
+        self.start_communication_round = start_communication_round
+
+    def set_communication_frequency(self, communication_frequency):
+        self.communication_frequency = communication_frequency
+
+    def set_communication_range(self, communication_range):
+        self.communication_range = communication_range
 
     def update_metrics(self, steps=0, particle_read=0, memory_read=0, particle_write=0, memory_write=0,
                        location_created=0, location_deleted=0):
@@ -155,6 +167,7 @@ class CsvRoundData:
                         self.particle_write, self.particle_write_sum,
                         self.location_created, self.location_created_sum,
                         self.location_deleted, self.location_deleted_sum]
+
         self.writer_round.writerow(csv_iterator)
         self.actual_round = round
         self.steps = 0
@@ -172,8 +185,9 @@ class CsvRoundData:
         csv_file = open(file_name, 'w', newline='')
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario','Solution', 'Seed', 'Successful Termination Round',
+        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Successful Termination Round',
                                 'Successful Marking Round',
+                                'Start Communication round', 'Communication Frequency', 'Communication Range',
                                 'Particle Counter',
                                 'Particle Steps Total', 'Particle Steps Avg',
                                 'Particle Steps Min', 'Particle Steps Max',
@@ -182,10 +196,14 @@ class CsvRoundData:
                                 'Location Created Sum', 'Location Created Avg',
                                 'Location Created Min', 'Location Created Max',
                                 'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max'])
+                                'Location Deleted Min', 'Location Deleted Max',
+                                ])
 
         csv_iterator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
                         self.all_marked_round,
+
+                        self.start_communication_round, self.communication_frequency, self.communication_range,
+
                         self.particle_num,
 
                         data['Particle Steps'].sum(), data['Particle Steps'].mean(),
