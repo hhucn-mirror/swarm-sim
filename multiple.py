@@ -25,8 +25,9 @@ def runflac(idx, out, max_round, nTime ):
     return (idx, rv)
 
 def main(argv):
-    max_round = 2500
-    seedvalue = 10
+    max_round = 1700
+    seed_start = 15
+    seed_end = 20
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
     try:
@@ -70,7 +71,7 @@ def main(argv):
     #         tp.map(runflac, idx, out, max_round, nTime)
     round = 0
     round_cnt=0
-    for seed in range(1, seedvalue+1):
+    for seed in range(seed_start, seed_end+1):
         process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d"+str(nTime),\
                               "-r"+ str(seed), "-v" + str(0)
         if round == os.cpu_count():
@@ -91,10 +92,10 @@ def main(argv):
 
     fout=open(dir+"/all_aggregates.csv","w+")
     # first file:
-    for line in open(dir+"/"+str(1)+"/aggregate_rounds.csv"):
+    for line in open(dir+"/"+str(seed_start)+"/aggregate_rounds.csv"):
         fout.write(line)
     # now the rest:
-    for seed in range(2, seedvalue+1):
+    for seed in range(seed_start+1, seed_end+1):
         f = open(dir+"/"+str(seed)+"/aggregate_rounds.csv")
         f.__next__() # skip the header
         for line in f:
