@@ -16,6 +16,7 @@ startRound = 1
 formation = "hexagon"
 formed = False
 tileY = None
+lineDir = W
 
 def solution(sim):
     print("Runde = ", sim.get_actual_round())
@@ -80,6 +81,7 @@ def scan_for_tiles(particleList, sim):
 
 def particle_scan_for_tile(particleList):
     global tileY
+    global lineDir
     for particle in particleList:
         dir = 0
         while dir < 6:
@@ -87,6 +89,9 @@ def particle_scan_for_tile(particleList):
                 if dir in [5, 0]: tileY = particle.coords[1] + 1
                 if dir in [4, 1]: tileY = particle.coords[1]
                 if dir in [3, 2]: tileY = particle.coords[1] - 1
+
+                if dir in [0, 1, 2]: lineDir = E
+                else: lineDir = W
                 return True
             dir = dir + 1
     return False
@@ -206,18 +211,18 @@ def calc_movement_line():
             nb = particle.get_particle_in(i)
             if nb != None:
                 particle.set_color(2)
-                leader_to_left(particle)
+                shift_leaders(particle)
                 appoint_leader_line(nb)
                 return replace_me(particle, nb)
             if i == 2:  i = i+1
             else:       i = i+2
 
 # shift leaders to left to make room for one particle above or under one leader
-def leader_to_left(particle):
-    nw = particle.get_particle_in(W)
-    if nw != None:
-        leader_to_left(nw)
-    particle.write_memory_with("Direction", W)
+def shift_leaders(particle):
+    nb = particle.get_particle_in(lineDir)
+    if nb != None:
+        shift_leaders(nb)
+    particle.write_memory_with("Direction", lineDir)
     particle.set_color(3)
     leaders_to_move.append(particle)
 
