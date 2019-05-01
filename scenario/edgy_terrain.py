@@ -29,12 +29,12 @@ def scenario(sim):
     # sim.add_particle(1.0, 8.0)
 
     # Particles Left
-    sim.add_particle(-10.0, 2.0)
-    sim.add_particle(-9.0, 2.0)
+    # sim.add_particle(-10.0, 2.0)
+    # sim.add_particle(-9.0, 2.0)
     sim.add_particle(-9.5, 1.0)
-    sim.add_particle(-7.5, 1.0)
-    sim.add_particle(-8.5, 1.0)
-    sim.add_particle(-8.0, 2.0)
+    # sim.add_particle(-7.5, 1.0)
+    # sim.add_particle(-8.5, 1.0)
+    # sim.add_particle(-8.0, 2.0)
 
     # Particles BottomRight
     # sim.add_particle(11.0, -10.0)
@@ -175,10 +175,6 @@ def draw_terrain(sim):
     sim.add_location(11.0, 12.0)
     sim.add_location(-3, -8)
     sim.add_location(-4, -8)
-    sim.add_location(-5, -8)
-    sim.add_location(-6, -8)
-    sim.add_location(-5.5, -7.0)
-    sim.add_location(-5.0, -6.0)
-    sim.add_location(-4.0, -6.0)
     sim.add_location(-3.0, -6.0)
     sim.add_location(-2.0, -6.0)
+    sim.add_location(-3.5, -7.0)
