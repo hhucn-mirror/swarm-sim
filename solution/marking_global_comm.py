@@ -39,9 +39,9 @@ dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, E, NE, NW, W, SW]]
 
 
-# search_algorithms = [-1, 0]  # Mixed
+search_algorithms = [-1, 0]  # Mixed
 # search_algorithms = [-1]  # DFS
-search_algorithms = [0]  # BFS
+# search_algorithms = [0]  # BFS
 
 graph = []
 visited = []
@@ -60,7 +60,6 @@ class Location:
     def __init__(self, coords):
         self.coords = coords
         self.adjacent = {}
-        # self.wall = []
         self.visited = False
         self.next_to_wall = False
 
