@@ -108,7 +108,7 @@ def get_dir(current_location, target_location):
 
 
 # Adds a new location to a graph
-def add_location_to_graph(sim, graph, location):
+def add_location_to_graph(graph, location):
     if location in graph:
         return
 
@@ -194,7 +194,7 @@ def discover_adjacent_locations(sim, particle):
         particle.create_location_on(adjacent_location_coords[0], adjacent_location_coords[1], color=blue)
         particle.current_location.adjacent[temp_dir] = new_location
         unvisited_queue.append(new_location)
-        add_location_to_graph(sim, graph, new_location)
+        add_location_to_graph(graph, new_location)
 
 
 # Marks the particle's current location as visited and removes it from the particle's unvisited queue
@@ -431,7 +431,7 @@ def solution(sim):
             set_particle_attributes(particle)
             particle.current_location = particle.start_location
             particle.create_location_on(particle.origin_coords[0], particle.origin_coords[1], color=blue)
-            add_location_to_graph(sim, graph, particle.current_location)
+            add_location_to_graph(graph, particle.current_location)
             discover_adjacent_locations(sim, particle)
 
         else:

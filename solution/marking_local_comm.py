@@ -1,4 +1,5 @@
 import random
+from random import randint
 import math
 import configparser
 from lib import config_data as cd
@@ -356,9 +357,8 @@ def solution(sim):
             if sim.get_actual_round() > start_communication_round:
                 if sim.get_actual_round() % communication_frequency == 0:
                     communicate(particle, communication_range)
-                    particle.received_data = True
 
-                if len(particle.read_whole_memory()) > 0:
+                if len(particle.read_whole_memory()) > 0 and sim.get_actual_round() % (start_communication_round + 1) == 0:
                     analyse_memory(sim, particle)
 
             if len(particle.unvisited_queue) > 0:
@@ -369,6 +369,9 @@ def solution(sim):
                 except ValueError:
                     discover_adjacent_locations(sim, particle)
                     decay_stuck_location(particle)
+                    navigate(sim, particle, particle.current_location.adjacent[
+                        randint(0, len(particle.current_location.adjacent) - 1)])
+
 
             else:
                 particle.current_location = get_location_with_coords(particle.graph, particle.coords)
@@ -391,6 +394,8 @@ def solution(sim):
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
                         decay_stuck_location(particle)
+                        navigate(sim, particle, particle.current_location.adjacent[randint(0, len(particle.current_location.adjacent) - 1)])
+
 
     if done_particles == len(sim.get_particle_list()):
         sim.success_termination()
