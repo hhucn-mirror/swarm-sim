@@ -56,7 +56,6 @@ class Location:
     def __init__(self, coords):
         self.coords = coords
         self.adjacent = {}
-        # self.wall = []
         self.visited = False
         self.next_to_wall = False
 
@@ -105,7 +104,7 @@ def get_dir(current_location, target_location):
 
 
 # Adds a new location to a graph
-def add_location_to_graph(sim, graph, location):
+def add_location_to_graph(graph, location):
     if location in graph:
         return
 
@@ -192,7 +191,7 @@ def discover_adjacent_locations(sim, particle):
         particle.create_location_on(adjacent_location_coords[0], adjacent_location_coords[1], color=blue)
         particle.current_location.adjacent[temp_dir] = new_location
         particle.unvisited_queue.append(new_location)
-        add_location_to_graph(sim, particle.graph, new_location)
+        add_location_to_graph(particle.graph, new_location)
 
 
 # Marks the particle's current location as visited and removes it from the particle's unvisited queue
@@ -251,7 +250,7 @@ def follow_wall(particle, target_location):
         if location in particle.last_visited_locations:
             continue
 
-        if location.next_to_wall:
+        if location.next_to_wall or not location.visited:
             possible_moves.append((get_distance(location, target_location), location))
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
@@ -422,7 +421,7 @@ def solution(sim):
             set_particle_attributes(particle)
             particle.current_location = particle.start_location
             particle.create_location_on(particle.origin_coords[0], particle.origin_coords[1], color=blue)
-            add_location_to_graph(sim, particle.graph, particle.current_location)
+            add_location_to_graph(particle.graph, particle.current_location)
             discover_adjacent_locations(sim, particle)
 
         else:
@@ -438,9 +437,7 @@ def solution(sim):
             if len(particle.unvisited_queue) > 0:
 
                 if particle.stuck:
-
                     if particle.current_location.coords != particle.stuck_location.coords:
-
                         if get_bearing(particle.current_location, particle.stuck_location) == get_opposite_bearing(particle.bearing):
                             particle.last_visited_locations.clear()
                             particle.stuck = False
@@ -452,9 +449,11 @@ def solution(sim):
                         continue
 
                     particle.last_visited_locations.append(particle.current_location)
+                    discover_adjacent_locations(sim, particle)
 
                     try:
                         next_location = follow_wall(particle, particle.target_location)
+                        particle.next_location = next_location
 
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
@@ -521,11 +520,13 @@ def solution(sim):
                                 continue
 
                         particle.last_visited_locations.append(particle.current_location)
+                        discover_adjacent_locations(sim, particle)
 
                         try:
                             next_location = follow_wall(particle, particle.target_location)
 
                         except ValueError:
+                            discover_adjacent_locations(sim, particle)
                             next_location = particle.current_location
                             particle.last_visited_locations.clear()
 
