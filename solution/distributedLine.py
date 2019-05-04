@@ -33,9 +33,9 @@ def check_nb(particle):
     if nbLen == 1: one_nb(particle)
     if nbLen == 2: two_nb(particle)
     if nbLen == 3: three_nb(particle)
-    if nbLen == 4: four_nb(particle)
-    if nbLen == 5: five_nb(particle)
-    if nbLen == 6: print()#six_nb(particle)
+    #if nbLen == 4: four_nb(particle)
+    #if nbLen == 5: five_nb(particle)
+    #if nbLen == 6: print()#six_nb(particle)
 
 ##################################################################################
 # moves to the direction in particles memory if the direction isnt none
@@ -67,8 +67,8 @@ def two_nb(particle):
     if two_nb_case3(particle): return
 
 def two_nb_case1(particle):
-    dir = 2
-    while dir < 4:
+    dir = 0
+    while dir < 6:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir+1) % 6)
 
@@ -79,8 +79,8 @@ def two_nb_case1(particle):
         dir = dir + 1
     return False
 def two_nb_case2(particle):
-    dir = 2
-    while dir < 4:
+    dir = 1
+    while dir < 5:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 2) % 6)
 
@@ -101,8 +101,8 @@ def three_nb(particle):
     if three_nb_case4(particle): return
 
 def three_nb_case1(particle):
-    dir = 2
-    while dir < 4:
+    dir = 0
+    while dir < 6:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 2) % 6)
@@ -114,8 +114,8 @@ def three_nb_case1(particle):
         dir = dir + 1
     return  False
 def three_nb_case2(particle):
-    dir = 2
-    while dir < 4:
+    dir = 0
+    while dir < 6:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 3) % 6)
@@ -127,8 +127,8 @@ def three_nb_case2(particle):
         dir = dir + 1
     return  False
 def three_nb_case3(particle):
-    dir = 2
-    while dir < 4:
+    dir = 0
+    while dir < 6:
         firstNB = particle.get_particle_in(dir)
         secondNB = particle.get_particle_in((dir + 1) % 6)
         thirdNB = particle.get_particle_in((dir + 3) % 6)
