@@ -41,7 +41,6 @@ particle_alpha = 1
 location_alpha = 1
 
 
-
 def coords_to_sim(coords):
     return coords[0], coords[1] * math.sqrt(3/4)
 

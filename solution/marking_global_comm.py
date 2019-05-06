@@ -39,10 +39,6 @@ dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, E, NE, NW, W, SW]]
 
 
-search_algorithms = [-1, 0]  # Mixed
-# search_algorithms = [-1]  # DFS
-# search_algorithms = [0]  # BFS
-
 graph = []
 visited = []
 unvisited_queue = []
@@ -52,8 +48,9 @@ unvisited_queue = []
 all_marked = False
 location_count = {"constricted_terrain": 363,
                   "square_terrain": 527,
-                  "edgy_terrain": 315,
-                  "crescent_terrain": 149}
+                  "edgy_terrain": 321,
+                  "crescent_terrain": 149,
+                  "test_terrain": 45}
 
 
 class Location:
@@ -67,7 +64,7 @@ class Location:
         return self.coords == other.coords
 
     def __str__(self):
-        return str(self.coords) + ' | Adjacent: ' + str([(direction, location.coords) for direction, location in self.adjacent.items()])
+        return str(self.coords) + ' | Adjacent: ' + str([(direction, location.coords, location.next_to_wall) for direction, location in self.adjacent.items()])
 
 
 # Checks if a location exists in a graph
@@ -108,11 +105,31 @@ def get_dir(current_location, target_location):
 
 
 # Adds a new location to a graph
-def add_location_to_graph(graph, location):
+def add_location_to_graph(sim, graph, location, directions):
     if location in graph:
         return
 
     graph.append(location)
+    location.visited = True
+
+    for direction in directions:
+        if direction > 0:
+            temp_dir = direction - 1
+        else:
+            temp_dir = 5
+
+        adjacent_location_coords = sim.get_coords_in_dir(location.coords, direction)
+        if location_exists(graph, adjacent_location_coords):
+            if location in get_location_with_coords(graph, adjacent_location_coords).adjacent.values():
+                continue
+            get_location_with_coords(graph, adjacent_location_coords).adjacent[get_opposite_bearing(temp_dir)] = location
+
+        if is_border(sim, adjacent_location_coords):
+            if location.next_to_wall is True:
+                continue
+
+            location.next_to_wall = True
+            continue
 
 
 # Checks if the given coordinates are valid simulator coordinates
@@ -135,9 +152,17 @@ def is_border(sim, coords):
 
 
 # Initializes the new custom particle attributes
-def set_particle_attributes(particle):
+def set_particle_attributes(particle, search_alg):
     directions = dirs_array.copy()
-    search_algo = search_algorithms.copy()
+    search_algo = []
+
+    if search_alg == 0:
+        search_algo.append(0)
+    elif search_alg == 1:
+        search_algo.append(-1)
+    elif search_alg == 2:
+        search_algo.append(-1)
+        search_algo.append(0)
 
     direction = random.choice(directions)
     search_algorithm = random.choice(search_algo)
@@ -152,12 +177,17 @@ def set_particle_attributes(particle):
     setattr(particle, "next_location", None)
     setattr(particle, "target_location", particle.start_location)
     setattr(particle, "stuck_location", None)
+    setattr(particle, "alternative_location", None)
     setattr(particle, "bearing", None)
 
     setattr(particle, "previous_location", None)
     setattr(particle, "last_visited_locations", [])
+    setattr(particle, "alternative_locations", [])
+    setattr(particle, "reverse_path", [])
 
     setattr(particle, "stuck", False)
+    setattr(particle, "alternative_reached", True)
+    setattr(particle, "target_reached", True)
     setattr(particle, "done", False)
 
 
@@ -194,7 +224,7 @@ def discover_adjacent_locations(sim, particle):
         particle.create_location_on(adjacent_location_coords[0], adjacent_location_coords[1], color=blue)
         particle.current_location.adjacent[temp_dir] = new_location
         unvisited_queue.append(new_location)
-        add_location_to_graph(graph, new_location)
+        add_location_to_graph(sim, graph, new_location, particle.direction)
 
 
 # Marks the particle's current location as visited and removes it from the particle's unvisited queue
@@ -228,6 +258,7 @@ def get_distance(location1, location2):
 # Returns the nearest location in the particle's unvisited queue relative to the particle's current location
 def get_nearest_unvisited(particle):
     global unvisited_queue
+
     possible_unvisited_locations = []
     for location in unvisited_queue:
         possible_unvisited_locations.append((round(get_distance(particle.current_location, location)), location))
@@ -256,8 +287,9 @@ def follow_wall(particle, target_location):
         if location in particle.last_visited_locations:
             continue
 
-        if location.next_to_wall:
+        if location.next_to_wall or not location.visited:
             possible_moves.append((get_distance(location, target_location), location))
+            particle.alternative_locations.append((get_distance(location, target_location), location))
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
 
@@ -267,19 +299,12 @@ def follow_wall(particle, target_location):
 # Returns the next closest unvisited location relative to the particle's current location
 def get_next_unvisited(particle):
     global unvisited_queue
+
     if unvisited_queue[particle.search_algorithm] not in particle.current_location.adjacent.values():
         return get_next_best_location(particle, get_nearest_unvisited(particle))
 
     else:
         return unvisited_queue[particle.search_algorithm]
-
-
-def is_adjacent(particle, location):
-
-    if location in particle.current_location.adjacent.values():
-        return True
-
-    return False
 
 
 # Checks if all markable sim locations have already been marked
@@ -289,16 +314,6 @@ def check_all_marked(sim, scenario_location_count):
 
     if len(marked_locations) == scenario_location_count:
         return True
-
-
-# Handles the navigation of the particle through the terrain
-def navigate(sim, particle, next_location):
-    particle.previous_location = particle.current_location
-    next_direction = get_dir(particle.current_location, next_location)
-    particle.current_location = next_location
-    discover_adjacent_locations(sim, particle)
-    mark_location(sim, particle)
-    particle.move_to(next_direction)
 
 
 # Returns the direction of the target location relative to the current location
@@ -336,7 +351,7 @@ def get_bearing(current_location, target_location):
 
 
 # Checks if the path to the target is obstructed by a wall or obstacle
-def path_not_free(current_location, target_location):
+def path_blocked(current_location, target_location):
     if target_location in current_location.adjacent.values():
         return False
 
@@ -371,7 +386,7 @@ def path_not_free(current_location, target_location):
             return True
 
     # W
-    if 180 < get_bearing(current_location, target_location) == 3:
+    if get_bearing(current_location, target_location) == 3:
         if 3 not in current_location.adjacent.keys():
             return True
 
@@ -411,12 +426,31 @@ def get_opposite_bearing(bearing):
         return 2
 
 
+# Checks if a particle's way is blocked by a wall or obstacle
+def check_stuck(particle, target_location):
+    if path_blocked(particle.current_location, target_location):
+        return True
+
+    return False
+
+
+# Handles the navigation of the particle through the terrain
+def navigate(sim, particle, next_location):
+    particle.previous_location = particle.current_location
+    next_direction = get_dir(particle.current_location, next_location)
+    particle.current_location = next_location
+    mark_location(sim, particle)
+    particle.move_to(next_direction)
+    particle.current_location = get_location_with_coords(graph, particle.coords)
+    discover_adjacent_locations(sim, particle)
+
+
 def solution(sim):
+    global all_marked
+
     global graph
     global visited
     global unvisited_queue
-
-    global all_marked
 
     done_particles = 0
 
@@ -425,88 +459,154 @@ def solution(sim):
     config_data = cd.ConfigData(config)
     scenario_name = config_data.scenario
 
+    start_communication_round = config_data.start_communication_round
+    communication_frequency = config_data.communication_frequency
+    communication_range = config_data.communication_range
+    search_algorithm = config_data.search_algorithm
+
+    sim.csv_round_writer.set_start_communication_round(start_communication_round)
+    sim.csv_round_writer.set_communication_frequency(communication_frequency)
+    sim.csv_round_writer.set_communication_range(communication_range)
+    sim.csv_round_writer.set_search_algorithm(search_algorithm)
+
     for particle in sim.get_particle_list():
 
         if sim.get_actual_round() == 1:
-            set_particle_attributes(particle)
+            set_particle_attributes(particle, search_algorithm)
+            particle.csv_particle_writer.set_search_algorithm(particle.search_algorithm)
             particle.current_location = particle.start_location
             particle.create_location_on(particle.origin_coords[0], particle.origin_coords[1], color=blue)
-            add_location_to_graph(graph, particle.current_location)
+            add_location_to_graph(sim, graph, particle.current_location, particle.direction)
             discover_adjacent_locations(sim, particle)
+            continue
 
         else:
-            particle.current_location = get_location_with_coords(graph, particle.coords)
-            discover_adjacent_locations(sim, particle)
-
             if not all_marked:
+
                 if check_all_marked(sim, location_count[scenario_name]):
                     all_marked = True
                     sim.csv_round_writer.marking_success()
                     sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
 
-            if len(unvisited_queue) > 0:
+            if not particle.alternative_reached:
 
-                if particle.stuck:
+                if particle.alternative_location in particle.current_location.adjacent.values():
+                    particle.alternative_reached = True
+                    particle.alternative_locations.clear()
+                    particle.reverse_path.clear()
+                    particle.next_location = particle.alternative_location
+                    navigate(sim, particle, particle.next_location)
+                    continue
 
-                    if particle.current_location.coords != particle.stuck_location.coords:
-                        if get_bearing(particle.current_location, particle.stuck_location) == get_opposite_bearing(particle.bearing):
-                            particle.last_visited_locations.clear()
-                            particle.stuck = False
-                            continue
+                particle.next_location = particle.reverse_path.pop()
+                navigate(sim, particle, particle.next_location)
+                continue
 
-                    if particle.target_location in particle.current_location.adjacent.values():
-                        particle.last_visited_locations.clear()
-                        particle.stuck = False
-                        continue
+            if particle.stuck:
+                particle.alternative_locations = [item for item in particle.alternative_locations if item[1].coords != particle.current_location.coords]
 
+                if particle.current_location not in particle.last_visited_locations:
                     particle.last_visited_locations.append(particle.current_location)
 
-                    try:
-                        next_location = follow_wall(particle, particle.target_location)
+                if particle.current_location.coords != particle.stuck_location.coords:
 
-                    except ValueError:
-                        discover_adjacent_locations(sim, particle)
-                        next_location = particle.current_location
+                    if get_bearing(particle.current_location, particle.stuck_location) == get_opposite_bearing(particle.bearing):
+                        particle.stuck = False
                         particle.last_visited_locations.clear()
+                        particle.alternative_locations.clear()
+                        continue
 
-                    except TypeError:
-                        discover_adjacent_locations(sim, particle)
-                        next_location = particle.current_location
-                        particle.last_visited_locations.clear()
+                if particle.target_location in particle.current_location.adjacent.values():
+                    particle.stuck = False
+                    particle.target_reached = True
+                    particle.last_visited_locations.clear()
+                    particle.alternative_locations.clear()
+                    particle.next_location = particle.target_location
+                    navigate(sim, particle, particle.next_location)
+                    continue
 
+                try:
+                    next_location = follow_wall(particle, particle.target_location)
                     particle.next_location = next_location
+                    navigate(sim, particle, particle.next_location)
+                    continue
+
+                except ValueError:
+                    particle.reverse_path = particle.last_visited_locations.copy()
+                    del particle.reverse_path[-1]
+                    particle.alternative_location = min(particle.alternative_locations, key=lambda t: t[0])[1]
+                    particle.alternative_reached = False
+                    continue
+
+            if not particle.target_reached:
+
+                if particle.target_location in particle.current_location.adjacent.values():
+                    particle.target_reached = True
+                    particle.next_location = particle.target_location
+                    navigate(sim, particle, particle.next_location)
+                    continue
+
+                if check_stuck(particle, particle.target_location):
+                    particle.stuck = True
+                    particle.bearing = get_bearing(particle.current_location, particle.target_location)
+                    particle.stuck_location = particle.current_location
+                    particle.last_visited_locations.append(particle.current_location)
+                    particle.next_location = follow_wall(particle, particle.target_location)
+                    navigate(sim, particle, particle.next_location)
+                    continue
 
                 else:
-                    if unvisited_queue[particle.search_algorithm] in particle.current_location.adjacent.values():
-                        particle.next_location = unvisited_queue[particle.search_algorithm]
+                    particle.next_location = get_next_best_location(particle, particle.target_location)
+                    navigate(sim, particle, particle.next_location)
+                    continue
+
+            if len(unvisited_queue) > 0:
+
+                if unvisited_queue[particle.search_algorithm] in particle.current_location.adjacent.values():
+                    particle.target_reached = True
+                    particle.next_location = unvisited_queue[particle.search_algorithm]
+                    navigate(sim, particle, particle.next_location)
+                    continue
+
+                else:
+                    nearest_unvisited = get_nearest_unvisited(particle)
+
+                    if nearest_unvisited in particle.current_location.adjacent.values():
+                        particle.target_reached = True
+                        particle.next_location = nearest_unvisited
+                        navigate(sim, particle, particle.next_location)
+                        continue
 
                     else:
-                        discover_adjacent_locations(sim, particle)
-                        nearest_unvisited = get_nearest_unvisited(particle)
+                        particle.target_reached = False
                         particle.target_location = nearest_unvisited
 
-                        if path_not_free(particle.current_location, particle.target_location):
-                            discover_adjacent_locations(sim, particle)
-                            particle.bearing = get_bearing(particle.current_location, particle.target_location)
-                            particle.stuck_location = particle.current_location
-                            particle.stuck = True
+                        if particle.target_location in particle.current_location.adjacent.values():
+                            particle.target_reached = True
+                            particle.next_location = particle.target_location
+                            navigate(sim, particle, particle.next_location)
                             continue
 
-                        next_location = get_next_best_location(particle, particle.target_location)
-                        particle.next_location = next_location
+                        if check_stuck(particle, particle.target_location):
+                            particle.stuck = True
+                            particle.bearing = get_bearing(particle.current_location, particle.target_location)
+                            particle.stuck_location = particle.current_location
+                            particle.last_visited_locations.append(particle.current_location)
+                            particle.next_location = follow_wall(particle, particle.target_location)
+                            navigate(sim, particle, particle.next_location)
+                            continue
 
-                discover_adjacent_locations(sim, particle)
-                try:
-                    navigate(sim, particle, particle.next_location)
-                except TypeError:
-                    pass
+                        else:
+                            particle.next_location = get_next_best_location(particle, particle.target_location)
+                            navigate(sim, particle, particle.next_location)
+                            continue
 
-            else:
-                particle.current_location = get_location_with_coords(graph, particle.coords)
-                discover_adjacent_locations(sim, particle)
+            if len(unvisited_queue) == 0:
                 mark_location(sim, particle)
 
                 if particle.current_location.coords == particle.start_location.coords:
+                    particle.target_reached = True
+
                     if particle.done is False:
                         particle.csv_particle_writer.set_task_success_round(sim.get_actual_round())
                     particle.last_visited_locations.clear()
@@ -515,56 +615,28 @@ def solution(sim):
                     continue
 
                 else:
-                    if particle.stuck:
+                    particle.target_reached = False
+                    particle.target_location = particle.start_location
 
-                        if particle.current_location.coords != particle.stuck_location.coords:
+                    if particle.target_location in particle.current_location.adjacent.values():
+                        particle.target_reached = True
+                        particle.next_location = particle.target_location
+                        navigate(sim, particle, particle.next_location)
+                        continue
 
-                            if get_bearing(particle.current_location, particle.stuck_location) == get_opposite_bearing(particle.bearing):
-                                particle.last_visited_locations.clear()
-                                particle.stuck = False
-                                continue
-
-                            if particle.target_location in particle.current_location.adjacent.values():
-                                particle.last_visited_locations.clear()
-                                particle.stuck = False
-                                continue
-
+                    if check_stuck(particle, particle.target_location):
+                        particle.stuck = True
+                        particle.bearing = get_bearing(particle.current_location, particle.target_location)
+                        particle.stuck_location = particle.current_location
                         particle.last_visited_locations.append(particle.current_location)
+                        particle.next_location = follow_wall(particle, particle.target_location)
+                        navigate(sim, particle, particle.next_location)
+                        continue
 
-                        try:
-                            next_location = follow_wall(particle, particle.target_location)
-
-                        except ValueError:
-                            next_location = particle.current_location
-                            particle.last_visited_locations.clear()
-
-                        except TypeError:
-                            discover_adjacent_locations(sim, particle)
-                            next_location = particle.current_location
-                            particle.last_visited_locations.clear()
-
-                        particle.next_location = next_location
                     else:
-                        discover_adjacent_locations(sim, particle)
-                        particle.target_location = particle.start_location
-
-                        if path_not_free(particle.current_location, particle.target_location):
-                            discover_adjacent_locations(sim, particle)
-                            particle.bearing = get_bearing(particle.current_location, particle.target_location)
-                            particle.stuck_location = particle.current_location
-                            particle.stuck = True
-                            continue
-
-                        next_location = get_next_best_location(particle, particle.target_location)
-                        particle.next_location = next_location
-
-                discover_adjacent_locations(sim, particle)
-
-                try:
-                    navigate(sim, particle, particle.next_location)
-                except TypeError:
-                    pass
+                        particle.next_location = get_next_best_location(particle, particle.target_location)
+                        navigate(sim, particle, particle.next_location)
+                        continue
 
     if done_particles == len(sim.get_particle_list()):
         sim.success_termination()
-

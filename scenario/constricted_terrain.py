@@ -21,8 +21,8 @@ def scenario(sim):
     # sim.add_particle(-11, 10, color=violett)
 
     # Particles TopRight
-    # sim.add_particle(9.5, 11.0)
-    # sim.add_particle(10.5, 11.0)
+    sim.add_particle(9.5, 11.0)
+    sim.add_particle(10.5, 11.0)
     # sim.add_particle(11.0, 10.0)
     # sim.add_particle(10.0, 10.0)
     # sim.add_particle(10.5, 9.0)
@@ -37,12 +37,12 @@ def scenario(sim):
     # sim.add_particle(-9.0, -10.0)
 
     # Particles BottomRight
-    sim.add_particle(10.5, -11.0)
-    sim.add_particle(11.0, -10.0)
-    sim.add_particle(9.5, -11.0)
-    sim.add_particle(10.0, -10.0)
-    sim.add_particle(10.5, -9.0)
-    sim.add_particle(9.0, -10.0)
+    # sim.add_particle(10.5, -11.0)
+    # sim.add_particle(11.0, -10.0)
+    # sim.add_particle(9.5, -11.0)
+    # sim.add_particle(10.0, -10.0)
+    # sim.add_particle(10.5, -9.0)
+    # sim.add_particle(9.0, -10.0)
 
     # Particles Random1
     # sim.add_particle(-6.5, 5.0)

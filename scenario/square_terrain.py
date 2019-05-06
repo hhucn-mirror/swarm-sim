@@ -22,11 +22,11 @@ def scenario(sim):
 
     # Particles Top Right Enclosed
     sim.add_particle(10.5, 11, color=black)
-    sim.add_particle(11, 12, color=black)
-    sim.add_particle(10, 12, color=black)
-    sim.add_particle(11, 10, color=black)
-    sim.add_particle(10, 10, color=black)
-    sim.add_particle(9.5, 11, color=black)
+    sim.add_particle(11, 12, color=red)
+    sim.add_particle(10, 12, color=green)
+    sim.add_particle(11, 10, color=blue)
+    sim.add_particle(10, 10, color=orange)
+    sim.add_particle(9.5, 11, color=red)
 
     # Particles Top Right
     # sim.add_particle(11, 8, color=blue)
@@ -187,7 +187,7 @@ def draw_terrain(sim):
     ###################################################
 
     # Obstacles
-    sim.add_location(-2, 0)
+    # sim.add_location(-2, 0)
     sim.add_location(0, -2)
     sim.add_location(1, -2)
     sim.add_location(1.5, 3)
@@ -228,6 +228,6 @@ def draw_terrain(sim):
     sim.add_location(3.5, 11)
     sim.add_location(2.5, 11)
     sim.add_location(1.5, 11)
-    # sim.add_location(0.5, 11)
+    sim.add_location(1, 0)
 
 

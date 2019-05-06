@@ -22,12 +22,13 @@ class CsvParticleFile:
         if not file_exists:
             self.csv_file = open(self.file_name, 'w', newline='')
             self.writer = csv.writer(self.csv_file)
-            self.writer.writerow(['Particle ID', 'Particle Number',
+            self.writer.writerow(['Particle ID', 'Particle Number', 'Search Algorithm',
                                   'Location Created', 'Location Deleted',
                                   'Particle Read', 'Particle Write', 'Particle Steps', 'Task Success Round'])
 
     def write_particle(self, particle):
         csv_iterator = [particle.csv_particle_writer.id, particle.csv_particle_writer.number,
+                        particle.csv_particle_writer.search_algorithm,
                         particle.csv_particle_writer.location_created, particle.csv_particle_writer.location_deleted,
                         particle.csv_particle_writer.particle_read,
                         particle.csv_particle_writer.particle_write,
@@ -47,6 +48,7 @@ class CsvParticleData:
         self.location_deleted = 0
         self.success=0
         self.success_round = None
+        self.search_algorithm = None
 
     def write_particle(self, steps= 0, particle_read=0,
                        particle_write=0, location_created=0, location_deleted=0, memory_read=0, memory_write=0,
@@ -64,6 +66,12 @@ class CsvParticleData:
 
     def set_task_success_round(self, success_round):
         self.success_round = success_round
+
+    def set_search_algorithm(self, search_algorithm):
+        if search_algorithm == -1:
+            self.search_algorithm = 'DFS'
+        elif search_algorithm == 0:
+            self.search_algorithm = 'BFS'
 
 
 class CsvRoundData:
@@ -89,6 +97,7 @@ class CsvRoundData:
         self.location_deleted_sum = 0
         self.success_round = 0
         self.all_marked_round = None
+        self.search_algorithm = None
         self.start_communication_round = 0
         self.communication_frequency = 0
         self.communication_range = 0
@@ -131,6 +140,14 @@ class CsvRoundData:
 
     def set_communication_range(self, communication_range):
         self.communication_range = communication_range
+
+    def set_search_algorithm(self, search_algorithm):
+        if search_algorithm == 0:
+            self.search_algorithm = 'BFS'
+        elif search_algorithm == 1:
+            self.search_algorithm = 'DFS'
+        elif search_algorithm == 2:
+            self.search_algorithm = 'MIXED'
 
     def update_metrics(self, steps=0, particle_read=0, memory_read=0, particle_write=0, memory_write=0,
                        location_created=0, location_deleted=0):
@@ -185,7 +202,7 @@ class CsvRoundData:
         csv_file = open(file_name, 'w', newline='')
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Successful Termination Round',
+        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Search Algorithm', 'Successful Termination Round',
                                 'Successful Marking Round',
                                 'Start Communication round', 'Communication Frequency', 'Communication Range',
                                 'Particle Counter',
@@ -199,7 +216,7 @@ class CsvRoundData:
                                 'Location Deleted Min', 'Location Deleted Max',
                                 ])
 
-        csv_iterator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
+        csv_iterator = [self.scenario, self.solution, self.seed, self.search_algorithm, data['Round Number'].count(),
                         self.all_marked_round,
 
                         self.start_communication_round, self.communication_frequency, self.communication_range,

@@ -493,7 +493,6 @@ class Particle(matter.matter):
             return None
 
 
-
     def scan_for_particle_within(self, hop=1):
         """
         Scans for particles, tiles, or location on a given hop distance and all the matters within the hop distance
@@ -572,7 +571,6 @@ class Particle(matter.matter):
             return None
 
 
-
     def scan_for_tile_within(self,  hop=1):
         """
         Scans for particles, tiles, or location on a given hop distance and all the matters within the hop distance
@@ -593,6 +591,7 @@ class Particle(matter.matter):
             return hop_list
         else:
             return None
+
 
     def scan_for_tile_in(self, hop=1):
         """
