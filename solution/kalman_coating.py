@@ -721,40 +721,6 @@ def check_termination(sim):
         print("Loc:", len(sim.locations), " Part:", len(sim.particles))
         exit_start=True
         return True
-
-def need_to_move(particle):
-    # Move to the next fl only if there is a particle that has an higher distance than yours.
-    for dir in particle.NH_dict:
-        if particle.NH_dict[dir].type == "fl":
-            if particle.p_max_dist > particle.NH_dict[dir].dist:
-                if particle.NH_dict[dir].dist == particle.own_dist:
-                    if particle.prev_dir != dir:
-                        if not particle.particle_in(dir):
-                            if debug:
-                                print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
-                            particle.move_to(dir)
-                            particle.prev_dir = invert_dir(dir)
-                            if debug:
-                                print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-                                print("\n P", particle.number, " coords after moving ", particle.coords)
-                            data_clearing(particle)
-
-                            return
-
-    # for dir in particle.NH_dict:
-    #     if particle.NH_dict[dir].type == "fl":
-    #         if particle.NH_dict[dir].dist == particle.p_max_dist -1 :
-    #             if not particle.particle_in(dir):
-    #                 if debug:
-    #                     print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
-    #                 particle.move_to(dir)
-    #                 particle.prev_dir = invert_dir(dir)
-    #                 if debug:
-    #                     print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-    #                     print("\n P", particle.number, " coords after moving ", particle.coords)
-    #                 data_clearing(particle)
-    #                 return
-
 def check_between_tiles(particle):
     for dir in direction:
         if particle.NH_dict[dir].type == "p" and  particle.NH_dict[invert_dir(dir)].type == "fl":
@@ -789,6 +755,41 @@ def check_between_tiles(particle):
             return
     if particle.fl_dir is not None:
         check_fl_dir(particle)
+
+def need_to_move(particle):
+    # Move to the next fl that is equal or lower than your distance
+    # only if there is a particle that has an higher distance than yours.
+    for dir in particle.NH_dict:
+        if particle.NH_dict[dir].type == "fl":
+            if particle.p_max_dist > particle.own_dist:
+                if particle.NH_dict[dir].dist != 10000 and particle.NH_dict[dir].dist <= particle.own_dist:
+                    if particle.prev_dir != dir:
+                        if not particle.particle_in(dir):
+                            if debug:
+                                print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
+                            particle.move_to(dir)
+                            particle.prev_dir = invert_dir(dir)
+                            if debug:
+                                print("\n P", particle.number, "moved to ", dir_str(dir), dir)
+                                print("\n P", particle.number, " coords after moving ", particle.coords)
+                            data_clearing(particle)
+                            return
+
+    # for dir in particle.NH_dict:
+    #     if particle.NH_dict[dir].type == "fl":
+    #         if particle.NH_dict[dir].dist == particle.p_max_dist -1 :
+    #             if not particle.particle_in(dir):
+    #                 if debug:
+    #                     print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
+    #                 particle.move_to(dir)
+    #                 particle.prev_dir = invert_dir(dir)
+    #                 if debug:
+    #                     print("\n P", particle.number, "moved to ", dir_str(dir), dir)
+    #                     print("\n P", particle.number, " coords after moving ", particle.coords)
+    #                 data_clearing(particle)
+    #                 return
+
+
 
 def check_fl_dir(particle):
     if not particle.particle_in(particle.fl_dir) and not particle.tile_in(particle.fl_dir):
