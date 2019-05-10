@@ -123,6 +123,75 @@ def reset_attributes(particle):
 
 cycle_no = 4
 
+def getCoordsOfNearestTile(partilceCoords, sim):
+    tileCoords = sim.get_tile_map_coords()
+
+    # max float
+    min = 1.7976931348623157e+308
+    x = sim.get_sim_x_size()
+    y = sim.get_sim_y_size()
+    for tCoords in tileCoords:
+        xdiff = partilceCoords[0] - tCoords[0]
+        ydiff = partilceCoords[1] - tCoords[1]
+        value = math.sqrt((xdiff * xdiff) + (ydiff * ydiff))
+        if (value < min):
+            min = value
+            x = tCoords[0]
+            y = tCoords[1]
+    return (x, y)
+
+
+def countToTile(particle, tile_coords, sim):
+    counter=0
+    prev_n_dir=NW
+    prev_s_dir=SW
+    phantom_coords_x=particle.coords[0]
+    phantom_coords_y = particle.coords[1]
+    phantom_coords = (phantom_coords_x, phantom_coords_y)
+    while phantom_coords != tile_coords:
+        if phantom_coords[1] < tile_coords[1] and phantom_coords[0] < \
+            tile_coords[0]:
+            phantom_coords=sim.get_coords_in_dir(phantom_coords, NE)
+            counter+=1
+        elif phantom_coords[1] < tile_coords[1] and phantom_coords[0] > \
+                tile_coords[0]:
+            phantom_coords = sim.get_coords_in_dir(phantom_coords, NW)
+            counter += 1
+        elif phantom_coords[1] > tile_coords[1] and phantom_coords[0] < \
+                tile_coords[0]:
+            phantom_coords = sim.get_coords_in_dir(phantom_coords, SE)
+            counter+= 1
+        elif phantom_coords[1] > tile_coords[1] and phantom_coords[0] > \
+                tile_coords[0]:
+            phantom_coords = sim.get_coords_in_dir(phantom_coords, SW)
+            counter += 1
+        else:
+            if phantom_coords[1] == tile_coords[1]:
+                if phantom_coords[0] > tile_coords[0]:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, W)
+                    counter += 1
+                elif phantom_coords[0] < tile_coords[0]:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, E)
+                    counter += 1
+            elif phantom_coords[1] < tile_coords[1]:
+                if prev_n_dir==NW:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, NE)
+                    prev_n_dir=NE
+                    counter += 1
+                else:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, NW)
+                    prev_n_dir = NW
+                    counter += 1
+            elif phantom_coords[1] > tile_coords[1]:
+                if prev_s_dir == SW:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, SE)
+                    prev_s_dir = SE
+                    counter += 1
+                else:
+                    phantom_coords = sim.get_coords_in_dir(phantom_coords, SW)
+                    prev_s_dir = SW
+                    counter += 1
+    return counter
 
 
 def check_layer_coated(sim):
@@ -139,6 +208,13 @@ def check_layer_coated(sim):
     else:
         return False
 
+def coating_complete(sim):
+    max_hop = -1
+    for particle in sim.particles:
+       hop = countToTile(particle, getCoordsOfNearestTile(particle.coords, sim), sim)
+       if hop > max_hop:
+           max_hop = hop
+    print("At round ", sim.get_actual_round(), " the max particle hop is ", max_hop)
 
 def create_new_particles(sim):
     particles_list = []
@@ -231,6 +307,7 @@ def solution(sim):
     #         sim.success_termination()
     #     exit_cnt -= 1
     #     return
+
     if new_layer:
         new_marked_locations(sim)
         particles_list = create_new_particles(sim)
@@ -250,7 +327,7 @@ def solution(sim):
         
     """
 
-
+    #coating_complete(sim)
     for particle in particles_list:
         if sim.get_actual_round() == 1:
             initialize_particle(particle)
@@ -399,9 +476,7 @@ def scan_nh(particle):
             ml_dir = dir
         else:
             particle.NH_dict[dir] = neighbors("fl", 10000)
-    if ml_dir:
-        if particle.NH_dict[invert_dir(ml_dir)].type == "fl" and not particle.check_on_location():
-            print ("Im the last one in the row")
+
 
 
 def data_setting(particle):
