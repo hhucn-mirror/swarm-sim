@@ -41,11 +41,11 @@ dirs_array = [[E, SE, SW, W, NW, NE],
 
 # Variables for evaluation
 all_marked = False
-location_count = {"constricted_terrain": 363,
-                  "square_terrain": 527,
-                  "edgy_terrain": 321,
-                  "crescent_terrain": 149,
-                  "test_terrain": 45}
+location_count = {"constricted": 363,
+                  "square": 527,
+                  "edgy": 321,
+                  "crescent": 187,
+                  "test": 45}
 
 
 class Location:
@@ -178,8 +178,8 @@ def set_particle_attributes(particle, search_alg):
     setattr(particle, "stuck_location", None)
     setattr(particle, "alternative_location", None)
     setattr(particle, "bearing", None)
-
     setattr(particle, "previous_location", None)
+
     setattr(particle, "last_visited_locations", [])
     setattr(particle, "alternative_locations", [])
     setattr(particle, "reverse_path", [])
@@ -417,6 +417,31 @@ def get_opposite_bearing(bearing):
         return 2
 
 
+# Enables the particles to create packets with their own data and send them to one another if they are within range
+def communicate(particle, communication_range):
+    packet = (particle.graph, particle.visited, particle.unvisited_queue)
+    found_particles = particle.scan_for_particle_within(hop=communication_range)
+
+    if found_particles is None:
+        return False
+
+    for found_particle in found_particles:
+        particle.write_to_with(found_particle, particle.get_id(), packet)
+
+    return True
+
+
+# Enables the particle to extend its own data with the data received from other particles
+def analyse_memory(sim, particle):
+    for particle_id in particle.read_from_with(particle):
+        for location in particle.read_whole_memory()[particle_id][0]:
+            if location not in particle.graph:
+                add_location_to_graph(sim, particle.graph, location, particle.direction)
+        particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if
+                                 location not in particle.visited])
+    particle.delete_whole_memory()
+
+
 # Checks if a particle's way is blocked by a wall or obstacle
 def check_stuck(particle, target_location):
     if path_blocked(particle.current_location, target_location):
@@ -436,16 +461,12 @@ def move(sim, particle, next_location):
     discover_adjacent_locations(sim, particle)
 
 
-def solution(sim):
+def solution(sim, config_data):
     global all_marked
 
     done_particles = 0
 
-    config = configparser.ConfigParser(allow_no_value=True)
-    config.read("config.ini")
-    config_data = cd.ConfigData(config)
     scenario_name = config_data.scenario
-
     start_communication_round = config_data.start_communication_round
     communication_frequency = config_data.communication_frequency
     communication_range = config_data.communication_range
@@ -468,12 +489,20 @@ def solution(sim):
             continue
 
         else:
-            if not all_marked:
+            if scenario_name in location_count.keys():
+                if not all_marked:
+                    if check_all_marked(sim, location_count[scenario_name]):
+                        all_marked = True
+                        sim.csv_round_writer.marking_success()
+                        sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
 
-                if check_all_marked(sim, location_count[scenario_name]):
-                    all_marked = True
-                    sim.csv_round_writer.marking_success()
-                    sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
+            if sim.get_actual_round() > start_communication_round:
+
+                if (sim.get_actual_round() - start_communication_round) % communication_frequency == 0:
+                    communicate(particle, communication_range)
+
+            if len(particle.read_whole_memory()) > 0:
+                analyse_memory(sim, particle)
 
             if not particle.alternative_reached:
 
@@ -567,6 +596,7 @@ def solution(sim):
                     else:
                         particle.target_reached = False
                         particle.target_location = nearest_unvisited
+
                         if particle.target_location in particle.current_location.adjacent.values():
                             particle.target_reached = True
                             particle.next_location = particle.target_location

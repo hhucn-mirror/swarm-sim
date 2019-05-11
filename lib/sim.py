@@ -40,7 +40,8 @@ blue = 5
 
 
 class Sim:
-    def __init__(self, config_data):
+    def __init__(self, config_data, start_position, particles_num):
+    # def __init__(self, config_data):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -103,23 +104,23 @@ class Sim:
                                                            steps=0, directory=self.directory)
 
         mod = importlib.import_module('scenario.' + config_data.scenario)
-        mod.scenario(self)
+        # mod.scenario(self, config_data.start_position, config_data.particles_num)
+        mod.scenario(self, start_position, particles_num)
         if config_data.random_order:
             random.shuffle(self.particles)
 
-
-    def run(self):
+    def run(self, config_data):
         """
         Runs the simulator either with or without visualization
         At the end it aggregate the data and generate a gnuplot
         :return:
         """
-        if self.visualization !=  0:
+        if self.visualization != 0:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
-            window.run()
+            window.run(config_data)
         else:
-            while self.get_actual_round() <= self.get_max_round() and self.__end == False:
-                self.solution_mod.solution(self)
+            while self.get_actual_round() <= self.get_max_round() and self.__end is False:
+                self.solution_mod.solution(self, config_data)
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
 
@@ -156,7 +157,7 @@ class Sim:
         """
         Allows to terminate before the max round is reached
         """
-        self.__end=True
+        self.__end = True
 
     def get_end(self):
         """

@@ -8,73 +8,25 @@ orange = 7
 cyan = 8
 violett = 9
 
+start_positions = {"TopLeft": [(-9.5, 11), (-10, 10), (-11, 12), (-11, 10), (-10, 12), (-10.5, 11)],
+                   "TopRightEnclosed": [(10.5, 11), (11, 12), (10, 12), (11, 10), (10, 10), (9.5, 11)],
+                   "TopRight": [(11, 8), (10, 8), (9, 8), (8, 8), (10.5, 7), (9.5, 7)],
+                   "BottomLeft": [(-10.5, -11), (-11, -12), (-10, -12), (-9.5, -11), (-10, -10), (-9, -12)],
+                   "BottomRight": [(10.5, -11), (11, -12), (10, -12), (11, -10), (10, -10), (9.5, -11)],
+                   "Center": [(0, 0), (1, 0), (0.5, -1), (-0.5, -1), (-1, 0), (-0.5, 1)],
+                   "Random1": [(8, -2), (7.5, -1), (7, -2), (8.5, -1), (8, 0), (6.5, -1)],
+                   "Random2": [(-5.5, 1), (-5, 2), (-7.5, 3), (-6.5, 1), (-4.5, 1), (-6.0, 2.0)]}
 
-def scenario(sim):
+
+def scenario(sim, start_position, particles_num):
     draw_terrain(sim)
 
-    # Particles Top Left
-    # sim.add_particle(-9.5, 11, color=blue)
-    # sim.add_particle(-10, 10, color=black)
-    # sim.add_particle(-11, 12, color=yellow)
-    # sim.add_particle(-11, 10, color=violett)
-    # sim.add_particle(-10, 12, color=cyan)
-    # sim.add_particle(-10.5, 11, color=gray)
+    for i in range(0, particles_num):
+        sim.add_particle((start_positions[start_position][i][0]), (start_positions[start_position][i][1]))
 
-    # Particles Top Right Enclosed
-    sim.add_particle(10.5, 11, color=black)
-    sim.add_particle(11, 12, color=red)
-    sim.add_particle(10, 12, color=green)
-    sim.add_particle(11, 10, color=blue)
-    sim.add_particle(10, 10, color=orange)
-    sim.add_particle(9.5, 11, color=red)
 
-    # Particles Top Right
-    # sim.add_particle(11, 8, color=blue)
-    # sim.add_particle(10, 8, color=blue)
-    # sim.add_particle(9, 8, color=blue)
-    # sim.add_particle(8, 8, color=blue)
-    # sim.add_particle(10.5, 7, color=blue)
-    # sim.add_particle(9.5, 7, color=blue)
-
-    # Particles Bottom Left
-    # sim.add_particle(-10.5, -11, color=blue)
-    # sim.add_particle(-11, -12, color=blue)
-    # sim.add_particle(-10, -12, color=blue)
-    # sim.add_particle(-9.5, -11, color=blue)
-    # sim.add_particle(-10, -10, color=blue)
-    # sim.add_particle(-9, -12, color=blue)
-
-    # Particles Bottom Right
-    # sim.add_particle(10.5, -11, color=blue)
-    # sim.add_particle(11, -12, color=blue)
-    # sim.add_particle(10, -12, color=blue)
-    # sim.add_particle(11, -10, color=blue)
-    # sim.add_particle(10, -10, color=blue)
-    # sim.add_particle(9.5, -11, color=blue)
-
-    # Particles Center
-    # sim.add_particle(0, 0, color=blue)
-    # sim.add_particle(1, 0, color=blue)
-    # sim.add_particle(0.5, -1, color=blue)
-    # sim.add_particle(-0.5, -1, color=blue)
-    # sim.add_particle(-1, 0, color=blue)
-    # sim.add_particle(-0.5, 1, color=blue)
-
-    # Particles Random1
-    # sim.add_particle(8, -2, color=blue)
-    # sim.add_particle(7.5, -1, color=blue)
-    # sim.add_particle(7, -2, color=blue)
-    # sim.add_particle(8.5, -1, color=blue)
-    # sim.add_particle(8, 0, color=blue)
-    # sim.add_particle(6.5, -1, color=blue)
-
-    # Particles Random2
-    # sim.add_particle(-5.5, 1, color=blue)
-    # sim.add_particle(-5, 2, color=red)
-    # sim.add_particle(-7.5, 3, color=blue)
-    # sim.add_particle(-6.5, 1, color=blue)
-    # sim.add_particle(-4.5, 1, color=blue)
-    # sim.add_particle(-6.0, 2.0, color=blue)
+def get_starting_positions():
+    return list(start_positions.keys())
 
 
 def draw_terrain(sim):

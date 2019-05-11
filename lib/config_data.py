@@ -32,8 +32,23 @@ class ConfigData:
         self.location_mm_size = config.getint("Matter", "location_mm_size")
         self.dir_name = None
 
-        #Marking Variables
+        # Marking Variables
         self.start_communication_round = config.getint("Marking", "start_communication_round")
         self.communication_frequency = config.getint("Marking", "communication_frequency")
         self.communication_range = config.getint("Marking", "communication_range")
         self.search_algorithm = config.getint("Marking", "search_algorithm")
+        self.start_position = config_section_map(config, "Marking")['start_position']
+        self.particles_num = config.getint("Marking", "particles_num")
+
+
+# Helper method to read strings from config
+# see line 40 for usage
+def config_section_map(config, section):
+    dict = {}
+    options = config.options(section)
+    for option in options:
+        try:
+            dict[option] = config.get(section, option)
+        except:
+            dict[option] = None
+    return dict

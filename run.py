@@ -1,77 +1,105 @@
 """This is the main module of the Opportunistic Robotics Network Simulator"""
 
-
 import configparser
-import getopt
+import argparse
 import logging
 import os
-import sys
 from datetime import datetime
-
 from lib import sim, config_data as cd
 
 
-def swarm_sim( argv ):
+def get_options():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--solution", dest="solution", help="Solution Name")
+    parser.add_argument("-w", "--scenario", dest="scenario", help="Scenario Name")
+    parser.add_argument("-r", "--seed", dest="seed", help="Seed Value")
+    parser.add_argument("-n", "--maxround", dest="maxround", help="Maximum Number of Rounds")
+    parser.add_argument("-m", "--multiple", dest="multiple", help="Multiple Runs: 0=off, 1=on")
+    parser.add_argument("-v", "--visualization", dest="visualization", help="Visualization: 0=off, 1=on")
+    parser.add_argument("-d", "--time", dest="time", help="Time")
+    parser.add_argument("-b", "--startpos", dest="startpos", help="Starting Position")
+    parser.add_argument("-p", "--particles", dest="particles", help="Number of Particles: 1 -> 6")
+    parser.add_argument("-a", "--searchalgorithm", dest="searchalgorithm",
+                        help="Searching Algorithm: 0=BFS, 1=DFS, 2=MIXED")
+    options = parser.parse_args()
+    return options
+
+
+def swarm_sim(options):
     """In the main function first the config is getting parsed and than
     the simulator and the sim object is created. Afterwards the run method of the simulator
-    is called in which the simlator is going to start to run"""
-    config = configparser.ConfigParser(allow_no_value=True)
+    is called in which the simulator is going to start to run"""
 
+    config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
     config_data = cd.ConfigData(config)
 
-    multiple_sim=0
+    search_algorithm = None
+    multiple_sim = 0
     local_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
-    try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
-    except getopt.GetoptError:
-        print('Error: run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
-            sys.exit()
-        elif opt in ("-s", "--solution"):
-            config_data.solution = arg
-        elif opt in ("-w", "--scenario"):
-            config_data.scenario = arg
-        elif opt in ("-r", "--seed"):
-            config_data.seedvalue = int(arg)
-        elif opt in ("-n", "--maxrounds"):
-           config_data.max_round = int(arg)
-        elif opt in ("-m"):
-           multiple_sim = int(arg)
-        elif opt in ("-v"):
-            config_data.visualization = int(arg)
-        elif opt in ("-d"):
-            local_time = str(arg)
 
+    if options.solution:
+        config_data.solution = options.solution
+    if options.scenario:
+        config_data.scenario = options.scenario
+    if options.seed:
+        config_data.seedvalue = int(options.seed)
+    if options.maxround:
+        config_data.max_round = int(options.maxround)
+    if options.multiple:
+        multiple_sim = int(options.multiple)
+    if options.visualization:
+        config_data.visualization = int(options.visualization)
+    if options.time:
+        local_time = options.time
+    if options.searchalgorithm:
+        config_data.search_algorithm = int(options.searchalgorithm)
+    if options.startpos:
+        config_data.start_position = str(options.startpos)
+    if options.particles:
+        config_data.particles_num = int(options.particles)
 
-    #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
     logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
 
+    if config_data.search_algorithm == 0:
+        search_algorithm = "BFS"
+    elif config_data.search_algorithm == 1:
+        search_algorithm = "DFS"
+    elif config_data.search_algorithm == 2:
+        search_algorithm = "MIXED"
 
     if multiple_sim == 1:
-        config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-               "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-               str(config_data.seedvalue)
+        config_data.dir_name = config_data.scenario.rsplit('.', 1)[0] + \
+                               "_" + str(config_data.particles_num) + "Part" + \
+                               "_" + config_data.solution.rsplit('.', 1)[0] + \
+                               "_" + search_algorithm + \
+                               "_" + config_data.start_position + \
+                               "/" + str(config_data.seedvalue)
 
-        config_data.dir_name = "./outputs/mulitple/"+ config_data.dir_name
+        config_data.dir_name = "./outputs/multiple/" + config_data.dir_name
 
     else:
-        config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-               "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
-               str(config_data.seedvalue)
+        config_data.dir_name = local_time + "_" + \
+                               config_data.scenario.rsplit('.', 1)[0] + \
+                               "_" + str(config_data.particles_num) + "Part" + \
+                               "_" + config_data.solution.rsplit('.', 1)[0] + \
+                               "_" + search_algorithm + \
+                               "_" + config_data.start_position + \
+                               "_" + str(config_data.seedvalue)
+
         config_data.dir_name = "./outputs/" + config_data.dir_name
+
     if not os.path.exists(config_data.dir_name):
         os.makedirs(config_data.dir_name)
 
     logging.info('Started')
-    simulator = sim.Sim( config_data )
-    simulator.run()
+    simulator = sim.Sim(config_data, config_data.start_position, config_data.particles_num)
+    simulator.run(config_data)
     logging.info('Finished')
 
 
 if __name__ == "__main__":
-    swarm_sim(sys.argv[1:])
+    options = get_options()
+    swarm_sim(options)
+
 

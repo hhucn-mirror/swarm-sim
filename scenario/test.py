@@ -8,10 +8,19 @@ orange = 7
 cyan = 8
 violett = 9
 
+start_positions = {"Center": [(0, 0)]}
 
-def scenario(sim):
+
+def scenario(sim, start_position, particles_num):
     draw_terrain(sim)
-    sim.add_particle(0, 0, color=blue)
+
+    for i in range(0, particles_num):
+        sim.add_particle((start_positions[start_position][i][0]), (start_positions[start_position][i][1]))
+
+
+def get_starting_positions():
+    return list(start_positions.keys())
+
 
 def draw_terrain(sim):
     sim.add_location(0.0, 4.0)

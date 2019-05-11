@@ -415,7 +415,7 @@ class VisWindow(pyglet.window.Window):
 
         self.location_vertex_list.colors[16 * i: 16 * i + 16] = (location.color + [location.get_alpha()]) * 4
 
-    def run(self):
+    def run(self, config_data):
         p = 0
         target_frame_time = 1 / target_frame_rate
         round_time = 1 / rounds_per_second
@@ -425,7 +425,7 @@ class VisWindow(pyglet.window.Window):
             #while actual simulation round is below max round
             last_time = time.perf_counter()
             while self.elapsed_frame_time >= round_time:
-                mod.solution(self.sim)
+                mod.solution(self.sim, config_data)
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
                     self.sim.csv_round_writer.next_line(self.sim.get_actual_round())

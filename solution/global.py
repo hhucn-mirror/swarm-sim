@@ -1,6 +1,7 @@
 import random
 import math
 import configparser
+import sys
 from lib import config_data as cd
 
 
@@ -46,11 +47,11 @@ unvisited_queue = []
 
 # Variables for evaluation
 all_marked = False
-location_count = {"constricted_terrain": 363,
-                  "square_terrain": 527,
-                  "edgy_terrain": 321,
-                  "crescent_terrain": 149,
-                  "test_terrain": 45}
+location_count = {"constricted": 363,
+                  "square": 527,
+                  "edgy": 321,
+                  "crescent": 187,
+                  "test": 45}
 
 
 class Location:
@@ -157,12 +158,11 @@ def set_particle_attributes(particle, search_alg):
     search_algo = []
 
     if search_alg == 0:
-        search_algo.append(0)
+        search_algo = [0]
     elif search_alg == 1:
-        search_algo.append(-1)
+        search_algo = [-1]
     elif search_alg == 2:
-        search_algo.append(-1)
-        search_algo.append(0)
+        search_algo = [-1, 0]
 
     direction = random.choice(directions)
     search_algorithm = random.choice(search_algo)
@@ -445,7 +445,7 @@ def move(sim, particle, next_location):
     discover_adjacent_locations(sim, particle)
 
 
-def solution(sim):
+def solution(sim, config_data):
     global all_marked
 
     global graph
@@ -454,11 +454,7 @@ def solution(sim):
 
     done_particles = 0
 
-    config = configparser.ConfigParser(allow_no_value=True)
-    config.read("config.ini")
-    config_data = cd.ConfigData(config)
     scenario_name = config_data.scenario
-
     start_communication_round = config_data.start_communication_round
     communication_frequency = config_data.communication_frequency
     communication_range = config_data.communication_range
@@ -471,6 +467,9 @@ def solution(sim):
 
     for particle in sim.get_particle_list():
 
+        if sim.get_actual_round() == config_data.max_round:
+            sim.set_end()
+
         if sim.get_actual_round() == 1:
             set_particle_attributes(particle, search_algorithm)
             particle.csv_particle_writer.set_search_algorithm(particle.search_algorithm)
@@ -481,12 +480,13 @@ def solution(sim):
             continue
 
         else:
-            if not all_marked:
+            if scenario_name in location_count.keys():
+                if not all_marked:
 
-                if check_all_marked(sim, location_count[scenario_name]):
-                    all_marked = True
-                    sim.csv_round_writer.marking_success()
-                    sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
+                    if check_all_marked(sim, location_count[scenario_name]):
+                        all_marked = True
+                        sim.csv_round_writer.marking_success()
+                        sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
 
             if not particle.alternative_reached:
 
@@ -640,3 +640,4 @@ def solution(sim):
 
     if done_particles == len(sim.get_particle_list()):
         sim.success_termination()
+
