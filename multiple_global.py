@@ -7,7 +7,7 @@ import importlib
 
 def main():
     seed_start = 1
-    seed_end = 20
+    seed_end = 2
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -19,6 +19,10 @@ def main():
     search = None
     scenario_mod = importlib.import_module('scenario.' + config_data.scenario)
     particles_num = config_data.particles_num
+
+    if scenario == "crescent":
+        particles_num = 3
+
     search_algorithms = 2
     start_positions = scenario_mod.get_starting_positions()
 
