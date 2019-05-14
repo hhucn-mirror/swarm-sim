@@ -12,16 +12,21 @@ gray = 2
 red = 3
 green = 4
 blue = 5
+yellow = 6
+orange = 7
+cyan = 8
+violett = 9
 
-E = 0
-SE = 1
-SW = 2
-W = 3
-NW = 4
-NE = 5
-S = 6  # S for stop and not south
+NE=0
+E = 1
+SE = 2
+SW = 3
+W = 4
+NW = 5
 
-direction = [E, SE, SW, W, NW, NE]
+
+direction = [NE, E, SE, SW, W, NW]
+
 
 
 def invert_dir(dir):
@@ -145,9 +150,7 @@ def countToTile(particle, tile_coords, sim):
     counter=0
     prev_n_dir=NW
     prev_s_dir=SW
-    phantom_coords_x=particle.coords[0]
-    phantom_coords_y = particle.coords[1]
-    phantom_coords = (phantom_coords_x, phantom_coords_y)
+    phantom_coords = (particle.coords[0], particle.coords[1])
     while phantom_coords != tile_coords:
         if phantom_coords[1] < tile_coords[1] and phantom_coords[0] < \
             tile_coords[0]:
@@ -208,13 +211,7 @@ def check_layer_coated(sim):
     else:
         return False
 
-def coating_complete(sim):
-    max_hop = -1
-    for particle in sim.particles:
-       hop = countToTile(particle, getCoordsOfNearestTile(particle.coords, sim), sim)
-       if hop > max_hop:
-           max_hop = hop
-    print("At round ", sim.get_actual_round(), " the max particle hop is ", max_hop)
+
 
 def create_new_particles(sim):
     particles_list = []
@@ -242,10 +239,10 @@ def create_new_particles(sim):
 
 
 
-layer = 1
+layer = 0
 def new_marked_locations(sim):
     global layer
-    if layer == 1:
+    if layer == 0:
         for tile in sim.tiles:
             sim.add_location(tile.coords[0] + 0.5, tile.coords[1] + 1)
             sim.add_location(tile.coords[0] + 0.5, tile.coords[1] - 1)
@@ -258,7 +255,7 @@ def new_marked_locations(sim):
             for location in sim.locations:
                 if tile.coords == location.coords:
                     sim.remove_location_on(location.coords)
-        layer = 2
+        layer = 1
     else:
         actual_locations = copy.copy(sim.locations)
         location_cnt = 0
@@ -288,10 +285,24 @@ def new_marked_locations(sim):
                     sim.remove_location_on(location.coords)
         for particle in sim.particles:
             particle.set_color(red)
+            sim.red_particles.append(particle)
             for location in sim.locations:
                 if particle.coords == location.coords:
                     sim.remove_location_on(location.coords)
+        layer = layer + 1
 
+def coating_complete(sim, particles_list):
+    global layer
+    max_hop = -1
+    for particle in particles_list:
+       hop = countToTile(particle, getCoordsOfNearestTile(particle.coords, sim), sim)
+       if hop > max_hop:
+           max_hop = hop
+    print("At round ", sim.get_actual_round(), " the max particle hop is ", max_hop)
+    if max_hop <= layer:
+        print ("Success ", max_hop, layer )
+        return True
+    return False
 termination = True
 new_layer = True
 particles_list = []
@@ -313,7 +324,9 @@ def solution(sim):
         particles_list = create_new_particles(sim)
         new_layer = False
     else:
-        new_layer = check_layer_coated(sim)
+        #new_layer = check_layer_coated(sim)
+        new_layer = coating_complete(sim, particles_list)
+
     """
         new_phase
         check if layer_coated or sim.get_actual_round() == 1:
@@ -326,10 +339,19 @@ def solution(sim):
             create new_particles
         
     """
+    if sim.get_actual_round() > 1:
+        if len(sim.red_particles) > 0 :
+            for particle in sim.red_particles:
+                scan_nh(particle, sim)
 
-    #coating_complete(sim)
+        if len(sim.green_particles) > 0:
+            for particle in sim.green_particles:
+                scan_nh(particle, sim)
+
     for particle in particles_list:
         if sim.get_actual_round() == 1:
+            setattr(sim, "red_particles", [])
+            setattr(sim, "green_particles", [])
             initialize_particle(particle)
 
         if sim.get_actual_round() % cycle_no == 1:
@@ -453,17 +475,16 @@ def scanning_neighborhood(particle):
     scan_nh(particle)
 
 
-def scan_nh(particle):
-    ml_dir=None
+def scan_nh(particle, sim=None):
     for dir in direction:
         if particle.particle_in(dir):
-            if  particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == red :
+            if  particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == red \
+                or particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == green \
+                    or particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == cyan :
                 particle.NH_dict[dir] = neighbors("t", 0)
                 particle.t_cnt += 1
             else:
                 particle.NH_dict[dir] = neighbors("p", -1)
-                if particle.get_particle_in(dir).check_on_location():
-                    ml_dir = dir
         elif particle.tile_in(dir):
             particle.NH_dict[dir] = neighbors("t", 0)
             # particle.own_dist = 1  #You are beside a tile so you become a distance
@@ -473,10 +494,26 @@ def scan_nh(particle):
         elif particle.location_in(dir):
             particle.NH_dict[dir] = neighbors("ml", 10000)
             particle.ml_cnt += 1
-            ml_dir = dir
         else:
             particle.NH_dict[dir] = neighbors("fl", 10000)
 
+    if particle.get_color()==red:
+        for dir in direction:
+            if particle.location_in(dir):
+                if particle.location_in(dir_in_range(dir-2)):
+                    particle.set_color(green)
+                    sim.green_particles.append(particle)
+            if particle.particle_in(dir):
+                if particle.get_particle_in(dir).check_on_location():
+                    if particle.location_in(dir_in_range(dir - 2)):
+                        particle.set_color(green)
+                        sim.green_particles.append(particle)
+    if particle.get_color()==green:
+        for dir in direction:
+            if particle.particle_in(dir):
+                if particle.get_particle_in(dir).get_color () ==  green:
+                    particle.set_color(cyan)
+                    particle.get_particle_in(dir).set_color(cyan)
 
 
 def data_setting(particle):

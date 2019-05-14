@@ -6,15 +6,15 @@ import copy
 from copy import deepcopy
 import collections
 
-E = 0
-SE = 1
-SW = 2
-W = 3
-NW = 4
-NE = 5
-S = 6  # S for stop and not south
+NE=0
+E = 1
+SE = 2
+SW = 3
+W = 4
+NW = 5
 
-direction = [E, SE, SW, W, NW, NE]
+
+direction = [NE, E, SE, SW, W, NW]
 
 
 def invert_dir(dir):
