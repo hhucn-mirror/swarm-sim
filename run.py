@@ -28,7 +28,11 @@ def get_options():
 def swarm_sim(options):
     """In the main function first the config is getting parsed and than
     the simulator and the sim object is created. Afterwards the run method of the simulator
-    is called in which the simulator is going to start to run"""
+    is called in which the simulator is going to start to run
+
+    Example: python3.6 run.py -w square -s global -n 1000 -m 0 -r 13 -v 1 -b Top -p 2 -a 1
+
+    """
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -93,7 +97,7 @@ def swarm_sim(options):
         os.makedirs(config_data.dir_name)
 
     logging.info('Started')
-    simulator = sim.Sim(config_data, config_data.start_position, config_data.particles_num)
+    simulator = sim.Sim(config_data)
     simulator.run(config_data)
     logging.info('Finished')
 

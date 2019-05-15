@@ -13,11 +13,11 @@ start_positions = {"Top": [(10.5, 3.0), (11.0, 4.0), (11.5, 5.0)],
                    "Center": [(-12.0, 0.0), (-11.0, 0.0), (-10.0, 0.0)]}
 
 
-def scenario(sim, start_position, particles_num):
+def scenario(sim, config_data):
     draw_terrain(sim)
 
-    for i in range(0, particles_num):
-        sim.add_particle((start_positions[start_position][i][0]), (start_positions[start_position][i][1]))
+    for i in range(0, config_data.particles_num):
+        sim.add_particle((start_positions[config_data.start_position][i][0]), (start_positions[config_data.start_position][i][1]))
 
 
 def get_starting_positions():
@@ -82,8 +82,6 @@ def draw_terrain(sim):
     sim.add_location(5.0, -14.0)
     sim.add_location(6.0, -14.0)
     sim.add_location(7.0, -14.0)
-    sim.add_location(5.0, -12.0)
-    sim.add_location(4.0, -12.0)
     sim.add_location(3.5, -11.0)
     sim.add_location(2.5, -11.0)
     sim.add_location(2.0, -10.0)
@@ -127,7 +125,6 @@ def draw_terrain(sim):
     sim.add_location(10.0, 2.0)
     sim.add_location(9.0, 2.0)
     sim.add_location(9.5, 3.0)
-    sim.add_location(6.0, -12.0)
     sim.add_location(8.0, -14.0)
     sim.add_location(8.5, -13.0)
     sim.add_location(9.0, -12.0)
@@ -157,3 +154,5 @@ def draw_terrain(sim):
     sim.add_location(-2.0, -2.0)
     sim.add_location(-1.5, -3.0)
     sim.add_location(-2.0, -4.0)
+    sim.add_location(4.5, -11.0)
+    sim.add_location(5.5, -11.0)

@@ -7,7 +7,7 @@ import importlib
 
 def main():
     seed_start = 1
-    seed_end = 2
+    seed_end = 20
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -18,17 +18,17 @@ def main():
     max_round = config_data.max_round
     search = None
     scenario_mod = importlib.import_module('scenario.' + config_data.scenario)
-    particles_num = config_data.particles_num
+    particles_num_max = 6
 
     if scenario == "crescent":
-        particles_num = 3
+        particles_num_max = 3
 
     search_algorithms = 2
     start_positions = scenario_mod.get_starting_positions()
 
     child_processes = []
 
-    for particle in range(1, particles_num + 1):
+    for particle in range(1, particles_num_max + 1):
         for search_algorithm in range(0, search_algorithms + 1):
             config_data.search_algorithm = search_algorithm
 
@@ -76,7 +76,7 @@ def main():
                     round += 1
                     p.wait()
 
-                fout = open(dir_name+"/all_aggregates.csv","w+")
+                fout = open(dir_name+"/all_aggregates.csv", "w+")
 
                 # first file:
                 for line in open(dir_name+"/"+str(1)+"/aggregate_rounds.csv"):

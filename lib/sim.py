@@ -40,8 +40,7 @@ blue = 5
 
 
 class Sim:
-    def __init__(self, config_data, start_position, particles_num):
-    # def __init__(self, config_data):
+    def __init__(self, config_data):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -63,7 +62,7 @@ class Sim:
         self.__end = False
         self.mm_limitation=config_data.mm_limitation
         self.init_particles=[]
-        self.particle_num=0
+        self.particle_num = config_data.particles_num
         self.particles = []
         self.particles_created = []
         self.particle_rm = []
@@ -92,7 +91,7 @@ class Sim:
         self.__size_x = config_data.size_x
         self.__size_y = config_data.size_y
         self.max_particles = config_data.max_particles
-        self.directory=config_data.dir_name
+        self.directory = config_data.dir_name
         self.visualization = config_data.visualization
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
@@ -100,12 +99,13 @@ class Sim:
         self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                            solution=config_data.solution,
                                                            seed=config_data.seedvalue,
-                                                           tiles_num=0, particle_num=0,
+                                                           tiles_num=0, particle_num=self.particle_num,
                                                            steps=0, directory=self.directory)
 
+        self.csv_particle_movement = csv_generator.CsvParticleMovement(self, directory=self.directory, particle_num=self.particle_num)
+
         mod = importlib.import_module('scenario.' + config_data.scenario)
-        # mod.scenario(self, config_data.start_position, config_data.particles_num)
-        mod.scenario(self, start_position, particles_num)
+        mod.scenario(self, config_data)
         if config_data.random_order:
             random.shuffle(self.particles)
 
@@ -122,6 +122,7 @@ class Sim:
             while self.get_actual_round() <= self.get_max_round() and self.__end is False:
                 self.solution_mod.solution(self, config_data)
                 self.csv_round_writer.next_line(self.get_actual_round())
+                self.csv_particle_movement.update_all_particles(self.get_particle_list(), self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
 
         #creating gnu plots

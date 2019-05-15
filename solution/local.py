@@ -1,7 +1,5 @@
 import random
 import math
-import configparser
-from lib import config_data as cd
 
 
 E = 0
@@ -259,7 +257,7 @@ def get_nearest_unvisited(particle):
 
 
 # Returns the next best possible move if the particle's target location is not adjacent to it (path generator)
-def get_next_best_location(particle, target_location):
+def get_best_location(particle, target_location):
     possible_moves = []
 
     for location in particle.current_location.adjacent.values():
@@ -292,7 +290,7 @@ def follow_wall(particle, target_location):
 def get_next_unvisited(particle):
 
     if particle.unvisited_queue[particle.search_algorithm] not in particle.current_location.adjacent.values():
-        return get_next_best_location(particle, get_nearest_unvisited(particle))
+        return get_best_location(particle, get_nearest_unvisited(particle))
 
     else:
         return particle.unvisited_queue[particle.search_algorithm]
@@ -450,6 +448,24 @@ def check_stuck(particle, target_location):
     return False
 
 
+# Returns the next location to move to
+def get_next_location(particle, target_location):
+    if target_location in particle.current_location.adjacent.values():
+        particle.target_reached = True
+        return target_location
+
+    else:
+        if check_stuck(particle, target_location):
+            particle.stuck = True
+            particle.bearing = get_bearing(particle.current_location, particle.target_location)
+            particle.stuck_location = particle.current_location
+            particle.last_visited_locations.append(particle.current_location)
+            return follow_wall(particle, target_location)
+
+        else:
+            return get_best_location(particle, target_location)
+
+
 # Handles the movement of the particle through the terrain
 def move(sim, particle, next_location):
     particle.previous_location = particle.current_location
@@ -555,29 +571,11 @@ def solution(sim, config_data):
                     continue
 
             if not particle.target_reached:
-
-                if particle.target_location in particle.current_location.adjacent.values():
-                    particle.target_reached = True
-                    particle.next_location = particle.target_location
-                    move(sim, particle, particle.next_location)
-                    continue
-
-                if check_stuck(particle, particle.target_location):
-                    particle.stuck = True
-                    particle.bearing = get_bearing(particle.current_location, particle.target_location)
-                    particle.stuck_location = particle.current_location
-                    particle.last_visited_locations.append(particle.current_location)
-                    particle.next_location = follow_wall(particle, particle.target_location)
-                    move(sim, particle, particle.next_location)
-                    continue
-
-                else:
-                    particle.next_location = get_next_best_location(particle, particle.target_location)
-                    move(sim, particle, particle.next_location)
-                    continue
+                particle.next_location = get_next_location(particle, particle.target_location)
+                move(sim, particle, particle.next_location)
+                continue
 
             if len(particle.unvisited_queue) > 0:
-
                 if particle.unvisited_queue[particle.search_algorithm] in particle.current_location.adjacent.values():
                     particle.target_reached = True
                     particle.next_location = particle.unvisited_queue[particle.search_algorithm]
@@ -596,28 +594,11 @@ def solution(sim, config_data):
                     else:
                         particle.target_reached = False
                         particle.target_location = nearest_unvisited
+                        particle.next_location = get_next_location(particle, particle.target_location)
+                        move(sim, particle, particle.next_location)
+                        continue
 
-                        if particle.target_location in particle.current_location.adjacent.values():
-                            particle.target_reached = True
-                            particle.next_location = particle.target_location
-                            move(sim, particle, particle.next_location)
-                            continue
-
-                        if check_stuck(particle, particle.target_location):
-                            particle.stuck = True
-                            particle.bearing = get_bearing(particle.current_location, particle.target_location)
-                            particle.stuck_location = particle.current_location
-                            particle.last_visited_locations.append(particle.current_location)
-                            particle.next_location = follow_wall(particle, particle.target_location)
-                            move(sim, particle, particle.next_location)
-                            continue
-
-                        else:
-                            particle.next_location = get_next_best_location(particle, particle.target_location)
-                            move(sim, particle, particle.next_location)
-                            continue
-
-            if len(particle.unvisited_queue) == 0:
+            else:
                 mark_location(sim, particle)
 
                 if particle.current_location.coords == particle.start_location.coords:
@@ -633,26 +614,9 @@ def solution(sim, config_data):
                 else:
                     particle.target_reached = False
                     particle.target_location = particle.start_location
-
-                    if particle.target_location in particle.current_location.adjacent.values():
-                        particle.target_reached = True
-                        particle.next_location = particle.target_location
-                        move(sim, particle, particle.next_location)
-                        continue
-
-                    if check_stuck(particle, particle.target_location):
-                        particle.stuck = True
-                        particle.bearing = get_bearing(particle.current_location, particle.target_location)
-                        particle.stuck_location = particle.current_location
-                        particle.last_visited_locations.append(particle.current_location)
-                        particle.next_location = follow_wall(particle, particle.target_location)
-                        move(sim, particle, particle.next_location)
-                        continue
-
-                    else:
-                        particle.next_location = get_next_best_location(particle, particle.target_location)
-                        move(sim, particle, particle.next_location)
-                        continue
+                    particle.next_location = get_next_location(particle, particle.target_location)
+                    move(sim, particle, particle.next_location)
+                    continue
 
     if done_particles == len(sim.get_particle_list()):
         sim.success_termination()

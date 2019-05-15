@@ -31,6 +31,7 @@ read = 0
 write = 1
 particle_counter=0
 
+
 class Particle(matter.matter):
     """In the classe location all the methods for the characterstic of a location is included"""
 
@@ -158,7 +159,7 @@ class Particle(matter.matter):
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         sim_coord = self.coords_to_sim(dir_coord)
         if self.sim.get_sim_x_size() >=  abs(sim_coord[0]) and \
-                        self.sim.get_sim_y_size() >=  abs(sim_coord[1]):
+                        self.sim.get_sim_y_size() >= abs(sim_coord[1]):
             return self.move_to(dir)
         else:
             # 'bounce' off the wall
@@ -1747,18 +1748,6 @@ class Particle(matter.matter):
             logging.info("No particle taken to drop")
             return False
 
-    def update_particle_coords(self, particle, new_coords):
-        """
-        Upadting the particle with new coordinates
-        Only necessary for taking and moving particles
-
-        :param particle: The particle object
-        :param new_coords: new coorindation points
-        :return: None
-        """
-        particle.coords = new_coords
-        self.particle_map_coords[new_coords] = particle
-
     def create_location(self, color=black, alpha=1):
         """
          Creates a location on the particles actual position
@@ -1767,7 +1756,7 @@ class Particle(matter.matter):
         """
 
         logging.info("Going to create on position %s", str(self.coords))
-        new_location=self.sim.add_location(self.coords[0], self.coords[1], color, alpha)
+        new_location = self.sim.add_location(self.coords[0], self.coords[1], color, alpha)
         if new_location != False:
             self.csv_particle_writer.write_particle(location_created=1)
             self.sim.csv_round_writer.update_locations_num(len(self.sim.get_location_list()))

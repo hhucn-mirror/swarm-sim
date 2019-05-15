@@ -28,8 +28,6 @@ def main():
     elif config_data.search_algorithm == 2:
         search_algorithm = "MIXED"
 
-    round = 1
-
     dir_name = "./outputs/multiple/" + \
                str(local_time) + \
                "_" + scenario + \
@@ -44,10 +42,19 @@ def main():
     out = open(dir_name+"/multiprocess.txt", "w")
     child_processes = []
 
+    round = 1
+
     for seed in range(seed_start, seed_end + 1):
-        process = "python3.6", "run.py", "-w" + scenario, "-s" + solution \
-            , "-n" + str(max_round), "-m 1", "-d" + str(local_time), \
-                  "-r" + str(seed), "-v" + str(0)
+        process = "python3.6", \
+                  "run.py", \
+                  "-w" + scenario, \
+                  "-s" + solution, \
+                  "-n" + str(max_round), \
+                  "-m 1", \
+                  "-d" + str(local_time), \
+                  "-r" + str(seed), \
+                  "-v" + str(0)
+
         p = subprocess.call(process, stdout=out, stderr=out)
         print("Round Nr. ", round, "finished")
         child_processes.append(p)

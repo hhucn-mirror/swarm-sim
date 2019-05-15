@@ -41,14 +41,16 @@ class ConfigData:
         self.particles_num = config.getint("Marking", "particles_num")
 
 
-# Helper method to read strings from config
-# see line 40 for usage
 def config_section_map(config, section):
-    dict = {}
+    """
+    This is a helper method which reads strings as there is no config.getstring() method
+    see  line 40 for usage example
+    """
+    dict1 = {}
     options = config.options(section)
     for option in options:
         try:
-            dict[option] = config.get(section, option)
+            dict1[option] = config.get(section, option)
         except:
-            dict[option] = None
-    return dict
+            dict1[option] = None
+    return dict1

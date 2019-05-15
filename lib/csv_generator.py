@@ -293,3 +293,29 @@ class CsvRoundData:
 
         writer_round.writerow(csv_iterator)
         csv_file.close()
+
+
+class CsvParticleMovement:
+    def __init__(self, sim, directory="outputs/", particle_num=0):
+        self.sim = sim
+        self.directory = directory
+        self.file_name = directory + '/movement.csv'
+        self.csv_file = open(self.file_name, 'w', newline='')
+        self.writer_round = csv.writer(self.csv_file)
+        self.row = ['Round Number']
+        self.particle_num = particle_num
+        for particle in range(1, particle_num + 1):
+            self.row.append("Particle:" + str(particle) + " x")
+            self.row.append("Particle:" + str(particle) + " y")
+        self.writer_round.writerow(self.row)
+
+    def update_all_particles(self, particle_list, round):
+        csv_iterator = [round]
+        particle_list.sort(key=lambda part: part.number)
+        for particle in particle_list:
+            csv_iterator.append(particle.coords[0])
+            csv_iterator.append(particle.coords[1])
+        self.writer_round.writerow(csv_iterator)
+
+
+

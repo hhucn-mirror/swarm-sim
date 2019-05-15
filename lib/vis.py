@@ -429,6 +429,7 @@ class VisWindow(pyglet.window.Window):
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
                     self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
+                    self.sim.csv_particle_movement.update_all_particles(self.sim.get_particle_list(), self.sim.get_actual_round())
                     self.sim.inc_round_cnter()  # increase simulation round counter by one.
             self.dispatch_events()
             self.draw()

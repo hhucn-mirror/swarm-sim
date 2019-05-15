@@ -18,11 +18,11 @@ start_positions = {"TopLeft": [(-9.5, 11), (-10, 10), (-11, 12), (-11, 10), (-10
                    "Random2": [(-5.5, 1), (-5, 2), (-7.5, 3), (-6.5, 1), (-4.5, 1), (-6.0, 2.0)]}
 
 
-def scenario(sim, start_position, particles_num):
+def scenario(sim, config_data):
     draw_terrain(sim)
 
-    for i in range(0, particles_num):
-        sim.add_particle((start_positions[start_position][i][0]), (start_positions[start_position][i][1]))
+    for i in range(0, config_data.particles_num):
+        sim.add_particle((start_positions[config_data.start_position][i][0]), (start_positions[config_data.start_position][i][1]))
 
 
 def get_starting_positions():
