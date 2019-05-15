@@ -53,11 +53,10 @@ def generate_gnuplot(directory):
     # #########################################################################################
 
     # ################################## movement.csv graphs ##################################
-    movement_data = pd.read_csv(directory + "/particle.csv")
     plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
 
-    for i in range(1, int(len(movement_data.index) + 1)):
+    for i in range(1, int(len(particle_data.index) + 1)):
         # 2D plots
         plot.stdin.write('set xlabel "Particle X coord" \n')
         plot.stdin.write('set ylabel "Particle Y coord" \n')
