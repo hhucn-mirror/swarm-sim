@@ -1731,8 +1731,7 @@ class Particle(matter.matter):
                             pass
                         self.carried_particle = None
                         logging.info("Dropped particle on %s coordinate", str(coords))
-                        self.sim.csv_round_writer.update_metrics(
-                                                                   particles_dropped=1)
+                        self.sim.csv_round_writer.update_metrics(particles_dropped=1)
                         self.csv_particle_writer.write_particle(particles_dropped=1)
                         return True
                     else:

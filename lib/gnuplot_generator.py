@@ -1,4 +1,4 @@
-import subprocess, os
+import subprocess
 import pandas as pd
 
 
@@ -6,7 +6,7 @@ def generate_gnuplot(directory):
 
     # ################################## rounds.csv graphs ##################################
     data = pd.read_csv(directory+"/rounds.csv")
-    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE,universal_newlines=True)
+    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
     plot.stdin.write('set xlabel "Rounds" \n')
 
@@ -29,7 +29,7 @@ def generate_gnuplot(directory):
 
     # ################################## particle.csv graphs ###################################
     data = pd.read_csv(directory+"/particle.csv")
-    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE,universal_newlines=True)
+    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
     plot.stdin.write('set xlabel "Particle" \n')
 
@@ -54,10 +54,11 @@ def generate_gnuplot(directory):
 
     # ################################## movement.csv graphs ##################################
     data = pd.read_csv(directory + "/movement.csv")
-    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE,universal_newlines=True)
+    plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
 
     for i in range(1, int((len(data.columns) - 1) / 2) + 1):
+        # 2D plots
         plot.stdin.write('set xlabel "Particle X coord" \n')
         plot.stdin.write('set ylabel "Particle Y coord" \n')
         plot.stdin.write("set term png giant size 800,600 font 'Helvetica,15' \n")
@@ -70,6 +71,7 @@ def generate_gnuplot(directory):
         plot.stdin.write("set output '" + directory + "/particle_%s_movement_2D.pdf' \n" % str(i))
         plot.stdin.write("replot \n")
 
+        # 3D plots
         plot.stdin.write('set xlabel "X" \n')
         plot.stdin.write('set ylabel "Round" \n')
         plot.stdin.write('set zlabel "Y" \n')

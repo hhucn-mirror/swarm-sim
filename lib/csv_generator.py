@@ -1,14 +1,3 @@
-"""
-
-TODO:
-1- Order the names based on particles, locations, and tiles and alphabetic
-2- A new column called round_success
-3- On demand extenstion of the metrics.
-
-
-"""
-
-
 import csv
 import pandas as pd
 import logging
@@ -40,7 +29,7 @@ class CsvParticleFile:
 class CsvParticleData:
     def __init__(self,  particle_id, particle_number):
         self.id = particle_id
-        self.number=particle_number
+        self.number = particle_number
         self.steps = 0
         self.particle_read = 0
         self.particle_write = 0
@@ -220,59 +209,6 @@ class CsvRoundData:
                         self.all_marked_round,
 
                         self.start_communication_round, self.communication_frequency, self.communication_range,
-
-                        self.particle_num,
-
-                        data['Particle Steps'].sum(), data['Particle Steps'].mean(),
-                        data['Particle Steps'].min(), data['Particle Steps'].max(),
-
-                        data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
-                        data['Particle Read'].max(),
-
-                        data['Particle Write'].sum(), data['Particle Write'].mean(), data['Particle Write'].min(),
-                        data['Particle Write'].max(),
-
-                        data['Location Created'].sum(), data['Location Created'].mean(),
-                        data['Location Created'].min(), data['Location Created'].max(),
-
-                        data['Location Deleted'].sum(), data['Location Deleted'].mean(),
-                        data['Location Deleted'].min(), data['Location Deleted'].max()]
-
-        writer_round.writerow(csv_iterator)
-        csv_file.close()
-
-    def all_aggregate_metrics(self):
-        self.csv_file.close()
-        data = pd.read_csv(self.file_name)
-        file_name = self.directory+"/aggregate_rounds.csv"
-        csv_file = open(file_name, 'w', newline='')
-        writer_round = csv.writer(csv_file)
-        """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Rounds Total',
-                                'Particle Counter',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
-                                'Particle Counter',
-                                'Particle Steps Total', 'Particle Steps Avg',
-                                'Particle Steps Min', 'Particle Steps Max',
-                                'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
-                                'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max'])
-
-        csv_iterator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
-                        self.particle_num,
-                        data['Success Counter'].sum(),
-                        data['Success Counter'].sum() / data['Round Number'].sum(),
-
-                        data['Success Counter'].mean(), data['Success Counter'].min(),
-                        data['Success Counter'].max(),
-
-                        data['Success Round'].min(),
-                        data['Success Round'].max(),
 
                         self.particle_num,
 
