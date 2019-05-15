@@ -5,13 +5,13 @@ import pandas as pd
 def generate_gnuplot(directory):
 
     # ################################## rounds.csv graphs ##################################
-    data = pd.read_csv(directory+"/rounds.csv")
+    round_data = pd.read_csv(directory+"/rounds.csv")
     plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
     plot.stdin.write('set xlabel "Rounds" \n')
 
     i = 1
-    for column in data.columns:
+    for column in round_data.columns:
         if i > 8:
             plot.stdin.write('set ylabel "%s" \n' % column)
             plot.stdin.write("set output '" + directory + "/rounds_%s.png' \n" % column)
@@ -28,13 +28,13 @@ def generate_gnuplot(directory):
     # ########################################################################################
 
     # ################################## particle.csv graphs ###################################
-    data = pd.read_csv(directory+"/particle.csv")
+    particle_data = pd.read_csv(directory+"/particle.csv")
     plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
     plot.stdin.write('set xlabel "Particle" \n')
 
     i = 1
-    for column in data.columns:
+    for column in particle_data.columns:
         if i > 3:
             plot.stdin.write('set ylabel "%s" \n' % column)
             plot.stdin.write("set term png giant size 800,600 font 'Helvetica,15' \n")
@@ -53,11 +53,11 @@ def generate_gnuplot(directory):
     # #########################################################################################
 
     # ################################## movement.csv graphs ##################################
-    data = pd.read_csv(directory + "/movement.csv")
+    movement_data = pd.read_csv(directory + "/particle.csv")
     plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     plot.stdin.write("set datafile separator ',' \n")
 
-    for i in range(1, int((len(data.columns) - 1) / 2) + 1):
+    for i in range(1, int(len(movement_data.index) + 1)):
         # 2D plots
         plot.stdin.write('set xlabel "Particle X coord" \n')
         plot.stdin.write('set ylabel "Particle Y coord" \n')
