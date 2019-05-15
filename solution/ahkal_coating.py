@@ -1005,6 +1005,10 @@ def check_dir_dist(particle, dir):
 
 
 def data_clearing(particle):
+    if particle.check_on_location():
+        if particle.get_location().get_color() == black:
+            particle.set_color(violett)
+        particle.get_location().set_color(blue)
     particle.ml_dir = None
     particle.p_dir = None
     particle.wait = True
