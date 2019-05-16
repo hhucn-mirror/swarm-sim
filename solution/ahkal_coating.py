@@ -255,7 +255,7 @@ def new_marked_locations(sim):
                     sim.remove_location_on(location.coords)
         layer = 1
     else:
-        actual_locations = copy.copy(sim.locations)
+        actual_locations = sim.locations.copy()
         location_cnt = 0
         for location in actual_locations:
             if sim.add_location(location.coords[0] + 0.5, location.coords[1] + 1):
@@ -474,30 +474,7 @@ def scan_nh(particle, sim, particles_list):
                 particle.t_cnt += 1
             else:
                 particle.NH_dict[dir] = neighbors("p", -1)
-            if (particle.get_color() == orange or particle.get_color() == yellow) and \
-                    particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == black \
-                    and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
-                particle.get_matter_in_dir(matter="particle", dir=dir).set_color(orange)
-            if particle.get_color() == orange and \
-                    particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == violett \
-                    and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
-                print("Circles is closed")
-                # for location in sim.locations:
-                #     if location.get_color() == blue:
-                #         sim.remove_location_on(location.coords)
-                for par in particles_list:
-                    if par.get_color() == yellow or par.get_color() == orange \
-                            or par.get_color() == violett:
-                        par.set_color(blue)
-                for loc in sim.locations.copy():
-                    if loc.get_color() == blue:
-                        if sim.remove_location_on(loc.coords) == False:
-                            pass
-            if particle.get_color() == violett \
-                    and particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == violett:
-                print("Circle")
-                circle = True
-                particle.set_color(yellow)
+            circle = circle_check(circle, dir, particle, particles_list, sim)
         elif particle.tile_in(dir):
             particle.NH_dict[dir] = neighbors("t", 0)
             # particle.own_dist = 1  #You are beside a tile so you become a distance
@@ -517,17 +494,33 @@ def scan_nh(particle, sim, particles_list):
                     particle.get_matter_in_dir(matter="particle", dir=dir).set_color(orange)
 
 
-def check_for_whole(particle, sim):
-    pass
-    """
-    Now check if there are particles and locations that need to be coat
-    by the particles.
-    If yes: 
-    :param particle:
-    :param sim:
-    :return:
-
-    """
+def circle_check(circle, dir, particle, particles_list, sim):
+    if (particle.get_color() == orange or particle.get_color() == yellow) and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == black \
+            and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
+        particle.get_matter_in_dir(matter="particle", dir=dir).set_color(orange)
+    if particle.get_color() == orange and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == green \
+            and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
+        print("Circles is closed")
+        # for location in sim.locations:
+        #     if location.get_color() == blue:
+        #         sim.remove_location_on(location.coords)
+        for par in particles_list:
+            if par.get_color() == green or par.get_color() == orange \
+                    or par.get_color() == yellow:
+                par.set_color(blue)
+        for loc in sim.locations.copy():
+            if loc.get_color() == blue:
+                if sim.remove_location_on(loc.coords) == False:
+                    pass
+    if particle.get_color() == violett \
+            and particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == violett:
+        print("Circle")
+        circle = True
+        particle.set_color(yellow)
+        particle.get_matter_in_dir(matter="particle", dir=dir).set_color(green)
+    return circle
 
 
 def data_setting(particle):
@@ -848,22 +841,6 @@ def moving_decision(particle, sim):
             than a particles distance in the network.
             If I am beside a tile and get the information to move in a direction where
             there is no tile beside me I am not going to move.
-                    # If particle is between four tiles it should move towards the opposite direction that it came from
-        # if particle.t_cnt == 4:
-        #     for dir in particle.NH_dict:
-        #         if particle.NH_dict[dir].type=="ml":
-        #             if dir != particle.prev_dir:
-        #                 if not particle.particle_in(dir):
-        #                     if not particle.tile_in(dir):
-        #                         particle.move_to(dir)
-        #                         particle.prev_dir = dir
-        #                         particle.ml_dir = -1
-        #                         particle.p_dir = -1
-        #                         particle.own_dist = 10000
-        #                         particle.wait = True
-        # But this solution only works if the the tube is straight when it has a curve
-        # it will then not move
-
     """
     if debug:
         print("\n", sim.get_actual_round())
@@ -890,14 +867,7 @@ def run_from_max(particle):
         if particle.NH_dict[dir].type == "ml":
             if particle.NH_dict[dir].dist == particle.p_max_dist - 1:
                 if not particle.particle_in(dir):
-                    if debug:
-                        print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
-                    particle.move_to(dir)
-                    particle.prev_dir = invert_dir(dir)
-                    if debug:
-                        print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-                        print("\n P", particle.number, " coords after moving ", particle.coords)
-                    data_clearing(particle)
+                    moving(particle)
                     return
 
 
@@ -905,33 +875,13 @@ def check_between_tiles(particle):
     for dir in direction:
         if particle.NH_dict[dir].type == "p" and particle.NH_dict[invert_dir(dir)].type == "ml":
             if invert_dir(dir) != particle.prev_dir:
-                if debug:
-                    print("\nin T P", particle.number, " coords before moving ", particle.coords)
-                particle.prev_dir = dir
-                particle.move_to(invert_dir(dir))
-                if debug:
-                    print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
-                    print("\n P", particle.number, " coords after moving ", particle.coords)
-                data_clearing(particle)
+                moving(particle)
                 return
         elif particle.NH_dict[dir].type == "ml" and particle.NH_dict[invert_dir(dir + 3)].type == "ml":
             if dir != particle.prev_dir and not particle.particle_in(dir) and not particle.tile_in(dir):
-                if debug:
-                    print("\nin T  P", particle.number, " coords before moving ", particle.coords)
-                particle.prev_dir = invert_dir(dir)
-                particle.move_to(dir)
-                if debug:
-                    print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-                    print("\n P", particle.number, " coords after moving ", particle.coords)
+                moving(particle)
             elif not particle.particle_in(invert_dir(dir)) and not particle.tile_in(invert_dir(dir)):
-                if debug:
-                    print("\nin T  P", particle.number, " coords before moving ", particle.coords)
-                particle.prev_dir = dir
-                particle.move_to(invert_dir(dir))
-                if debug:
-                    print("\n P", particle.number, "moved to ", dir_str(invert_dir(dir)), invert_dir(dir))
-                    print("\n P", particle.number, " coords after moving ", particle.coords)
-            data_clearing(particle)
+                moving(particle)
             return
     if particle.ml_dir is not None:
         check_ml_dir(particle)
@@ -946,43 +896,15 @@ def need_to_move(particle):
                 if particle.NH_dict[dir].dist != 10000 and particle.NH_dict[dir].dist <= particle.own_dist:
                     if particle.prev_dir != dir:
                         if not particle.particle_in(dir):
-                            if debug:
-                                print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
-                            particle.move_to(dir)
-                            particle.prev_dir = invert_dir(dir)
-                            if debug:
-                                print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-                                print("\n P", particle.number, " coords after moving ", particle.coords)
-                            data_clearing(particle)
+                            moving(particle)
                             return
-
-    # for dir in particle.NH_dict:
-    #     if particle.NH_dict[dir].type == "ml":
-    #         if particle.NH_dict[dir].dist == particle.p_max_dist -1 :
-    #             if not particle.particle_in(dir):
-    #                 if debug:
-    #                     print("\n Neet to P", particle.number, " coords before moving ", particle.coords)
-    #                 particle.move_to(dir)
-    #                 particle.prev_dir = invert_dir(dir)
-    #                 if debug:
-    #                     print("\n P", particle.number, "moved to ", dir_str(dir), dir)
-    #                     print("\n P", particle.number, " coords after moving ", particle.coords)
-    #                 data_clearing(particle)
-    #                 return
 
 
 def check_ml_dir(particle):
     if not particle.particle_in(particle.ml_dir) and not particle.tile_in(particle.ml_dir):
         if particle.ml_dir != particle.prev_dir or particle.ml_cnt == 1:
             if particle.p_max_dist != -1 and particle.own_dist <= particle.p_max_dist:
-                if debug:
-                    print("\nin ml P", particle.number, " coords before moving ", particle.coords)
-                particle.move_to(particle.ml_dir)
-                particle.prev_dir = invert_dir(particle.ml_dir)
-                if debug:
-                    print("\n P", particle.number, "moved to ", dir_str(particle.ml_dir), particle.ml_dir)
-                    print("\n P", particle.number, " coords after moving ", particle.coords)
-                data_clearing(particle)
+                moving(particle)
                 return True
             else:
                 print(particle.number,
@@ -995,6 +917,17 @@ def check_ml_dir(particle):
         print(particle.number, ":Particle or tile is infront of me")
         return False
         # search for another free location
+
+
+def moving(particle):
+    if debug:
+        print("\n P", particle.number, " coords before moving ", particle.coords)
+    particle.move_to(particle.ml_dir)
+    particle.prev_dir = invert_dir(particle.ml_dir)
+    if debug:
+        print("\n P", particle.number, "moved to ", dir_str(particle.ml_dir), particle.ml_dir)
+        print("\n P", particle.number, " coords after moving ", particle.coords)
+    data_clearing(particle)
 
 
 def check_dir_dist(particle, dir):
