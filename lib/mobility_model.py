@@ -32,43 +32,51 @@ class MobilityModel:
     
     def next_direction(self):
         if self.mode == Mode.Back_And_Forth:
-            return self.back_and_forth()
+            return self.__back_and_forth__()
         elif self.mode == Mode.Random_Walk:
-            if self.steps < self.route_length:
-                self.steps += 1
-                return self.current_dir
-            else:
-                self.steps = 1
-                self.route_length = random.randint(1, self.max_length)
-                self.current_dir = MobilityModel.random_direction()
-                return self.current_dir
+            return self.__random_walk__()
         elif self.mode == Mode.Circle:
-            if self.steps < self.route_length:
-                self.steps += 1
-            else:
-                if self.current_dir == Directions.NE.value:
-                    self.current_dir = Directions.NW.value
-                elif self.current_dir == Directions.NW.value:
-                    self.current_dir = Directions.W.value
-                elif self.current_dir == Directions.W.value:
-                    self.current_dir = Directions.SW.value
-                elif self.current_dir == Directions.SW.value:
-                    self.current_dir = Directions.SE.value
-                elif self.current_dir == Directions.SE.value:
-                    self.current_dir = Directions.E.value
-                elif self.current_dir == Directions.E.value:
-                    self.current_dir = Directions.NE.value
-                self.steps = 1
-                # new circle if we walked a full circle
-                if self.current_dir == self.starting_dir:
-                    self.route_length = random.randint(1, self.max_length)
-                    self.starting_dir = MobilityModel.random_direction()
-                    self.current_dir = self.starting_dir
+            self.__circle__()
         elif self.mode == Mode.Random:
-            self.current_dir = MobilityModel.random_direction()
-            return self.current_dir
+            return self.__random__()
 
-    def back_and_forth(self):
+    def __random__(self):
+        self.current_dir = MobilityModel.random_direction()
+        return self.current_dir
+
+    def __circle__(self):
+        if self.steps < self.route_length:
+            self.steps += 1
+        else:
+            if self.current_dir == Directions.NE.value:
+                self.current_dir = Directions.NW.value
+            elif self.current_dir == Directions.NW.value:
+                self.current_dir = Directions.W.value
+            elif self.current_dir == Directions.W.value:
+                self.current_dir = Directions.SW.value
+            elif self.current_dir == Directions.SW.value:
+                self.current_dir = Directions.SE.value
+            elif self.current_dir == Directions.SE.value:
+                self.current_dir = Directions.E.value
+            elif self.current_dir == Directions.E.value:
+                self.current_dir = Directions.NE.value
+            self.steps = 1
+            # new circle if we walked a full circle
+            if self.current_dir == self.starting_dir:
+                self.route_length = random.randint(1, self.max_length)
+                self.starting_dir = MobilityModel.random_direction()
+                self.current_dir = self.starting_dir
+
+    def __random_walk__(self):
+        if self.steps < self.route_length:
+            self.steps += 1
+            return self.current_dir
+        else:
+            self.steps = 1
+            self.route_length = random.randint(1, self.max_length)
+            return self.__random__()
+
+    def __back_and_forth__(self):
         if 0 < self.steps < self.route_length:
             self.steps += 1
             return self.starting_dir
