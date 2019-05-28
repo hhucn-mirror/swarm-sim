@@ -113,10 +113,10 @@ class info_package:
 
 
 def reset_attributes(particle):
-    particle.ml_min_dist = 10000
-    particle.ml_hop = 0
-    particle.p_max_dist = -1
-    particle.p_hop = 0
+    #particle.ml_min_dist = 10000
+    #particle.ml_hop = 0
+    #particle.p_max_dist = -1
+    #particle.p_hop = 0
     particle.NH_dict.clear()
     particle.ml_cnt = 0
     particle.t_cnt = 0
@@ -300,6 +300,7 @@ def coating_complete(sim, particles_list):
     print("At round ", sim.get_actual_round(), " the max particle hop is ", max_hop)
     if max_hop <= layer:
         print("Success ", max_hop, layer)
+        #sim.success_termination()
         return True
     return False
 
@@ -399,7 +400,7 @@ def solution(sim):
                       particle.p_hop, "waiting state", particle.wait)
 
             if not particle.wait and check_data_received(particle):
-                update_local_data(particle)
+                update_own_data_from_nh(particle)
 
                 if debug:
                     print("\n after defined the distances of your neighborhood ml ")
@@ -462,19 +463,21 @@ def initialize_particle(particle):
 
 def scanning_neighborhood(particle, sim, particles_list):
     reset_attributes(particle)
-    scan_nh(particle, sim, particles_list)
+    scan_nh(particle)
 
 
-def scan_nh(particle, sim, particles_list):
-    circle = False
+def scan_nh(particle):
     for dir in direction:
         if particle.particle_in(dir):
+            conqueror_reached(particle, dir)
             if particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == red:
                 particle.NH_dict[dir] = neighbors("t", 0)
                 particle.t_cnt += 1
             else:
+                if circle_completed(dir, particle):
+                    print ("Circle Completed")
                 particle.NH_dict[dir] = neighbors("p", -1)
-            circle = circle_check(circle, dir, particle, particles_list, sim)
+
         elif particle.tile_in(dir):
             particle.NH_dict[dir] = neighbors("t", 0)
             # particle.own_dist = 1  #You are beside a tile so you become a distance
@@ -487,40 +490,37 @@ def scan_nh(particle, sim, particles_list):
         else:
             particle.NH_dict[dir] = neighbors("fl", 10000)
 
-    if circle == True:
-        for dir in direction:
-            if particle.particle_in(dir):
-                if particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == black:
-                    particle.get_matter_in_dir(matter="particle", dir=dir).set_color(orange)
+
+def circle_completed(dir, particle):
+    if particle.get_color() == black and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == yellow:
+        particle.set_color(blue)
+    elif particle.get_color() == black and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == blue:
+        particle.set_color(blue)
+    elif particle.get_color() == blue and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == violett:
+        particle.set_color(cyan)
+    # elif particle.get_color() == violett and \
+    #         particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == blue:
+    #     particle.set_color(cyan)
+    elif particle.get_color() == blue and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == cyan:
+        particle.set_color(cyan)
+    elif particle.get_color() == yellow and \
+            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == cyan:
+        particle.set_color(cyan)
+        return True
+    return False
 
 
-def circle_check(circle, dir, particle, particles_list, sim):
-    if (particle.get_color() == orange or particle.get_color() == yellow) and \
-            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == black \
-            and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
-        particle.get_matter_in_dir(matter="particle", dir=dir).set_color(orange)
-    if particle.get_color() == orange and \
-            particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == green \
-            and particle.get_matter_in_dir(matter="particle", dir=dir).check_on_location():
-        print("Circles is closed")
-        # for location in sim.locations:
-        #     if location.get_color() == blue:
-        #         sim.remove_location_on(location.coords)
-        for par in particles_list:
-            if par.get_color() == green or par.get_color() == orange \
-                    or par.get_color() == yellow:
-                par.set_color(blue)
-        for loc in sim.locations.copy():
-            if loc.get_color() == blue:
-                if sim.remove_location_on(loc.coords) == False:
-                    pass
+def conqueror_reached(particle, dir):
     if particle.get_color() == violett \
             and particle.get_matter_in_dir(matter="particle", dir=dir).get_color() == violett:
         print("Circle")
-        circle = True
         particle.set_color(yellow)
-        particle.get_matter_in_dir(matter="particle", dir=dir).set_color(green)
-    return circle
+        return True
+    return False
 
 
 def data_setting(particle):
@@ -546,34 +546,34 @@ def set_nh_dist(particle):
     for dir in particle.NH_dict:
         if particle.NH_dict[dir_in_range(dir)].type == "t":
             if particle.t_cnt == 1:
-                for i in range(1, 3):
+                for i in range(1, 2):
                     particle.NH_dict[dir_in_range(dir + i)].dist = i
                     particle.NH_dict[dir_in_range(dir - i)].dist = i
-                particle.NH_dict[dir_in_range(dir + 3)].dist = 2
+                #particle.NH_dict[dir_in_range(dir + 3)].dist = 2
             elif particle.t_cnt == 2:
                 if particle.NH_dict[dir_in_range(dir + 1)].type == "t":
                     particle.NH_dict[dir_in_range(dir + 1)].dist = 0
                     particle.NH_dict[dir_in_range(dir - 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir + 2)].dist = 1
-                    particle.NH_dict[dir_in_range(dir - 2)].dist = 2
-                    particle.NH_dict[dir_in_range(dir + 3)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir - 2)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir + 3)].dist = 2
                 elif particle.NH_dict[dir_in_range(dir - 1)].type == "t":
                     particle.NH_dict[dir_in_range(dir - 1)].dist = 0
                     particle.NH_dict[dir_in_range(dir + 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir - 2)].dist = 1
-                    particle.NH_dict[dir_in_range(dir + 2)].dist = 2
-                    particle.NH_dict[dir_in_range(dir + 3)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir + 2)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir + 3)].dist = 2
                 elif particle.NH_dict[dir_in_range(dir + 2)].type == "t":
                     particle.NH_dict[dir_in_range(dir + 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir - 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir + 2)].dist = 0
-                    particle.NH_dict[dir_in_range(dir - 2)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir - 2)].dist = 2
                     particle.NH_dict[dir_in_range(dir + 3)].dist = 1
                 elif particle.NH_dict[dir_in_range(dir - 2)].type == "t":
                     particle.NH_dict[dir_in_range(dir - 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir + 1)].dist = 1
                     particle.NH_dict[dir_in_range(dir - 2)].dist = 0
-                    particle.NH_dict[dir_in_range(dir + 2)].dist = 2
+                    #particle.NH_dict[dir_in_range(dir + 2)].dist = 2
                     particle.NH_dict[dir_in_range(dir + 3)].dist = 1
                 elif particle.NH_dict[dir_in_range(dir + 3)].type == "t":
                     particle.NH_dict[dir_in_range(dir + 1)].dist = 1
@@ -588,12 +588,12 @@ def set_nh_dist(particle):
                         particle.NH_dict[dir_in_range(dir - 1)].dist = 1
                         particle.NH_dict[dir_in_range(dir + 2)].dist = 0
                         particle.NH_dict[dir_in_range(dir + 3)].dist = 1
-                        particle.NH_dict[dir_in_range(dir - 2)].dist = 2
+                       # particle.NH_dict[dir_in_range(dir - 2)].dist = 2
                     elif particle.NH_dict[dir_in_range(dir - 1)].type == "t":
                         particle.NH_dict[dir_in_range(dir + 1)].dist = 0
                         particle.NH_dict[dir_in_range(dir - 1)].dist = 0
                         particle.NH_dict[dir_in_range(dir + 2)].dist = 1
-                        particle.NH_dict[dir_in_range(dir + 3)].dist = 2
+                        #particle.NH_dict[dir_in_range(dir + 3)].dist = 2
                         particle.NH_dict[dir_in_range(dir - 2)].dist = 1
                     elif particle.NH_dict[dir_in_range(dir + 3)].type == "t":
                         particle.NH_dict[dir_in_range(dir + 1)].dist = 0
@@ -613,12 +613,12 @@ def set_nh_dist(particle):
                         particle.NH_dict[dir_in_range(dir + 1)].dist = 1
                         particle.NH_dict[dir_in_range(dir - 2)].dist = 0
                         particle.NH_dict[dir_in_range(dir + 3)].dist = 1
-                        particle.NH_dict[dir_in_range(dir + 2)].dist = 2
+                        #particle.NH_dict[dir_in_range(dir + 2)].dist = 2
                     elif particle.NH_dict[dir_in_range(dir + 1)].type == "t":
                         particle.NH_dict[dir_in_range(dir + 1)].dist = 0
                         particle.NH_dict[dir_in_range(dir - 1)].dist = 0
                         particle.NH_dict[dir_in_range(dir + 2)].dist = 1
-                        particle.NH_dict[dir_in_range(dir + 3)].dist = 2
+                        #particle.NH_dict[dir_in_range(dir + 3)].dist = 2
                         particle.NH_dict[dir_in_range(dir - 2)].dist = 1
                     elif particle.NH_dict[dir_in_range(dir + 3)].type == "t":
                         particle.NH_dict[dir_in_range(dir + 1)].dist = 1
@@ -711,14 +711,13 @@ def check_data_received(particle):
     return False
 
 
-def update_local_data(particle):
-    # if particle.own_dist == 10000:
-    if get_own_dist_from_nh(particle):
-        update_nh_dict(particle)
+def update_own_data_from_nh(particle):
+    #if particle.own_dist == 10000:
+    update_own_dist_from_nh(particle)
     comparing_ml_p_dist(particle)
 
 
-def get_own_dist_from_nh(particle):
+def update_own_dist_from_nh(particle):
     p_dist_dict = {}
     for dir in particle.rcv_buf:
         if particle.rcv_buf[dir].own_dist != 10000:
@@ -726,6 +725,8 @@ def get_own_dist_from_nh(particle):
                   Take the distances of the neighborhood particles and store them in a list
             """
             p_dist_dict[dir] = particle.rcv_buf[dir].own_dist
+            if particle.NH_dict[dir].type == "p":
+                particle.NH_dict[dir].dist = particle.rcv_buf[dir].own_dist
 
     if p_dist_dict:
         # Give yourself a distance if you are not beside a tile
@@ -750,11 +751,8 @@ def update_nh_dict(particle):
                   "p_dir = ", dir_str(particle.rcv_buf[dir].p_dir),
                   "p_hop =  ", particle.rcv_buf[dir].p_hop)
         if particle.rcv_buf[dir].own_dist != 10000 and particle.t_cnt == 0:
-            if particle.NH_dict[dir_in_range(invert_dir(dir) + 1)].type == "p":
-                particle.NH_dict[invert_dir(dir)].dist = particle.rcv_buf[dir].own_dist
-            if particle.NH_dict[dir_in_range(invert_dir(dir) + 1)].type == "ml":
+            #The distance of the neighborhood particle will be
                 particle.NH_dict[dir_in_range(invert_dir(dir) + 1)].dist = particle.rcv_buf[dir].own_dist + 1
-            if particle.NH_dict[dir_in_range(invert_dir(dir) - 1)].type == "ml":
                 particle.NH_dict[dir_in_range(invert_dir(dir) - 1)].dist = particle.rcv_buf[dir].own_dist + 1
 
             # update = True
@@ -789,22 +787,22 @@ def find_max_p(dir, particle):
         particle.p_hop = 0
     if particle.rcv_buf[dir].own_dist != 10000 and particle.rcv_buf[dir].own_dist > particle.p_max_dist:
         particle.p_max_dist = particle.rcv_buf[dir].own_dist
-        particle.p_dir = invert_dir(dir)
+        particle.p_dir = dir
         particle.p_hop = particle.rcv_buf[dir].p_hop + 1
     elif particle.rcv_buf[dir].p_max_dist > particle.p_max_dist:
         particle.p_max_dist = particle.rcv_buf[dir].p_max_dist
-        particle.p_dir = invert_dir(dir)
+        particle.p_dir = dir
         particle.p_hop = particle.rcv_buf[dir].p_hop + 1
     elif particle.rcv_buf[dir].p_max_dist == particle.p_max_dist:
         if (particle.rcv_buf[dir].p_hop + 1) < particle.p_hop:
-            particle.p_dir = invert_dir(dir)
+            particle.p_dir = dir
             particle.p_hop = particle.rcv_buf[dir].p_hop + 1
 
 
 def new_ml(dir, particle):
-    if particle.prev_dir != invert_dir(dir):
+    if particle.prev_dir != dir:
         particle.ml_min_dist = particle.rcv_buf[dir].ml_min_dist
-        particle.ml_dir = invert_dir(dir)
+        particle.ml_dir = dir
         particle.ml_hop = particle.rcv_buf[dir].ml_hop + 1
 
 
@@ -823,7 +821,8 @@ def data_sending(particle):
     for dir in direction:
         if particle.particle_in(dir):
             neighbor_p = particle.get_particle_in(dir)
-            particle.write_to_with(neighbor_p, key=dir, data=deepcopy(package))
+            #invert the dir so the receiver particle knows from where direction it got the package
+            particle.write_to_with(neighbor_p, key=invert_dir(dir), data=deepcopy(package))
             if debug:
                 print("P", particle.number, "wrote to P", neighbor_p.number, "dir", dir_str(dir))
                 print("Own distance ", particle.own_dist, "ml_min_dist =",
@@ -866,7 +865,7 @@ def run_from_max(particle):
     for dir in particle.NH_dict:
         if particle.NH_dict[dir].type == "ml":
             if particle.NH_dict[dir].dist == particle.p_max_dist - 1:
-                if not particle.particle_in(dir):
+                if not particle.particle_in(dir) and not particle.tile_in(dir):
                     moving(particle)
                     return
 
@@ -874,13 +873,16 @@ def run_from_max(particle):
 def check_between_tiles(particle):
     for dir in direction:
         if particle.NH_dict[dir].type == "p" and particle.NH_dict[invert_dir(dir)].type == "ml":
-            if invert_dir(dir) != particle.prev_dir:
+            if invert_dir(dir) != particle.prev_dir :
+                particle.ml_dir = invert_dir(dir)
                 moving(particle)
                 return
         elif particle.NH_dict[dir].type == "ml" and particle.NH_dict[invert_dir(dir + 3)].type == "ml":
             if dir != particle.prev_dir and not particle.particle_in(dir) and not particle.tile_in(dir):
+                particle.ml_dir = dir
                 moving(particle)
             elif not particle.particle_in(invert_dir(dir)) and not particle.tile_in(invert_dir(dir)):
+                particle.ml_dir = invert_dir(dir)
                 moving(particle)
             return
     if particle.ml_dir is not None:
@@ -893,9 +895,11 @@ def need_to_move(particle):
     for dir in particle.NH_dict:
         if particle.NH_dict[dir].type == "ml":
             if particle.p_max_dist > particle.own_dist:
-                if particle.NH_dict[dir].dist != 10000 and particle.NH_dict[dir].dist <= particle.own_dist:
+                if (particle.NH_dict[dir].dist != 10000 or particle.NH_dict[dir].dist != -1) \
+                        and particle.NH_dict[dir].dist <= particle.own_dist:
                     if particle.prev_dir != dir:
                         if not particle.particle_in(dir):
+                            particle.ml_dir = dir
                             moving(particle)
                             return
 
@@ -941,6 +945,6 @@ def data_clearing(particle):
         if particle.get_location().get_color() == black:
             particle.set_color(violett)
         particle.get_location().set_color(blue)
-    particle.ml_dir = None
-    particle.p_dir = None
+    #particle.ml_dir = None
+    #particle.p_dir = None
     particle.wait = True

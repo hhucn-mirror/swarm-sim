@@ -39,8 +39,8 @@ def scenario(sim):
     sim.add_tile(-3.5, 11.0)
     sim.add_tile(-4.5, 11.0)
     sim.add_tile(0.5, 3.0)
-    sim.add_tile(-1.0, 10.0)
-    sim.add_tile(-0.0, 10.0)
+    #sim.add_tile(-1.0, 10.0)
+    #sim.add_tile(-0.0, 10.0)
     #sim.add_tile(-2.0, 8.0)
 
 
