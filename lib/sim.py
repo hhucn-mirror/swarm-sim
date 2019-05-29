@@ -8,15 +8,13 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 import importlib
 import random
-import math
+
 import logging
 from lib import csv_generator, particle, tile, location, vis
 from lib.gnuplot_generator import generate_gnuplot
 
-
 x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
 y_offset = [ 1, 0, -1,   -1,    0,  1]
-
 
 
 NE=0
@@ -41,7 +39,10 @@ blue = 5
 
 
 class Sim:
-    def __init__(self, config_data):
+    def __init__(self, seed=1, max_round=10, solution="None", size_x = 0, size_y = 0,
+                 scenario_name = None, max_particles = 50,
+                 mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
+                 random_order=False, visualization=False, window_size_x=600, window_size_y=800,density=0,calculated_dir=0):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -54,14 +55,14 @@ class Sim:
         :param seed: the seed number it is only used here for the csv file
         :param max_particles: the maximal number of particles that are allowed to be or created in this sim
         """
-        random.seed(config_data.seedvalue)
-        self.__max_round = config_data.max_round
+        random.seed(seed)
+        self.__max_round = max_round
         self.__round_counter = 1
-        self.__seed=config_data.seedvalue
-        self.__solution = config_data.solution
-        self.solution_mod = importlib.import_module('solution.' + config_data.solution)
+        self.__seed=seed
+        self.__solution = solution
+        self.solution_mod = importlib.import_module('solution.' + solution)
         self.__end = False
-        self.mm_limitation=config_data.mm_limitation
+        self.mm_limitation=mm_limitation
         self.init_particles=[]
         self.particle_num=0
         self.particles = []
@@ -69,7 +70,7 @@ class Sim:
         self.particle_rm = []
         self.particle_map_coords = {}
         self.particle_map_id = {}
-        self.particle_mm_size = config_data.particle_mm_size
+        self.particle_mm_size=particle_mm_size
         self.__particle_deleted=False
         self.tiles_num = 0
         self.tiles = []
@@ -79,33 +80,31 @@ class Sim:
         self.tile_map_id = {}
         self.__tile_deleted=False
         self.new_tile_flag = False
-        self.tile_mm_size=config_data.tile_mm_size
+        self.tile_mm_size=tile_mm_size
         self.locations_num=0
         self.locations = []
         self.locations_created = []
         self.location_map_coords = {}
         self.location_map_id = {}
         self.locations_rm = []
-        self.location_mm_size=config_data.location_mm_size
+        self.location_mm_size=location_mm_size
         self.__location_deleted = False
         self.new_tile=None
-        self.__size_x = config_data.size_x
-        self.__size_y = config_data.size_y
-        self.max_particles = config_data.max_particles
-        self.directory=config_data.dir_name
-        self.visualization = config_data.visualization
-        self.window_size_x = config_data.window_size_x
-        self.window_size_y = config_data.window_size_y
-        self.border = config_data.border
-        self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
-                                                           solution=self.solution_mod,
-                                                           seed=config_data.seedvalue,
+        self.__size_x = size_x
+        self.__size_y = size_y
+        self.max_particles = max_particles
+        self.directory=dir
+        self.visualization = visualization
+        self.window_size_x = window_size_x
+        self.window_size_y = window_size_y
+        self.csv_round_writer = csv_generator.CsvRoundData(self, solution=solution.rsplit('.', 1)[0],
+                                                           seed=seed,
                                                            tiles_num=0, particle_num=0,
-                                                           steps=0, directory=self.directory)
+                                                           steps=0, directory=dir)
 
-        mod = importlib.import_module('scenario.' + config_data.scenario)
+        mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
         mod.scenario(self)
-        if config_data.random_order:
+        if random_order:
             random.shuffle(self.particles)
 
 
@@ -115,27 +114,24 @@ class Sim:
         At the end it aggregate the data and generate a gnuplot
         :return:
         """
-        if self.visualization !=  0:
+        if self.visualization:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
             window.run()
-        else:
-            while self.get_actual_round() <= self.get_max_round() and self.__end == False:
-                self.solution_mod.solution(self)
-                self.csv_round_writer.next_line(self.get_actual_round())
-                self.__round_counter = self.__round_counter + 1
+
+        while self.get_actual_round() <= self.get_max_round() and self.__end == False:
+            self.solution_mod.solution(self)
+            self.csv_round_writer.next_line(self.get_actual_round())
+            self.__round_counter = self.__round_counter + 1
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.directory)
+        particleFile = csv_generator.CsvParticleFile(self.directory)
         for particle in self.init_particles:
-            particle_csv.write_particle(particle)
-        particle_csv.csv_file.close()
+            particleFile.write_particle(particle)
+        particleFile.csv_file.close()
         generate_gnuplot(self.directory)
         return
 
-    def success_termination(self):
-        self.csv_round_writer.success()
-        self.set_end()
 
     def get_max_round(self):
         """
@@ -165,6 +161,42 @@ class Sim:
         """
         return self.__end
 
+
+    def get_density(self):
+        """
+            Returns the density
+        """
+        return self.__density
+
+    def get_calculated_dir(self):
+        """
+            Returns the sum of calculated directions
+        """
+        return self.__calculated_dir
+
+    def set_calculated_dir(self,calcdir):
+        """
+        save the number of calculated directions
+        """
+        self.__calculated_dir=calcdir
+
+    def get_calculated_dis(self):
+        """
+            Returns the sum of calculated proportional distances
+        """
+        return self.__calculated_dis
+
+    def set_calculated_dis(self, calcdis):
+        """
+        save the number of calculated proportional distances
+        """
+        self.__calculated_dis = calcdis
+
+    def set_density(self,dense):
+        """
+        Allows to terminate before the max round is reached
+        """
+        self.__density=dense
 
     def inc_round_cnter(self):
         """
@@ -343,11 +375,6 @@ class Sim:
                 return False
             else:
                 return True
-    def coords_to_sim(self, coords):
-        return coords[0], coords[1] * math.sqrt(3 / 4)
-
-    def sim_to_coords(self, x, y):
-        return x, round(y / math.sqrt(3 / 4), 0)
 
     def add_particle(self, x, y, color=black, alpha=1):
         """
@@ -358,7 +385,7 @@ class Sim:
         :param state: The state of the particle. Default: S for for Stopped or Not Moving. Other options
                       are the moving directions: E, SE, SW, W, NW, NE
         :param color: The color of the particle. Coloroptions: black, gray, red, green, or blue
-        :return: Added Matter; False: Unsuccsessful
+        :return: True: Successful added; False: Unsuccsessful
         """
         if alpha < 0 or alpha >1:
             alpha = 1
@@ -375,7 +402,7 @@ class Sim:
                     self.init_particles.append(new_particle)
                     new_particle.created=True
                     logging.info("Created particle at %s", new_particle.coords)
-                    return new_particle
+                    return True
                 else:
                     print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
@@ -419,6 +446,7 @@ class Sim:
         if coords in self.particle_map_coords:
             self.particles.remove(self.particle_map_coords[coords])
             self.particle_rm.append(self.particle_map_coords[coords])
+           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.particle_map_id[self.particle_map_coords[coords].get_id()]
             except KeyError:
@@ -442,7 +470,7 @@ class Sim:
         :param color:
         :param x: the x coordinates on which the tile should be added
         :param y: the y coordinates on which the tile should be added
-        :return: Successful added matter; False: Unsuccsessful
+        :return: True: Successful added; False: Unsuccsessful
         """
         if alpha < 0 or alpha >1:
             alpha = 1
@@ -458,7 +486,7 @@ class Sim:
                 print("Afer adding ", len(self.tiles), self.new_tile.coords )
                 logging.info("Created tile with tile id %s on coords %s",str(self.new_tile.get_id()), str(self.new_tile.coords))
                 self.new_tile.touch()
-                return self.new_tile
+                return True
             else:
                 logging.info ("on x %f and y %f coordinates is a tile already", x, y)
                 return False
@@ -504,6 +532,7 @@ class Sim:
             self.tiles.remove(rm_tile)
             self.tiles_rm.append(rm_tile)
             logging.info("Deleted tile with tile id %s on %s", str(rm_tile.get_id()), str(rm_tile.coords) )
+           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[rm_tile.get_id()]
             except KeyError:
@@ -529,6 +558,7 @@ class Sim:
         if coords in self.tile_map_coords:
             self.tiles.remove(self.tile_map_coords[coords])
             self.tiles_rm.append(self.tile_map_coords[coords])
+           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[self.tile_map_coords[coords].get_id()]
             except KeyError:
@@ -573,8 +603,6 @@ class Sim:
                 return False
         else:
             logging.info("for x %f and y %f not possible to draw ", x, y)
-            return False
-
 
     def remove_location(self, id):
         """
