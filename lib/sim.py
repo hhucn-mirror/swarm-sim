@@ -165,6 +165,18 @@ class Sim:
         """
         return self.__end
 
+    def get_calculated_dis(self):
+        """
+            Returns the sum of calculated proportional distances
+        """
+        return self.__calculated_dis
+
+    def set_calculated_dis(self, calcdis):
+        """
+        save the number of calculated proportional distances
+        """
+        self.__calculated_dis = calcdis
+
    def get_density(self):
         """
             Returns the density
