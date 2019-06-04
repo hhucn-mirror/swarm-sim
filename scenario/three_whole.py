@@ -26,29 +26,29 @@ def scenario(sim):
     sim.add_tile(-8.0, -0.0)
 
     for tile in sim.tiles:
-        sim.add_location(tile.coords[0] + 0.5, tile.coords[1] + 1)
-        sim.add_location(tile.coords[0] + 0.5, tile.coords[1] - 1)
-        sim.add_location(tile.coords[0] - 0.5, tile.coords[1] + 1)
-        sim.add_location(tile.coords[0] - 0.5, tile.coords[1] - 1)
-        sim.add_location(tile.coords[0]+ 1, tile.coords[1] )
-        sim.add_location(tile.coords[0]- 1, tile.coords[1] )
-    # actual_locations = copy.copy(sim.locations)
-    # for location in actual_locations:
-    #     sim.add_location(location.coords[0] + 0.5, location.coords[1] + 1)
-    #     sim.add_location(location.coords[0] + 0.5, location.coords[1] - 1)
-    #     sim.add_location(location.coords[0] - 0.5, location.coords[1] + 1)
-    #     sim.add_location(location.coords[0] - 0.5, location.coords[1] - 1)
-    #     sim.add_location(location.coords[0]+ 1, location.coords[1] )
-    #     sim.add_location(location.coords[0]- 1, location.coords[1] )
+        sim.add_marker(tile.coords[0] + 0.5, tile.coords[1] + 1)
+        sim.add_marker(tile.coords[0] + 0.5, tile.coords[1] - 1)
+        sim.add_marker(tile.coords[0] - 0.5, tile.coords[1] + 1)
+        sim.add_marker(tile.coords[0] - 0.5, tile.coords[1] - 1)
+        sim.add_marker(tile.coords[0]+ 1, tile.coords[1] )
+        sim.add_marker(tile.coords[0]- 1, tile.coords[1] )
+    # actual_markers = copy.copy(sim.markers)
+    # for marker in actual_markers:
+    #     sim.add_marker(marker.coords[0] + 0.5, marker.coords[1] + 1)
+    #     sim.add_marker(marker.coords[0] + 0.5, marker.coords[1] - 1)
+    #     sim.add_marker(marker.coords[0] - 0.5, marker.coords[1] + 1)
+    #     sim.add_marker(marker.coords[0] - 0.5, marker.coords[1] - 1)
+    #     sim.add_marker(marker.coords[0]+ 1, marker.coords[1] )
+    #     sim.add_marker(marker.coords[0]- 1, marker.coords[1] )
 
 
     for tile in sim.tiles:
-        for location in sim.locations:
-            location.alpha = 0.1
-            if tile.coords == location.coords:
-                sim.remove_location_on(location.coords)
+        for marker in sim.markers:
+            marker.alpha = 0.1
+            if tile.coords == marker.coords:
+                sim.remove_marker_on(marker.coords)
 
-    for i in range (1, len(sim.locations)+1):
+    for i in range (1, len(sim.markers)+1):
         if i == 2:
             sim.add_particle(i, 0, color=3)
         else:

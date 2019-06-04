@@ -67,4 +67,4 @@ def scenario(sim):
     sim.add_particle(5.5, 1.0, color=blue)
     sim.add_particle(6.5, 1.0)
 
-    sim.add_location(1.5, 1.0)
+    sim.add_marker(1.5, 1.0)

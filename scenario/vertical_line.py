@@ -22,12 +22,12 @@ def scenario(sim):
     sim.add_tile(4.0, 8.0)
 
 
-    # actual_locations = copy.copy(sim.locations)
-    # for location in actual_locations:
-    #     sim.add_location(location.coords[0] + 0.5, location.coords[1] + 1)
-    #     sim.add_location(location.coords[0] + 0.5, location.coords[1] - 1)
-    #     sim.add_location(location.coords[0] - 0.5, location.coords[1] + 1)
-    #     sim.add_location(location.coords[0] - 0.5, location.coords[1] - 1)
-    #     sim.add_location(location.coords[0]+ 1, location.coords[1] )
-    #     sim.add_location(location.coords[0]- 1, location.coords[1] )
+    # actual_markers = copy.copy(sim.markers)
+    # for marker in actual_markers:
+    #     sim.add_marker(marker.coords[0] + 0.5, marker.coords[1] + 1)
+    #     sim.add_marker(marker.coords[0] + 0.5, marker.coords[1] - 1)
+    #     sim.add_marker(marker.coords[0] - 0.5, marker.coords[1] + 1)
+    #     sim.add_marker(marker.coords[0] - 0.5, marker.coords[1] - 1)
+    #     sim.add_marker(marker.coords[0]+ 1, marker.coords[1] )
+    #     sim.add_marker(marker.coords[0]- 1, marker.coords[1] )
 
