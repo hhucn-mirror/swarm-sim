@@ -8,183 +8,172 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(sim, world):
-    print("Runde = ",  sim.get_actual_round())
-    if (sim.get_actual_round() == 1):
-        initialize(world)
+def solution(sim):
+    print("Runde", sim.get_actual_round())
+    if sim.get_actual_round() == 1:
+        init_particles(sim.get_particle_list())
+        leader_election(sim.get_particle_list())
 
-    for particle in world.get_particle_list():
-        check_nb(particle)
-##################################################################################
+    if sim.get_actual_round() % 2 == 1:
+        update_leaders(sim.get_particle_list())
+        calc_movement(sim.get_particle_list())
+    else:
+        get_first_particle_to_move(sim.get_particle_list())
 
-# initialize the memory of every particle, first delete whole and then only reserve
-# memory for direction
-def initialize(world):
-    for particle in world.get_particle_list():
-        particle.delete_whole_memeory()
-        particle.write_memory_with("Direction", "None")
-###################################################################################
 
-# depending on the amount of neighbours switch the case
-def check_nb(particle):
-    neighbours = particle.scan_for_particle_within(hop=1)
-    nbLen = len(neighbours)
+# elects leader with the highest id
+def leader_election(particleList):
+    for particle in particleList:
+        send_max_id_to_all_nbs(particle)
+    for particle in particleList:
+        if particle.number == particle.read_memory_with("MaxID"):
+            particle.write_memory_with("Leader", "True")
+            particle.set_color(4)
 
-    if nbLen == 1: one_nb(particle)
-    if nbLen == 2: two_nb(particle)
-    if nbLen == 3: three_nb(particle)
-    if nbLen == 4: four_nb(particle)
-    if nbLen == 5: five_nb(particle)
-    if nbLen == 6: return
+# sends max id to all nbs and recursivley the nbs send it to their nbs
+def send_max_id_to_all_nbs(particle):
+    nbs = particle.scan_for_particle_within(hop=1)
+    for neigh in nbs:
+        if neigh.read_memory_with("MaxID") < particle.read_memory_with("MaxID"):
+            particle.write_to_with(neigh, "MaxID", particle.read_memory_with("MaxID"))
+            send_max_id_to_all_nbs(neigh)
 
-##################################################################################
-# moves to the direction in particles memory if the direction isnt none
-def move_and_refresh_mem(particle):
-    if particle.read_memory_with("Direction") != "None":
-        dir = particle.read_memory_with("Direction")
-        particle.move_to(dir)
-        particle.write_memory_with("Direction", "None")
-        particle.set_color(1)
-##################################################################################
+# initialize the memory of the particles
+def init_particles(particleList):
+    for particle in particleList:
+        particle.write_memory_with("MaxID", particle.number)
+        particle.write_memory_with("Leader", "False")
+        particle.write_memory_with("AnnounceNext", None)
+        particle.write_memory_with("Mark", "False")
+        particle.write_memory_with("Order", None)
+        particle.write_memory_with("Direction", None)
 
-# calculate the movement for particle with 1 neighbour
-def one_nb(particle):
-    dir = 2
-    while dir < 4:
-        if particle.get_particle_in(dir) != None:
-            particle.write_memory_with("Direction", (dir + 1) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
+def calc_movement(particleList):
+    for particle in particleList:
+        if particle.read_memory_with("Leader") == "True":
+            i = 0
+            while i < 6:
+                nb = particle.get_particle_in(i)
+                next_nb = particle.get_particle_in((i + 1) % 6)
+                if nb != None and next_nb == None and nb.read_memory_with("Leader") == "False":
+                    dir = (i + 2) % 6
+                    return dictate(nb, dir)
+                i = i + 1
 
-# calculate the movement for particle with 2 neighbour
-def two_nb(particle):
-    if two_nb_case1(particle): return
-    if two_nb_case2(particle): return
-    if two_nb_case3(particle): return
+#####################################################################################
 
-def two_nb_case1(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir+1) % 6)
+def update_leaders(particleList):
+    allLeadersRdy(particleList)
+    newLeaders(particleList)
+    for particle in particleList:
+        refresh_mem(particle)
 
-        if firstNB != None and secondNB != None:
-            particle.write_memory_with("Direction", (dir - 1) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return False
-def two_nb_case2(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 2) % 6)
 
-        if firstNB != None and secondNB != None:
-            particle.write_memory_with("Direction", (dir + 1) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return False
-def two_nb_case3(particle):
-    return True
+def newLeaders(particleList):
+    for particle in particleList:
+        if particle.read_memory_with("Leader") == "False" and particle.read_memory_with("Mark") == "True":
+            particle.write_memory_with("Leader", "True")
+            particle.set_color(4)
 
-# calculate the movement for particle with 3 neighbour
-def three_nb(particle):
-    if three_nb_case1(particle): return
-    if three_nb_case2(particle): return
-    if three_nb_case3(particle): return
-    if three_nb_case4(particle): return
+def allLeadersRdy(particleList):
+    for particle in particleList:
+        if particle.read_memory_with("Leader") == "True" and particle.read_memory_with("AnnounceNext") == None:
+            if len(particle.scan_for_particle_within(1)) == 6:
+                particle.write_memory_with("AnnounceNext", "True")
+                markNextLeaders(particle)
+            else:
+                spreadNoNextLeaders(particle)
 
-def three_nb_case1(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 2) % 6)
+def markNextLeaders(particle):
+    nbs = particle.scan_for_particle_within(1)
+    for nb in nbs:
+         if nb.read_memory_with("Leader") == "False":
+             nb.write_memory_with("Mark", "True")
 
-        if firstNB != None and secondNB != None and thirdNB != None:
-            return True
-        dir = dir + 1
-    return  False
-def three_nb_case2(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 3) % 6)
+def demarkNextLeaders(particle):
+    nbs = particle.scan_for_particle_within(1)
+    for nb in nbs:
+        if nb.read_memory_with("Leader") == "False":
+            nb.write_memory_with("Mark", "False")
 
-        if firstNB != None and secondNB != None and thirdNB != None:
-            particle.write_memory_with("Direction", (dir + 2) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return  False
-def three_nb_case3(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 3) % 6)
+def spreadNoNextLeaders(particle):
+    particle.write_memory_with("AnnounceNext", "False")
+    particle.write_memory_with("Mark", "True")
+    demarkNextLeaders(particle)
+    nbs = particle.scan_for_particle_within(1)
+    for nb in nbs:
+        if nb.read_memory_with("Leader") == "True" and nb.read_memory_with("Mark") == "False":
+            spreadNoNextLeaders(nb)
 
-        if firstNB != None and secondNB != None and thirdNB != None:
-            particle.write_memory_with("Direction", (dir + 5) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return  False
-def three_nb_case4(particle):
-    return True
+#####################################################################################
 
-# calculate the movement for particle with 4 neighbour
-def four_nb(particle):
-    if four_nb_case1(particle): return
-    if four_nb_case2(particle): return
-    if four_nb_case3(particle): return
+# leader tells non leader neighbour to move in a circle till every spot is filled
+def dictate(particle, dir):
+    particle.write_memory_with("Direction", dir)
+    particle.write_memory_with("Mark", "True")
+    particle.write_memory_with("Order", 1)
+    particle.set_color(3)
 
-def four_nb_case1(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 2) % 6)
-        fourthNB = particle.get_particle_in((dir + 3) % 6)
+    indepth_replacement(particle)
 
-        if firstNB != None and secondNB != None and thirdNB != None and fourthNB != None:
-            return True
-        dir = dir + 1
-    return False
-def four_nb_case2(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 2) % 6)
-        fourthNB = particle.get_particle_in((dir + 4) % 6)
+def indepth_replacement(particle):
+    particle.set_color(3)
+    nbs = particle.scan_for_particle_within(1)
+    for nb in nbs:
+        if nb.read_memory_with("Leader") == "False" and nb.read_memory_with("Mark") == "False":
+            orderNr = particle.read_memory_with("Order")
+            orderNr = orderNr + 1
 
-        if firstNB != None and secondNB != None and thirdNB != None and fourthNB != None:
-            particle.write_memory_with("Direction", (dir + 3) % 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return False
-def four_nb_case3(particle):
-    return True
+            dir = calc_dir(particle, nb)
 
-# calculate the movement for particle with 5 neighbour
-def five_nb(particle):
-    dir = 2
-    while dir < 4:
-        firstNB = particle.get_particle_in(dir)
-        secondNB = particle.get_particle_in((dir + 1) % 6)
-        thirdNB = particle.get_particle_in((dir + 2) % 6)
-        fourthNB = particle.get_particle_in((dir + 3) % 6)
-        fifthNB = particle.get_particle_in((dir + 4) % 6)
+            nb.write_memory_with("Mark", "True")
+            nb.write_memory_with("Order", orderNr)
+            nb.write_memory_with("Direction", dir)
 
-        if firstNB != None and secondNB != None and thirdNB != None and fourthNB != None and fifthNB != None:
-            particle.write_memory_with("Direction", (dir + 5)% 6)
-            move_and_refresh_mem(particle)
-            return True
-        dir = dir + 1
-    return False
+            return indepth_replacement(nb)
+
+def calc_dir(p1, p2):
+    i = 0
+    while i < 6:
+        tmp = p2.get_particle_in(i)
+        if tmp == p1:
+            return i
+        i = i + 1
+
+def get_first_particle_to_move(particleList):
+    particleToMove = None
+
+    for particle in particleList:
+        if particle.read_memory_with("Order") == 1:
+            particleToMove = particle
+            break
+
+    if particleToMove != None:
+        move_in_right_order(particleToMove, 1)
+
+def move_in_right_order(particle, orderNr):
+    if particle.read_memory_with("Order") != orderNr:
+        return
+
+    nbs = particle.scan_for_particle_within(1)
+
+    nextParticle = None
+    if nbs != None:
+        for nb in nbs:
+            if nb.read_memory_with("Order") == (orderNr+1):
+                nextParticle = nb
+                break
+
+    dir = particle.read_memory_with("Direction")
+    particle.move_to(dir)
+    particle.set_color(1)
+    refresh_mem(particle)
+
+    if nextParticle != None:
+        move_in_right_order(nextParticle, (orderNr+1))
+
+def refresh_mem(particle):
+    particle.write_memory_with("Mark", "False")
+    particle.write_memory_with("Order", None)
+    particle.write_memory_with("Direction", None)
+    particle.write_memory_with("AnnounceNext", None)

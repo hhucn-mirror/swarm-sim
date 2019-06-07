@@ -6,4 +6,3 @@ def scenario(sim):
 	sim.add_particle(2, -4)
 	sim.add_particle(1, -4)
 	sim.add_particle(3, -4)
-	sim.add_particle(4, -4)

@@ -5,7 +5,6 @@ SW = 3
 W = 4
 NW = 5
 
-
 direction = [NE, E, SE, SW, W, NW]
 
 def solution(sim):
@@ -20,9 +19,6 @@ def solution(sim):
     else:
         get_first_particle_to_move(sim.get_particle_list())
 
-    for particle in sim.get_particle_list():
-        print(particle.number, particle.read_whole_memory())
-    print("")
 
 # elects leader with the highest id
 def leader_election(particleList):
