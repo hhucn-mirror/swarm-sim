@@ -12,6 +12,7 @@ TODO: Erase Memory
 import logging, math
 from lib import csv_generator, matter
 from lib.comms import MessageStore
+from lib.directions import Directions
 
 black = 1
 gray = 2
@@ -54,9 +55,11 @@ class Particle(matter.matter):
         self.fwd_store = MessageStore()
         self.rcv_store = MessageStore()
 
+    @staticmethod
     def coords_to_sim(self, coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)
 
+    @staticmethod
     def sim_to_coords(self, x, y):
         return x, round(y / math.sqrt(3 / 4), 0)
 
@@ -122,6 +125,8 @@ class Particle(matter.matter):
         :param dir: The direction must be either: E, SE, SW, W, NW, or NE
         :return: True: Success Moving;  False: Non moving
         """
+        if dir == Directions.S.value:
+            return False
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         #sim = self.sim_to_coords(dir_coord[0], dir_coord[1])
         #print ("sim actual coord "+ str(sim))

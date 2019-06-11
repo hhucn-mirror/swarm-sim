@@ -5,30 +5,26 @@ It also have the the coordination system and stated the maximum of the x and y c
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
 """
 
-
 import importlib
+import logging
 import random
 
-import logging
-from lib import csv_generator, particle, tile, location
+from lib import particle, tile, location
 
-x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
-y_offset = [ 1, 0, -1,   -1,    0,  1]
+x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5]
+y_offset = [1, 0, -1, -1, 0, 1]
 
-
-NE=0
+NE = 0
 E = 1
 SE = 2
 SW = 3
 W = 4
 NW = 5
 
-
 direction = [NE, E, SE, SW, W, NW]
 
-
-read=0
-write=1
+read = 0
+write = 1
 
 black = 1
 gray = 2
@@ -36,8 +32,9 @@ red = 3
 green = 4
 blue = 5
 
+
 class World:
-    def __init__(self,  size_x=0, size_y=0,  world_name=None,  sim=None, max_particles=50,
+    def __init__(self, size_x=0, size_y=0, world_name=None, sim=None, max_particles=50,
                  mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
                  csv_round="", random_order=False):
         """Initializing the World constructor
@@ -49,43 +46,43 @@ class World:
         :param seed: the seed number it is only used here for the csv file
         :param max_particles: the maximal number of particles that are allowed to be or created in this world
         """
-        self.mm_limitation=mm_limitation
-        self.init_particles=[]
-        self.particle_num=0
+        self.mm_limitation = mm_limitation
+        self.init_particles = []
+        self.particle_num = 0
         self.particles = []
         self.particles_created = []
         self.particle_rm = []
         self.particle_map_coords = {}
         self.particle_map_id = {}
-        self.particle_mm_size=particle_mm_size
-        self.__particle_deleted=False
+        self.particle_mm_size = particle_mm_size
+        self.__particle_deleted = False
         self.tiles_num = 0
         self.tiles = []
         self.tiles_created = []
         self.tiles_rm = []
         self.tile_map_coords = {}
         self.tile_map_id = {}
-        self.__tile_deleted=False
+        self.__tile_deleted = False
         self.new_tile_flag = False
-        self.tile_mm_size=tile_mm_size
-        self.locations_num=0
+        self.tile_mm_size = tile_mm_size
+        self.locations_num = 0
         self.locations = []
         self.locations_created = []
         self.location_map_coords = {}
         self.location_map_id = {}
         self.locations_rm = []
-        self.location_mm_size=location_mm_size
+        self.location_mm_size = location_mm_size
         self.__location_deleted = False
-        self.new_tile=None
+        self.new_tile = None
         self.__size_x = size_x
         self.__size_y = size_y
         self.max_particles = max_particles
-        self.directory=dir
+        self.directory = dir
 
-        #csv attributes
+        # csv attributes
         self.csv_round_writer = csv_round
 
-        mod = importlib.import_module('scenario.' + world_name.rsplit('.',1)[0])
+        mod = importlib.import_module('scenario.' + world_name.rsplit('.', 1)[0])
         mod.create_world(self)
         if random_order:
             random.shuffle(self.particles)
@@ -121,7 +118,6 @@ class World:
         :return: a dictionary with particles and their own ids
         """
         return self.particle_map_id
-
 
     def get_tiles_num(self):
         """
@@ -187,7 +183,6 @@ class World:
         """
         return self.location_map_id
 
-
     def get_coords_in_dir(self, coords, dir):
         """
         Returns the coordination data of the pointed directions
@@ -224,7 +219,7 @@ class World:
         self.__tile_deleted = False
 
     def set_particle_deleted(self):
-        self.__particle_deleted=False
+        self.__particle_deleted = False
 
     def set_location_deleted(self):
         self.__location_deleted = False
@@ -261,12 +256,13 @@ class World:
         :param color: The color of the particle. Coloroptions: black, gray, red, green, or blue
         :return: True: Successful added; False: Unsuccsessful
         """
-        if alpha < 0 or alpha >1:
+        if alpha < 0 or alpha > 1:
             alpha = 1
         if len(self.particles) < self.max_particles:
-            if  self.check_coords(x,y) == True:
-                if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha, self.mm_limitation, self.particle_mm_size)
+            if self.check_coords(x, y) == True:
+                if (x, y) not in self.get_particle_map_coords():
+                    new_particle = particle.Particle(self, x, y, color, alpha, self.mm_limitation,
+                                                     self.particle_mm_size)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -274,20 +270,20 @@ class World:
                     new_particle.touch()
                     self.csv_round_writer.update_particle_num(len(self.particles))
                     self.init_particles.append(new_particle)
-                    new_particle.created=True
+                    new_particle.created = True
                     logging.info("Created particle at %s", new_particle.coords)
                     return True
                 else:
                     print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
             else:
-                 print ("for x %f and y %f not possible to draw ", x, y)
-                 return False
+                print("for x %f and y %f not possible to draw ", x, y)
+                return False
         else:
             logging.info("Max of particles reached and no more particles can be created")
             return False
 
-    def remove_particle(self,id):
+    def remove_particle(self, id):
         """ Removes a particle with a given particle id from the world database
 
 
@@ -320,7 +316,7 @@ class World:
         if coords in self.particle_map_coords:
             self.particles.remove(self.particle_map_coords[coords])
             self.particle_rm.append(self.particle_map_coords[coords])
-           # del self.tile_map_coords[rm_tile.coords]
+            # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.particle_map_id[self.particle_map_coords[coords].get_id()]
             except KeyError:
@@ -330,12 +326,11 @@ class World:
             except KeyError:
                 pass
             self.csv_round_writer.update_particle_num(len(self.particles))
-            self.csv_round_writer.update_metrics( particle_deleted=1)
+            self.csv_round_writer.update_metrics(particle_deleted=1)
             self.__particle_deleted = True
             return True
         else:
             return False
-
 
     def add_tile(self, x, y, color=gray, alpha=1):
         """
@@ -346,27 +341,28 @@ class World:
         :param y: the y coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
-        if alpha < 0 or alpha >1:
+        if alpha < 0 or alpha > 1:
             alpha = 1
-        if  self.check_coords(x,y) == True:
-            if (x,y) not in self.tile_map_coords:
-                self.new_tile=tile.Tile(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
-                print("Before adding ", len(self.tiles) )
+        if self.check_coords(x, y) == True:
+            if (x, y) not in self.tile_map_coords:
+                self.new_tile = tile.Tile(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
+                print("Before adding ", len(self.tiles))
                 self.tiles.append(self.new_tile)
                 self.csv_round_writer.update_tiles_num(len(self.tiles))
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("Afer adding ", len(self.tiles), self.new_tile.coords )
-                logging.info("Created tile with tile id %s on coords %s",str(self.new_tile.get_id()), str(self.new_tile.coords))
+                print("Afer adding ", len(self.tiles), self.new_tile.coords)
+                logging.info("Created tile with tile id %s on coords %s", str(self.new_tile.get_id()),
+                             str(self.new_tile.coords))
                 self.new_tile.touch()
                 return True
             else:
-                logging.info ("on x %f and y %f coordinates is a tile already", x, y)
+                logging.info("on x %f and y %f coordinates is a tile already", x, y)
                 return False
         else:
-             logging.info ("for x %f and y %f not possible to draw ", x, y)
-             return False
+            logging.info("for x %f and y %f not possible to draw ", x, y)
+            return False
 
     def add_tile_vis(self, x, y, color=gray, alpha=1):
         """
@@ -385,7 +381,7 @@ class World:
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("world.add_tile",self.new_tile.coords)
+                print("world.add_tile", self.new_tile.coords)
                 logging.info("Created tile with tile id %s on coords %s", str(self.new_tile.get_id()),
                              str(self.new_tile.coords))
                 return True
@@ -393,7 +389,7 @@ class World:
                 logging.info("on x %f and y %f coordinates is a tile already", x, y)
                 return False
 
-    def remove_tile(self,id):
+    def remove_tile(self, id):
         """
         Removes a tile with a given tile_id from to the world database
 
@@ -405,8 +401,8 @@ class World:
             rm_tile.touch()
             self.tiles.remove(rm_tile)
             self.tiles_rm.append(rm_tile)
-            logging.info("Deleted tile with tile id %s on %s", str(rm_tile.get_id()), str(rm_tile.coords) )
-           # del self.tile_map_coords[rm_tile.coords]
+            logging.info("Deleted tile with tile id %s on %s", str(rm_tile.get_id()), str(rm_tile.coords))
+            # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[rm_tile.get_id()]
             except KeyError:
@@ -432,7 +428,7 @@ class World:
         if coords in self.tile_map_coords:
             self.tiles.remove(self.tile_map_coords[coords])
             self.tiles_rm.append(self.tile_map_coords[coords])
-           # del self.tile_map_coords[rm_tile.coords]
+            # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[self.tile_map_coords[coords].get_id()]
             except KeyError:
@@ -442,12 +438,11 @@ class World:
             except KeyError:
                 pass
             self.csv_round_writer.update_tiles_num(len(self.tiles))
-            self.csv_round_writer.update_metrics( tile_deleted=1)
+            self.csv_round_writer.update_metrics(tile_deleted=1)
             self.__tile_deleted = True
             return True
         else:
             return False
-
 
     def add_location(self, x, y, color=black, alpha=1):
         """
@@ -458,16 +453,18 @@ class World:
         :param y: the y coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
-        if alpha < 0 or alpha >1:
+        if alpha < 0 or alpha > 1:
             alpha = 1
         if self.check_coords(x, y) == True:
             if (x, y) not in self.location_map_coords:
-                self.new_location = location.Location(self, x, y, color, alpha,  self.mm_limitation, self.location_mm_size)
+                self.new_location = location.Location(self, x, y, color, alpha, self.mm_limitation,
+                                                      self.location_mm_size)
                 self.locations.append(self.new_location)
                 self.location_map_coords[self.new_location.coords] = self.new_location
                 self.location_map_id[self.new_location.get_id()] = self.new_location
                 self.csv_round_writer.update_locations_num(len(self.locations))
-                logging.info("Created location with id %s on coords %s", str(self.new_location.get_id()), str(self.new_location.coords))
+                logging.info("Created location with id %s on coords %s", str(self.new_location.get_id()),
+                             str(self.new_location.coords))
 
                 self.new_location.created = True
                 self.new_location.touch()
@@ -502,12 +499,11 @@ class World:
             except KeyError:
                 pass
             self.csv_round_writer.update_locations_num(len(self.locations))
-            self.csv_round_writer.update_metrics( location_deleted=1)
+            self.csv_round_writer.update_metrics(location_deleted=1)
             self.__location_deleted = True
             return True
         else:
             return False
-
 
     def remove_location_on(self, coords):
         """
@@ -528,7 +524,7 @@ class World:
             except KeyError:
                 pass
             self.csv_round_writer.update_locations_num(len(self.locations))
-            self.csv_round_writer.update_metrics( location_deleted=1)
+            self.csv_round_writer.update_metrics(location_deleted=1)
             self.__location_deleted = True
             return True
         else:

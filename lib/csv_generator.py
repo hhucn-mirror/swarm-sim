@@ -8,15 +8,15 @@ TODO:
 
 """
 
-
 import csv
-import pandas as pd
 import logging
 import os
 
+import pandas as pd
+
 
 class CsvParticleFile:
-    def __init__(self, directory ):
+    def __init__(self, directory):
         self.file_name = directory + '/particle.csv'
         file_exists = os.path.isfile(self.file_name)
         if not file_exists:
@@ -33,31 +33,37 @@ class CsvParticleFile:
                                   'Tiles Created', 'Tiles Deleted',
                                   'Tiles Dropped',
                                   'Tile Read', 'Tiles Taken',
-                                  'Tile Write', 'Success'
+                                  'Tile Write', 'Success',
+                                  'Messages Sent', 'Messages Forwarded', 'Messages Delivered', 'Messages Received'
                                   ])
+
     def write_particle(self, particle):
         csv_iterator = [particle.csv_particle_writer.id, particle.csv_particle_writer.number,
                         particle.csv_particle_writer.location_created, particle.csv_particle_writer.location_deleted,
                         particle.csv_particle_writer.location_read, particle.csv_particle_writer.location_write,
                         particle.csv_particle_writer.memory_read, particle.csv_particle_writer.memory_write,
-                        particle.csv_particle_writer.particle_created,particle.csv_particle_writer.particles_dropped,
+                        particle.csv_particle_writer.particle_created, particle.csv_particle_writer.particles_dropped,
                         particle.csv_particle_writer.particle_deleted, particle.csv_particle_writer.particle_read,
                         particle.csv_particle_writer.steps, particle.csv_particle_writer.particles_taken,
                         particle.csv_particle_writer.particle_write,
                         particle.csv_particle_writer.tile_created, particle.csv_particle_writer.tile_deleted,
                         particle.csv_particle_writer.tiles_dropped,
                         particle.csv_particle_writer.tile_read, particle.csv_particle_writer.tiles_taken,
-                        particle.csv_particle_writer.tile_write, particle.csv_particle_writer.success]
+                        particle.csv_particle_writer.tile_write,
+                        particle.csv_particle_writer.success,
+                        particle.csv_particle_writer.messages_sent, particle.csv_particle_writer.messages_forwarded,
+                        particle.csv_particle_writer.messages_delivered, particle.csv_particle_writer.messages_received
+                        ]
         self.writer.writerow(csv_iterator)
 
 
 class CsvParticleData:
-    def __init__(self,  particle_id, particle_number):
+    def __init__(self, particle_id, particle_number):
         self.id = particle_id
-        self.number=particle_number
+        self.number = particle_number
         self.steps = 0
-        self.particle_created=0
-        self.particle_deleted=0
+        self.particle_created = 0
+        self.particle_deleted = 0
         self.particles_dropped = 0
         self.particle_read = 0
         self.particles_taken = 0
@@ -74,53 +80,57 @@ class CsvParticleData:
         self.memory_write = 0
         self.tiles_taken = 0
         self.tiles_dropped = 0
-        self.success=0
+        self.success = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_received = 0
 
-
-    def write_particle(self, steps= 0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
+    def write_particle(self, steps=0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
                        particles_taken=0,
                        particle_write=0, tile_created=0, tile_deleted=0, tile_read=0, tile_write=0, location_read=0,
                        location_write=0, location_created=0, location_deleted=0, memory_read=0, memory_write=0,
-                        tiles_taken = 0, tiles_dropped = 0, success=0):
+                       tiles_taken=0, tiles_dropped=0, success=0, messages_sent=0, messages_forwarded=0,
+                       messages_delivered=0, messages_received=0):
         self.steps = self.steps + steps
-        self.particle_created=self.particle_created+particle_created
-        self.particle_deleted=self.particle_deleted+particle_deleted
+        self.particle_created = self.particle_created + particle_created
+        self.particle_deleted = self.particle_deleted + particle_deleted
         self.particles_dropped = self.particles_dropped + particles_dropped
         self.particles_taken = self.particles_taken + particles_taken
-        self.particle_read=self.particle_read+particle_read
-        self.particle_write=self.particle_write+particle_write
-        self.tile_created=self.tile_created+tile_created
-        self.tile_deleted=self.tile_deleted+tile_deleted
-        self.tile_read=self.tile_read+tile_read
-        self.tile_write=self.tile_write+tile_write
-        self.location_read=self.location_read+location_read
-        self.location_write=self.location_write+location_write
-        self.location_created=self.location_created+location_created
-        self.location_deleted=self.location_deleted+location_deleted
-        self.memory_read=self.memory_read+memory_read
-        self.memory_write=self.memory_write+memory_write
+        self.particle_read = self.particle_read + particle_read
+        self.particle_write = self.particle_write + particle_write
+        self.tile_created = self.tile_created + tile_created
+        self.tile_deleted = self.tile_deleted + tile_deleted
+        self.tile_read = self.tile_read + tile_read
+        self.tile_write = self.tile_write + tile_write
+        self.location_read = self.location_read + location_read
+        self.location_write = self.location_write + location_write
+        self.location_created = self.location_created + location_created
+        self.location_deleted = self.location_deleted + location_deleted
+        self.memory_read = self.memory_read + memory_read
+        self.memory_write = self.memory_write + memory_write
         self.tiles_taken = self.tiles_taken + tiles_taken
         self.tiles_dropped = self.tiles_dropped + tiles_dropped
-        self.success = self.success+success
-
-
-
-
+        self.success = self.success + success
+        self.messages_sent += messages_sent
+        self.messages_forwarded += messages_forwarded
+        self.messages_delivered += messages_delivered
+        self.messages_received += messages_received
 
 
 class CsvRoundData:
-    def __init__(self, sim, task=0, solution=0, seed=20,  particle_num=0, tiles_num=0, locations_num=0,
-                 steps=0,  directory="outputs/"):
+    def __init__(self, sim, task=0, solution=0, seed=20, particle_num=0, tiles_num=0, locations_num=0,
+                 steps=0, directory="outputs/"):
         self.sim = sim
 
         self.task = task
         self.solution = solution
-        self.actual_round=sim.get_actual_round()
+        self.actual_round = sim.get_actual_round()
         self.seed = seed
-        self.steps  = steps
+        self.steps = steps
         self.steps_sum = steps
-        self.particle_created=0
-        self.particle_deleted=0
+        self.particle_created = 0
+        self.particle_deleted = 0
         self.particle_num = particle_num
         self.particle_read = 0
         self.particle_write = 0
@@ -160,12 +170,18 @@ class CsvRoundData:
         self.tiles_dropped = 0
         self.tiles_taken_sum = 0
         self.tiles_dropped_sum = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_received = 0
+        self.message_ttl_expired = 0
+
         self.directory = directory
         self.file_name = directory + '/rounds.csv'
         self.csv_file = open(self.file_name, 'w', newline='')
         self.writer_round = csv.writer(self.csv_file)
         self.writer_round.writerow(['',
-                                    'Round Number', 'Seed','solution',
+                                    'Round Number', 'Seed', 'solution',
                                     'Location Counter',
                                     'Location Created', 'Location Created Sum',
                                     'Location Deleted', 'Location Deleted Sum',
@@ -189,26 +205,30 @@ class CsvRoundData:
                                     'Tile Read', 'Tile Read Sum',
                                     'Tiles Taken', 'Tiles Taken Sum',
                                     'Tile Write', 'Tile Write Sum',
+                                    'Messages Sent', 'Messages Forwarded',
+                                    'Messages Delivered', 'Messages Received',
+                                    'Message TTL Expired'
                                     ])
 
-    def update_particle_num (self, particle):
+    def update_particle_num(self, particle):
         self.particle_num = particle
 
-    def update_tiles_num (self, tile):
+    def update_tiles_num(self, tile):
         self.tile_num = tile
 
     def update_locations_num(self, act_locations_num):
         self.locations_num = act_locations_num
 
     def success(self):
-        self.success_counter=self.success_counter+1
+        self.success_counter = self.success_counter + 1
 
-    def update_metrics(self, steps = 0,
-                        particle_read = 0, tile_read = 0, location_read = 0, memory_read = 0,
-                        particle_write = 0, tile_write = 0, location_write = 0, memory_write = 0,
-                        particle_created=0, tile_created=0, location_created=0,
-                        particle_deleted=0, tile_deleted=0, location_deleted=0, tiles_taken=0, tiles_dropped=0,
-                        particles_taken=0, particles_dropped=0):
+    def update_metrics(self, steps=0,
+                       particle_read=0, tile_read=0, location_read=0, memory_read=0,
+                       particle_write=0, tile_write=0, location_write=0, memory_write=0,
+                       particle_created=0, tile_created=0, location_created=0,
+                       particle_deleted=0, tile_deleted=0, location_deleted=0, tiles_taken=0, tiles_dropped=0,
+                       particles_taken=0, particles_dropped=0, messages_sent=0, messages_forwarded=0,
+                       messages_delivered=0, messages_received=0, message_ttl_expired=0):
         logging.debug("CSV: Starting writing_rounds")
         self.location_created_sum = self.location_created_sum + location_created
         self.location_deleted_sum = self.location_deleted_sum + location_deleted
@@ -229,6 +249,11 @@ class CsvRoundData:
         self.tile_write_sum = self.tile_write_sum + tile_write
         self.particles_taken_sum = self.particles_taken_sum + particles_taken
         self.particles_dropped_sum = self.particles_dropped_sum + particles_dropped
+        self.messages_sent += messages_sent
+        self.messages_forwarded += messages_forwarded
+        self.messages_delivered += messages_delivered
+        self.messages_received += messages_received
+        self.message_ttl_expired += message_ttl_expired
 
         if self.actual_round == self.sim.get_actual_round():
             self.steps = self.steps + steps
@@ -248,9 +273,9 @@ class CsvRoundData:
             self.location_deleted = self.location_deleted + location_deleted
             self.tiles_dropped = self.tiles_dropped + tiles_dropped
             self.tiles_taken = self.tiles_taken + tiles_taken
-            self.particles_taken= self.particles_taken + particles_taken
+            self.particles_taken = self.particles_taken + particles_taken
             self.particles_dropped = self.particles_dropped + particles_dropped
-        elif self.actual_round !=self.sim.get_actual_round():
+        elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
             self.steps = steps
             self.particle_read = particle_read
@@ -274,7 +299,7 @@ class CsvRoundData:
         logging.debug("CSV: Ending writing_rounds")
 
     def next_line(self, round):
-        csv_iterator = ['',round, self.seed, self.solution,
+        csv_iterator = ['', round, self.seed, self.solution,
                         self.locations_num, self.location_created, self.location_created_sum,
                         self.location_deleted, self.location_deleted_sum,
                         self.location_read, self.location_read_sum,
@@ -291,18 +316,20 @@ class CsvRoundData:
                         self.tile_num, self.tile_created, self.tile_created_sum,
                         self.tile_deleted, self.tile_deleted_sum, self.tiles_dropped, self.tiles_dropped_sum,
                         self.tile_read, self.tile_read_sum, self.tiles_taken, self.tiles_taken_sum,
-                        self.tile_write, self.tile_write_sum]
+                        self.tile_write, self.tile_write_sum,
+                        self.messages_sent, self.messages_forwarded, self.messages_delivered, self.messages_received,
+                        self.message_ttl_expired]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = round
-        self.steps=0
-        self.particle_read=0
-        self.tile_read=0
-        self.location_read=0
-        self.memory_read=0
-        self.particle_write=0
-        self.tile_write=0
-        self.location_write=0
-        self.memory_write=0
+        self.steps = 0
+        self.particle_read = 0
+        self.tile_read = 0
+        self.location_read = 0
+        self.memory_read = 0
+        self.particle_write = 0
+        self.tile_write = 0
+        self.location_write = 0
+        self.memory_write = 0
         self.particle_created = 0
         self.tile_created = 0
         self.location_created = 0
@@ -315,54 +342,63 @@ class CsvRoundData:
         self.success_counter = 0
         self.particles_taken = 0
         self.particles_dropped = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_received = 0
+        self.message_ttl_expired = 0
 
     def aggregate_metrics(self):
         self.csv_file.close()
         data = pd.read_csv(self.file_name)
-        file_name = self.directory+"/aggregate_rounds.csv"
+        file_name = self.directory + "/aggregate_rounds.csv"
         csv_file = open(file_name, 'w', newline='')
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
         writer_round.writerow(['Seed', 'Rounds Total',
-                                'Solution', 'Particle Counter', 'Foods Sources Counter', 'Pheromones Counter',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Location Counter',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max',
-                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
-                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
-                                'Particle Counter',
-                                'Particles Created Sum', 'Particles Created Avg',
-                                'Particles Created Min', 'Particles Created Max',
-                                'Particles Deleted Sum', 'Particles Deleted Avg',
-                                'Particles Deleted Min', 'Particles Deleted Max',
-                                'Particles Dropped Sum', 'Particles Dropped Avg',
-                                'Particles Dropped Min', 'Particles Dropped Max',
-                                'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
-                                'Partilcle Steps Total',  'Particle Steps Avg',
-                                'Particle Steps Min', 'Particle Steps Max',
-                                'Particles Taken Sum', 'Particles Taken Avg',
-                                'Particles Taken Min', 'Particles Taken Max',
-                                'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
-                                'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
-                                'Success Rate Sum', 'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
-                                'Tile Counter',
-                                'Tiles Created Sum', 'Tiles Created Avg', 'Tiles Created Min', 'Tiles Created Max',
-                                'Tiles Deleted Sum', 'Tiles Deleted Avg', 'Tiles Deleted Min', 'Tiles Deleted Max',
-                                'Tiles Dropped Sum', 'Tiles Dropped Avg', 'Tiles Dropped Min', 'Tiles Dropped Max',
-                                'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
-                                'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
-                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max'])
+                               'Solution', 'Particle Counter', 'Foods Sources Counter', 'Pheromones Counter',
+                               'Success Rate Sum', 'Success Ratio',
+                               'Location Counter',
+                               'Location Created Sum', 'Location Created Avg',
+                               'Location Created Min', 'Location Created Max',
+                               'Location Deleted Sum', 'Location Deleted Avg',
+                               'Location Deleted Min', 'Location Deleted Max',
+                               'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
+                               'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
+                               'Particle Counter',
+                               'Particles Created Sum', 'Particles Created Avg',
+                               'Particles Created Min', 'Particles Created Max',
+                               'Particles Deleted Sum', 'Particles Deleted Avg',
+                               'Particles Deleted Min', 'Particles Deleted Max',
+                               'Particles Dropped Sum', 'Particles Dropped Avg',
+                               'Particles Dropped Min', 'Particles Dropped Max',
+                               'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
+                               'Partilcle Steps Total', 'Particle Steps Avg',
+                               'Particle Steps Min', 'Particle Steps Max',
+                               'Particles Taken Sum', 'Particles Taken Avg',
+                               'Particles Taken Min', 'Particles Taken Max',
+                               'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
+                               'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
+                               'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
+                               'Success Rate Sum', 'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
+                               'Success Round Min', 'Success Round Max',
+                               'Tile Counter',
+                               'Tiles Created Sum', 'Tiles Created Avg', 'Tiles Created Min', 'Tiles Created Max',
+                               'Tiles Deleted Sum', 'Tiles Deleted Avg', 'Tiles Deleted Min', 'Tiles Deleted Max',
+                               'Tiles Dropped Sum', 'Tiles Dropped Avg', 'Tiles Dropped Min', 'Tiles Dropped Max',
+                               'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
+                               'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
+                               'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max',
+                               'Messages Sent Sum', 'Messages Forwarded Sum',
+                               'Messages Delivered Sum', 'Messages Received Sum',
+                               'Message TTL Expired'
+                               ])
 
         csv_interator = [self.seed, data['Round Number'].count(),
 
                          self.solution, self.particle_num, self.tile_num, self.locations_num,
                          data['Success Counter'].sum(),
-                         data['Success Counter'].sum()/ data['Round Number'].sum(),
+                         data['Success Counter'].sum() / data['Round Number'].sum(),
 
                          self.locations_num,
                          data['Location Created'].sum(), data['Location Created'].mean(),
@@ -387,7 +423,7 @@ class CsvRoundData:
                          data['Particles Dropped'].sum(), data['Particles Dropped'].mean(),
                          data['Particles Dropped'].min(), data['Particles Dropped'].max(),
 
-                         data['Particle Read'].sum(), data['Particle Read'].mean(),data['Particle Read'].min(),
+                         data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
                          data['Particle Read'].max(),
 
                          data['Particle Steps'].sum(), data['Particle Steps'].mean(),
@@ -408,7 +444,7 @@ class CsvRoundData:
                          data['Success Counter'].sum(), data['Success Counter'].mean(), data['Success Counter'].min(),
                          data['Success Counter'].max(),
 
-                         data['Success Round'].min() ,
+                         data['Success Round'].min(),
                          data['Success Round'].max(),
 
                          self.tile_num,
@@ -421,18 +457,20 @@ class CsvRoundData:
                          data['Tiles Dropped'].sum(), data['Tiles Dropped'].mean(), data['Tiles Dropped'].min(),
                          data['Tiles Dropped'].max(),
 
-                         data['Tile Read'].sum(), data['Tile Read'].mean(),  data['Tile Read'].min(),
+                         data['Tile Read'].sum(), data['Tile Read'].mean(), data['Tile Read'].min(),
                          data['Tile Read'].max(),
 
                          data['Tiles Taken'].sum(), data['Tiles Taken'].mean(), data['Tiles Taken'].min(),
                          data['Tiles Taken'].max(),
 
                          data['Tile Write'].sum(), data['Tile Write'].mean(), data['Tile Write'].min(),
-                         data['Tile Write'].max()]
+                         data['Tile Write'].max(),
 
+                         data['Messages Sent'].sum(), data['Messages Forwarded'].sum(),
+                         data['Messages Delivered'].sum(), data['Messages Received'].sum(),
 
+                         data['Message TTL Expired'].sum()
+                         ]
 
         writer_round.writerow(csv_interator)
         csv_file.close()
-
-

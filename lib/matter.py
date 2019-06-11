@@ -1,11 +1,9 @@
 """The location module provides the interface to the locations. A location is any point on
  the coordinate system of the simulators sim"""
 
-
 import uuid
 import logging
 from datetime import datetime
-
 
 black = 1
 gray = 2
@@ -38,14 +36,14 @@ class matter():
         self.coords = (x, y)
         self.color = color_map[color]
         self.__id = uuid.uuid4()
-        self.memory_delay_time=3
-        self.memory_delay=True
-        self.memory_buffer=[]
-        self._tmp_memory=[]
+        self.memory_delay_time = 3
+        self.memory_delay = True
+        self.memory_buffer = []
+        self._tmp_memory = []
         self.sim = sim
-        self._memory={}
-        self.__modified=False
-        self.__alpha=alpha
+        self._memory = {}
+        self.__modified = False
+        self.__alpha = alpha
         self.type = type
         self.mm_limit = mm_limit
         self.mm_size = mm_size
@@ -58,7 +56,7 @@ class matter():
         :return: None
         """
         if (0 <= alpha <= 1):
-            self.__alpha = round(alpha,2)
+            self.__alpha = round(alpha, 2)
             self.touch()
         elif alpha < 0:
             self.__alpha = 0
@@ -73,7 +71,7 @@ class matter():
 
         :return: alpha
         """
-        return round(self.__alpha,2)
+        return round(self.__alpha, 2)
 
     def read_memory_with(self, key):
         """
@@ -86,9 +84,9 @@ class matter():
         # if self.memory_delay == True:
         #     for key in self._tmp_memory:
         #         if key ==
-        if  key in self._memory:
+        if key in self._memory:
             tmp_memory = self._memory[key]
-            self.sim.csv_round_writer.update_metrics( memory_read=1)
+            self.sim.csv_round_writer.update_metrics(memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
             return None
         if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:
@@ -102,8 +100,8 @@ class matter():
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
-        if self._memory != None :
-          return self._memory
+        if self._memory != None:
+            return self._memory
         else:
             return None
 
@@ -116,21 +114,20 @@ class matter():
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.mm_limit == True and len(self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
             self.sim.csv_round_writer.update_metrics(memory_write=1)
-                # if self.memory_delay == True:
-                #     self._tmp_memory[key] = data
-                #     print("Wrote data at ", self.sim.sim.get_actual_round())
-                #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
-                #     self._tmp_memory.clear()
-                # else:
-                #     self._memory[key] = data
+            # if self.memory_delay == True:
+            #     self._tmp_memory[key] = data
+            #     print("Wrote data at ", self.sim.sim.get_actual_round())
+            #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
+            #     self._tmp_memory.clear()
+            # else:
+            #     self._memory[key] = data
             return True
         else:
             return False
-            #write csv
-
+            # write csv
 
     def write_memory(self, data):
         """
@@ -141,21 +138,19 @@ class matter():
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
-                self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
-                self.sim.csv_round_writer.update_metrics(memory_write=1)
-                return True
+        if (self.mm_limit == True and len(self._memory) < self.mm_size) or not self.mm_limit:
+            self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
+            self.sim.csv_round_writer.update_metrics(memory_write=1)
+            return True
         else:
             return False
-            #write csv
-
+            # write csv
 
     def delete_memeory_with(self, key):
         del self._memory[key]
 
     def delete_whole_memeory(self):
-         self._memory.clear()
-
+        self._memory.clear()
 
     def get_id(self):
         """
@@ -171,11 +166,10 @@ class matter():
         :param color: Location color
         :return: None
         """
-        if type (color) == int:
+        if type(color) == int:
             self.color = color_map[color]
         else:
             self.color = color
-
 
         self.touch()
 
@@ -186,4 +180,3 @@ class matter():
     def untouch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""
         self.modified = False
-

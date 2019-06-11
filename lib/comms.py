@@ -35,6 +35,8 @@ class Message:
         else:
             self.content = content
 
+        sender.send_store.add_message(self)
+
     def __create_msg_key(self):
         return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
 
@@ -44,7 +46,7 @@ class Message:
 
 class MessageStore(dict):
 
-    def __init__(self, max_size=10, *maps):
+    def __init__(self, max_size=1000, *maps):
         self.max_size = max_size
         self.size = 0
         super().__init__(*maps)
