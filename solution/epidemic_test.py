@@ -1,6 +1,4 @@
-import random
-
-from lib.comms import Message
+from lib.comms import generate_random_messages
 from lib.mobility_model import MobilityModel, Mode
 import lib.routing
 
@@ -10,11 +8,7 @@ def solution(sim):
 
     if sim.get_actual_round() == 1:
         particles = sim.get_particle_list()
-        # generate random messages
-        for i in range(200):
-            sender = random.choice(particles)
-            receiver = random.choice([particle for particle in particles if particle != sender])
-            Message(sender, receiver, start_round=sim.get_actual_round(), ttl=random.randint(50, sim.get_max_round()))
+        generate_random_messages(particles, len(particles)*2)
         # initialize the particle mobility models
         for particle in particles:
             m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Random_Mode, (5, 30))
