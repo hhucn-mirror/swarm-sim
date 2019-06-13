@@ -1,5 +1,6 @@
 from enum import Enum
 
+from lib.colors import Colors
 from lib.comms import send_message, CommEvent
 
 
@@ -84,15 +85,19 @@ def __success_event__(sender, receiver, message, event):
         message.original_sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered_directly=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly=1, messages_received=1)
+        receiver.set_color(Colors.green.value)
     elif event == CommEvent.MessageDelivered:
         sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered=1, messages_received=1)
+        receiver.set_color(Colors.green.value)
     elif event == CommEvent.MessageForwarded:
         sender.csv_particle_writer.write_particle(messages_sent=1, messages_forwarded=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_forwarded=1, messages_received=1)
+        sender.set_color(Colors.blue.value)
     elif event == CommEvent.MessageTTLExpired:
         sender.sim.csv_round_writer.update_metrics(message_ttl_expired=1)
     elif event == CommEvent.ReceiverOutOfMem:
         sender.sim.csv_round_writer.update_metrics(receiver_out_of_mem=1)
+        sender.set_color(Colors.red.value)

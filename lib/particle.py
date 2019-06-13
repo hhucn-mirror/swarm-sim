@@ -56,25 +56,24 @@ class Particle(matter.matter):
         self.rcv_store = MessageStore()
 
     @staticmethod
-    def coords_to_sim(self, coords):
+    def coords_to_sim(coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)
 
     @staticmethod
-    def sim_to_coords(self, x, y):
+    def sim_to_coords(x, y):
         return x, round(y / math.sqrt(3 / 4), 0)
 
     def has_tile(self):
-        if self.carried_tile == None:
+        if self.carried_tile is None:
             return False
         else:
             return True
 
     def has_particle(self):
-        if self.carried_particle == None:
+        if self.carried_particle is None:
             return False
         else:
             return True
-
 
     def get_carried_status(self):
         """
@@ -94,7 +93,6 @@ class Particle(matter.matter):
             return True
         else:
             return False
-
 
     def check_on_particle(self):
         """
@@ -140,7 +138,7 @@ class Particle(matter.matter):
             if not self.coords in self.sim.particle_map_coords:
                 self.sim.particle_map_coords[self.coords] = self
                 logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.sim.csv_round_writer.update_metrics( steps=1)
+                self.sim.csv_round_writer.update_metrics(steps=1)
                 self.csv_particle_writer.write_particle(steps=1)
                 self.touch()
                 if self.carried_tile is not None:
@@ -164,8 +162,8 @@ class Particle(matter.matter):
         """
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         sim_coord = self.coords_to_sim(dir_coord)
-        if self.sim.get_sim_x_size() >=  abs(sim_coord[0]) and \
-                        self.sim.get_sim_y_size() >=  abs(sim_coord[1]):
+        if self.sim.get_sim_x_size() >= abs(sim_coord[0]) \
+                and self.sim.get_sim_y_size() >= abs(sim_coord[1]):
             return self.move_to(dir)
         else:
             # 'bounce' off the wall

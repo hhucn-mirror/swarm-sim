@@ -1,6 +1,6 @@
 import datetime, math, os, time
 from pyglet.gl import *
-from pyglet.window import mouse
+from pyglet.window import mouse, Window
 import pyglet.window.key as key
 import importlib
 import subprocess
@@ -41,7 +41,6 @@ particle_alpha = 1
 location_alpha = 1
 
 
-
 def coords_to_sim(coords):
     return coords[0], coords[1] * math.sqrt(3/4)
 
@@ -60,6 +59,7 @@ class ScreenshotManager:
     dt = datetime.datetime.now()
     #prefix = dt.isoformat(sep = '_', timespec = 'seconds').replace(':', '') + '_'
     prefix = dt.isoformat(sep='_').replace(':', '') + '_'
+
     def takeScreenshot():
         if not os.path.exists(screenshot_directory):
             os.makedirs(screenshot_directory)
@@ -107,7 +107,7 @@ class View:
         self.top = self.focusPos[1] + halfZoomRec * self.height;
 
 
-class VisWindow(pyglet.window.Window):
+class VisWindow(Window):
     def __init__(self, window_size_x, window_size_y, sim):
         #super().__init__(sim.get_sim_x_size(), sim.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
         super().__init__(window_size_x, window_size_y , resizable=window_resizable, vsync=False, caption="Simulator")
@@ -149,6 +149,7 @@ class VisWindow(pyglet.window.Window):
 
     def exit_callback(self):
         self.close()
+
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.view.scroll(x, y, scroll_x, scroll_y)
 
@@ -267,7 +268,6 @@ class VisWindow(pyglet.window.Window):
                                                                     'v2f', 't2f', 'c4f')
         self.update_tiles(True)
 
-
     def update_tiles(self, update_all=False):
         foreground = []
         background = []
@@ -346,7 +346,6 @@ class VisWindow(pyglet.window.Window):
                     particle.modified = False
         else:
             pass
-
 
     def update_particle(self, i, particle):
         weird = 256 / 220

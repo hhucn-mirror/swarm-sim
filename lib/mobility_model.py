@@ -1,7 +1,7 @@
 import random
 from enum import Enum
 
-from lib.directions import Directions
+from lib.directions import Directions, directions_list
 
 
 class Mode(Enum):
@@ -10,14 +10,29 @@ class Mode(Enum):
     Circle = 2,
     Random = 3,
     Static = 4,
-    Random_Mode = 5
+    Zonal = 5,
+    Random_Mode = 6
 
 
 class MobilityModel:
 
-    def __init__(self, start_x, start_y, mode: Mode, length: (int, int)):
+    @staticmethod
+    def get(particle):
+        return getattr(particle, "mobility_model")
+
+    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=()):
         if mode == Mode.Random_Mode:
             mode = random.choice(list(Mode)[:-1])
+        if mode == Mode.Zonal:
+            self.min_x = zone[0]
+            self.min_y = zone[1]
+            self.max_x = zone[2]
+            self.max_y = zone[3]
+        else:
+            self.min_x = start_x - length[1]
+            self.min_y = start_y - length[1]
+            self.max_x = start_x + length[1]
+            self.max_y = start_y + length[1]
         self.mode = mode
         self.steps = 0
         self.min_length = length[0]
@@ -26,10 +41,6 @@ class MobilityModel:
         self.route_length = random.randint(self.min_length, self.max_length)
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir
-        self.min_x = start_x - length[1]
-        self.min_y = start_y - length[1]
-        self.max_x = start_x + length[1]
-        self.max_y = start_y + length[1]
 
     def set(self, particle):
         setattr(particle, "mobility_model", self)
@@ -37,7 +48,7 @@ class MobilityModel:
     def __return_direction(self):
         return self.starting_dir - 3 if self.starting_dir > 2 else self.starting_dir + 3
     
-    def next_direction(self):
+    def next_direction(self, current_x_y=None):
         if self.mode == Mode.Back_And_Forth:
             return self.__back_and_forth__()
         elif self.mode == Mode.Random_Walk:
@@ -48,6 +59,8 @@ class MobilityModel:
             return self.__random__()
         elif self.mode == Mode.Static:
             return Directions.S.value
+        elif self.mode == Mode.Zonal:
+            return self.__zonal__(current_x_y)
 
     def __random__(self):
         self.current_dir = MobilityModel.random_direction()
@@ -100,6 +113,22 @@ class MobilityModel:
             self.steps -= 1
             return self.return_dir
 
+    def __zonal__(self, current_x_y):
+        (x, y) = current_x_y
+        # check if at min_x then head anywhere but west
+        exceptions = []
+        if x <= self.min_x:
+            exceptions.extend([Directions.W, Directions.SW, Directions.NW])
+        # check if at max_x then head anywhere but east
+        elif x >= self.max_x:
+            exceptions.append([Directions.E, Directions.SE, Directions.NE])
+        # check if at min_y then head anywhere but south
+        if y <= self.min_y:
+            exceptions.extend([Directions.SE, Directions.SW])
+        elif y >= self.max_x:
+            exceptions.extend([Directions.NE, Directions.NW])
+        return MobilityModel.random_direction(exceptions)
+
     @staticmethod
-    def random_direction():
-        return random.choice(list(Directions)[:-1]).value
+    def random_direction(exceptions=[]):
+        return random.choice(directions_list(exceptions)).value

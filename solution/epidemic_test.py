@@ -19,5 +19,5 @@ def solution(sim):
         for particle in particles:
             lib.routing.next_step(particle)
             # move the particle to the next location
-            m_model = getattr(particle, "mobility_model")
-            particle.move_to(m_model.next_direction())
+            m_model = MobilityModel.get(particle)
+            particle.move_to_in_bounds(m_model.next_direction())

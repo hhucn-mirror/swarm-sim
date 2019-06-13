@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+def directions_list(exceptions=[]):
+    return [direction for direction in Directions if direction not in exceptions]
+
+
 class Directions(Enum):
     E = 0
     SE = 1
