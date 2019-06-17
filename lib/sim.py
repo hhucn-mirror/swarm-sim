@@ -10,7 +10,7 @@ import importlib
 import random
 import math
 import logging
-from lib import csv_generator, particle, tile, location, vis
+from lib import csv_generator, particle, tile, marker, vis
 from lib.gnuplot_generator import generate_gnuplot
 
 
@@ -562,7 +562,7 @@ class Sim:
             alpha = 1
         if self.check_coords(x, y) == True:
             if (x, y) not in self.location_map_coords:
-                self.new_location = location.Location(self, x, y, color, alpha,  self.mm_limitation, self.location_mm_size)
+                self.new_location = marker.Location(self, x, y, color, alpha, self.mm_limitation, self.location_mm_size)
                 self.locations.append(self.new_location)
                 self.location_map_coords[self.new_location.coords] = self.new_location
                 self.location_map_id[self.new_location.get_id()] = self.new_location
