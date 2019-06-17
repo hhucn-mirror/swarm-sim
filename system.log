@@ -1,33 +1,29 @@
 Started
-Created particle at (-0.5, 1.0)
-Created particle at (-1.0, -0.0)
-Created particle at (-0.0, 0.0)
-Created particle at (-1.5, -1.0)
-Created particle at (-0.5, -1.0)
-Created particle at (0.5, -1.0)
-Created particle at (-2.0, -2.0)
-Created particle at (-1.0, -2.0)
-Created particle at (-0.0, -2.0)
-Created particle at (1.0, -2.0)
-particle on (-0.5, 1.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.0, -0.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-0.0, 0.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.5, -1.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 6 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-0.0, -2.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-0.5, 1.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
+Created particle at (0.0, 0)
+Created particle at (-0.5, 1)
+Created particle at (-1.0, 2)
+Created particle at (-1.5, 3)
+Created particle at (-2.0, 4)
+Created particle at (-2.5, 5)
+Created particle at (-3.0, 6)
+Created particle at (-3.5, 7)
+Created particle at (-4.0, 8)
+Created particle at (-4.5, 9)
+Created particle at (-5.0, 10)
+Created particle at (-5.5, 11)
+Created particle at (-6.0, 12)
+Created particle at (-6.5, 13)
+Created location with id d0722cdb-5da9-4a35-9928-b4e6cd3b58c8 on coords (0.0, 0)
+Created location with id 0b3b3e9f-3cda-4da4-8742-0463fccbd6fe on coords (1.0, 0)
+Created location with id c3d36ad7-9c1a-46bb-99ad-e1bbe516497b on coords (2.0, 0)
+Created location with id 44ec9bb9-ef36-47e2-a0a1-fe3e0b29872e on coords (3.0, 0)
+Created location with id ab77f2c7-46d5-452d-a533-6de54a6ccc4a on coords (-0.5, -1)
+Created location with id c1f50df7-2d26-4310-97a9-56d87ce5dbea on coords (0.5, -1)
+Created location with id 2f445834-b340-49f1-90be-074e140d4798 on coords (1.5, -1)
+Created location with id 418c806a-4d08-423c-a2c8-1809ba580092 on coords (2.5, -1)
+Created location with id e243bb4d-57fb-483c-8574-b83b748e93c7 on coords (-1.0, -2)
+Created location with id 78509807-af68-4a7e-9291-b4a1a586afda on coords (0.0, -2)
+Created location with id 96a3f935-24d1-4f79-99e3-c4ab27b4b708 on coords (1.0, -2)
+Created location with id be4bad29-a83a-462c-967a-bb6bfc540381 on coords (2.0, -2)
+Created location with id 74171c04-3691-4808-b57e-df8885f68a60 on coords (-1.5, -3)
+Created location with id 79c265d6-a475-450f-8613-ba699ff4b301 on coords (-0.5, -3)
