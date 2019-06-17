@@ -165,10 +165,10 @@ def scenario(sim):
     sim.add_particle(13.5, 3.0)
     sim.add_particle(14.5, 3.0)
     sim.add_particle(15.5, 3.0)
-
-    sim.add_marker(1.5, 3.0)
-    sim.add_marker(2.5, 3.0)
-    sim.add_marker(3.5, 3.0)
-    sim.add_marker(3.0, 2.0)
-    sim.add_marker(2.0, 2.0)
-    sim.add_marker(2.5, 1.0)
+    #
+    # sim.add_marker(1.5, 3.0)
+    # sim.add_marker(2.5, 3.0)
+    # sim.add_marker(3.5, 3.0)
+    # sim.add_marker(3.0, 2.0)
+    # sim.add_marker(2.0, 2.0)
+    # sim.add_marker(2.5, 1.0)
