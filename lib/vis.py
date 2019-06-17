@@ -33,7 +33,7 @@ busy_waiting_time = 0.0015
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 10
+rounds_per_second = 5
 
 # tile_alpha = 0.6
 particle_alpha = 1
@@ -60,7 +60,7 @@ class ScreenshotManager:
     #prefix = dt.isoformat(sep = '_', timespec = 'seconds').replace(':', '') + '_'
     prefix = dt.isoformat(sep='_').replace(':', '') + '_'
 
-    def takeScreenshot():
+    def takeScreenshot(self):
         if not os.path.exists(screenshot_directory):
             os.makedirs(screenshot_directory)
 
