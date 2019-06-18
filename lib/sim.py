@@ -97,6 +97,7 @@ class Sim:
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
         self.border = config_data.border
+        self.config_data = config_data
         self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                            solution=self.solution_mod,
                                                            seed=config_data.seedvalue,
