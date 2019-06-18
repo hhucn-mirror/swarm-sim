@@ -25,9 +25,10 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 particle_add = 13
-creat_particle = False
+creat_particle = True
 output_min = 128
 output_max = 134
+no_action = 100
 
 def invert_dir(dir):
     if dir >= 3:
@@ -392,7 +393,7 @@ def solution(sim):
             if not particle.wait:
                 data_sending(particle)
         elif sim.get_actual_round() % cycle_no == 0:
-            if not particle.wait:
+            if not particle.wait and sim.get_actual_round() > no_action :
                 moving_decision(particle, sim)
             else:
                 particle.wait = False
