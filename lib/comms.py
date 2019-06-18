@@ -36,7 +36,7 @@ class Message:
         else:
             self.content = content
 
-        sender.send_store.add_message(self)
+        sender.send_store.add_message(self, False)
 
     def __create_msg_key(self):
         return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
@@ -52,7 +52,7 @@ class MessageStore(dict):
         self.size = 0
         super().__init__(*maps)
 
-    def add_message(self, message: Message):
+    def add_message(self, message: Message, inc_hop_cnt=True):
         # check if the message is already present
         if message.key in self.keys():
             message = self.get(message.key)
@@ -62,7 +62,8 @@ class MessageStore(dict):
         # add the message to the list of message keys intended for receiver
         else:
             # increment hop_count
-            message.hop_count += 1
+            if inc_hop_cnt:
+                message.hop_count += 1
             if not message.receiver.get_id() in self:
                 self[message.receiver.get_id()] = []
             self[message.receiver.get_id()].append(message.key)
@@ -75,25 +76,34 @@ class MessageStore(dict):
 
     def del_message(self, message: Message):
         del self[message.key]
+        # check if this was the only message for the receiver of message
+        if len(self[message.receiver.get_id()] < 2):
+            del self[message.receiver.get_id()]
         self.size -= 1
 
 
-def send_message(sender, message: Message, receiver):
+def send_message(msg_store, sender, receiver, message: Message):
     if message.hop_count == message.ttl:
         try:
-            sender.send_store.del_message(message)
+            msg_store.del_message(message)
         except KeyError:
             pass
         finally:
             return CommEvent.MessageTTLExpired
+
+    if receiver.get_id() == message.receiver.get_id():
+        store = receiver.rcv_store
+    else:
+        store = receiver.fwd_store
+
     try:
-        receiver.rcv_store.add_message(message)
+        store.add_message(message)
     except OverflowError:
         return CommEvent.ReceiverOutOfMem
     finally:
         if receiver.get_id() == message.receiver.get_id():
             try:
-                sender.send_store.del_message(message)
+                msg_store.del_message(message)
             except KeyError:
                 pass
             finally:
@@ -102,12 +112,7 @@ def send_message(sender, message: Message, receiver):
                 else:
                     return CommEvent.MessageDelivered
         else:
-            try:
-                sender.fwd_store.del_message(message)
-            except KeyError:
-                pass
-            finally:
-                return CommEvent.MessageForwarded
+            return CommEvent.MessageForwarded
 
 
 def generate_random_messages(particle_list, amount, ttl_range=None):

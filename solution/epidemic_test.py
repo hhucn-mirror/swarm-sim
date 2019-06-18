@@ -1,6 +1,9 @@
-from lib.comms import generate_random_messages
+from lib.comms import generate_random_messages, send_message, Message
 from lib.mobility_model import MobilityModel, Mode
 import lib.routing
+
+
+s_radius = 1
 
 
 def solution(sim):
@@ -8,14 +11,15 @@ def solution(sim):
 
     if sim.get_actual_round() == 1:
         particles = sim.get_particle_list()
-        generate_random_messages(particles, len(particles)*2)
+        # generate_random_messages(particles, len(particles)*2)
         # initialize the particle mobility models
         for particle in particles:
-            m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Random_Mode, (5, 30))
+            m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Static, (5, 10))
             m_model.set(particle)
-            r_params = lib.routing.RoutingParameters(lib.routing.Algorithm.Epidemic, 10)
+            r_params = lib.routing.RoutingParameters(lib.routing.Algorithm.Epidemic, scan_radius=s_radius)
             r_params.set(particle)
     else:
+        Message(particles[1], particles[2], sim.get_actual_round(), 100)
         for particle in particles:
             lib.routing.next_step(particle)
             # move the particle to the next location

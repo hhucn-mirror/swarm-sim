@@ -1,7 +1,7 @@
 from enum import Enum
 
 from lib.colors import Colors
-from lib.comms import send_message, CommEvent, Message
+from lib.comms import CommEvent, Message, send_message
 
 
 class Algorithm(Enum):
@@ -38,6 +38,8 @@ class RoutingParameters:
 
 
 def next_step(particle, scan_radius=None):
+    if len(particle.send_store.keys()) == 0 and len(particle.fwd_store.keys()) == 0:
+        return
     routing_params = RoutingParameters.get(particle)
 
     if scan_radius is not None:
@@ -56,21 +58,20 @@ def __next_step_epidemic__(particle, routing_params, nearby=None):
             return
 
     for neighbour in nearby:
-        # first check if we've got a message for this exact neighbour
-        if neighbour.get_id() in particle.send_store:
-            for message_key in particle.send_store[neighbour.get_id()]:
-                try:
-                    message = particle.send_store[message_key]
-                    comm_event = send_message(particle, message, neighbour)
-                    __success_event__(particle, neighbour, message, comm_event)
-                except KeyError:
-                    # ignore deleted keys
-                    pass
         for key in list(particle.send_store.keys()):
             try:
                 item = particle.send_store[key]
                 if isinstance(item, Message):
-                    comm_event = send_message(particle, item, neighbour)
+                    comm_event = send_message(particle.send_store, particle, neighbour, item)
+                    __success_event__(particle, neighbour, item, comm_event)
+            except KeyError:
+                # ignore deleted keys
+                pass
+        for key in list(particle.fwd_store.keys()):
+            try:
+                item = particle.fwd_store[key]
+                if isinstance(item, Message):
+                    comm_event = send_message(particle.fwd_store, particle, neighbour, item)
                     __success_event__(particle, neighbour, item, comm_event)
             except KeyError:
                 # ignore deleted keys

@@ -482,8 +482,9 @@ class CsvRoundData:
                          data['Tile Write'].max(),
 
                          data['Messages Sent'].sum(), data['Messages Forwarded'].sum(),
-                         data['Messages Delivered'].sum(), data['Messages Received'].sum(),
-                         data['Messages Delivered Directly'].sum(),
+                         data['Messages Delivered'].sum(), data['Messages Delivered Directly'].sum(),
+                         data['Messages Received'].sum(),
+
 
                          data['Message TTL Expired'].sum(),
 
