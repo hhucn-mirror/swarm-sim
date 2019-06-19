@@ -24,11 +24,11 @@ W = 4
 NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
-particle_add = 13
-creat_particle = True
-output_min = 128
-output_max = 134
-no_action = 100
+particle_add =  12
+creat_particle = False
+output_min = 0
+output_max = 1340
+no_action = 0
 
 def invert_dir(dir):
     if dir >= 3:
@@ -121,16 +121,16 @@ class info_package:
 
 def reset_attributes(particle):
     particle.fl_min_dist = 10000
-    particle.fl_hop = 0
+    #particle.fl_hop = 0
     particle.fl_rcv = False
 
     particle.p_max_dist =-1
-    particle.p_hop = 0
+    #particle.p_hop = 0
     particle.p_dir = None
     particle.NH_dict.clear()
     particle.fl_cnt = 0
     particle.t_cnt = 0
-    particle.own_dist = 10000
+    #particle.own_dist = 10000
     #particle.p_max_id = None
     #particle.own_dist = 10000
 
@@ -346,6 +346,7 @@ def solution(sim):
             """
             if debug:
                 if output_min <= particle.number <= output_max:
+                    print("\n", sim.get_actual_round())
                     print("P", particle.number, "Before checked received Information")
             data_setting(particle)
             if debug:
@@ -411,6 +412,9 @@ def initialize_particle(particle):
     # dir: direction
     setattr(particle, "fl_dir", None)
     setattr(particle, "fl_hop", 0)
+
+    setattr(particle, "rcv_min_dir", None)
+
     # p: particle
     setattr(particle, "p_max_dist", -1)
     setattr(particle, "p_dir", None)
@@ -520,12 +524,12 @@ def update_own_dist_from_nh(particle):
                 particle.NH_dict[dir].dist = particle.rcv_buf[dir].own_dist
                 if particle.rcv_buf[dir].own_dist + 1 < particle.own_dist:
                     particle.own_dist = particle.rcv_buf[dir].own_dist + 1
-                    min_dist = particle.own_dist
-                    particle.p_max_dist = particle.own_dist
-
-                    particle.p_dir = None
-                    particle.p_hop = 0
-                    particle.p_max_id = None
+                    # min_dist = particle.own_dist
+                    # particle.p_max_dist = particle.own_dist
+                    #
+                    # particle.p_dir = None
+                    # particle.p_hop = 0
+                    # particle.p_max_id = None
                     return_dir = dir
                 elif particle.NH_dict[dir].dist < min_dist:
                     min_dist = particle.NH_dict[dir].dist
@@ -541,6 +545,7 @@ def update_own_dist_from_nh(particle):
                     min_dist = particle.NH_dict[dir].dist
                     return_dir = dir
 
+    particle.rcv_min_dir = return_dir
     return return_dir
 
 
@@ -657,7 +662,13 @@ def find_max_p(dir, particle):
     Else if the I have no p_max and the distance is smaller than my own distance
     than define
     """
-    if particle.rcv_buf[dir].p_max_dist != -1:
+    if particle.rcv_buf[dir].own_dist != 10000 \
+        and particle.rcv_buf[dir].own_dist > particle.own_dist and particle.rcv_buf[dir].own_dist > particle.rcv_buf[dir].p_max_dist:
+        particle.p_max_dist = particle.rcv_buf[dir].own_dist
+        particle.p_dir = dir
+        particle.p_hop = 1
+        particle.p_max_id = particle.rcv_buf[dir].own_id
+    elif particle.rcv_buf[dir].p_max_dist != -1 and particle.rcv_buf[dir].p_max_dist > particle.own_dist:
         if particle.rcv_buf[dir].p_max_dist > particle.p_max_dist:
             new_p(dir, particle)
         elif particle.rcv_buf[dir].p_max_dist == particle.p_max_dist:
@@ -665,10 +676,10 @@ def find_max_p(dir, particle):
                 new_p(dir, particle)
 
 def new_p(dir, particle):
-    particle.p_max_dist = particle.rcv_buf[dir].p_max_dist
-    particle.p_dir = dir
-    particle.p_hop = particle.rcv_buf[dir].p_hop + 1
-    particle.p_max_id = particle.rcv_buf[dir].own_id
+        particle.p_max_dist = particle.rcv_buf[dir].p_max_dist
+        particle.p_dir = dir
+        particle.p_hop = particle.rcv_buf[dir].p_hop + 1
+        particle.p_max_id = particle.rcv_buf[dir].p_max_id
 
 
 def new_fl(dir, particle):
@@ -762,7 +773,8 @@ def move_to_fl_dir(particle):
     if particle.p_max_dist != -1 and particle.fl_min_dist <= particle.own_dist \
     and not particle.particle_in (particle.fl_dir) \
             and not particle.tile_in(particle.fl_dir) \
-            and particle.fl_dir != particle.prev_dir:
+            and particle.fl_dir != particle.prev_dir \
+            and particle.p_max_id is not None:
         moving(particle)
     elif particle.p_max_dist > particle.fl_min_dist and particle.fl_cnt > 0:
         if particle.p_dir is not None \
@@ -772,6 +784,10 @@ def move_to_fl_dir(particle):
             if particle.NH_dict[invert_dir(particle.p_dir)].dist < particle.p_max_dist:
                 particle.fl_dir = invert_dir(particle.p_dir)
                 moving(particle)
+    elif particle.rcv_min_dir is not None and not particle.particle_in (particle.rcv_min_dir) \
+            and not particle.tile_in(particle.rcv_min_dir) and  particle.rcv_min_dir != particle.prev_dir:
+        particle.fl_dir = particle.rcv_min_dir
+        moving(particle)
 
 
     # elif particle.p_max_dist == particle.fl_min_dist and particle.fl_cnt > 0\
@@ -849,10 +865,13 @@ def moving(particle):
     data_clearing(particle)
 
 def data_clearing(particle):
+    particle.rcv_min_dir =  None
     particle.fl_dir = None
     particle.p_dir = None
+    particle.p_hop = 0
+    particle.fl_hop = 0
     particle.p_max_dist = -1
-    # particle.own_dist = 10000
+    particle.own_dist = 10000
     if particle.p_max_id == particle.number:
         particle.p_max_dist = -1
     particle.wait = True
