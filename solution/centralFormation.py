@@ -38,7 +38,7 @@ def solution(sim):
             if leaf not in placed_particles:
                 path = find_shortest_path(spantree, particle, leaf)
                 for particle in path:
-                    particle.set_color(5)
+                    particle.set_color(8)
                 write_replace_directions(1, path)
                 return
 
@@ -217,6 +217,7 @@ def move_and_refresh(path):
     while index < len(path):
         path[index].move_to(path[index].read_memory_with("Dir"))
         path[index].write_memory_with("Dir", None)
+        path[index].set_color(1)
         index = index + 1
 
 #####################################################################
