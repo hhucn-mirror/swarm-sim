@@ -13,7 +13,6 @@ direction = [NE, E, SE, SW, W, NW]
 amount = 0
 
 placed_particles = []
-not_placed_particles = []
 graph = {}
 path = []
 
@@ -46,7 +45,6 @@ def solution(sim):
     else:
         move_and_refresh(path)
         delete_structures()
-        print("Move and Refresh Memory")
 
 def initialize(sim):
 
@@ -221,11 +219,10 @@ def move_and_refresh(path):
         path[index].write_memory_with("Dir", None)
         index = index + 1
 
-#######################
+#####################################################################
 
 def delete_structures():
     placed_particles.clear()
-    not_placed_particles.clear()
     graph.clear()
     path.clear()
 
@@ -233,5 +230,3 @@ def calc_placed_particles(sim):
     for particle in sim.get_particle_list():
         if particle.check_on_location():
             placed_particles.append(particle)
-        else:
-            not_placed_particles.append(particle)
