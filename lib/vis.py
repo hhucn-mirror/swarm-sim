@@ -23,7 +23,7 @@ translation_init = (0, 0)
 # presentation parameters
 window_width = 800
 window_height = 600
-window_resizable = True  # set to False to force resolution even if window does not fit on screen
+window_resizable = False  # set to False to force resolution even if window does not fit on screen
 show_grid = True
 rotate_thirty_degree = False  # the grid is not drawn correctly if the view is rotated!
 
@@ -33,7 +33,7 @@ busy_waiting_time = 0.0015
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 15
+rounds_per_second = 5
 
 # tile_alpha = 0.6
 particle_alpha = 1
