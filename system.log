@@ -1,729 +1,3509 @@
 Started
-Created particle at (0, 0)
-Created particle at (-0.5, -1.0)
-Created particle at (0.5, 1.0)
-Created particle at (-1.0, -2.0)
-Created particle at (-1.5, -3.0)
-Created particle at (-2.0, -4.0)
-Created particle at (-2.5, -5.0)
-Created particle at (-3.0, -6.0)
-Created particle at (0.5, -1.0)
-Created particle at (1.0, -2.0)
-Created particle at (1.5, -3.0)
-Created particle at (2.0, -4.0)
-Created particle at (2.5, -5.0)
-Created particle at (3.0, -6.0)
-Created particle at (2.0, -6.0)
-Created particle at (1.0, -6.0)
-Created particle at (-0.0, -6.0)
-Created particle at (-1.0, -6.0)
-Created particle at (-2.0, -6.0)
-Created location with id 2e6bb284-2cf0-4adf-8337-778039ba18a2 on coords (-3.0, -6.0)
-Created location with id eedef3e8-208f-4a77-b5b8-857b6556a47c on coords (-2.0, -6.0)
-Created location with id ea055c39-693e-4a1e-a9e6-5536e46b4fd1 on coords (-1.0, -6.0)
-Created location with id ac2e8e7c-ea56-4550-91f6-6b7261ca5f92 on coords (0.0, -6.0)
-Created location with id 64d61bcf-9804-4406-8699-95eed0596c4d on coords (-3.5, -7.0)
-Created location with id 01bb5b3e-8867-4042-8802-8a820596ddec on coords (-2.5, -7.0)
-Created location with id 031d745e-9cd3-4ff7-ba94-6a838d9eb169 on coords (-1.5, -7.0)
-Created location with id 9fc4b317-218a-42bd-8ef2-133c83537239 on coords (-0.5, -7.0)
-Created location with id 6241da06-1452-40a9-9dbb-1e7931d539c2 on coords (-4.0, -8.0)
-Created location with id 79e2013f-14d2-42e5-a5e1-85b2d27f51b7 on coords (-3.0, -8.0)
-Created location with id afc383e7-e602-42a9-9cc8-eca6d601fcf7 on coords (-2.0, -8.0)
-Created location with id ea100d2d-be01-4e56-bc02-2f81bdaa6b09 on coords (-1.0, -8.0)
-Created location with id a37ba60d-fab6-46d7-a74d-25e46bed9638 on coords (-4.5, -9.0)
-Created location with id 63be6a66-4de8-49ed-88c2-aa8fcf723c35 on coords (-3.5, -9.0)
-Created location with id 45e5b74d-550d-4f69-a489-6a4db7ef2ee4 on coords (-2.5, -9.0)
-Created location with id adb395b1-cd15-4a41-bf1d-fe4ec2c747d0 on coords (-1.5, -9.0)
-Created location with id 7c1740b6-94ce-4f0f-9248-c880f2860877 on coords (-5.0, -10.0)
-Created location with id 93be04a2-e1c7-4fc7-a50b-bee2fd4a32a8 on coords (-4.0, -10.0)
-Created location with id 1e37bcd4-6977-4ec0-9da0-4108a70b161c on coords (-3.0, -10.0)
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+Created particle at (0.0, 0)
+Created particle at (-0.5, 1)
+Created particle at (-1.0, 2)
+Created particle at (-1.5, 3)
+Created particle at (-2.0, 4)
+Created particle at (-2.5, 5)
+Created particle at (-3.0, 6)
+Created particle at (-3.5, 7)
+Created particle at (-4.0, 8)
+Created particle at (-4.5, 9)
+Created particle at (-5.0, 10)
+Created particle at (-5.5, 11)
+Created particle at (-6.0, 12)
+Created particle at (-6.5, 13)
+Created particle at (-7.0, 14)
+Created particle at (-7.5, 15)
+Created particle at (-8.0, 16)
+Created particle at (-8.5, 17)
+Created particle at (-9.0, 18)
+Created particle at (-9.5, 19)
+Created particle at (-10.0, 20)
+Created particle at (-10.5, 21)
+Created particle at (-11.0, 22)
+Created particle at (-11.5, 23)
+Created particle at (-12.0, 24)
+Created particle at (-12.5, 25)
+Created particle at (-13.0, 26)
+Created particle at (-13.5, 27)
+Created particle at (-14.0, 28)
+Created particle at (-14.5, 29)
+Created particle at (-15.0, 30)
+Created particle at (-15.5, 31)
+Created particle at (-16.0, 32)
+Created particle at (-16.5, 33)
+Created particle at (-17.0, 34)
+Created particle at (-17.5, 35)
+Created particle at (-18.0, 36)
+Created location with id b1906f8e-2998-4cce-81df-9d0fba174f96 on coords (-1.5, 3)
+Created location with id 8cd2f879-9c01-4754-a0d6-18d8ef59b35d on coords (-1.0, 4)
+Created location with id 51d1e4b3-35a8-4bf3-846c-2f2c43048027 on coords (-0.5, 3)
+Created location with id f38f8566-770f-4633-a1e2-479aea5433f8 on coords (-1.0, 2)
+Created location with id 2c169742-33eb-464a-8da9-c9a6fecfce97 on coords (-2.0, 2)
+Created location with id b411cec3-b148-4777-8552-6a183fa713eb on coords (-2.5, 3)
+Created location with id 8bdd2639-14cb-4c41-8e92-32edcc25f280 on coords (-2.0, 4)
+Created location with id 3ab69077-583d-47b3-9512-5156b882af48 on coords (-0.5, 5)
+Created location with id 6421b519-7e2c-4d10-8e6b-aab0146a99b3 on coords (0.0, 4)
+Created location with id ed2c0519-cf2e-420c-be1f-bac3507a5c38 on coords (-1.5, 5)
+Created location with id 248be72d-4b09-4324-9db6-c302bc78b5da on coords (0.5, 3)
+Created location with id 9492ab43-c637-444c-b0e8-e500aebe32ed on coords (0.0, 2)
+Created location with id 10c89f7d-2265-4d31-81ae-191e07e540b7 on coords (-0.5, 1)
+Created location with id 4e45bf46-0f6d-4bf6-84f5-1520e74a1566 on coords (-1.5, 1)
+Created location with id 1c833469-f04b-412a-a40b-0634cafd1c3a on coords (-2.5, 1)
+Created location with id 56fdf0b1-947b-48ff-a4ed-a391115f7454 on coords (-3.0, 2)
+Created location with id 38a28e19-96fa-4d5d-b8df-792fbefb7af5 on coords (-3.5, 3)
+Created location with id ee1c366c-a5d3-4506-b645-67e2dd3e1041 on coords (-3.0, 4)
+Created location with id 81543a03-2a45-46c3-8b62-c183043cd196 on coords (-2.5, 5)
+Created location with id 15e104fd-a92f-48a9-b9d8-5d9f2bc3cb0a on coords (0.0, 6)
+Created location with id 0744587c-4a77-4250-9db0-0b1c685a2282 on coords (0.5, 5)
+Created location with id e5787517-2854-472a-8771-a92757dd871d on coords (-1.0, 6)
+Created location with id 24258d05-e4fa-4831-a34d-fa9ab207b3f2 on coords (1.0, 4)
+Created location with id f49407c6-c1fc-4df4-a966-92117f1f0eb7 on coords (-2.0, 6)
+Created location with id 831e8197-6fe8-4163-874d-2e807b147af3 on coords (1.5, 3)
+Created location with id 298807f8-9043-4c7b-8c63-50a7710b0bd7 on coords (1.0, 2)
+Created location with id 18c6e998-0679-472c-aba2-1c872051c3d2 on coords (0.5, 1)
+Created location with id a29fdc5a-e919-48d1-be9e-cb3554fa30cc on coords (0.0, 0)
+Created location with id d6ce2712-e23e-4321-836f-533fea3bfa2e on coords (-1.0, 0)
+Created location with id 7af4e342-7602-425c-ba85-371aa8909381 on coords (-2.0, 0)
+Created location with id 902ffbb6-2630-4784-a373-da7f4ca3617f on coords (-3.0, 0)
+Created location with id 96862810-d212-461c-ba5d-537294b30fd7 on coords (-3.5, 1)
+Created location with id 19b5af22-6006-490e-a1d6-7acf068c2970 on coords (-4.0, 2)
+Created location with id 5ee19e75-239b-4483-9b92-edd2a27fa667 on coords (-4.5, 3)
+Created location with id 1b329601-0f76-475f-ba74-cc66614ef08a on coords (-4.0, 4)
+Created location with id fb442454-5529-4a7d-8184-0b66a0d68721 on coords (-3.5, 5)
+Created location with id da710792-d64e-4311-bf90-a1d35bc60ce5 on coords (-3.0, 6)
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-0.0, -6.0) is scanning for particle in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.5, 33) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-17.0, 34) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-17.5, 35) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.0, 32) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-18.0, 36) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 0
+particle 5e7c36d8-b41a-4481-8dd8-acfc8c62ae91 successfully moved to 2
+particle 0ba8ca2d-195e-4dbe-ad6b-60d763f358a9 successfully moved to 2
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 2
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 2
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 2
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 2
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.0, 32) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.5, 33) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-17.0, 34) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-17.5, 35) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 0
+particle 0ba8ca2d-195e-4dbe-ad6b-60d763f358a9 successfully moved to 1
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 2
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 2
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 2
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 2
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.0, 32) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.5, 33) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (3.0, -6.0) is scanning for particle in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (2.0, -6.0) is scanning for particle in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (2.5, -5.0) is scanning for particle in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-17.0, 34) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 0
+particle 0ba8ca2d-195e-4dbe-ad6b-60d763f358a9 successfully moved to 0
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 1
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 2
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 2
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 2
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (1.5, -3.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.0, 32) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (2.0, -4.0) is scanning for particle in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 2
-particle 37199c49-6c4a-4d98-b9b3-3e57996972cc successfully moved to 4
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 4
-particle f27b0a57-f9c0-4858-b52e-3d48cb732657 successfully moved to 4
-particle 735c0b35-85af-4816-9a6d-32c8cf9af112 successfully moved to 4
-particle d8cd7333-df85-4827-b82c-b5389d07cd4e successfully moved to 4
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 4
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.5, 33) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 2
+particle 0ba8ca2d-195e-4dbe-ad6b-60d763f358a9 successfully moved to 0
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 0
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 1
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 2
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 2
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-16.0, 32) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 2
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 1
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 0
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 1
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 2
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.5, 31) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 2
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 2
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 1
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 0
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 1
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 2
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-15.0, 30) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 3
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 2
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 2
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 1
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 0
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 1
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.5, 29) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 3
+particle b8f8b741-a1a2-4145-b9c0-ae87880205b9 successfully moved to 3
+particle 0b98188a-3cf5-40b3-bb19-f4388b2d3fe9 successfully moved to 2
+particle b7074cec-8ba5-421c-aab7-e89e42f5288f successfully moved to 2
+particle 8430938e-337c-42fa-a749-acbc88520116 successfully moved to 1
+particle 8b57a952-77dd-45fc-bc65-98cf91353b19 successfully moved to 0
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 1
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-14.0, 28) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 5
+particle 0ff6ce0f-2fe1-45ab-9318-f8fc33720c6c successfully moved to 1
+particle e4c708e3-106e-4a02-9096-85c03741e56c successfully moved to 2
+particle 5e7c36d8-b41a-4481-8dd8-acfc8c62ae91 successfully moved to 2
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 2) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (2.0, -6.0) is scanning for particle in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (2.5, -5.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 1
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 3
-particle f27b0a57-f9c0-4858-b52e-3d48cb732657 successfully moved to 4
-particle 735c0b35-85af-4816-9a6d-32c8cf9af112 successfully moved to 4
-particle d8cd7333-df85-4827-b82c-b5389d07cd4e successfully moved to 4
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 4
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 3
-particle 19201ace-a8a0-48df-af64-33114db27de8 successfully moved to 2
-particle 939b260d-b3ab-42bf-aaf3-ba4c846a9510 successfully moved to 2
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (2.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (2.0, -4.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (2.5, -5.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 1
-particle 735c0b35-85af-4816-9a6d-32c8cf9af112 successfully moved to 3
-particle d8cd7333-df85-4827-b82c-b5389d07cd4e successfully moved to 4
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 4
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 4
-particle 19201ace-a8a0-48df-af64-33114db27de8 successfully moved to 3
-particle 939b260d-b3ab-42bf-aaf3-ba4c846a9510 successfully moved to 2
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (2.5, -5.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (2.0, -6.0) is scanning for particle in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.5, 27) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 3
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 3
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 4
-particle 19201ace-a8a0-48df-af64-33114db27de8 successfully moved to 4
-particle 939b260d-b3ab-42bf-aaf3-ba4c846a9510 successfully moved to 3
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 0
+particle 5e7c36d8-b41a-4481-8dd8-acfc8c62ae91 successfully moved to 1
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.5, 3) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (2.0, -6.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 3
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 3
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 3
-particle 19201ace-a8a0-48df-af64-33114db27de8 successfully moved to 4
-particle 939b260d-b3ab-42bf-aaf3-ba4c846a9510 successfully moved to 4
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-13.0, 26) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (1.0, -6.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 4
+particle 5e7c36d8-b41a-4481-8dd8-acfc8c62ae91 successfully moved to 0
+particle cd826404-ca12-4fc7-857f-1ceed15da2ab successfully moved to 1
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 2
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 2
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (-0.5, 3) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 4
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 3
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 3
-particle 19201ace-a8a0-48df-af64-33114db27de8 successfully moved to 3
-particle 939b260d-b3ab-42bf-aaf3-ba4c846a9510 successfully moved to 4
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (1.0, -2.0) is scanning for particle in 1 hops
-Got 1 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 0
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 4
-particle 6ffc12c6-7b2c-4719-bd57-a909a63b9436 successfully moved to 3
-particle 735c0b35-85af-4816-9a6d-32c8cf9af112 successfully moved to 2
-particle f27b0a57-f9c0-4858-b52e-3d48cb732657 successfully moved to 2
-particle b60fd9e5-9a2c-4dab-abe9-a631e64b4df4 successfully moved to 2
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 3
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 3
-particle 81c39609-b949-4b39-9b12-4d7ac74f4987 successfully moved to 3
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 4
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 5
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.5, 25) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (0.5, -1.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 4
-particle f27b0a57-f9c0-4858-b52e-3d48cb732657 successfully moved to 3
-particle b60fd9e5-9a2c-4dab-abe9-a631e64b4df4 successfully moved to 2
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 2
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 3
-particle 81c39609-b949-4b39-9b12-4d7ac74f4987 successfully moved to 3
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 4
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 6e716b2f-0dc3-42de-b9f2-503a99b02c0d successfully moved to 0
+particle b9a77e43-e68d-4233-b1b1-b9d46b501ff2 successfully moved to 1
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle on (0.5, 1.0) is scanning for particle in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-12.0, 24) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 5
+particle fee37b3d-e6c2-4d2e-b8b7-98736601f2f4 successfully moved to 1
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 2
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (0, 0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 3
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 3
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 3
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 2
-particle 81c39609-b949-4b39-9b12-4d7ac74f4987 successfully moved to 3
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (0.0, 0.0) is scanning for particle in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.5, 23) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 0
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 1
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-0.5, -1) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 2
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 3
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 3
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 3
-particle 81c39609-b949-4b39-9b12-4d7ac74f4987 successfully moved to 2
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-3.0, -10.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -1.0) is scanning for particle in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-11.0, 22) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 0778211d-a01c-4d77-8095-992e914e33db successfully moved to 4
+particle aa451994-233d-418a-8c7e-aff7ecc7f716 successfully moved to 0
+particle 02a45a73-8661-44b7-a495-e5186ea9a049 successfully moved to 1
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.0, -2) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 4
-particle 882882c8-d6e1-4479-840f-6ef9d3ad6324 successfully moved to 3
-particle f27b0a57-f9c0-4858-b52e-3d48cb732657 successfully moved to 3
-particle b60fd9e5-9a2c-4dab-abe9-a631e64b4df4 successfully moved to 3
-particle 81c39609-b949-4b39-9b12-4d7ac74f4987 successfully moved to 2
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 2
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-4.0, -10.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -2.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.5, 21) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 3
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 2
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle on (-1.5, -3) is scanning for particle in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -10.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 4
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 3
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 3
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 3
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 2
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-5.0, -10.0) is scanning for particle in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-10.0, 20) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
-Got 6 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-4.0, -10.0) is scanning for particle in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-1.5, -3.0) is scanning for particle in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 3
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.5, 19) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 2
+particle 1ad0dde8-9bfb-4002-9428-1a45801fa7a3 successfully moved to 3
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-2.0, -4) is scanning for particle in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -10.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 0
-particle da5c13e3-8da0-4f9b-92dd-bcf336b595d2 successfully moved to 4
-particle 22d75aff-3d76-4afd-b2fc-b3fc53429034 successfully moved to 3
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 3
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 2
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-4.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-5.0, -10.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.0, -4.0) is scanning for particle in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-9.0, 18) is scanning for particle in 1 hops
 Got 1 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.5, -5) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-3.0, -10.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
 Got 5 in 1 hops
-particle on (-4.0, -10.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.0, -6.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 0
-particle e6521340-12f3-40f5-80b3-aba78f4da1bc successfully moved to 4
-particle 86af828b-cfb8-43ee-bc07-b5fc7afd7c76 successfully moved to 3
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 3
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 2
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 3
-particle on (-4.0, -8.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-1.5, -7.0) is scanning for particle in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.5, -9.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-4.5, -9.0) is scanning for particle in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-5.0, -10.0) is scanning for particle in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-2.5, -5.0) is scanning for particle in 1 hops
-Got 2 in 1 hops
-particle on (-2.0, -8.0) is scanning for particle in 1 hops
+particle 358f59a1-e72e-4a72-bebe-3ecb0a99fe14 successfully moved to 4
+particle e4c708e3-106e-4a02-9096-85c03741e56c successfully moved to 3
+particle 092d2e37-0515-4788-9347-8e77b33f6462 successfully moved to 2
+particle a3adc63c-859e-4e8e-8394-e8d3f226ffc1 successfully moved to 2
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 2
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-3.5, -9.0) is scanning for particle in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
 Got 6 in 1 hops
-particle on (-2.0, -6) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-3.0, -10.0) is scanning for particle in 1 hops
-Got 3 in 1 hops
-particle on (-3.0, -8.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-4.0, -10.0) is scanning for particle in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -6.0) is scanning for particle in 1 hops
-Got 4 in 1 hops
-particle on (-2.5, -7.0) is scanning for particle in 1 hops
-Got 5 in 1 hops
-particle on (-1.5, -9.0) is scanning for particle in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (0.0, -6.0) is scanning for particle in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
 Got 2 in 1 hops
-particle on (-3.0, -6.0) is scanning for particle in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
 Got 3 in 1 hops
-particle on (-0.5, -7.0) is scanning for particle in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle on (-1.0, -8.0) is scanning for particle in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
 Got 4 in 1 hops
-particle d00cdf6a-4ca3-4a17-b4e2-c21b003be574 successfully moved to 0
-particle ece23884-e6aa-49fb-b692-5b3a45d1ec6f successfully moved to 4
-particle 64823217-c2af-4404-b263-790bcc177086 successfully moved to 3
-particle d5e1ba36-d9cb-457d-b018-0e268e9e063b successfully moved to 3
-particle 9a2c6e1e-8661-402d-b91e-0a5ca7914104 successfully moved to 2
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.5, 17) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 3
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 2
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-8.0, 16) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 895db795-3141-4408-aef1-df5fd7b6b53d successfully moved to 3
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-7.5, 15) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 3
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-7.0, 14) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 3
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 3
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 2
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-6.5, 13) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 2
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 3
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 3
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-6.0, 12) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 3
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 3
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 3
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 2
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-5.5, 11) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 5
+particle 27782404-baad-4042-a302-51a56b693e89 successfully moved to 3
+particle b06e4358-dbbf-453a-bcfd-ebc76a8db5bd successfully moved to 3
+particle 78ee39bc-d78e-4621-95d1-597267702af5 successfully moved to 3
+particle 92a89d17-01b4-46d9-88e2-390ac4585d00 successfully moved to 2
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 2
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-5.0, 10) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 5
+particle 3972e778-7493-42db-8743-4f2f60a98ee9 successfully moved to 3
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 3
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 3
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 2
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-4.5, 9) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 0
+particle 19e7735a-3328-481a-8f19-5dc87b8ae2b0 successfully moved to 4
+particle e36e7d15-2b43-4808-b108-7df624c52c61 successfully moved to 3
+particle 8d1fbd1a-7fff-4596-924b-55c2559b0515 successfully moved to 3
+particle 529c2a66-e299-4f04-982b-9e9784733dda successfully moved to 2
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 2
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-4.0, 8) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 4
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 3
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 3
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 2
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 5 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.5, 7) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle 524f3eef-694f-480e-b9ad-aee8d3cedc62 successfully moved to 0
+particle eebda501-c219-45b6-8981-0c44f2454875 successfully moved to 4
+particle 73174e4b-fd7e-4dc0-8ee4-ad0d052fbdbc successfully moved to 3
+particle 30babf92-6ae0-4e06-a7e7-63d011402f98 successfully moved to 3
+particle dc3fec63-16ad-41c0-9a85-c22bb7c9cfb7 successfully moved to 2
+particle 527dfa09-dcb0-4aba-9986-26fb6347fcaf successfully moved to 2
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (1.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 6) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.5, 5) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-4.5, 3) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-1.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.0, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (1.0, 4) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-2.0, 4) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0.5, 5) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-4.0, 2) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-3.0, 6) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-3.5, 1) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 0) is scanning for particle in 1 hops
+Got 4 in 1 hops
+particle on (-1.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-3.0, 2) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 1) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (-2.5, 3) is scanning for particle in 1 hops
+Got 6 in 1 hops
 Finished

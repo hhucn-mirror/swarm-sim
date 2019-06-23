@@ -21,26 +21,28 @@ def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if (sim.get_actual_round() == 1):
         initialize(sim)
-        print("Particles on Locations")
         i = 0
         while i < len(placed_particles):
             print(placed_particles[i].coords)
             i = i+1
 
     if (sim.get_actual_round() % 2 == 1):
+        # calculation for movement
         calc_placed_particles(sim)
         particle = which_particle_to_move(sim)
         create_graph(sim)
-        spantree = create_spantree(particle)
-        leafs = get_leafs(spantree)
+        if particle != None:
+            spantree = create_spantree(particle)
+            leafs = get_leafs(spantree)
 
-        for leaf in leafs:
-            if leaf not in placed_particles:
-                path = find_shortest_path(spantree, particle, leaf)
-                for particle in path:
-                    particle.set_color(8)
-                write_replace_directions(1, path)
-                return
+            for leaf in leafs:
+                if leaf not in placed_particles:
+                    path = find_shortest_path(spantree, particle, leaf)
+                    for particle in path:
+                        particle.set_color(8)
+                    write_replace_directions(1, path)
+                    return
+
 
     else:
         move_and_refresh(path)
@@ -55,11 +57,13 @@ def initialize(sim):
 
     centerParticle = sim.get_particle_list()[0]
     centerPos = centerParticle.coords
-    print(centerPos)
 
     #create_locationsT(sim, centerPos)
     #create_locationsL(sim, centerPos)
-    create_locationsS(sim, centerPos)
+    #create_locationsS(sim, centerPos)
+
+    create_locationsH(sim, centerPos)
+
 
 # triangle formula
 def create_locationsT(sim, pos):
@@ -117,11 +121,37 @@ def create_locationsS(sim, pos):
             y = startPos[1]
             if locationCount < particleCount:
                 sim.add_location(x, y)
+                locationCount = locationCount + 1
             else:
                 return
-            locationCount = locationCount + 1
             i = i + 1
         d = d+1
+
+# hexagon formula
+def create_locationsH(sim, pos):
+    locationCount = 0
+    particleCount = amount
+
+    positions = [pos]
+
+    i = 0
+    while True:
+        current_pos = positions[i]
+
+        dir = 0
+        while dir < 6:
+            new_coords = sim.get_coords_in_dir(current_pos, dir)
+            positions.append(new_coords)
+            dir = dir + 1
+
+
+        if locationCount < particleCount:
+            if sim.get_location_map_coords().get(current_pos) == None:
+                sim.add_location(current_pos[0], current_pos[1])
+                locationCount = locationCount + 1
+        else:
+            return
+        i = i+1
 
 
 ###########################################
@@ -208,7 +238,6 @@ def calc_dir(p1, p2):
         if tmp == p1:
             return i
         i = i + 1
-
 
 ######################################################################
 
