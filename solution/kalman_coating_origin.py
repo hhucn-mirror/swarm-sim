@@ -24,8 +24,8 @@ W = 4
 NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
-particle_add =  12
-creat_particle = False
+particle_add =  0
+creat_particle = True
 output_min = 0
 output_max = 1340
 no_action = 0
@@ -121,19 +121,13 @@ class info_package:
 
 def reset_attributes(particle):
     particle.fl_min_dist = 10000
-    #particle.fl_hop = 0
-    particle.fl_rcv = False
 
     particle.p_max_dist =-1
-    #particle.p_hop = 0
     particle.p_dir = None
     particle.NH_dict.clear()
     particle.fl_cnt = 0
     particle.t_cnt = 0
-    #particle.rcv_min_dir.clear()
-    #particle.own_dist = 10000
-    #particle.p_max_id = None
-    #particle.own_dist = 10000
+
 
 
 cycle_no = 4
@@ -414,6 +408,7 @@ def initialize_particle(particle):
     setattr(particle, "fl_dir", None)
     setattr(particle, "fl_hop", 0)
 
+    setattr(particle, "nh_min_dist", 10000)
     setattr(particle, "rcv_min_dir", [])
 
     # p: particle
@@ -434,7 +429,6 @@ def initialize_particle(particle):
     # stores the previous (prev) direction
     setattr(particle, "prev_dir", -1)
     setattr(particle, "wait", False)
-    setattr(particle, "fl_rcv", False)
 
 
 def scanning_neighborhood(particle, sim, particles_list):
@@ -528,12 +522,13 @@ def update_own_dist_from_nh(particle):
                 if particle.rcv_buf[dir].own_dist < particle.own_dist:
                     particle.own_dist = particle.rcv_buf[dir].own_dist + 1
                     return_dir = dir
-                    particle.rcv_min_dir.clear()
-                    particle.rcv_min_dir.append(dir)
-                    print("first rcv_min_dir", particle.rcv_min_dir )
-                elif particle.NH_dict[dir].dist == min_dist:
-                    particle.rcv_min_dir.append(dir)
-                    print("second rcv_min_dir", particle.rcv_min_dir)
+                    if particle.rcv_buf[dir].own_dist < particle.nh_min_dist:
+                        particle.nh_min_dist = particle.rcv_buf[dir].own_dist
+                        particle.rcv_min_dir.clear()
+                        particle.rcv_min_dir.append(dir)
+                    elif particle.rcv_buf[dir].own_dist == particle.nh_min_dist:
+                        if dir not in particle.rcv_min_dir:
+                            particle.rcv_min_dir.append(dir)
 
             else:
                 if particle.rcv_buf[dir].own_dist < min_dist:
@@ -544,17 +539,24 @@ def update_own_dist_from_nh(particle):
 
 
 def update_nh_dict(particle, return_dir):
-    if 0 < particle.fl_cnt < 6:
-        for i in range(0, 6):
-            if (particle.NH_dict[i].type == "p" or particle.NH_dict[i].type == "t"):
-                for j in range (1, 6):
-                    scan_dir = dir_in_range(i+j)
-                    if particle.NH_dict[scan_dir].type == "fl":
+    """
 
-                        particle.NH_dict[scan_dir].dist = min( particle.NH_dict[dir_in_range(scan_dir + 1)].dist,
-                                                               particle.NH_dict[dir_in_range(scan_dir - 1)].dist) +1
-                        if particle.NH_dict[scan_dir].dist == 0 or particle.NH_dict[scan_dir].dist == 10001:
-                            particle.NH_dict[scan_dir].dist = 10000
+    This part I have to d
+
+    :param particle:
+    :param return_dir:
+    :return:
+    """
+    for i in range(0, 6):
+        if (particle.NH_dict[i].type == "p" or particle.NH_dict[i].type == "t"):
+            for j in range (1, 6):
+                scan_dir = dir_in_range(i+j)
+                if particle.NH_dict[scan_dir].type == "fl":
+
+                    particle.NH_dict[scan_dir].dist = min( particle.NH_dict[dir_in_range(scan_dir + 1)].dist,
+                                                           particle.NH_dict[dir_in_range(scan_dir - 1)].dist) +1
+                    if particle.NH_dict[scan_dir].dist == 0 or particle.NH_dict[scan_dir].dist == 10001:
+                        particle.NH_dict[scan_dir].dist = 10000
 
         min_fl_dist = 10000
         min_dir = None
@@ -567,68 +569,6 @@ def update_nh_dict(particle, return_dir):
         particle.fl_dir = min_dir
         particle.fl_hop = 1
 
-                # elif particle.NH_dict[dir_in_range(dir + 1)].type == "p" or "t":
-            #     particle.NH_dict[dir].dist = particle.NH_dict[dir_in_range(dir + 1)].dist + 1
-            # elif particle.NH_dict[dir_in_range(dir - 1)].type == "p" or "t":
-            #     particle.NH_dict[dir].dist = particle.NH_dict[dir_in_range(dir - 1)].dist + 1
-            # elif particle.NH_dict[dir_in_range(dir + 1)].type == "fl"\
-            # and particle.NH_dict[dir_in_range(dir - 1)].type == "fl":
-            #     if particle.NH_dict[dir_in_range(dir + 2)].type == "p" or "t" \
-            #     and particle.NH_dict[dir_in_range(dir - 2)].type == "p" or "t":
-            #         particle.NH_dict[dir_in_range(dir + 1)].dist = particle.NH_dict[dir_in_range(dir + 2)].dist + 1
-            #         particle.NH_dict[dir_in_range(dir - 1)].dist = particle.NH_dict[dir_in_range(dir - 2)].dist + 1
-            #         particle.NH_dict[dir].dist = min(particle.NH_dict[dir_in_range(dir + 1)].dist,
-            #                                          particle.NH_dict[dir_in_range(dir - 1)].dist) + 1
-
-                    # if return_dir is not None:
-    #     particle.NH_dict[dir_in_range(return_dir + 1)].dist = particle.rcv_buf[return_dir].own_dist + 1
-    #     particle.NH_dict[dir_in_range(return_dir - 1)].dist = particle.rcv_buf[return_dir].own_dist + 1
-    #     # for dir in particle.NH_dict:
-    #     #
-    #     #     if particle.NH_dict[dir].type == "fl" and particle.NH_dict[dir].dist == 10000:
-    #     #         particle.NH_dict[dir].dist = particle.own_dist
-    #     #         if particle.NH_dict[dir].dist < particle.fl_min_dist  :
-    #     #             particle.fl_min_dist = particle.NH_dict[dir].dist
-    #     #             particle.fl_dir = dir_in_range(return_dir + 1)
-    #     #             particle.fl_hop = 1
-    #
-    #
-    # #
-    # # if particle.NH_dict[dir_in_range(return_dir + 1)].type != "fl" \
-    # #     and particle.NH_dict[dir_in_range(return_dir - 1)].type != "fl":
-    # #         if particle.NH_dict[dir_in_range(return_dir + 2)].type == "fl":
-    # #             particle.NH_dict[dir_in_range(return_dir + 2)].dist = particle.own_dist
-    # #             particle.fl_min_dist = particle.own_dist
-    # #             particle.fl_dir = dir_in_range(return_dir + 2)
-    # #             particle.fl_hop = 1
-    # #         elif particle.NH_dict[dir_in_range(return_dir - 2)].type == "fl":
-    # #             particle.NH_dict[dir_in_range(return_dir - 2)].dist = particle.own_dist
-    # #             particle.fl_min_dist = particle.own_dist
-    # #             particle.fl_dir = dir_in_range(return_dir - 2)
-    # #             particle.fl_hop = 1
-    # #         elif particle.NH_dict[dir_in_range(return_dir - 3)].type == "fl":
-    # #             particle.NH_dict[dir_in_range(return_dir - 3)].dist = particle.own_dist
-    # #             particle.fl_min_dist = particle.own_dist
-    # #             particle.fl_dir = dir_in_range(return_dir - 3)
-    # #             particle.fl_hop = 1
-    # # else:
-    # if particle.NH_dict[dir_in_range(return_dir + 1)].type == "fl" \
-    #     and particle.prev_dir != dir_in_range(return_dir + 1)\
-    #         and particle.NH_dict[dir_in_range(return_dir + 1)].dist < particle.own_dist:
-    #     particle.fl_min_dist = particle.own_dist
-    #     particle.fl_dir = dir_in_range(return_dir + 1)
-    #     particle.fl_hop = 1
-    # elif particle.NH_dict[dir_in_range(return_dir - 1)].type == "fl"\
-    #     and particle.prev_dir != dir_in_range(return_dir - 1)\
-    #         and particle.NH_dict[dir_in_range(return_dir + 1)].dist < particle.own_dist:
-    #     particle.fl_min_dist = particle.own_dist
-    #     particle.fl_dir = dir_in_range(return_dir - 1)
-    #     particle.fl_hop = 1
-    #
-    #         # update = True
-    #         # # if update == True:
-    #         # #     #set_nh_dist(particle)
-    #         # #     set_min_max_data(particle)
 
 
 def comparing_fl_p_dist(particle):
@@ -682,7 +622,7 @@ def new_fl(dir, particle):
         particle.fl_min_dist = particle.rcv_buf[dir].fl_min_dist
         particle.fl_dir = dir
         particle.fl_hop = particle.rcv_buf[dir].fl_hop + 1
-        particle.fl_rcv = True
+
 
 
 def hop_compare(dir, particle):
@@ -741,52 +681,71 @@ def moving_decision(particle, sim):
     #     need_to_move(particle
     # )
 
-
-
 def move_to_fl_dir(particle):
-
-    # Move when you have a p_max and fl_min is smaller or equal to your own distance
-    # This is the situation when you are exactly beside the free position
-    if particle.p_max_dist != -1 and particle.fl_min_dist <= particle.own_dist \
-    and not particle.particle_in (particle.fl_dir) \
-            and not particle.tile_in(particle.fl_dir) \
-            and particle.fl_dir != particle.prev_dir \
-            and particle.p_max_id is not None:
-        moving(particle)
     # Here it is when you are in a cave position and you want to run away from
     # the particle that is beside a free location that is smaller than the maximum particle in the network
     # go into the oposite direction where you got the message of the maximal particle distance
-    elif particle.p_max_dist > particle.fl_min_dist and particle.fl_cnt > 0:
-        if particle.p_dir is not None \
-        and not particle.particle_in(invert_dir(particle.p_dir))\
-            and not particle.tile_in(invert_dir(particle.p_dir)) \
-            and invert_dir(particle.p_dir) != particle.prev_dir:
-            if particle.NH_dict[invert_dir(particle.p_dir)].dist < particle.p_max_dist:
+    if particle.p_max_dist != -1:
+        for dir in direction:
+            if particle.NH_dict[dir].type == "fl" and particle.p_max_dist - particle.NH_dict[dir].dist == 1:
+                if not particle.particle_in(dir) and not particle.tile_in(dir):
+                    particle.fl_dir = dir
+                    moving(particle)
+                    return
+                else:
+                    print("I thought that there is a free location but it is not")
+        if particle.rcv_min_dir is not None and particle.nh_min_dist < particle.p_max_dist:
+            for fl_dir in particle.rcv_min_dir:
+                if not particle.particle_in(fl_dir):
+                    particle.fl_dir = fl_dir
+                    moving(particle)
+                    return
+        if not particle.particle_in(invert_dir(particle.p_dir)) and not particle.tile_in(invert_dir(particle.p_dir)):
+           if particle.p_max_dist- particle.NH_dict[invert_dir(particle.p_dir)].dist  == 1:
                 particle.fl_dir = invert_dir(particle.p_dir)
                 moving(particle)
-    #Go to the free direction where a particle was there before that had a distance lower than yours
-    elif particle.rcv_min_dir is not None:
-        for fl_dir in particle.rcv_min_dir:
-            if not particle.particle_in (fl_dir):
-                particle.fl_dir = fl_dir
-                moving(particle)
-                break
-            #and  particle.rcv_min_dir != particle.prev_dir:
+                return
+
+    else:
+        if particle.rcv_min_dir is not None and particle.nh_min_dist < particle.own_dist:
+            for fl_dir in particle.rcv_min_dir:
+                if not particle.particle_in(fl_dir):
+                    particle.fl_dir = fl_dir
+                    moving(particle)
+                    return
 
 
-    # elif particle.p_max_dist == particle.fl_min_dist and particle.fl_cnt > 0\
-    #         and particle.own_dist < particle.fl_min_dist \
-    #         and particle.own_dist < particle.p_max_dist and particle.fl_min_dist != 10000\
-    #         and particle.p_max_dist != -1:
-    #     if not particle.particle_in(invert_dir(particle.p_dir)) \
-    #             and not particle.tile_in(invert_dir(particle.p_dir)) \
-    #             and invert_dir(particle.p_dir) != particle.prev_dir:
-    #         particle.fl_dir = invert_dir(particle.p_dir)
-    #         moving(particle)
-        #min_dir = check_for_min_fl(particle)
-                # if min_dir is not None:
-                #     particle.fl_dir = min_dir
-                #     moving(particle)
+
+# def move_to_fl_dir(particle):
+#     # Here it is when you are in a cave position and you want to run away from
+#     # the particle that is beside a free location that is smaller than the maximum particle in the network
+#     # go into the oposite direction where you got the message of the maximal particle distance
+#     if particle.p_max_dist > particle.fl_min_dist and particle.fl_cnt > 0:
+#         if particle.p_dir is not None \
+#             and not particle.particle_in(invert_dir(particle.p_dir)) \
+#             and not particle.tile_in(invert_dir(particle.p_dir)) \
+#             and invert_dir(particle.p_dir) != particle.prev_dir:
+#             if particle.NH_dict[invert_dir(particle.p_dir)].dist < particle.p_max_dist:
+#                 particle.fl_dir = invert_dir(particle.p_dir)
+#                 moving(particle)
+#     # Go to the free direction where a particle was there before that had a distance lower than yours
+#     elif particle.rcv_min_dir is not None:
+#         for fl_dir in particle.rcv_min_dir:
+#             if not particle.particle_in (fl_dir):
+#                 particle.fl_dir = fl_dir
+#                 moving(particle)
+#                 break
+#
+#
+#     # Move when you have a p_max and fl_min is smaller or equal to your own distance
+#     # This is the situation when you are exactly beside the free position
+#     elif particle.p_max_dist != -1 and particle.fl_min_dist <= particle.own_dist \
+#     and not particle.particle_in (particle.fl_dir) \
+#             and not particle.tile_in(particle.fl_dir) \
+#             and particle.fl_dir != particle.prev_dir \
+#             and particle.p_max_id is not None:
+#         moving(particle)
+
 
 def check_for_fl(particle):
     # Move to the next fl that is equal or lower than your distance
@@ -851,10 +810,10 @@ def moving(particle):
 def data_clearing(particle):
     particle.fl_dir = None
     particle.p_dir = None
+    particle.nh_min_dist = 10000
+    particle.rcv_min_dir.clear()
     particle.p_hop = 0
     particle.fl_hop = 0
     particle.p_max_dist = -1
     particle.own_dist = 10000
-    if particle.p_max_id == particle.number:
-        particle.p_max_dist = -1
     particle.wait = True
