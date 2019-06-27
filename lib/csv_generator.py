@@ -23,31 +23,34 @@ class CsvParticleFile:
             self.csv_file = open(self.file_name, 'w', newline='')
             self.writer = csv.writer(self.csv_file)
             self.writer.writerow(['Particle ID', 'Particle Number',
-                                  'Location Created', 'Location Deleted',
-                                  'Location Read', 'Location Write',
                                   'Memory Read', 'Memory Write',
-                                  'Particles Created', 'Particles Deleted',
-                                  'Particles Dropped',
                                   'Particle Read', 'Particle Steps',
-                                  'Particles Taken', 'Particle Write',
-                                  'Tiles Created', 'Tiles Deleted',
-                                  'Tiles Dropped',
-                                  'Tile Read', 'Tiles Taken',
-                                  'Tile Write', 'Success'
+                                  'Particle Write', 'Tile Read',
+                                  'Tile Write',
+                                  'Steps NE (0)',
+                                  'Steps E  (1)',
+                                  'Steps SE (2)',
+                                  'Steps SW (3)',
+                                  'Steps W  (4)',
+                                  'Steps NW (5)',
+                                  'Success'
                                   ])
+
     def write_particle(self, particle):
         csv_iterator = [particle.csv_particle_writer.id, particle.csv_particle_writer.number,
-                        particle.csv_particle_writer.location_created, particle.csv_particle_writer.location_deleted,
-                        particle.csv_particle_writer.location_read, particle.csv_particle_writer.location_write,
                         particle.csv_particle_writer.memory_read, particle.csv_particle_writer.memory_write,
-                        particle.csv_particle_writer.particle_created,particle.csv_particle_writer.particles_dropped,
-                        particle.csv_particle_writer.particle_deleted, particle.csv_particle_writer.particle_read,
-                        particle.csv_particle_writer.steps, particle.csv_particle_writer.particles_taken,
+                        particle.csv_particle_writer.particle_read,
+                        particle.csv_particle_writer.steps,
                         particle.csv_particle_writer.particle_write,
-                        particle.csv_particle_writer.tile_created, particle.csv_particle_writer.tile_deleted,
-                        particle.csv_particle_writer.tiles_dropped,
-                        particle.csv_particle_writer.tile_read, particle.csv_particle_writer.tiles_taken,
-                        particle.csv_particle_writer.tile_write, particle.csv_particle_writer.success]
+                        particle.csv_particle_writer.tile_read,
+                        particle.csv_particle_writer.tile_write,
+                        particle.csv_particle_writer.directional_steps[0],
+                        particle.csv_particle_writer.directional_steps[1],
+                        particle.csv_particle_writer.directional_steps[2],
+                        particle.csv_particle_writer.directional_steps[3],
+                        particle.csv_particle_writer.directional_steps[4],
+                        particle.csv_particle_writer.directional_steps[5],
+                        particle.csv_particle_writer.success]
         self.writer.writerow(csv_iterator)
 
 
@@ -75,6 +78,7 @@ class CsvParticleData:
         self.tiles_taken = 0
         self.tiles_dropped = 0
         self.success=0
+        self.directional_steps = [0, 0, 0, 0, 0, 0]
 
 
     def write_particle(self, steps= 0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
@@ -104,8 +108,9 @@ class CsvParticleData:
         self.success = self.success+success
 
 
-
-
+    def write_directional_metrics(self, dir=0):
+        if 0 <= dir < 6:
+            self.directional_steps[dir] = self.directional_steps[dir] + 1
 
 
 class CsvRoundData:
@@ -161,6 +166,8 @@ class CsvRoundData:
         self.tiles_dropped = 0
         self.tiles_taken_sum = 0
         self.tiles_dropped_sum = 0
+        self.directional_metrics_sum = [0, 0, 0, 0, 0, 0]
+        self.directional_metrics = [0, 0, 0, 0, 0, 0]
         self.directory = directory
         self.file_name = directory + '/rounds.csv'
         self.csv_file = open(self.file_name, 'w', newline='')
@@ -190,6 +197,12 @@ class CsvRoundData:
                                     'Tile Read', 'Tile Read Sum',
                                     'Tiles Taken', 'Tiles Taken Sum',
                                     'Tile Write', 'Tile Write Sum',
+                                    'Steps NE (0)', 'Steps NE Sum (0)',
+                                    'Steps E  (1)', 'Steps E  Sum (1)',
+                                    'Steps SE (2)', 'Steps SE Sum (2)',
+                                    'Steps SW (3)', 'Steps WS Sum (3)',
+                                    'Steps W  (4)', 'Steps W  Sum (4)',
+                                    'Steps NW (5)', 'Steps NW Sum (5)'
                                     ])
 
     def update_particle_num (self, particle):
@@ -209,7 +222,7 @@ class CsvRoundData:
                         particle_write = 0, tile_write = 0, location_write = 0, memory_write = 0,
                         particle_created=0, tile_created=0, location_created=0,
                         particle_deleted=0, tile_deleted=0, location_deleted=0, tiles_taken=0, tiles_dropped=0,
-                        particles_taken=0, particles_dropped=0):
+                        particles_taken=0, particles_dropped=0, directional_metrics=[]):
         logging.debug("CSV: Starting writing_rounds")
         self.location_created_sum = self.location_created_sum + location_created
         self.location_deleted_sum = self.location_deleted_sum + location_deleted
@@ -230,6 +243,13 @@ class CsvRoundData:
         self.tile_write_sum = self.tile_write_sum + tile_write
         self.particles_taken_sum = self.particles_taken_sum + particles_taken
         self.particles_dropped_sum = self.particles_dropped_sum + particles_dropped
+        if len(directional_metrics) == 6:
+            self.directional_metrics_sum[0] = self.directional_metrics_sum[0] + directional_metrics[0]
+            self.directional_metrics_sum[1] = self.directional_metrics_sum[1] + directional_metrics[1]
+            self.directional_metrics_sum[2] = self.directional_metrics_sum[2] + directional_metrics[2]
+            self.directional_metrics_sum[3] = self.directional_metrics_sum[3] + directional_metrics[3]
+            self.directional_metrics_sum[4] = self.directional_metrics_sum[4] + directional_metrics[4]
+            self.directional_metrics_sum[5] = self.directional_metrics_sum[5] + directional_metrics[5]
 
         if self.actual_round == self.sim.get_actual_round():
             self.steps = self.steps + steps
@@ -251,6 +271,13 @@ class CsvRoundData:
             self.tiles_taken = self.tiles_taken + tiles_taken
             self.particles_taken= self.particles_taken + particles_taken
             self.particles_dropped = self.particles_dropped + particles_dropped
+            if len(directional_metrics) == 6:
+                self.directional_metrics[0] = self.directional_metrics[0] + directional_metrics[0]
+                self.directional_metrics[1] = self.directional_metrics[1] + directional_metrics[1]
+                self.directional_metrics[2] = self.directional_metrics[2] + directional_metrics[2]
+                self.directional_metrics[3] = self.directional_metrics[3] + directional_metrics[3]
+                self.directional_metrics[4] = self.directional_metrics[4] + directional_metrics[4]
+                self.directional_metrics[5] = self.directional_metrics[5] + directional_metrics[5]
         elif self.actual_round !=self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
             self.steps = steps
@@ -272,6 +299,8 @@ class CsvRoundData:
             self.tiles_taken = tiles_taken
             self.particles_taken = particles_taken
             self.particles_dropped = particles_dropped
+            if len(directional_metrics) == 6:
+                self.directional_metrics = directional_metrics
         logging.debug("CSV: Ending writing_rounds")
 
     def next_line(self, round):
@@ -292,7 +321,14 @@ class CsvRoundData:
                         self.tile_num, self.tile_created, self.tile_created_sum,
                         self.tile_deleted, self.tile_deleted_sum, self.tiles_dropped, self.tiles_dropped_sum,
                         self.tile_read, self.tile_read_sum, self.tiles_taken, self.tiles_taken_sum,
-                        self.tile_write, self.tile_write_sum]
+                        self.tile_write, self.tile_write_sum,
+                        self.directional_metrics[0], self.directional_metrics_sum[0],
+                        self.directional_metrics[1], self.directional_metrics_sum[1],
+                        self.directional_metrics[2], self.directional_metrics_sum[2],
+                        self.directional_metrics[3], self.directional_metrics_sum[3],
+                        self.directional_metrics[4], self.directional_metrics_sum[4],
+                        self.directional_metrics[5], self.directional_metrics_sum[5]
+                        ]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = round
         self.steps=0
@@ -316,6 +352,7 @@ class CsvRoundData:
         self.success_counter = 0
         self.particles_taken = 0
         self.particles_dropped = 0
+        self.directional_metrics = [0, 0, 0, 0, 0, 0]
 
     def aggregate_metrics(self):
         self.csv_file.close()
@@ -329,34 +366,19 @@ class CsvRoundData:
                                 'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
                                 'Success Round Min', 'Success Round Max',
                                 'Particle Counter',
-                                'Particles Created Sum', 'Particles Created Avg',
-                                'Particles Created Min', 'Particles Created Max',
-                                'Particles Deleted Sum', 'Particles Deleted Avg',
-                                'Particles Deleted Min', 'Particles Deleted Max',
-                                'Particles Dropped Sum', 'Particles Dropped Avg',
-                                'Particles Dropped Min', 'Particles Dropped Max',
                                 'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
                                 'Partilcle Steps Total',  'Particle Steps Avg',
                                 'Particle Steps Min', 'Particle Steps Max',
-                                'Particles Taken Sum', 'Particles Taken Avg',
-                                'Particles Taken Min', 'Particles Taken Max',
                                 'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Location Counter',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max',
-                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
-                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
                                 'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
                                 'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
                                 'Tile Counter',
-                                'Tiles Created Sum', 'Tiles Created Avg', 'Tiles Created Min', 'Tiles Created Max',
-                                'Tiles Deleted Sum', 'Tiles Deleted Avg', 'Tiles Deleted Min', 'Tiles Deleted Max',
-                                'Tiles Dropped Sum', 'Tiles Dropped Avg', 'Tiles Dropped Min', 'Tiles Dropped Max',
                                 'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
                                 'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
-                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max'])
+                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max',
+                                'Steps NE (0)', 'Steps E  (1)', 'Steps SE (2)',
+                                'Steps SW (3)', 'Steps W  (4)', 'Steps NW (5)',
+                               ])
 
         csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
 
@@ -370,14 +392,6 @@ class CsvRoundData:
                          data['Success Round'].max(),
 
                          self.particle_num,
-                         data['Particles Created'].sum(), data['Particles Created'].mean(),
-                         data['Particles Created'].min(), data['Particles Created'].max(),
-
-                         data['Particles Deleted'].sum(), data['Particles Deleted'].mean(),
-                         data['Particles Deleted'].min(), data['Particles Deleted'].max(),
-
-                         data['Particles Dropped'].sum(), data['Particles Dropped'].mean(),
-                         data['Particles Dropped'].min(), data['Particles Dropped'].max(),
 
                          data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
                          data['Particle Read'].max(),
@@ -385,25 +399,8 @@ class CsvRoundData:
                          data['Particle Steps'].sum(), data['Particle Steps'].mean(),
                          data['Particle Steps'].min(), data['Particle Steps'].max(),
 
-                         data['Particles Taken'].sum(), data['Particles Taken'].mean(), data['Particles Taken'].min(),
-                         data['Particles Taken'].max(),
-
                          data['Particle Write'].sum(), data['Particle Write'].mean(), data['Particle Write'].min(),
                          data['Particle Write'].max(),
-
-
-                         self.locations_num,
-                         data['Location Created'].sum(), data['Location Created'].mean(),
-                         data['Location Created'].min(), data['Location Created'].max(),
-
-                         data['Location Deleted'].sum(), data['Location Deleted'].mean(),
-                         data['Location Deleted'].min(), data['Location Deleted'].max(),
-
-                         data['Location Read'].sum(), data['Location Read'].mean(), data['Location Read'].min(),
-                         data['Location Read'].max(),
-
-                         data['Location Write'].sum(), data['Location Write'].mean(), data['Location Write'].min(),
-                         data['Location Write'].max(),
 
                          data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
                          data['Memory Read'].max(),
@@ -413,14 +410,6 @@ class CsvRoundData:
 
 
                          self.tile_num,
-                         data['Tiles Created'].sum(), data['Tiles Created'].mean(), data['Tiles Created'].min(),
-                         data['Tiles Created'].max(),
-
-                         data['Tiles Deleted'].sum(), data['Tiles Deleted'].mean(), data['Tiles Deleted'].min(),
-                         data['Tiles Deleted'].max(),
-
-                         data['Tiles Dropped'].sum(), data['Tiles Dropped'].mean(), data['Tiles Dropped'].min(),
-                         data['Tiles Dropped'].max(),
 
                          data['Tile Read'].sum(), data['Tile Read'].mean(),  data['Tile Read'].min(),
                          data['Tile Read'].max(),
@@ -429,9 +418,11 @@ class CsvRoundData:
                          data['Tiles Taken'].max(),
 
                          data['Tile Write'].sum(), data['Tile Write'].mean(), data['Tile Write'].min(),
-                         data['Tile Write'].max()]
+                         data['Tile Write'].max(),
 
-
+                         data['Steps NE (0)'].sum(), data['Steps E  (1)'].sum(), data['Steps SE (2)'].sum(),
+                         data['Steps SW (3)'].sum(), data['Steps W  (4)'].sum(), data['Steps NW (5)'].sum()
+                         ]
 
         writer_round.writerow(csv_interator)
         csv_file.close()
