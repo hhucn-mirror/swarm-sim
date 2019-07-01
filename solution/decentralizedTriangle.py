@@ -47,6 +47,7 @@ def init_particles(particleList):
         particle.write_memory_with("Mark", "False")
         particle.write_memory_with("Order", None)
         particle.write_memory_with("Direction", None)
+        particle.write_memory_with("NeighbourOfLeader", None)
 
 def calc_movement(particleList):
     for particle in particleList:
@@ -127,6 +128,11 @@ def dictate(particle, dir):
 def indepth_replacement(particle):
     particle.set_color(3)
     nbs = particle.scan_for_particle_within(1)
+    neighbour_of_leader(particle)
+
+    if predecessor_not_nb_of_leader(particle, particle.read_memory_with("Order")):
+        return
+
     for nb in nbs:
         if nb.read_memory_with("Leader") == "False" and nb.read_memory_with("Mark") == "False":
             orderNr = particle.read_memory_with("Order")
@@ -134,11 +140,27 @@ def indepth_replacement(particle):
 
             dir = calc_dir(particle, nb)
 
-            nb.write_memory_with("Mark", "True")
-            nb.write_memory_with("Order", orderNr)
-            nb.write_memory_with("Direction", dir)
+            particle.write_to_with(nb, "Mark", "True")
+            particle.write_to_with(nb, "Order", orderNr)
+            particle.write_to_with(nb, "Direction", dir)
 
             return indepth_replacement(nb)
+
+# tests if predecessor is not a nb of leader
+def predecessor_not_nb_of_leader(particle, orderNr):
+    for nb in particle.scan_for_particle_within(1):
+        if nb.read_memory_with("Order") == particle.read_memory_with("Order")-1:
+            if nb.read_memory_with("NeighbourOfLeader") == "False" and particle.read_memory_with("NeighbourOfLeader") == "True":
+                return True
+    return False
+
+#write to memory true if particle is nb of leader or false if not
+def neighbour_of_leader(particle):
+    for nb in particle.scan_for_particle_within(1):
+        if nb.read_memory_with("Leader") == "True":
+            particle.write_memory_with("NeighbourOfLeader", "True")
+            return
+    particle.write_memory_with("NeighbourOfLeader", "False")
 
 def calc_dir(p1, p2):
     i = 0
@@ -185,3 +207,4 @@ def refresh_mem(particle):
     particle.write_memory_with("Order", None)
     particle.write_memory_with("Direction", None)
     particle.write_memory_with("AnnounceNext", None)
+    particle.write_memory_with("NeighbourOfLeader", None)

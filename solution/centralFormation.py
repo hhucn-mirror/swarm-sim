@@ -58,11 +58,11 @@ def initialize(sim):
     centerParticle = sim.get_particle_list()[0]
     centerPos = centerParticle.coords
 
-    #create_locationsT(sim, centerPos)
+    create_locationsT(sim, centerPos)
     #create_locationsL(sim, centerPos)
     #create_locationsS(sim, centerPos)
 
-    create_locationsH(sim, centerPos)
+    #create_locationsH(sim, centerPos)
 
 
 # triangle formula
