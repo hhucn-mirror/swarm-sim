@@ -138,8 +138,6 @@ class Particle(matter.Matter):
             if not self.coords in self.sim.particle_map_coords:
                 self.sim.particle_map_coords[self.coords] = self
                 logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.sim.csv_round_writer.update_metrics( steps=1)
-                self.csv_particle_writer.write_particle(steps=1)
                 self.touch()
                 if self.carried_tile is not None:
                     self.carried_tile.coords = self.coords
