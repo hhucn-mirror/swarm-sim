@@ -20,6 +20,8 @@ def solution(sim):
     else:
         get_first_particle_to_move(sim.get_particle_list())
 
+    finished_formation(sim)
+
 
 # elects leader with the highest id
 def leader_election(particleList):
@@ -90,10 +92,12 @@ def allLeadersRdy(particleList):
 def markNextLeaders(particle):
     sw = particle.get_particle_in(SW)
     se = particle.get_particle_in(SE)
-    if sw.read_memory_with("Leader") == "False":
-        sw.write_memory_with("Mark", "True")
-    if se.read_memory_with("Leader") == "False":
-        se.write_memory_with("Mark", "True")
+    if sw != None:
+        if sw.read_memory_with("Leader") == "False":
+            sw.write_memory_with("Mark", "True")
+    if se != None:
+        if se.read_memory_with("Leader") == "False":
+            se.write_memory_with("Mark", "True")
 
 def demarkNextLeaders(particle):
     sw = particle.get_particle_in(SW)
@@ -208,3 +212,9 @@ def refresh_mem(particle):
     particle.write_memory_with("Direction", None)
     particle.write_memory_with("AnnounceNext", None)
     particle.write_memory_with("NeighbourOfLeader", None)
+
+def finished_formation(sim):
+    for particle in sim.get_particle_list():
+        if particle.read_memory_with("Leader") == "False":
+            return False
+    return sim.success_termination()

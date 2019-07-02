@@ -78,10 +78,10 @@ def newLeaders(particleList):
 def allLeadersRdy(particleList):
     for particle in particleList:
         if particle.read_memory_with("Leader") == "True" and particle.read_memory_with("AnnounceNext") == None:
-            w = particle.get_particle_in(W)
+            e = particle.get_particle_in(E)
             sw = particle.get_particle_in(SW)
             se = particle.get_particle_in(SE)
-            if sw != None and se != None and w != None:
+            if sw != None and se != None and e != None:
                 particle.write_memory_with("AnnounceNext", "True")
                 markNextLeaders(particle)
             else:
@@ -91,12 +91,15 @@ def markNextLeaders(particle):
     e = particle.get_particle_in(E)
     sw = particle.get_particle_in(SW)
     se = particle.get_particle_in(SE)
-    if e.read_memory_with("Leader") == "False":
-        e.write_memory_with("Mark", "True")
-    if sw.read_memory_with("Leader") == "False":
-        sw.write_memory_with("Mark", "True")
-    if se.read_memory_with("Leader") == "False":
-        se.write_memory_with("Mark", "True")
+    if e != None:
+        if e.read_memory_with("Leader") == "False":
+            e.write_memory_with("Mark", "True")
+    if sw != None:
+        if sw.read_memory_with("Leader") == "False":
+            sw.write_memory_with("Mark", "True")
+    if se != None:
+        if se.read_memory_with("Leader") == "False":
+            se.write_memory_with("Mark", "True")
 
 def demarkNextLeaders(particle):
     e = particle.get_particle_in(E)
