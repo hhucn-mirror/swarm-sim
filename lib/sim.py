@@ -97,11 +97,10 @@ class Sim:
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
         self.border = config_data.border
-        self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
+        self.csv_round_writer = csv_generator.CsvRoundData(self,
                                                            solution=self.solution_mod,
-                                                           seed=config_data.seedvalue,
-                                                           tiles_num=0, particle_num=0,
-                                                           steps=0, directory=self.directory)
+                                                           seed=config_data.seedvalue, particle_num=0,
+                                                           directory=self.directory)
 
         mod = importlib.import_module('scenario.' + config_data.scenario)
         mod.scenario(self)
@@ -177,11 +176,64 @@ class Sim:
         """
         self.__calculated_dis = calcdis
 
-   def get_density(self):
+    def get_density(self):
         """
             Returns the density
         """
         return self.__density
+
+    def set_densityRadius(self,radius):
+        """
+        save the the radius of calculated density
+        """
+        self.__densityRadius=radius
+
+    def get__densityRadius(self):
+        """
+        returns the density radius
+        """
+        return self.__densityRadius
+    def set_mems(self,mems):
+        """
+        """
+        self._mems=mems
+
+    def get_mems(self):
+        """
+        """
+        return self._mems
+
+    def set_safe(self, safe):
+        """
+        """
+        self._safe = safe
+
+    def get_safe(self):
+        """
+        """
+        return self._safe
+
+    def set_critical(self, critical):
+        """
+        """
+        self._critical = critical
+
+    def get_critical(self):
+        """
+        """
+        return self._critical
+
+    def set_uncomfortable(self, uncomfortable):
+        """
+        """
+        self._uncomfortable = uncomfortable
+
+    def get_uncomfortable(self):
+        """
+        """
+        return self._uncomfortable
+
+
 
     def get_calculated_dir(self):
         """
