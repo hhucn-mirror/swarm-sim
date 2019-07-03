@@ -94,20 +94,20 @@ def markNextLeaders(particle):
     se = particle.get_particle_in(SE)
     if sw != None:
         if sw.read_memory_with("Leader") == "False":
-            sw.write_memory_with("Mark", "True")
+            particle.write_to_with(sw, "Mark", "True")
     if se != None:
         if se.read_memory_with("Leader") == "False":
-            se.write_memory_with("Mark", "True")
+            particle.write_to_with(se, "Mark", "True")
 
 def demarkNextLeaders(particle):
     sw = particle.get_particle_in(SW)
     se = particle.get_particle_in(SE)
     if sw != None:
         if sw.read_memory_with("Leader") == "False":
-            sw.write_memory_with("Mark", "False")
+            particle.write_to_with(sw, "Mark", "False")
     if se != None:
         if se.read_memory_with("Leader") == "False":
-            se.write_memory_with("Mark", "False")
+            particle.write_to_with(se, "Mark", "False")
 
 def spreadNoNextLeaders(particle):
     particle.write_memory_with("AnnounceNext", "False")

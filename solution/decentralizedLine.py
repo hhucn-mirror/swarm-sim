@@ -19,6 +19,8 @@ def solution(sim):
     else:
         get_first_particle_to_move(sim.get_particle_list())
 
+    #finished_formation(sim)
+
 
 # elects leader with the highest id
 def leader_election(particleList):
@@ -63,6 +65,7 @@ def look_for_more_leader(particle):
 def update_leaders(particleList):
     for particle in particleList:
         if particle.read_memory_with("Leader") == "True":
+            particle.set_color(5)
             look_for_more_leader(particle)
 
 def calc_movement(particleList):
@@ -81,7 +84,9 @@ def calc_movement_for_leader(particle):
             indepth_replacement(particle)
 
 def indepth_replacement(particle):
+    particle.set_color(3)
     nbs = particle.scan_for_particle_within(1)
+
     for nb in nbs:
         if nb.read_memory_with("Leader") == "False" and nb.read_memory_with("Mark") == "False":
             orderNr = particle.read_memory_with("Order")
@@ -89,9 +94,9 @@ def indepth_replacement(particle):
 
             dir = calc_dir(particle, nb)
 
-            nb.write_memory_with("Mark", "True")
-            nb.write_memory_with("Order", orderNr)
-            nb.write_memory_with("Direction", dir)
+            particle.write_to_with(nb, "Mark", "True")
+            particle.write_to_with(nb, "Order", orderNr)
+            particle.write_to_with(nb, "Direction", dir)
 
             return indepth_replacement(nb)
 
@@ -115,8 +120,9 @@ def shift_leaders_to_left(particle):
     particle.write_memory_with("Mark", "True")
     particle.write_memory_with("Direction", W)
     particle.write_memory_with("Order", orderNr)
+    particle.set_color(6)
 
-    if nbE != None:
+    if nbE != None and nbE.read_memory_with("Mark") == "False":
         mark_leaders_on_right(nbE)
 
     orderNr = orderNr + 1
@@ -153,6 +159,7 @@ def move_in_right_order(particle, orderNr):
 
     dir = particle.read_memory_with("Direction")
     particle.move_to(dir)
+    particle.set_color(1)
     refresh_mem(particle)
 
     if nextParticle != None:
@@ -162,3 +169,9 @@ def refresh_mem(particle):
     particle.write_memory_with("Mark", "False")
     particle.write_memory_with("Order", None)
     particle.write_memory_with("Direction", None)
+
+def finished_formation(sim):
+    for particle in sim.get_particle_list():
+        if particle.read_memory_with("Leader") == "False":
+            return False
+    return sim.success_termination()

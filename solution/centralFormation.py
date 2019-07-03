@@ -60,7 +60,7 @@ def initialize(sim):
 
     create_locationsT(sim, centerPos)
     #create_locationsL(sim, centerPos)
-    #create_locationsS(sim, centerPos)
+    create_locationsS(sim, centerPos)
 
     #create_locationsH(sim, centerPos)
 
