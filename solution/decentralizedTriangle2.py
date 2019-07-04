@@ -15,13 +15,17 @@ def solution(sim):
         init_particles(sim.get_particle_list())
         leader_election(sim.get_particle_list())
 
-    if sim.get_actual_round() % 2 == 1:
+    if sim.get_actual_round() % 6 == 1:
         refresh_mem(sim.get_particle_list())
+    elif sim.get_actual_round() % 6 == 2:
         announce_next(sim.get_particle_list())
+    elif sim.get_actual_round() % 6 == 3:
         update_leaders(sim.get_particle_list())
+    elif sim.get_actual_round() % 6 == 4:
         calc_movement(sim.get_particle_list())
+    elif sim.get_actual_round() % 6 == 5:
         announce_right_placed_to_leaders(sim.get_particle_list())
-    else:
+    elif sim.get_actual_round() % 6 == 0:
         get_first_particle_to_move(sim.get_particle_list())
 
 
