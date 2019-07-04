@@ -1,3 +1,5 @@
+import random
+
 NE = 0
 E = 1
 SE = 2
@@ -15,17 +17,19 @@ def solution(sim):
         init_particles(sim.get_particle_list())
         leader_election(sim.get_particle_list())
 
-    if sim.get_actual_round() % 6 == 1:
+    if sim.get_actual_round() % 7 == 0:
         refresh_mem(sim.get_particle_list())
-    elif sim.get_actual_round() % 6 == 2:
+    elif sim.get_actual_round() % 7 == 1:
         announce_next(sim.get_particle_list())
-    elif sim.get_actual_round() % 6 == 3:
+    elif sim.get_actual_round() % 7 == 2:
+        calc_nb_of_leader(sim.get_particle_list())
+    elif sim.get_actual_round() % 7 == 3:
         update_leaders(sim.get_particle_list())
-    elif sim.get_actual_round() % 6 == 4:
+    elif sim.get_actual_round() % 7 == 4:
         calc_movement(sim.get_particle_list())
-    elif sim.get_actual_round() % 6 == 5:
+    elif sim.get_actual_round() % 7 == 5:
         announce_right_placed_to_leaders(sim.get_particle_list())
-    elif sim.get_actual_round() % 6 == 0:
+    elif sim.get_actual_round() % 7 == 6:
         get_first_particle_to_move(sim.get_particle_list())
 
 
@@ -74,7 +78,6 @@ def announce_next(particleList):
                 else:
                     particle.write_memory_with("AnnounceNext", 0)
 
-            # maybe not necessary
             if particle.read_memory_with("AnnounceNext") == 0:
                 set_nbs_announceNext_to_false(particle)
 
@@ -143,8 +146,10 @@ def indepth_replacement(particle):
     nbs = particle.scan_for_particle_within(1)
     neighbour_of_leader(particle)
 
-    if predecessor_not_nb_of_leader(particle, particle.read_memory_with("Order")):
-        return
+    #verzweifelter versuch doppelfehler zu beheben
+    if random.randint(0, 100) < 20:
+        if predecessor_not_nb_of_leader(particle, particle.read_memory_with("Order")):
+            return
 
     for nb in nbs:
         if nb.read_memory_with("Leader") == 0 and nb.read_memory_with("Mark") == 0:
@@ -236,3 +241,7 @@ def announce_right_placed_to_leaders(particleList):
             if se is not None and se.read_memory_with("Leader") == 2:
                 particle.write_to_with(se, "Leader", 1)
                 se.set_color(4)
+
+def calc_nb_of_leader(particleList):
+    for particle in particleList:
+        neighbour_of_leader(particle)
