@@ -5,8 +5,8 @@ import configparser
 
 
 def main(argv):
-    max_round = 2000
-    seedvalue = 10
+    max_round = 10000
+    seedvalue = 30
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
     try:

@@ -36,6 +36,8 @@ def solution(sim):
         elif sim.get_actual_round() % 7 == 0:
             refresh_mem(particle)
 
+        formed(sim)
+
 # initialize the memory of the particles
 def init_particles(particleList):
     for particle in particleList:
@@ -259,3 +261,9 @@ def announce_right_placed_to_leaders(particle):
         if se is not None and se.read_memory_with("Leader") == 2:
             particle.write_to_with(se, "Leader", 1)
             se.set_color(4)
+
+def formed(sim):
+    for particle in sim.get_particle_list():
+        if particle.read_memory_with("Leader") != 1:
+            return
+    sim.success_termination()
