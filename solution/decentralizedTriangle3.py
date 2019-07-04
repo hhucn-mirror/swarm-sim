@@ -26,8 +26,6 @@ def solution(sim):
             neighbour_of_leader(particle)
         elif sim.get_actual_round() % 7 == 4:
             calc_move(particle)
-        #elif sim.get_actual_round() % 8 == 5:
-        #    announce_right_placed_to_leaders(particle)
         elif sim.get_actual_round() % 7 == 5:
             if particle.read_memory_with("Moving") == 0:
                 announce_right_placed_to_leaders(particle)
@@ -37,10 +35,6 @@ def solution(sim):
             update_state(particle)
         elif sim.get_actual_round() % 7 == 0:
             refresh_mem(particle)
-
-    for particle in sim.get_particle_list():
-        #if particle.read_memory_with("Leader"):
-        print(particle.coords, particle.read_whole_memory())
 
 # initialize the memory of the particles
 def init_particles(particleList):
