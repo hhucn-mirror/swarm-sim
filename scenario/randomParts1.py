@@ -33,7 +33,7 @@ def scenario(sim):
     sim.add_particle (-0.0, -8.0)
     sim.add_particle (0.5, -9.0)
     sim.add_particle (1.0, -10.0)
-    sim.add_particle (1.5, -11.0)
+    #sim.add_particle (1.5, -11.0)
     #sim.add_particle (2.0, -12.0)
     sim.add_particle (2.0, -2.0)
 
