@@ -32,6 +32,7 @@ def solution(sim):
     elif sim.get_actual_round() % 7 == 6:
         get_first_particle_to_move(sim.get_particle_list())
 
+    formed(sim)
 
 # initialize the memory of the particles
 def init_particles(particleList):
@@ -147,7 +148,7 @@ def indepth_replacement(particle):
     neighbour_of_leader(particle)
 
     #verzweifelter versuch doppelfehler zu beheben
-    if random.randint(0, 100) < 20:
+    if random.randint(0, 100) < 50:
         if predecessor_not_nb_of_leader(particle, particle.read_memory_with("Order")):
             return
 
@@ -245,3 +246,9 @@ def announce_right_placed_to_leaders(particleList):
 def calc_nb_of_leader(particleList):
     for particle in particleList:
         neighbour_of_leader(particle)
+
+def formed(sim):
+    for particle in sim.get_particle_list():
+        if particle.read_memory_with("Leader") == 0:
+            return
+    sim.success_termination()
