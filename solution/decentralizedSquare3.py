@@ -37,6 +37,8 @@ def solution(sim):
             refresh_mem(particle)
             formed(sim)
 
+        formed(sim)
+
 # initialize the memory of the particles
 def init_particles(particleList):
     for particle in particleList:
