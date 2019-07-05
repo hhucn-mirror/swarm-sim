@@ -35,6 +35,7 @@ def solution(sim):
             update_state(particle)
         elif sim.get_actual_round() % 7 == 0:
             refresh_mem(particle)
+            formed(sim)
 
 # initialize the memory of the particles
 def init_particles(particleList):
@@ -78,9 +79,7 @@ def announce_next(particle):
                 particle.write_memory_with("AnnounceNext", 1)
             else:
                 particle.write_memory_with("AnnounceNext", 0)
-
-        if particle.read_memory_with("AnnounceNext") == 0:
-            set_nbs_announceNext_to_false(particle)
+                set_nbs_announceNext_to_false(particle)
 
 def set_nbs_announceNext_to_false(particle):
     nbs = particle.scan_for_particle_within(1)
@@ -245,3 +244,9 @@ def announce_right_placed_to_leaders(particle):
         if se is not None and se.read_memory_with("Leader") == 2:
             particle.write_to_with(se, "Leader", 1)
             se.set_color(4)
+
+def formed(sim):
+    for particle in sim.get_particle_list():
+        if particle.read_memory_with("Leader") != 1:
+            return
+    sim.success_termination()

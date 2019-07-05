@@ -74,9 +74,8 @@ def announce_next(particle):
         if particle.read_memory_with("AnnounceNext") is None:
 
             e = particle.get_particle_in(E)
-            sw = particle.get_particle_in(SW)
-            se = particle.get_particle_in(SE)
-            if sw is not None and se is not None and e is not None:
+            w = particle.get_particle_in(W)
+            if e is not None and w is not None:
                 particle.write_memory_with("AnnounceNext", 1)
             else:
                 particle.write_memory_with("AnnounceNext", 0)
@@ -92,27 +91,21 @@ def set_nbs_announceNext_to_false(particle):
 def update_leaders(particle):
     if particle.read_memory_with("Leader") == 1:
         e = particle.get_particle_in(E)
-        sw = particle.get_particle_in(SW)
-        se = particle.get_particle_in(SE)
+        w = particle.get_particle_in(W)
 
         if particle.read_memory_with("AnnounceNext") == 1:
+            particle.write_to_with(w, "Leader", 1)
             particle.write_to_with(e, "Leader", 1)
-            particle.write_to_with(sw, "Leader", 1)
-            particle.write_to_with(se, "Leader", 1)
+            w.set_color(4)
             e.set_color(4)
-            sw.set_color(4)
-            se.set_color(4)
 
         if particle.read_memory_with("AnnounceNext") == 0:
+            if w is not None and w.read_memory_with("Leader") == 0:
+                particle.write_to_with(w, "Leader", 2)
+                w.set_color(5)
             if e is not None and e.read_memory_with("Leader") == 0:
                 particle.write_to_with(e, "Leader", 2)
                 e.set_color(5)
-            if sw is not None and sw.read_memory_with("Leader") == 0:
-                particle.write_to_with(sw, "Leader", 2)
-                sw.set_color(5)
-            if se is not None and se.read_memory_with("Leader") == 0:
-                particle.write_to_with(se, "Leader", 2)
-                se.set_color(5)
 
 #################################################################################
 
@@ -147,18 +140,15 @@ def calc_dir(p1, p2):
 def calc_move(particle):
     if particle.read_memory_with("Leader") == 1 and particle.read_memory_with("WayForN") != None and particle.read_memory_with("Moving") == 0:
         e = particle.get_particle_in(E)
-        se = particle.get_particle_in(SE)
-        sw = particle.get_particle_in(SW)
+        w = particle.get_particle_in(W)
 
-        if se == None or sw == None or e == None:
+        if e == None or w == None:
             spread_moving(particle)
         else:
             return
 
-        if sw == None:
-            particle.write_memory_with("Direction", SW)
-        elif se == None:
-            particle.write_memory_with("Direction", SE)
+        if w == None:
+            particle.write_memory_with("Direction", W)
         elif e == None:
             particle.write_memory_with("Direction", E)
 
@@ -246,18 +236,14 @@ def refresh_mem(particle):
 def announce_right_placed_to_leaders(particle):
     if particle.read_memory_with("Leader") == 1 and particle.read_memory_with("Moving") == 0:
         e = particle.get_particle_in(E)
-        sw = particle.get_particle_in(SW)
-        se = particle.get_particle_in(SE)
+        w = particle.get_particle_in(W)
 
+        if w is not None and w.read_memory_with("Leader") == 2:
+            particle.write_to_with(w, "Leader", 1)
+            w.set_color(4)
         if e is not None and e.read_memory_with("Leader") == 2:
             particle.write_to_with(e, "Leader", 1)
             e.set_color(4)
-        if sw is not None and sw.read_memory_with("Leader") == 2:
-            particle.write_to_with(sw, "Leader", 1)
-            sw.set_color(4)
-        if se is not None and se.read_memory_with("Leader") == 2:
-            particle.write_to_with(se, "Leader", 1)
-            se.set_color(4)
 
 def formed(sim):
     for particle in sim.get_particle_list():
