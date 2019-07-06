@@ -40,6 +40,9 @@ def swarm_sim(argv):
     mm_particle = config.getint("Matter", "particle_mm_size")
     mm_tile= config.getint("Matter", "tile_mm_size")
     mm_location=config.getint("Matter", "location_mm_size")
+
+   # particle_amount = config.getint("Criteria", "particle_amount")
+
     # tile_color_map = config.getboolean("Matter", "tile_color_map")
 
     multiple_sim=0
