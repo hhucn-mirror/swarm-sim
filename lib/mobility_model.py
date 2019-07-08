@@ -121,12 +121,14 @@ class MobilityModel:
             exceptions.extend([Directions.W, Directions.SW, Directions.NW])
         # check if at max_x then head anywhere but east
         elif x >= self.max_x:
-            exceptions.append([Directions.E, Directions.SE, Directions.NE])
+            exceptions.extend([Directions.E, Directions.SE, Directions.NE])
         # check if at min_y then head anywhere but south
         if y <= self.min_y:
             exceptions.extend([Directions.SE, Directions.SW])
-        elif y >= self.max_x:
+        elif y >= self.max_y:
             exceptions.extend([Directions.NE, Directions.NW])
+        else:
+            exceptions = [Directions.S]
         return MobilityModel.random_direction(exceptions)
 
     @staticmethod

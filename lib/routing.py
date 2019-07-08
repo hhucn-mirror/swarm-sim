@@ -38,7 +38,7 @@ class RoutingParameters:
 
 
 def next_step(particle, scan_radius=None):
-    if len(particle.send_store.keys()) == 0 and len(particle.fwd_store.keys()) == 0:
+    if len(particle.send_store) == 0 and len(particle.fwd_store) == 0:
         return
     routing_params = RoutingParameters.get(particle)
 
@@ -58,24 +58,14 @@ def __next_step_epidemic__(particle, routing_params, nearby=None):
             return
 
     for neighbour in nearby:
-        for key in list(particle.send_store.keys()):
-            try:
-                item = particle.send_store[key]
-                if isinstance(item, Message):
-                    comm_event = send_message(particle.send_store, particle, neighbour, item)
-                    __success_event__(particle, neighbour, item, comm_event)
-            except KeyError:
-                # ignore deleted keys
-                pass
-        for key in list(particle.fwd_store.keys()):
-            try:
-                item = particle.fwd_store[key]
-                if isinstance(item, Message):
-                    comm_event = send_message(particle.fwd_store, particle, neighbour, item)
-                    __success_event__(particle, neighbour, item, comm_event)
-            except KeyError:
-                # ignore deleted keys
-                pass
+        for item in list(particle.send_store):
+            if isinstance(item, Message):
+                comm_event = send_message(particle.send_store, particle, neighbour, item)
+                __success_event__(particle, neighbour, item, comm_event)
+        for item in list(particle.fwd_store):
+            if isinstance(item, Message):
+                comm_event = send_message(particle.fwd_store, particle, neighbour, item)
+                __success_event__(particle, neighbour, item, comm_event)
 
 
 def __next_step_epidemic_manet__(particle, routing_params):

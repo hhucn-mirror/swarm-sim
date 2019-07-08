@@ -11,7 +11,7 @@ TODO: Erase Memory
 
 import logging, math
 from lib import csv_generator, matter
-from lib.comms import MessageStore
+from lib.messagestore import MessageStore
 from lib.directions import Directions
 
 black = 1
@@ -28,6 +28,7 @@ SW = 3
 W = 4
 NW = 5
 
+message_store_size= 5
 
 read = 0
 write = 1
@@ -51,9 +52,9 @@ class Particle(matter.matter):
         self.steps = 0
         self.created = False
         self.csv_particle_writer = csv_generator.CsvParticleData( self.get_id(), self.number)
-        self.send_store = MessageStore()
-        self.fwd_store = MessageStore()
-        self.rcv_store = MessageStore()
+        self.send_store = MessageStore(maxlen=message_store_size)
+        self.fwd_store = MessageStore(maxlen=message_store_size)
+        self.rcv_store = MessageStore(maxlen=message_store_size)
 
     @staticmethod
     def coords_to_sim(coords):

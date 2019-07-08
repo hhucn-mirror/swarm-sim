@@ -14,6 +14,14 @@ class CommEvent(Enum):
     ReceiverOutOfMem = 10
 
 
+class BufferStrategy(Enum):
+    fifo = 0
+    lifo = 1
+    lru = 2
+    mru = 3
+    random = 4
+
+
 class Message:
 
     seq_number = 0
@@ -36,7 +44,7 @@ class Message:
         else:
             self.content = content
 
-        sender.send_store.add_message(self, False)
+        sender.send_store.append(self)
 
     def __create_msg_key(self):
         return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
@@ -47,9 +55,9 @@ class Message:
 
 class MessageStore(dict):
 
-    def __init__(self, max_size=1000, *maps):
+    def __init__(self, max_size=1000, buffer_strategy=BufferStrategy.lru, *maps):
         self.max_size = max_size
-        self.size = 0
+        self.buffer_strategy = buffer_strategy
         super().__init__(*maps)
 
     def add_message(self, message: Message, inc_hop_cnt=True):
@@ -68,9 +76,8 @@ class MessageStore(dict):
                 self[message.receiver.get_id()] = []
             self[message.receiver.get_id()].append(message.key)
             # add the actual message, if enough space
-            if self.size < self.max_size:
+            if len(self) < self.max_size:
                 self[message.key] = message
-                self.size += 1
             else:
                 raise OverflowError
 
@@ -79,13 +86,34 @@ class MessageStore(dict):
         # check if this was the only message for the receiver of message
         if len(self[message.receiver.get_id()] < 2):
             del self[message.receiver.get_id()]
-        self.size -= 1
+
+    def handle_overflow(self):
+        if self.buffer_strategy == BufferStrategy.fifo:
+            self.__handle_fifo__()
+        elif self.buffer_strategy == BufferStrategy.lifo:
+            self.__handle_lifo__()
+        elif self.buffer_strategy == BufferStrategy.lru:
+            self.__handle_lru__()
+        elif self.buffer_strategy == BufferStrategy.mru:
+            self.__handle_mru__()
+
+    def __handle_fifo__(self):
+        pass
+
+    def __handle_lifo__(self):
+        pass
+
+    def __handle_lru__(self):
+        pass
+
+    def __handle_mru__(self):
+        pass
 
 
 def send_message(msg_store, sender, receiver, message: Message):
     if message.hop_count == message.ttl:
         try:
-            msg_store.del_message(message)
+            msg_store.remove(message)
         except KeyError:
             pass
         finally:
@@ -95,15 +123,15 @@ def send_message(msg_store, sender, receiver, message: Message):
         store = receiver.rcv_store
     else:
         store = receiver.fwd_store
-
     try:
-        store.add_message(message)
+        store.append(message)
     except OverflowError:
+        store.handle_overflow()
         return CommEvent.ReceiverOutOfMem
     finally:
         if receiver.get_id() == message.receiver.get_id():
             try:
-                msg_store.del_message(message)
+                msg_store.remove(message)
             except KeyError:
                 pass
             finally:

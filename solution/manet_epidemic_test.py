@@ -12,6 +12,7 @@ def solution(sim):
     if sim.get_actual_round() == 1:
         particles = sim.get_particle_list()
         generate_random_messages(particles, len(particles)*10)
+
         # initialize the particle mobility models
         i = 0
         for particle in particles:
