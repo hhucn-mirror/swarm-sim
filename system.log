@@ -1,44 +1,979 @@
 Started
 Created particle at (0, 0)
-particle with id 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
-Going to create a tile in 1 
-Created tile with tile id 67b7793e-1401-4fc5-bc99-818e6c9593ea on coords (1, 0)
-Tile is created
-Going to create a location in 4 on position (-1, 0)
-Created location with id c4012956-d37e-4aa5-8f9c-444521bfaa98 on coords (-1, 0)
-Created location on coords (-1, 0)
-Going to create a particle in 4 on position (-1, 0)
+Created particle at (1, 0)
 Created particle at (-1, 0)
-Created particle on coords (-1, 0)
-Going to create a particle in 4 on position (-1, 0)
-Take particle
-particle with particle id 8b10cc7c-6638-4952-89dd-ccbef50082c0  has been taken
-Deleting tile in 4 direction
-Could not delet particle on coords (-1, 0)
-Deleting tile in 1 direction
-Deleted tile with tile on coords (1, 0)
-particle with id 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
-Going to create a tile on position \(1 , 0\)
-Created tile with tile id eb0ec433-0925-40f3-b44d-8ad73526f11f on coords (1, 0)
-Not created tile on coords  \(0 , 1\)
-Going to create a location on position (1, 0)
-Created location with id 93cf375a-6c2f-4228-b5dd-00986aaacf8b on coords (1, 0)
-Created location on coords (1, 0)
-Deleted tile with tile on coords (1, 0)
-Going to create a particle on position (-1, 0)
-Created particle at (-1, 0)
-Created particle on coords (-1, 0)
-Deleted location  oords (1, 0)
-Deleted particle with particle on coords (-1, 0)
-Going to create a tile on position (0, 0)
-Created tile with tile id 03582534-a0e9-4af7-9eba-6820681d63c3 on coords (0, 0)
-Going to create on position (0, 0)
-Created location with id d7112617-30f0-46b0-9bee-87c7190c73df on coords (0, 0)
-Particle 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
-is going to delete a tile on current position
-Going to create on position (0, 0)
-Particle 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
-is going to delete a particle on current position
-Particle 8b10cc7c-6638-4952-89dd-ccbef50082c0 is
-is going to delete a location on current position
+Created particle at (0.5, 1)
+Created particle at (-0.5, 1)
+Created particle at (0.5, -1)
+Created particle at (-0.5, -1)
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-1, 0) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-1, 0) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, 1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, 1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 8 hops
+Nothing in 8 hops
+particle on (-0.5, -1) is scanning for particle in 9 hops
+Nothing in 9 hops
+particle on (-0.5, -1) is scanning for particle in 10 hops
+Nothing in 10 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0, 0) is scanning for particle in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for particle in 2 hops
+Nothing in 2 hops
+particle on (0, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (0, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (1, 0) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (1, 0) is scanning for particle in 3 hops
+Nothing in 3 hops
+particle on (1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle 96a52b12-fd98-4234-91cb-ecf1839fdfc0 successfully moved to 2
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 2 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 2 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 2 in 2 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 2 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-1, 0) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (-1, 0) is scanning for particle in 2 hops
+Got 2 in 2 hops
+particle on (-1, 0) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-1, 0) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-1, 0) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-1, 0) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-1, 0) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle 4a65452a-8b1a-40b2-892b-ecb418e05ee7 successfully moved to 4
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle c685f71f-321b-4f61-9c6d-ca880596b6a6 successfully moved to 5
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, 1) is scanning for particle in 1 hops
+Got 2 in 1 hops
+particle on (-0.5, 1) is scanning for particle in 2 hops
+Got 3 in 2 hops
+particle on (-0.5, 1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, 1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, 1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, 1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, 1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle 6c61018c-49ad-441f-a622-cebb50df7915 successfully moved to 1
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 1 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Got 2 in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 1 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Got 2 in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 1 in 2 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 1 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Got 2 in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (0.5, -1) is scanning for particle in 1 hops
+Got 3 in 1 hops
+particle on (0.5, -1) is scanning for particle in 2 hops
+Got 1 in 2 hops
+particle on (0.5, -1) is scanning for particle in 3 hops
+Got 2 in 3 hops
+particle on (0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle 921335ab-eb77-4a24-a6df-0b23552d8bc3 successfully moved to 2
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 4 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 4 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 4 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 4 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle on (-0.5, -1) is scanning for particle in 1 hops
+Got 1 in 1 hops
+particle on (-0.5, -1) is scanning for particle in 2 hops
+Got 4 in 2 hops
+particle on (-0.5, -1) is scanning for particle in 3 hops
+Got 1 in 3 hops
+particle on (-0.5, -1) is scanning for particle in 4 hops
+Nothing in 4 hops
+particle on (-0.5, -1) is scanning for particle in 5 hops
+Nothing in 5 hops
+particle on (-0.5, -1) is scanning for particle in 6 hops
+Nothing in 6 hops
+particle on (-0.5, -1) is scanning for particle in 7 hops
+Nothing in 7 hops
+particle a5463609-2de3-4591-b254-0a185cefb2ad successfully moved to 3
 Finished

@@ -12,7 +12,7 @@ NW = 5
 #Topological or distance interaction: topological_interaction=1 -> if particles have topological interactions and 0 otherwise.
 topological_interaction=0
 # maximum number of Neighbors to observe
-number_of_neighbors=8
+number_of_neighbors=20
 
 #if noise=1 than in predefined time intervals the particle will move undependently of his observation
 noise=0
@@ -20,10 +20,10 @@ noise_interval=10
 
 # define minimum and maximum distance
 min_distance = 2
-max_distance = 4
+max_distance = 7
 
 # visual range
-vr =7
+vr = 7
 
 #set the initial radius to calculate density
 initialRadius=10
@@ -32,23 +32,52 @@ direction = [NE, E, SE, SW, W, NW]
 
 def density(particles):
     sumAverageDistances=0
+    sumTotalDistance = 0
     sumneighbors=0
+    min_density = 100000000000
+    max_density = -1
     for particle in particles:
         sum_distances=0
+        print("P", particle.number)
         for i in range(1,initialRadius+1):
             if particle.scan_for_particle_in(hop=i) is not None:
                 sum_distances=sum_distances+len(particle.scan_for_particle_in(hop=i))*i
+                print("for Hop:", i, " sumdistance ",  sum_distances)
         if particle.scan_for_particle_within(hop=initialRadius) is not None:
             x=len(particle.scan_for_particle_within(hop=initialRadius))
-            averageDistanceToAllNeighbors=sum_distances /x
+            averageDistanceToAllNeighbors=sum_distances/x
+            print("neighbors within initial_radius", initialRadius, " are ", x)
+            print(" and a total of distances of ", sum_distances)
+            density = x
+            print("with a Density of", density, "particle every", initialRadius,"hops")
+            if density > max_density:
+                max_density = density
+            if density < min_density:
+                min_density = density
             sumneighbors +=x
         else:
             averageDistanceToAllNeighbors=0
         sumAverageDistances+=averageDistanceToAllNeighbors
+        sumTotalDistance += sum_distances
+        print(" has the sumAverageDistances", sumAverageDistances )
     if sumAverageDistances==0:
         return 0
     else:
-        print("average distance=",int(sumAverageDistances/len(particles)))
+        print(" Final sumAverageDistances", sumAverageDistances)
+        print(" Final sum of all neighbors", sumneighbors)
+        print("numbers of particles ", len(particles))
+
+        print("Average Distance=  sumAverageDistances/len(particles)= ", sumTotalDistance,"/",len(particles),"=",
+              float(sumTotalDistance/len(particles)))
+        print("average density= sumneighbors/len(particles)) =", sumneighbors,"/",len(particles),"=",
+              float(sumneighbors/len(particles)))
+        print("min density ", min_density , "max density", max_density, "particles every", initialRadius, "hops")
+
+        print("Asma Densitiy Radius = sumAverageDistances/len(particles) =",sumAverageDistances,"/",len(particles),"=",
+              float(sumAverageDistances/len(particles)))
+        print("Asma Density = sumneighbors/sumAverageDistances =", sumneighbors,"/",sumAverageDistances,"=",
+              float(sumneighbors/sumAverageDistances))
+
         return([sumneighbors/sumAverageDistances,int(sumAverageDistances/len(particles))])
 
 
