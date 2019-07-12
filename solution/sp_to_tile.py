@@ -36,12 +36,12 @@ def sp(sim, particle, tile):
             next_dir = SE
         elif p_y > t_y and p_x > t_x:
             next_dir = SW
-    elif p_y == 0:
+    elif p_y == t_y:
         if p_x > t_x:
             next_dir = W
         elif p_x < t_x:
             next_dir = E
-    elif p_x == 0:
+    elif p_x == t_x:
         if p_y < t_y:
             next_dir = NE
         else:
@@ -57,6 +57,8 @@ def sp(sim, particle, tile):
             next_dir = SW
 
     if particle.tile_in(next_dir) or particle.particle_in(next_dir):
+        pass
+    elif next_dir == -1:
         pass
     else:
         particle.move_to(next_dir)

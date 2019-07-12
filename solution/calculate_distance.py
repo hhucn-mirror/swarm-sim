@@ -53,7 +53,7 @@ def dir_in_range(dir):
     return dir
 
 
-class neighbors:
+class Neighbors:
     def __init__(self, type, dist):
         self.type = type
         self.dist = dist
@@ -63,13 +63,13 @@ class neighbors:
 def scan_nh(particle):
     for dir in direction:
         if particle.particle_in(dir):
-            particle.NH_dict[dir] = neighbors("p", -1)
+            particle.NH_dict[dir] = Neighbors("p", -1)
             particle.p_dir.append(dir)
         elif particle.tile_in(dir):
-            particle.NH_dict[dir] = neighbors("t", 0)
+            particle.NH_dict[dir] = Neighbors("t", 0)
             particle.t_dir.append(dir)
         else:
-            particle.NH_dict[dir] = neighbors("fl", 10000)
+            particle.NH_dict[dir] = Neighbors("fl", 10000)
             particle.fl_cnt += 1
 
 def initialize_particle(particle):
@@ -132,13 +132,13 @@ def check_data_received(particle):
         return True
     return False
 
-class info_package:
+class InfoPackage:
     def __init__(self,  own_dist):
         self.own_dist = own_dist
 
 def data_sending(particle):
     if particle.own_dist != 10000 and particle.p_dir:
-        package = info_package (particle.own_dist)
+        package = InfoPackage (particle.own_dist)
         for dir in particle.p_dir:
             neighbor_p = particle.get_particle_in(dir)
             # invert the dir so the receiver particle knows from where direction it got the package
@@ -185,9 +185,7 @@ def define_nh_dist(particle):
 def define_own_dist(particle):
     if particle.t_dir:
         particle.own_dist = 1
-    if particle.p_dir:
-        if check_data_received(particle):
-            if particle.own_dist == 10000:
+    if particle.p_dir and check_data_received(particle) and particle.own_dist == 10000:
                 particle.own_dist = particle.rcv_buf[min(particle.rcv_buf.keys(),
                                                          key=(lambda k: particle.rcv_buf[k].own_dist))].own_dist + 1
 
