@@ -36,18 +36,18 @@ def getAllSuroundingCoords(pcoords, world):
         world.get_coords_in_dir(pcoords, SW)
     ]
 
-def shortest_path(particle, sim):
-
-    if sim.get_actual_round() == 1:
-        setattr(particle, "current_way", [])
-        tCoords = getCoordsOfNearestTile(particle.coords, sim)
-        particle.current_way = findWayToAim(particle.coords, tCoords, sim)
-        particle.current_way.pop(0)
-    if sim.get_actual_round() > 1:
-        if len(particle.current_way):
-            dir = getDirectionForCoords(particle.current_way.pop(0), particle.coords)
-            if not particle.particle_in(dir):
-                particle.move_to(dir)
+def solution( sim):
+    for particle in sim.particles:
+        if sim.get_actual_round() == 1:
+            setattr(particle, "current_way", [])
+            tCoords = random.choice(sim.get_tiles_list()).coords
+            particle.current_way = findWayToAim(particle.coords, tCoords, sim)
+            particle.current_way.pop(0)
+        if sim.get_actual_round() > 1:
+            if len(particle.current_way):
+                dir = getDirectionForCoords(particle.current_way.pop(0), particle.coords)
+                if not particle.particle_in(dir):
+                    particle.move_to(dir)
 
 def getCoordsOfNearestTile(partilceCoords, world):
     tileCoords = world.get_tile_map_coords()

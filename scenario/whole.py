@@ -9,7 +9,7 @@ NE = 5
 S = 6  # S for stop and not south
 
 direction = [E, SE, SW, W, NW, NE]
-
+max=100
 def scenario(sim):
     sim.add_tile(0, 0)
     sim.add_tile(-1.0, -0.0)

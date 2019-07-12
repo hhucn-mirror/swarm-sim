@@ -19,7 +19,8 @@ NW = 5
 direction = [NE, E, SE, SW, W, NW]
 
 from copy import deepcopy
-
+from solution import sp_to_tile
+import random
 
 def dir_to_str(dir):
     if dir == 0:
@@ -71,9 +72,6 @@ def scan_nh(particle):
             particle.NH_dict[dir] = neighbors("fl", 10000)
             particle.fl_cnt += 1
 
-
-
-
 def initialize_particle(particle):
     setattr(particle, "own_dist", 10000)
     setattr(particle, "NH_dict", {})
@@ -81,6 +79,7 @@ def initialize_particle(particle):
     setattr(particle, "p_dir", [])
     setattr(particle, "t_dir", [])
     setattr(particle, "rcv_buf", {})
+    setattr(particle, "tile", None)
 
 def reset_attributes(particle):
     particle.NH_dict.clear()
@@ -145,12 +144,15 @@ def data_sending(particle):
             # invert the dir so the receiver particle knows from where direction it got the package
             particle.write_to_with(neighbor_p, key=invert_dir(dir), data=deepcopy(package))
 
-cycle_no=2-
+cycle_no=2
 def solution(sim):
+
     for particle in sim.particles:
         if sim.get_actual_round() == 1:
             initialize_particle(particle)
+            particle.tile=random.choice(sim.get_tiles_list())
         reset_attributes(particle)
+        sp_to_tile.sp(sim, particle, particle.tile)
         scan_nh(particle)
         if sim.get_actual_round() % cycle_no == 1:
             define_own_dist(particle)
