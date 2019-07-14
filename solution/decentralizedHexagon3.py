@@ -157,4 +157,3 @@ def announce_right_placed_to_leaders(particle):
         if ne is not None and ne.read_memory_with("Leader") == 2:
             particle.write_to_with(ne, "Leader", 1)
             ne.set_color(4)
-            
