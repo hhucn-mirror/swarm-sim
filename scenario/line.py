@@ -11,7 +11,7 @@ def scenario(sim):
     sim.add_tile(-7.0, 0.0)
     #sim.add_tile(-8.0, 0.0)
 
-    for i in range(0, max):
+    for _ in range(0, max):
         x = random.randrange(-sim.get_sim_x_size(), sim.get_sim_x_size())
         y = random.randrange(-sim.get_sim_y_size(), sim.get_sim_y_size())
         if y % 2 == 1:

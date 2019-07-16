@@ -18,47 +18,27 @@ def solution (sim):
             setattr(particle, "tile", None)
             particle.tile = random.choice(sim.tiles)
         else:
-            sp(sim, particle, particle.tile)
+            mv_one_step_closer_to(particle, tile)
 
-def sp(sim, particle, tile):
-    next_dir = -1
-    #particle.create_location()
-    p_x = particle.coords[0]
-    p_y = particle.coords[1]
-    t_x = tile.coords[0]
-    t_y = tile.coords[1]
-    if (p_x-t_x == p_y-t_y):
-        if p_y < t_y and  p_x < t_x:
-            next_dir = NE
-        elif p_y < t_y and p_x > t_x:
-            next_dir = NW
-        elif p_y > t_y and p_x < t_x:
-            next_dir = SE
-        elif p_y > t_y and p_x > t_x:
-            next_dir = SW
-    elif p_y == t_y:
-        if p_x > t_x:
-            next_dir = W
-        elif p_x < t_x:
-            next_dir = E
-    elif p_x == t_x:
-        if p_y < t_y:
-            next_dir = NE
-        else:
-            next_dir = SW
-    else:
-        if p_y < t_y and p_x < t_x:
-            next_dir = NE
-        elif p_y < t_y and p_x > t_x:
-            next_dir = NW
-        elif p_y > t_y and p_x < t_x:
-            next_dir = SE
-        elif p_y > t_y and p_x > t_x:
-            next_dir = SW
+def mv_one_step_closer_to(particle, tile):
+    next_dir =get_next_dir_to(particle.coords[0], particle.coords[1],  tile.coords[0], tile.coords[1])
 
-    if particle.tile_in(next_dir) or particle.particle_in(next_dir):
-        pass
-    elif next_dir == -1:
-        pass
-    else:
+    if not particle.tile_in(next_dir) and not particle.particle_in(next_dir) and next_dir != -1:
         particle.move_to(next_dir)
+
+
+def get_next_dir_to(src_x, src_y, dest_x, dest_y):
+    next_dir = -1
+    if (src_x < dest_x or src_x == dest_x) and src_y < dest_y:
+        next_dir = NE
+    elif src_y < dest_y and src_x > dest_x:
+        next_dir = NW
+    elif src_y > dest_y and src_x < dest_x:
+        next_dir = SE
+    elif (src_x > dest_x or src_x == dest_x) and src_y > dest_y :
+        next_dir = SW
+    elif src_y == dest_y and src_x > dest_x:
+        next_dir = W
+    elif src_y == dest_y and src_x < dest_x:
+        next_dir = E
+    return next_dir
