@@ -1,193 +1,83 @@
-"""The marker module provides the interface to the markers. A marker is any point on
- the coordinate system of the simulators sim"""
-
-
-import uuid
-import logging
+import sys, getopt, subprocess
 from datetime import datetime
+import os
+import configparser
+import multiprocessing
+import concurrent.futures
 
 
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-yellow = 6
-orange = 7
-cyan = 8
-violett = 9
 
-color_map = {
-    black: [0.0, 0.0, 0.0],
-    gray: [0.3, 0.3, 0.3],
-    red: [0.8, 0.0, 0.0],
-    green: [0.0, 0.8, 0.0],
-    blue: [0.0, 0.0, 0.8],
-    yellow: [0.8, 0.8, 0.0],
-    orange: [0.8, 0.3, 0.0],
-    cyan: [0.0, 0.8, 0.8],
-    violett: [0.8, 0.2, 0.6]
-}
+def main(argv):
+    max_round = 10
+    seed_start = 1
+    seed_end = 10
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read("config.ini")
 
+    try:
+        scenario_file = config.get ("File", "scenario")
+    except (configparser.NoOptionError) as noe:
+        scenario_file = "init_scenario.py"
 
-class Matter():
-    """In the classe marker all the methods for the characterstic of a marker is included"""
+    try:
+        solution_file = config.get("File", "solution")
+    except (configparser.NoOptionError) as noe:
+        solution_file = "solution.py"
 
-    def __init__(self, sim, coords, color=black, alpha=1, type=None, mm_size=100):
-        """Initializing the marker constructor"""
-        self.coords = coords
-        self.color = color_map[color]
-        self.__id = str(uuid.uuid4())
-        self.memory_delay_time=3
-        self.memory_delay=True
-        self.memory_buffer=[]
-        self._tmp_memory=[]
-        self.sim = sim
-        self._memory={}
-        self.__modified=False
-        self.__alpha=alpha
-        self.type = type
-        self.mm_limit = sim.config_data.mm_limitation
-        self.mm_size = mm_size
+    n_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
+    try:
+        opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
+    except getopt.GetoptError:
+        print('Error: multiple.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
+        sys.exit(2)
 
-    def set_alpha(self, alpha):
-        """
-        Set the alpha value of the particle
+    for opt, arg in opts:
+        if opt == '-h':
+            print('multiple.py -ss <seed_start> -se <seed_end> -w <scenario> -s <solution>  -n <maxRounds>')
+            sys.exit()
+        elif opt in ("-s", "--solution"):
+            solution_file = arg
+        elif opt in ("-w", "--scenario"):
+            scenario_file = arg
+        elif opt in ("-ss", "--seed_start"):
+            seed_start = int(arg)
+        elif opt in ("-se", "--seed_end"):
+            seed_end = int(arg)
+        elif opt in ("-n", "--maxrounds"):
+            max_round = int(arg)
 
-        :param alpha: The alpha of the particle
-        :return: None
-        """
-        if (0 <= alpha <= 1):
-            self.__alpha = round(alpha,2)
-            self.touch()
-        elif alpha < 0:
-            self.__alpha = 0
-            self.touch()
-        elif alpha > 1:
-            self.__alpha = 1
-            self.touch()
+    dir = "./outputs/mulitple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" + \
+          solution_file.rsplit('.', 1)[0]
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    out = open(dir + "/multiprocess.txt", "w")
+    child_processes = []
+    round_cnt=0
+    for seed in range(seed_start, seed_end+1):
+        process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d"+str(n_time),\
+                              "-r"+ str(seed), "-v" + str(0)
+        p = subprocess.Popen(process, stdout=out, stderr=out)
+        child_processes.append(p)
+        round_cnt += 1
+        print("Round Nr. ", round_cnt, "started")
+        if len(child_processes) == os.cpu_count():
+            for cp in child_processes:
+                cp.wait()
+            child_processes.clear()
 
-    def get_alpha(self):
-        """
-        Returns the alpha value of the particle
-
-        :return: alpha
-        """
-        return round(self.__alpha,2)
-
-    def read_memory_with(self, key):
-        """
-        Read all its own memory based on a give keywoard
-
-        :param key: Keywoard
-        :return: The founded memory; None: When nothing is written based on the keywoard
-        """
-        tmp_memory = None
-        # if self.memory_delay == True:
-        #     for key in self._tmp_memory:
-        #         if key ==
-        if key in self._memory:
-            tmp_memory = self._memory[key]
-            self.sim.csv_round_writer.update_metrics( memory_read=1)
-        if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
-            return None
-        if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:
-            return None
-        return tmp_memory
-
-    def read_whole_memory(self):
-        """
-        Reads all  markers own memory based on a give keywoard
-
-        :param key: Keywoard
-        :return: The founded memory; None: When nothing is written based on the keywoard
-        """
-        if self._memory != None :
-            self.sim.csv_round_writer.update_metrics(memory_read=1)
-            return self._memory
-        else:
-            return None
-
-    def write_memory_with(self, key, data):
-        """
-        Write on its own memory a data with a keywoard
-
-        :param key: A string keyword for orderring the data into the memory
-        :param data: The data that should be stored into the memory
-        :return: True: Successful written into the memory; False: Unsuccessful
-        """
-
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
-            self._memory[key] = data
-            self.sim.csv_round_writer.update_metrics(memory_write=1)
-            return True
-        else:
-            return False
-            #write csv
+    for cp in child_processes:
+        cp.wait()
+    fout=open(dir+"/all_aggregates.csv","w+")
+    for seed in range(seed_start, seed_end+1):
+        f = open(dir+"/"+str(seed)+"/aggregate_rounds.csv")
+        f.__next__() # skip the header
+        for line in f:
+            fout.write(line)
+        f.close() # not really needed
+    fout.close()
 
 
-    def write_memory(self, data):
-        """
-        Write on its own memory a data with a keywoard
-
-        :param key: A string keyword for orderring the data into the memory
-        :param data: The data that should be stored into the memory
-        :return: True: Successful written into the memory; False: Unsuccessful
-        """
-
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
-                self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
-                self.sim.csv_round_writer.update_metrics(memory_write=1)
-                return True
-        else:
-            return False
-            #write csv
 
 
-    def delete_memeory_with(self, key):
-        del self._memory[key]
-
-    def delete_whole_memeory(self):
-         self._memory.clear()
-
-
-    def get_id(self):
-        """
-        Gets the marker id
-        :return: marker id
-        """
-        return self.__id
-
-    def set_color(self, color):
-        """
-        Sets the marker color
-
-        :param color: marker color
-        :return: None
-        """
-        if type (color) == int:
-            self.color = color_map[color]
-        else:
-            self.color = color
-        self.touch()
-
-
-    def get_color(self):
-        """
-        Sets the marker color
-
-        :param color: marker color
-        :return: None
-        """
-        for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
-         if code == self.color:
-           return(color)
-
-    def touch(self):
-        """Tells the visualization that something has been modified and that it shoud changed it"""
-        self.modified = True
-
-    def untouch(self):
-        """Tells the visualization that something has been modified and that it shoud changed it"""
-        self.modified = False
-
+if __name__ == "__main__":
+    main(sys.argv[1:])
