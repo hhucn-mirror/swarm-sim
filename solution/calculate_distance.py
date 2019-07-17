@@ -71,7 +71,7 @@ def def_min_dist_fl(particle):
         if particle.nh_dict[dir].dist < particle.loc_fl_min_dist:
             particle.loc_fl_min_dist = particle.nh_dict[dir].dist
             particle.loc_fl_min_dir = dir
-        
+
 
 
 #def def_max_dist_p(particle)
