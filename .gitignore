@@ -156,9 +156,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-system.log
-config.ini
-
 .dropbox
 outputs/
 lib/__pycache__/*
+system.log
+config.ini
