@@ -21,16 +21,17 @@ def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if (sim.get_actual_round() == 1):
         initialize(sim)
-        i = 0
+        '''i = 0
         while i < len(placed_particles):
             print(placed_particles[i].coords)
-            i = i+1
+            i = i+1'''
 
     if (sim.get_actual_round() % 2 == 1):
         # calculation for movement
         calc_placed_particles(sim)
         particle = which_particle_to_move(sim)
         create_graph(sim)
+
         if particle != None:
             spantree = create_spantree(particle)
             leafs = get_leafs(spantree)
@@ -42,11 +43,10 @@ def solution(sim):
                         particle.set_color(8)
                     write_replace_directions(1, path)
                     return
-
-
     else:
         move_and_refresh(path)
         delete_structures()
+        is_formed(sim)
 
 def initialize(sim):
 
@@ -58,16 +58,22 @@ def initialize(sim):
     centerParticle = sim.get_particle_list()[0]
     centerPos = centerParticle.coords
 
-    #create_locationsT(sim, centerPos)
-    #create_locationsL(sim, centerPos)
-    #create_locationsS(sim, centerPos)
-    create_locationsH(sim, centerPos)
+    form = sim.config_data.formation
 
+
+    if form == 1:
+        create_markersH(sim, centerPos)
+    elif form == 2:
+        create_markersS(sim, centerPos)
+    elif form == 3:
+        create_markersT(sim, centerPos)
+    elif form == 4:
+        create_markersL(sim, centerPos)
 
 # triangle formula
-def create_locationsT(sim, pos):
+def create_markersT(sim, pos):
     d = 0
-    locationCount = 0
+    markerCount = 0
     particleCount = amount
     startPos = [0, 0]
 
@@ -79,34 +85,36 @@ def create_locationsT(sim, pos):
         while i <= d:
             x = startPos[0]+(1*i)
             y = startPos[1]
-            if locationCount < particleCount:
-                sim.add_location(x, y)
+            if markerCount < particleCount:
+                sim.add_marker(x, y)
             else:
                 return
-            locationCount = locationCount + 1
+            markerCount = markerCount + 1
             i = i + 1
         d = d + 1
 
 # line formula
-def create_locationsL(sim, pos):
-    locationCount = 0
+def create_markersL(sim, pos):
+    print("HIER")
+
+    markerCount = 0
     particleCount = amount
 
-    while locationCount < particleCount:
-        x = pos[0] + (1*locationCount)
+    while markerCount < particleCount:
+        x = pos[0] + (1*markerCount)
         y = pos[1]
 
-        if locationCount < particleCount:
-                sim.add_location(x, y)
+        if markerCount < particleCount:
+                sim.add_marker(x, y)
         else:
             return
-        locationCount = locationCount + 1
+        markerCount = markerCount + 1
 
 # square formula
-def create_locationsS(sim, pos):
+def create_markersS(sim, pos):
     n = round(math.sqrt(amount))
     d = 0
-    locationCount = 0
+    markerCount = 0
     particleCount = amount
 
     startPos = [0, 0]
@@ -118,17 +126,17 @@ def create_locationsS(sim, pos):
         while i < n:
             x = startPos[0]+(1*i)
             y = startPos[1]
-            if locationCount < particleCount:
-                sim.add_location(x, y)
-                locationCount = locationCount + 1
+            if markerCount < particleCount:
+                sim.add_marker(x, y)
+                markerCount = markerCount + 1
             else:
                 return
             i = i + 1
         d = d+1
 
 # hexagon formula
-def create_locationsH(sim, pos):
-    locationCount = 0
+def create_markersH(sim, pos):
+    markerCount = 0
     particleCount = amount
 
     positions = [pos]
@@ -144,10 +152,10 @@ def create_locationsH(sim, pos):
             dir = dir + 1
 
 
-        if locationCount < particleCount:
-            if sim.get_location_map_coords().get(current_pos) == None:
-                sim.add_location(current_pos[0], current_pos[1])
-                locationCount = locationCount + 1
+        if markerCount < particleCount:
+            if sim.get_marker_map_coords().get(current_pos) == None:
+                sim.add_marker(current_pos[0], current_pos[1])
+                markerCount = markerCount + 1
         else:
             return
         i = i+1
@@ -159,7 +167,7 @@ def which_particle_to_move(sim):
     for particle in placed_particles:
         i = 0
         while i < 6:
-            if particle.get_location_in(i) != None and particle.get_particle_in(i) == None:
+            if particle.get_marker_in(i) is not None and particle.get_particle_in(i) is None:
                 particle.write_memory_with("Dir", i)
                 return particle
             i = i + 1
@@ -257,5 +265,11 @@ def delete_structures():
 
 def calc_placed_particles(sim):
     for particle in sim.get_particle_list():
-        if particle.check_on_location():
+        if particle.check_on_marker():
             placed_particles.append(particle)
+
+def is_formed(sim):
+    for particle in sim.get_particle_list():
+        if not particle.check_on_marker():
+            return
+    sim.success_termination()

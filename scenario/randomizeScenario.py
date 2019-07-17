@@ -1,17 +1,15 @@
 import random
 
 def scenario(sim):
-
-    amount = 100
     added = 1
 
     sim.add_particle(0, 0)
+    amount = sim.config_data.p_amount
 
     list = sim.get_particle_list()
 
     while added < amount:
         random.shuffle(list)
-        #particle = list[0]
 
         dir = [0, 1, 2, 3, 4, 5]
         random.shuffle(dir)
@@ -23,4 +21,16 @@ def scenario(sim):
                 added = added+1
                 break
 
-        list = sim.get_particle_list()
+        #random.shuffle(list)
+        #list = sim.get_particle_list()
+
+
+    assign_new_numbers(list)
+
+def assign_new_numbers(particleList):
+    i = 0
+
+    #random.shuffle(particleList)
+    while i < len(particleList):
+        particleList[i].__setattr__("number", i)
+        i = i+1

@@ -1,4 +1,4 @@
-"""The location module provides the interface to the locations. A location is any point on
+"""The marker module provides the interface to the markers. A marker is any point on
  the coordinate system of the simulators sim"""
 
 
@@ -30,12 +30,12 @@ color_map = {
 }
 
 
-class matter():
-    """In the classe location all the methods for the characterstic of a location is included"""
+class Matter():
+    """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
-        """Initializing the location constructor"""
-        self.coords = (x, y)
+    def __init__(self, sim, coords, color=black, alpha=1, type=None, mm_size=100):
+        """Initializing the marker constructor"""
+        self.coords = coords
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
         self.memory_delay_time=3
@@ -47,7 +47,7 @@ class matter():
         self.__modified=False
         self.__alpha=alpha
         self.type = type
-        self.mm_limit = mm_limit
+        self.mm_limit = sim.config_data.mm_limitation
         self.mm_size = mm_size
 
     def set_alpha(self, alpha):
@@ -86,7 +86,7 @@ class matter():
         # if self.memory_delay == True:
         #     for key in self._tmp_memory:
         #         if key ==
-        if  key in self._memory:
+        if key in self._memory:
             tmp_memory = self._memory[key]
             self.sim.csv_round_writer.update_metrics( memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
@@ -97,13 +97,14 @@ class matter():
 
     def read_whole_memory(self):
         """
-        Reads all  locations own memory based on a give keywoard
+        Reads all  markers own memory based on a give keywoard
 
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
         if self._memory != None :
-          return self._memory
+            self.sim.csv_round_writer.update_metrics(memory_read=1)
+            return self._memory
         else:
             return None
 
@@ -119,13 +120,6 @@ class matter():
         if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
             self.sim.csv_round_writer.update_metrics(memory_write=1)
-                # if self.memory_delay == True:
-                #     self._tmp_memory[key] = data
-                #     print("Wrote data at ", self.sim.sim.get_actual_round())
-                #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
-                #     self._tmp_memory.clear()
-                # else:
-                #     self._memory[key] = data
             return True
         else:
             return False
@@ -159,25 +153,35 @@ class matter():
 
     def get_id(self):
         """
-        Gets the location id
-        :return: Location id
+        Gets the marker id
+        :return: marker id
         """
         return self.__id
 
     def set_color(self, color):
         """
-        Sets the location color
+        Sets the marker color
 
-        :param color: Location color
+        :param color: marker color
         :return: None
         """
         if type (color) == int:
             self.color = color_map[color]
         else:
             self.color = color
-
-
         self.touch()
+
+
+    def get_color(self):
+        """
+        Sets the marker color
+
+        :param color: marker color
+        :return: None
+        """
+        for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+         if code == self.color:
+           return(color)
 
     def touch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""

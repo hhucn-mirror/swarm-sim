@@ -14,12 +14,12 @@ read=0
 write=1
 
 
-class Tile(matter.matter):
-    """In the classe location all the methods for the characterstic of a location is included"""
+class Tile(matter.Matter):
+    """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=gray, alpha=1, mm_limit=0, mm_size=0):
-        """Initializing the location constructor"""
-        super().__init__( sim, x, y, color, alpha=1,  type="tile", mm_limit=mm_limit, mm_size=mm_size)
+    def __init__(self, sim, x, y, color=gray, alpha=1):
+        """Initializing the marker constructor"""
+        super().__init__( sim, (x, y), color, alpha,  type="tile", mm_size=sim.config_data.tile_mm_size)
         self.__isCarried = False
         self.created = False
 
