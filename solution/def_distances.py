@@ -20,25 +20,24 @@ def scan_nh(particle):
         else:
             particle.nh_dict[dir] = Neighbors("fl", 10000)
             particle.fl_dir_list.append(dir)
-    if particle.fl_dir_list or particle.p_dir_list or particle.t_dir_list:
-        return True
-    else:
-        return False
-
+    return True
 
 def def_distances(particle):
     if scan_nh(particle) and def_own_dist(particle):
         def_nh_dist(particle)
-
+    def_min_dist_fl(particle)
+    def_max_dist_p(particle)
 
 def def_own_dist(particle):
     if particle.t_dir_list:
         particle.own_dist = 1
+        particle.gl_p_max_dist = 1
     elif particle.rcv_buf:
         min_dist_nh = particle.rcv_buf[min(particle.rcv_buf.keys(),
                                              key=(lambda k: particle.rcv_buf[k].own_dist))].own_dist + 1
         if min_dist_nh < particle.own_dist:
             particle.own_dist = min_dist_nh
+            particle.gl_p_max_dist = min_dist_nh
     return True
 
 
@@ -118,3 +117,52 @@ def check_beside_fl(dir, particle):
         particle.nh_dict[dir].dist = particle.own_dist + 1
     else:
         particle.nh_dict[dir].dist = particle.own_dist
+
+
+
+def def_min_dist_fl(particle):
+    for dir in particle.fl_dir_list:
+        loc_min_fl(dir, particle)
+    for dir in particle.rcv_buf:
+        gl_min_fl(dir, particle)
+
+
+def loc_min_fl(dir, particle):
+    change = False
+    if particle.nh_dict[dir].dist < particle.loc_fl_min_dist:
+        particle.loc_fl_min_dist = particle.nh_dict[dir].dist
+        particle.loc_fl_min_dir.clear()
+        particle.loc_fl_min_dir.append(dir)
+        particle.gl_fl_min_dist = particle.nh_dict[dir].dist
+        particle.gl_fl_min_dir = dir
+        particle.gl_fl_min_hop = 1
+        change = True
+    elif particle.nh_dict[dir].dist == particle.loc_fl_min_dist and change == True:
+        particle.loc_fl_min_dir.append(dir)
+
+
+def gl_min_fl(dir, particle):
+    if particle.rcv_buf[dir].fl_min_dist < particle.gl_fl_min_dist:
+        particle.gl_fl_min_dist = particle.rcv_buf[dir].fl_min_dist
+        particle.gl_fl_min_dir = dir
+        particle.gl_fl_min_hop = particle.rcv_buf[dir].fl_hop + 1
+    elif particle.rcv_buf[dir].fl_min_dist == particle.gl_fl_min_dist \
+            and particle.gl_fl_min_hop > particle.rcv_buf[dir].fl_hop + 1:
+        particle.gl_fl_min_dir = dir
+        particle.gl_fl_min_hop = particle.rcv_buf[dir].fl_hop + 1
+
+
+def def_max_dist_p(particle):
+    for dir in particle.rcv_buf:
+        gl_p_max(dir, particle)
+
+
+def gl_p_max(dir, particle):
+    if particle.rcv_buf[dir].p_max_dist > particle.own_dist:
+        particle.gl_p_max_dist = particle.rcv_buf[dir].p_max_dist
+        particle.gl_p_max_dir = dir
+        particle.gl_p_max_hop = particle.rcv_buf[dir].p_hop + 1
+    if particle.rcv_buf[dir].p_max_dist == particle.gl_p_max_dist \
+            and particle.gl_p_max_hop > particle.rcv_buf[dir].p_hop + 1:
+        particle.gl_p_max_dir = dir
+        particle.gl_p_max_hop = particle.rcv_buf[dir].p_hop + 1
