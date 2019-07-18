@@ -157,7 +157,7 @@ venv.bak/
 .mypy_cache/
 
 system.log
-config.ini
+#config.ini
 
 .dropbox
 outputs/
