@@ -19,8 +19,9 @@ class MessageStore(deque):
             super().append(x)
         else:
             super().append(x)
-        #if self.maxlen == len(self):
-        #    raise OverflowError
+        if self.maxlen == len(self):
+            # manually raise an OverFlowError for protocol purposes
+            raise OverflowError
 
     def __getitem__(self, index):
         if self.strategy == BufferStrategy.mru:

@@ -28,7 +28,7 @@ SW = 3
 W = 4
 NW = 5
 
-message_store_size= 5
+message_store_size = 5
 
 read = 0
 write = 1

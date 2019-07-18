@@ -1,17 +1,9 @@
 import random
 import uuid
+from deprecated import deprecated
 from enum import Enum
 
-
-class CommEvent(Enum):
-    MessageSent = 0
-    MessageDelivered = 1
-    MessageDeliveredDirect = 2
-    MessageForwarded = 3
-    MessagesDeliveredUnique = 4
-    MessageTTLExpired = 5
-    #
-    ReceiverOutOfMem = 10
+from lib.meta import success_event, CommEvent
 
 
 class BufferStrategy(Enum):
@@ -44,7 +36,10 @@ class Message:
         else:
             self.content = content
 
-        sender.send_store.append(self)
+        try:
+            sender.send_store.append(self)
+        except OverflowError:
+            success_event(sender, receiver, self, CommEvent.ReceiverOutOfMem)
 
     def __create_msg_key(self):
         return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
@@ -53,8 +48,12 @@ class Message:
         self.content = uuid.uuid5(self.original_sender.get_id(), 'random_msg')
 
 
+@deprecated
 class MessageStore(dict):
-
+    """
+        This class will be removed when the newer MessageStore class in messagestore.py
+        is fully evaluated.
+    """
     def __init__(self, max_size=1000, buffer_strategy=BufferStrategy.lru, *maps):
         self.max_size = max_size
         self.buffer_strategy = buffer_strategy
@@ -126,8 +125,7 @@ def send_message(msg_store, sender, receiver, message: Message):
     try:
         store.append(message)
     except OverflowError:
-        store.handle_overflow()
-        return CommEvent.ReceiverOutOfMem
+        success_event(sender, receiver, message, CommEvent.ReceiverOutOfMem)
     finally:
         if receiver.get_id() == message.receiver.get_id():
             try:
