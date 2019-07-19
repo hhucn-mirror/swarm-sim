@@ -89,10 +89,7 @@ def dir_to_str(dir):
 
 
 def get_the_invert(dir):
-    if dir >= 3:
-        return dir - 3
-    else:
-        return dir + 3
+    return (dir + 3) % 6
 
 
 def dir_in_range(dir):

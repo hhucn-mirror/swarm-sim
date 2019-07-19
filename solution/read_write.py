@@ -32,8 +32,8 @@ def read_data(particle):
 
 def send_data(particle):
     if particle.own_dist != 10000 and particle.p_dir_list:
-        package = InfoPackage (particle.own_dist, particle.gl_fl_min_dist, particle.gl_fl_min_hop,
-                               particle.gl_p_max_dist, particle.gl_p_max_hop)
+        package = InfoPackage (particle.own_dist, particle.loc_fl_min_dist, particle.gl_fl_min_hop,
+                               particle.loc_p_max_dist, particle.gl_p_max_hop)
         for dir in particle.p_dir_list:
             neighbor_p = particle.get_particle_in(dir)
             # invert the dir so the receiver particle knows from where direction it got the package
