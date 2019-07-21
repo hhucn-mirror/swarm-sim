@@ -28,7 +28,7 @@ color_map = {
 }
 
 
-class matter():
+class Matter:
     """In the classe location all the methods for the characterstic of a location is included"""
 
     def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
@@ -117,13 +117,6 @@ class matter():
         if (self.mm_limit == True and len(self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
             self.sim.csv_round_writer.update_metrics(memory_write=1)
-            # if self.memory_delay == True:
-            #     self._tmp_memory[key] = data
-            #     print("Wrote data at ", self.sim.sim.get_actual_round())
-            #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
-            #     self._tmp_memory.clear()
-            # else:
-            #     self._memory[key] = data
             return True
         else:
             return False

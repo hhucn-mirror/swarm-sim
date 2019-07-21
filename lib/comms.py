@@ -145,7 +145,7 @@ def generate_random_messages(particle_list, amount, ttl_range=None):
     sim = particle_list[0].sim
     if ttl_range is not tuple:
         ttl_range = (1, round(sim.get_max_round()/10))
-    for i in range(amount):
+    for _ in range(amount):
         sender = random.choice(particle_list)
         receiver = random.choice([particle for particle in particle_list if particle != sender])
         Message(sender, receiver, start_round=sim.get_actual_round(), ttl=random.randint(ttl_range[0], ttl_range[1]))
