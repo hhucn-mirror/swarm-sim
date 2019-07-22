@@ -2,6 +2,8 @@
 from lib.std_lib import *
 from solution.def_distances import def_distances
 from solution.read_write import *
+from solution.kalman import coating
+
 import random
 
 
@@ -12,6 +14,7 @@ def initialize_particle(particle):
     setattr(particle, "nh_dict", {})
     setattr(particle, "rcv_buf", {})
     setattr(particle, "prev_dir", None)
+    setattr(particle, "next_dir", None)
 
     # t: tile
     setattr(particle, "t_dir_list", [])
@@ -40,9 +43,29 @@ def reset_attributes(particle):
     particle.fl_dir_list.clear()
     particle.loc_fl_min_dir.clear()
     particle.loc_fl_min_dist = 10000
+    particle.loc_p_max_dist = -1
+    particle.loc_p_max_dir = None
+    data_clearing(particle)
+    particle.next_dir = None
 
 
-cycle_no = 3
+def data_clearing(particle):
+    particle.gl_fl_min_dir = None
+    particle.gl_fl_min_dist = 10000
+    particle.gl_fl_min_hop = 0
+
+    particle.gl_p_max_dist = -1
+    particle.gl_p_max_dir = None
+    particle.gl_p_max_hop = 0
+
+    #particle.rcv_buf.clear()
+    #particle.delete_whole_memeory()
+    particle.own_dist = 10000
+    # if particle.own_dist != 10000:
+    #     particle.own_dist = particle.own_dist - 1
+
+
+cycle_no = 4
 
 
 def solution(sim):
@@ -50,8 +73,8 @@ def solution(sim):
         if sim.get_actual_round() == 1:
             initialize_particle(particle)
             particle.dest_t=random.choice(sim.get_tiles_list())
-            #move_to_dest_in_one_rnd(particle, particle.tile)
-        move_to_dest_step_by_step(particle, particle.dest_t)
+            #move_to_dest_in_one_rnd(particle, particle.dest_t)
+        #move_to_dest_step_by_step(particle, particle.dest_t)
 
         if sim.get_actual_round() % cycle_no == 1:
             reset_attributes(particle)
@@ -61,58 +84,17 @@ def solution(sim):
         elif sim.get_actual_round() % cycle_no == 2:
             send_data(particle)
 
-        # elif sim.get_actual_round() % cycle_no == 0:
-        #     coating_dir=coating(particle)
-        #     if coating_dir is not False:
-        #         particle.prev_dir = get_the_invert(coating_dir)
-        #         particle.move_to(coating_dir)
-        #         data_clearing(particle)
-        #     else:
-        #         move_to_dest_step_by_step(particle, particle.dest_t)
+        elif sim.get_actual_round() % cycle_no == 3:
+            particle.next_dir = coating_dir=coating(particle)
 
+        elif sim.get_actual_round() % cycle_no == 0:
 
-def coating(particle):
-    if len(particle.t_dir_list) > 3:
-        # Optimization movementen between tiles
-        if len(particle.t_dir_list) == 4:
-            return move_between_tiles(particle)
-    else:
-        if particle.fl_dir_list is not None:
-           return move_to_fl_dir(particle)
-    return False
+            if particle.next_dir is not False and not particle.particle_in(particle.next_dir)\
+                    and not particle.tile_in(particle.next_dir):
+                particle.prev_dir = get_the_invert(particle.next_dir)
+                particle.move_to(particle.next_dir)
+                print("\n P", particle.number, " coates to", dir_to_str(particle.next_dir))
 
+            else:
+                move_to_dest_step_by_step(particle, particle.dest_t)
 
-def move_between_tiles(particle):
-    for dir in particle.fl_dir_list:
-        if particle.nh_dict[dir].type == "p" and particle.nh_dict[get_the_invert(dir)].type == "fl" \
-        and get_the_invert(dir) != particle.prev_dir :
-            return get_the_invert(dir)
-        elif particle.nh_dict[dir].type == "fl" and particle.nh_dict[get_the_invert(dir + 3)].type == "fl" \
-        and dir != particle.prev_dir and not particle.particle_in(dir) and not particle.tile_in(dir):
-            return dir
-        elif not particle.particle_in(get_the_invert(dir)) and not particle.tile_in(get_the_invert(dir)) \
-        and not particle.tile_in(dir):
-            return get_the_invert(dir)
-    return False
-
-
-def move_to_fl_dir(particle):
-    if particle.gl_p_max_dir != -1 :
-        for fl_dir in particle.fl_dir_list:
-            if particle.gl_p_max_dist > particle.nh_dict[fl_dir].dist and \
-                    particle.particle_in (fl_dir) is False:
-                    return fl_dir
-
-    return False
-
-
-def data_clearing(particle):
-    particle.gl_fl_min_dir = None
-    particle.gl_fl_min_dist = 10000
-
-    particle.loc_p_max_dir = None
-    particle.gl_p_max_dir = None
-    particle.gl_p_max_dist = -1
-    particle.loc_p_max_dist = -1
-
-    particle.wait = True

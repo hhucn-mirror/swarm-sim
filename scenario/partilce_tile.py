@@ -10,7 +10,7 @@ S = 6  # S for stop and not south
 
 direction = [E, SE, SW, W, NW, NE]
 
-max=10
+max=20
 def scenario(sim):
     # sim.add_tile(0.0, 2.0)
     # sim.add_tile(3.0, 2.0)
@@ -32,7 +32,7 @@ def scenario(sim):
     #sim.add_tile(-0.5, 1.0)
 
 
-    for i in range(0, max):
+    for i in range(0, max+1):
         x = random.randrange(-sim.get_sim_x_size(), sim.get_sim_x_size())
         y = random.randrange(-sim.get_sim_y_size(), sim.get_sim_y_size())
         if y % 2 == 1:

@@ -40,9 +40,10 @@ def move_to_dest_in_one_rnd(particle, destiny):
 def move_to_dest_step_by_step(particle, destiny):
     next_dir = get_next_dir_to(particle.coords[0], particle.coords[1], destiny.coords[0], destiny.coords[1])
     if particle.matter_in(next_dir):
+        return False
+    if particle.move_to(next_dir):
+        print("\n P", particle.number, " moves to", dir_to_str(next_dir))
         return True
-    particle.move_to(next_dir)
-    return False
 
 def get_next_dir_to(src_x, src_y, dest_x, dest_y):
     """
