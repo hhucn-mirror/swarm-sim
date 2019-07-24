@@ -1,15 +1,8 @@
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-yellow = 6
-orange = 7
-cyan = 8
-violett = 9
+from scenario.scenario_std_lib import *
 
-import random
-max=100
+max_size_particle = 200
+
+
 def scenario(sim):
 
     sim.add_tile(0.0, 0.0)
@@ -31,16 +24,18 @@ def scenario(sim):
     sim.add_tile(-0.5, 5.0)
     sim.add_tile(-0.0, 6.0)
 
-    for i in range(0, max):
-        x = random.randrange(-sim.get_sim_x_size(), sim.get_sim_x_size())
-        y = random.randrange(-sim.get_sim_y_size(), sim.get_sim_y_size())
-        if y % 2 == 1:
-            x = x + 0.5
-        if (x, y) not in sim.tile_map_coords:
-            sim.add_particle(x, y)
-        else:
-            print(" x and y ", (x, y))
-    print("Max Size of created Particle", len(sim.particles))
+    #create_particle_in_line(sim, max_size_particle)
+    generating_random_spraded_particles(sim, max_size_particle)
+    # for i in range(0, max):
+    #     x = random.randrange(-sim.get_sim_x_size(), sim.get_sim_x_size())
+    #     y = random.randrange(-sim.get_sim_y_size(), sim.get_sim_y_size())
+    #     if y % 2 == 1:
+    #         x = x + 0.5
+    #     if (x, y) not in sim.tile_map_coords:
+    #         sim.add_particle(x, y)
+    #     else:
+    #         print(" x and y ", (x, y))
+    # print("Max Size of created Particle", len(sim.particles))
     # sim.add_particle(1.0, 0.0, color=red)
     # sim.add_particle(0.5, -1.0, color=red)
     # sim.add_particle(0.5, 1.0, color=red)

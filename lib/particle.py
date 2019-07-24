@@ -35,6 +35,7 @@ read = 0
 write = 1
 particle_counter=0
 
+
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
@@ -70,7 +71,6 @@ class Particle(matter.Matter):
             return False
         else:
             return True
-
 
     def get_carried_status(self):
         """

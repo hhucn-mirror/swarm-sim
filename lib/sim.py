@@ -364,7 +364,7 @@ class Sim:
         if alpha < 0 or alpha >1:
             alpha = 1
         if len(self.particles) < self.max_particles:
-            if  self.check_coords(x,y) == True:
+            if self.check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
                     new_particle= particle.Particle(self, x, y, color, alpha)
                     self.particles_created.append(new_particle)

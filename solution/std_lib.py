@@ -68,6 +68,7 @@ def get_next_dir_to(src_x, src_y, dest_x, dest_y):
         next_dir = E
     return next_dir
 
+
 def dir_to_str(dir):
     """
     :param dir: the direction that should get converted to a string
