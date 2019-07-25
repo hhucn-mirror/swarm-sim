@@ -3,10 +3,13 @@ import math
 
 class TypeInfo:
     def __init__(self):
-        self.id = None
-        self.dist = math.inf
-        self.dir = None
+        self.id = 0
+        self.dist = -math.inf
+        self.dir = 0
         self.hop = 0
+
+    def __str__(self):
+        return "id: "+ str(self.id)+"|"+"dist: "+str(self.dist)+"|"+"dir: "+ str(self.dir)+"|"+"hop: "+ str(self.hop)
 
     def __eq__(self, id, dist, dir, hop):
         self.id = id
@@ -20,7 +23,7 @@ def initialize_particle(particle):
 
     setattr(particle, "own_dist", math.inf)
     #nh: neighborhood
-    setattr(particle, "nh_dict", {})
+    setattr(particle, "nh_dist_list", [math.inf, math.inf, math.inf, math.inf, math.inf, math.inf,])
     setattr(particle, "rcv_buf", {})
     setattr(particle, "prev_dir", None)
     setattr(particle, "next_dir", None)
@@ -29,16 +32,15 @@ def initialize_particle(particle):
     setattr(particle, "dest_t", None)
 
     # fl: free location
-    setattr(particle, "fl_min", TypeInfo)
+    setattr(particle, "fl_min", TypeInfo())
 
     # p: particle
-    setattr(particle, "p_max", TypeInfo)
+    setattr(particle, "p_max", TypeInfo())
 
     setattr(particle, "wait", False)
 
 
 def reset_attributes(particle):
-    particle.nh_dict.clear()
     particle.next_dir = None
     data_clearing(particle)
 
