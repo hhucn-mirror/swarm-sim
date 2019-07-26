@@ -6,14 +6,21 @@ debug = 1
 
 
 class DistInfo:
-    def __init__(self, own_dist, p_max):
+    def __init__(self, own_dist, own_id, p_max):
         self.own_dist = own_dist
-        self.p_max_id = p_max.id
-        self.p_max_dist = p_max.dist
-        self.p_max_dir = p_max.dir
-        self.p_max_hop = p_max.hop
+        self.own_id = own_id
+        if p_max:
+            max_key = max(p_max, key=p_max.get)
+            self.p_max_id = max_key
+            self.p_max_dist = p_max[self.p_max_id]
+            self.p_max_dir = 0
+        else:
+            self.p_max_id = None
+            self.p_max_dist = -math.inf
 
-
+class OwnInfo:
+    def __init__(self, own_dist):
+        self.own_dist = own_dist
 # def __init__(self, own_dist, fl_min_dist, fl_hop, p_max_id, p_max_dist, p_hop):
 # self.own_dist = own_dist
 # self.fl_min_dist = fl_min_dist
@@ -31,16 +38,30 @@ def read_data(particle):
     return False
 
 
-def send_data(particle):
+def send_own_distance(particle):
     if particle.own_dist != math.inf:
-        dist_package = DistInfo(particle.own_dist, particle.p_max)
+        dist_package = OwnInfo(particle.own_dist)
         for dir in direction:
             neighbor_p = particle.get_particle_in(dir)
             if neighbor_p:
                 if debug:
                     print("P", particle.number, "sends own distance", dist_package.own_dist,
-                          " P MAx", particle.p_max,
                           " to", neighbor_p.number, " in dir", dir_to_str(dir))
+                # invert the dir so the receiver particle knows from where direction it got the package
+                particle.write_to_with(neighbor_p, key=get_the_invert(dir), data=deepcopy(dist_package))
+        return True
+
+
+def send_data(particle):
+    if particle.own_dist != math.inf:
+        dist_package = DistInfo(particle.own_dist, particle.number, particle.p_max_table)
+        for dir in direction:
+            neighbor_p = particle.get_particle_in(dir)
+            if neighbor_p and dir not in particle.p_max.black_list:
+                if debug:
+                    print("P", particle.number, "sends own distance", dist_package.own_dist,
+                          " P Max ID:", dist_package.p_max_id, "Dist:", dist_package.p_max_dist,
+                          " to P", neighbor_p.number, " in dir", dir_to_str(dir))
                 # invert the dir so the receiver particle knows from where direction it got the package
                 particle.write_to_with(neighbor_p, key=get_the_invert(dir), data=deepcopy(dist_package))
         return True

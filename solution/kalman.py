@@ -1,23 +1,28 @@
 from solution.std_lib import *
 import math
 
+
 class TypeInfo:
     def __init__(self):
         self.id = 0
         self.dist = -math.inf
         self.dir = 0
-        self.hop = 0
-
+        self.black_list = []
     def __str__(self):
-        return "id: "+ str(self.id)+"|"+"dist: "+str(self.dist)+"|"+"dir: "+ str(self.dir)+"|"+"hop: "+ str(self.hop)
+        return "id: "+ str(self.id)+"|"+"dist: "+str(self.dist)+"|"+"dir: "+ str(self.dir) \
+               + "|" + "Blacklist: " + str(self.black_list)[1:-1]
 
     def __eq__(self, id, dist, dir, hop):
         self.id = id
         self.dist = dist
         self.dir = dir
-        self.hop = hop
+        self.black_list = []
 
-
+    def reset(self):
+        self.id = 0
+        self.dist = -math.inf
+        self.dir = 0
+        self.black_list.clear()
 
 def initialize_particle(particle):
 
@@ -27,12 +32,14 @@ def initialize_particle(particle):
     setattr(particle, "rcv_buf", {})
     setattr(particle, "prev_dir", None)
     setattr(particle, "next_dir", None)
+    setattr(particle, "first_send", True)
+    setattr(particle, "p_max_table", [])
 
     # t: tile
     setattr(particle, "dest_t", None)
 
     # fl: free location
-    setattr(particle, "fl_min", TypeInfo())
+    # setattr(particle, "fl_min", TypeInfo())
 
     # p: particle
     setattr(particle, "p_max", TypeInfo())
@@ -51,25 +58,17 @@ def data_clearing(particle):
 
 def coating_alg(particle):
     #opt_coating(particle)
-    if particle.fl_dir_list is not None:
+    if particle.nh_dist_list is not None:
         return  move_to_fl_dir(particle)
     return False
 
 
 def move_to_fl_dir(particle):
     #Check if particle has a global p_max and it is not equal to its own distance
-    if particle.gl_p_max_dist != math.inf and particle.gl_p_max_dist != particle.own_dist:
+    if particle.p_max.dist > particle.own_dist:
         #check if the global free location is smaller than the p_max_dist
-        if particle.gl_fl_min_dist < particle.gl_p_max_dist and particle.particle_in(particle.gl_fl_min_dir) is False\
-                and particle.tile_in (particle.gl_fl_min_dir) is False:
-            return particle.gl_fl_min_dir
-        else:
-            for fl_dir in particle.fl_dir_list:
-                if particle.gl_p_max_dist > particle.nh_dict[fl_dir].dist and \
-                        particle.particle_in (fl_dir) is False:
-                    return fl_dir
-    else:
-        if particle.gl_fl_min_dist != math.inf and particle.particle_in(particle.gl_fl_min_dir) is False\
-                and particle.tile_in(particle.gl_fl_min_dir) is False:
-            return particle.gl_fl_min_dir
+        for dir in direction:
+            if particle.nh_dist_list[dir] < particle.p_max.dist and not particle.particle_in(dir) and \
+                    not particle.tile_in(dir) and particle.prev_dir != dir:
+                return dir
     return False

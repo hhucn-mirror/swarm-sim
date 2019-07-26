@@ -75,11 +75,11 @@ def dir_to_str(dir):
     :return: the string of the direction
     """
     if dir == 0:
-        return "NO"
+        return "NE"
     elif dir == 1:
-        return "O"
+        return "E"
     elif dir == 2:
-        return "SO"
+        return "SE"
     elif dir == 3:
         return "SW"
     elif dir == 4:

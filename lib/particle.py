@@ -63,14 +63,13 @@ class Particle(matter.Matter):
     def has_tile(self):
         if self.carried_tile == None:
             return False
-        else:
-            return True
+
+        return True
 
     def has_particle(self):
         if self.carried_particle == None:
             return False
-        else:
-            return True
+        return True
 
     def get_carried_status(self):
         """
@@ -88,9 +87,7 @@ class Particle(matter.Matter):
         """
         if self.coords in self.sim.tile_map_coords:
             return True
-        else:
-            return False
-
+        return False
 
     def check_on_particle(self):
         """
@@ -100,8 +97,7 @@ class Particle(matter.Matter):
         """
         if self.coords in self.sim.particle_map_coords:
             return True
-        else:
-            return False
+        return False
 
     def check_on_marker(self):
         """
@@ -111,8 +107,8 @@ class Particle(matter.Matter):
         """
         if self.coords in self.sim.marker_map_coords:
             return True
-        else:
-            return False
+
+        return False
 
     def move_to(self, dir):
         """
@@ -143,10 +139,12 @@ class Particle(matter.Matter):
         if self.carried_tile is not None:
             self.carried_tile.coords = self.coords
             self.carried_tile.touch()
+            return True
         elif self.carried_particle is not None:
             self.carried_particle.coords = self.coords
             self.carried_particle.touch()
-
+            return True
+        return False
     def check_within_border(self, dir, dir_coord):
         if self.sim.border == 1 and \
                 (abs(dir_coord[0]) > self.sim.get_sim_x_size() or abs(dir_coord[1]) > self.sim.get_sim_y_size()):
@@ -169,7 +167,7 @@ class Particle(matter.Matter):
         else:
             # 'bounce' off the wall
             n_dir = dir - 3 if dir > 2 else dir + 3
-            self.move_to(n_dir)
+            return self.move_to(n_dir)
 
     def read_from_with(self, matter, key=None):
         """
@@ -195,8 +193,8 @@ class Particle(matter.Matter):
                 self.sim.csv_round_writer.update_metrics( marker_read=1)
                 self.csv_particle_writer.write_particle(marker_read=1)
             return tmp_memory
-        else:
-            return None
+
+        return None
 
     def matter_in(self, dir=E):
         """
@@ -207,8 +205,7 @@ class Particle(matter.Matter):
             or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords() \
             or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
             return True
-        else:
-            return False
+        return False
 
     def tile_in(self, dir=E):
         """
@@ -217,8 +214,7 @@ class Particle(matter.Matter):
         """
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
             return True
-        else:
-            return False
+        return False
 
     def particle_in(self, dir=E):
         """
@@ -227,8 +223,7 @@ class Particle(matter.Matter):
         """
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
             return True
-        else:
-            return False
+        return False
 
     def marker_in(self, dir=E):
         """
@@ -237,8 +232,7 @@ class Particle(matter.Matter):
         """
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
             return True
-        else:
-            return False
+        return False
 
     def get_matter_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
@@ -247,38 +241,32 @@ class Particle(matter.Matter):
             return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
         elif self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
             return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        else:
-            return False
+        return False
 
     def get_tile_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
             return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        else:
-            return False
+        return False
 
     def get_particle_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
             return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        else:
-            return False
+        return False
 
     def get_marker_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
             return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        else:
-            return False
+        return False
 
     def get_marker(self):
         if self.coords in self.sim.marker_map_coords:
             return self.sim.get_marker_map_coords()[self.coords]
-        else:
-            return False
+        return False
 
     def get_tile(self):
         if self.self.coords in self.sim.get_tile_map_coords():
             return self.sim.get_tile_map_coords()[self.coords]
-        else:
-            return False
+        return False
 
     def write_to_with(self, matter, key=None, data=None):
         """
@@ -307,10 +295,7 @@ class Particle(matter.Matter):
                     self.sim.csv_round_writer.update_metrics( marker_write=1)
                     self.csv_particle_writer.write_particle(marker_write=1)
                 return True
-            else:
-                return False
-        else:
-            return False
+        return False
 
     def scan_for_matter_within(self, matter='all', hop=1):
         """
@@ -330,8 +315,7 @@ class Particle(matter.Matter):
                 hop_list.extend(list)
         if len(hop_list) != 0:
             return hop_list
-        else:
-            return None
+        return None
 
     def scan_for_matter_in(self, matter='all', hop=1):
         """
@@ -496,9 +480,8 @@ class Particle(matter.Matter):
         if len(hop_list) > 0:
             logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
             return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+        logging.info("Nothing in %s hops", str(hop))
+        return None
 
 
 
@@ -520,8 +503,7 @@ class Particle(matter.Matter):
                 hop_list.extend(list)
         if len(hop_list) != 0:
             return hop_list
-        else:
-            return None
+        return None
 
     def scan_for_particle_in(self, hop=1):
         """
@@ -575,9 +557,8 @@ class Particle(matter.Matter):
         if len(hop_list) > 0:
             logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
             return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+        logging.info("Nothing in %s hops", str(hop))
+        return None
 
 
 
@@ -599,8 +580,7 @@ class Particle(matter.Matter):
                 hop_list.extend(list)
         if len(hop_list) != 0:
             return hop_list
-        else:
-            return None
+        return None
 
     def scan_for_tile_in(self, hop=1):
         """
@@ -654,9 +634,9 @@ class Particle(matter.Matter):
         if len(hop_list) > 0:
             logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
             return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+
+        logging.info("Nothing in %s hops", str(hop))
+        return None
 
 
     def scan_for_marker_within(self, hop=1):
@@ -677,8 +657,7 @@ class Particle(matter.Matter):
                 hop_list.extend(list)
         if len(hop_list) != 0:
             return hop_list
-        else:
-            return None
+        return None
 
     def scan_for_marker_in(self, hop=1):
         """
@@ -733,9 +712,8 @@ class Particle(matter.Matter):
         if len(hop_list) > 0:
             logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
             return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+        logging.info("Nothing in %s hops", str(hop))
+        return None
 
     def take_me(self, coords=0):
         """
@@ -753,8 +731,7 @@ class Particle(matter.Matter):
             self.set_alpha(0.5)
             self.touch()
             return True
-        else:
-            return False
+        return False
 
     def drop_me(self, coords):
         """
@@ -783,8 +760,7 @@ class Particle(matter.Matter):
             self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()))
             self.sim.csv_round_writer.update_metrics( tile_created=1)
             return new_tile
-        else:
-            return False
+        return False
 
     def create_tile_in(self, dir=None, color=gray, alpha=1):
         """
@@ -806,11 +782,8 @@ class Particle(matter.Matter):
                 self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()))
                 self.sim.csv_round_writer.update_metrics( tile_created=1)
                 return new_tile
-            else:
-                return False
-        else:
-            logging.info("Not created tile ")
-            return False
+        logging.info("Not created tile ")
+        return False
 
     def create_tile_on(self, x=None, y=None, color=gray, alpha=1):
         """
@@ -833,12 +806,8 @@ class Particle(matter.Matter):
                     self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()) )
                     self.sim.csv_round_writer.update_metrics( tile_created=1)
                     return True
-                else:
-                    logging.info("Not created tile on coords  \(%i , %i\)", y,x )
-                    return False
-            else:
-                logging.info("Not created tile on coords   \(%i , %i\)", y,x )
-                return False
+        logging.info("Not created tile on coords   \(%i , %i\)", y,x )
+        return False
 
     def delete_tile(self):
         """
@@ -852,9 +821,8 @@ class Particle(matter.Matter):
             if self.sim.remove_tile_on(self.coords):
                 self.csv_particle_writer.write_particle(tile_deleted=1)
                 return True
-        else:
-            logging.info("Could not delet tile")
-            return False
+        logging.info("Could not delet tile")
+        return False
 
     def delete_tile_with(self, id):
         """
@@ -868,9 +836,8 @@ class Particle(matter.Matter):
         if self.sim.remove_tile(id):
             self.csv_particle_writer.write_particle(tile_deleted=1)
             return True
-        else:
-            logging.info("Could not delet tile with tile id %s", str(id))
-            return False
+        logging.info("Could not delet tile with tile id %s", str(id))
+        return False
 
     def delete_tile_in(self, dir=None):
         """
@@ -889,12 +856,8 @@ class Particle(matter.Matter):
                     logging.info("Deleted tile with tile on coords %s", str(coords))
                     self.csv_particle_writer.write_particle(tile_deleted=1)
                     return True
-                else:
-                    logging.info("Could not delet tile on coords %s", str(coords))
-                    return False
-        else:
-            logging.info("Could not delet tile on coords %s", str(coords))
-            return False
+        logging.info("Could not delet tile on coords %s", str(coords))
+        return False
 
     def delete_tile_on(self, x=None, y=None):
         """
@@ -911,12 +874,8 @@ class Particle(matter.Matter):
                 logging.info("Deleted tile with tile on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(tile_deleted=1)
                 return True
-            else:
-                logging.info("Could not delet tile on coords %s", str(coords))
-                return False
-        else:
-            logging.info("Could not delet tile on coords %s", str(coords))
-            return False
+        logging.info("Could not delet tile on coords %s", str(coords))
+        return False
 
     def take_tile(self):
         """
@@ -1049,6 +1008,7 @@ class Particle(matter.Matter):
                 logging.info("Is not possible to drop the tile on that position because it is occupied")
                 return False
         else:
+            logging.info("No tile taken for dropping")
             return False
 
     def drop_tile_in(self, dir):
@@ -1121,8 +1081,8 @@ class Particle(matter.Matter):
             self.sim.csv_round_writer.update_particle_num(len(self.sim.get_particle_list()))
             self.sim.csv_round_writer.update_metrics( particle_created=1)
             return new_particle
-        else:
-            return False
+
+        return False
 
     def create_particle_in(self, dir=None, color=black, alpha=1):
         """
@@ -1145,11 +1105,9 @@ class Particle(matter.Matter):
                 self.sim.csv_round_writer.update_metrics( particle_created=1)
                 self.csv_particle_writer.write_particle(particle_created=1)
                 return new_particle
-            else:
-                return False
-        else:
-            logging.info("Not created particle on coords %s", str(coords))
-            return False
+
+        logging.info("Not created particle on coords %s", str(coords))
+        return False
 
     def create_particle_on(self, x=None, y=None, color=black, alpha=1):
         """
@@ -1174,13 +1132,9 @@ class Particle(matter.Matter):
                     self.sim.csv_round_writer.update_metrics( particle_created=1)
                     self.csv_particle_writer.write_particle(particle_created=1)
                     return new_particle
-                else:
-                    return False
-            else:
-                return False
-        else:
-            logging.info("Not created particle on coords %s", str(coords))
-            return False
+
+        logging.info("Not created particle on coords %s", str(coords))
+        return False
 
     def delete_particle(self):
         """
@@ -1194,9 +1148,9 @@ class Particle(matter.Matter):
             if self.sim.remove_particle_on(self.coords):
                 self.csv_particle_writer.write_particle(particle_deleted=1)
                 return True
-        else:
-            logging.info("Could not delet particle")
-            return False
+
+        logging.info("Could not delet particle")
+        return False
 
     def delete_particle_with(self, id):
         """
@@ -1209,9 +1163,9 @@ class Particle(matter.Matter):
         logging.info("is going to delete a particle with id %s", str(id))
         if self.sim.remove_particle(id):
             self.csv_particle_writer.write_particle(particle_deleted=1)
-            return
-        else:
-            logging.info("Could not delet particle with particle id %s", str(id))
+            return True
+        logging.info("Could not delet particle with particle id %s", str(id))
+        return False
 
     def delete_particle_in(self, dir=None):
         """
@@ -1226,8 +1180,9 @@ class Particle(matter.Matter):
             if self.sim.remove_particle_on(coords):
                 logging.info("Deleted particle with particle on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(particle_deleted=1)
-            else:
-                logging.info("Could not delet particle on coords %s", str(coords))
+                return True
+        logging.info("Could not delet particle on coords %s", str(coords))
+        return False
 
     def delete_particle_on(self, x=None, y=None):
         """
@@ -1244,13 +1199,8 @@ class Particle(matter.Matter):
                     logging.info("Deleted particle with particle on coords %s", str(coords))
                     self.csv_particle_writer.write_particle(particle_deleted=1)
                     return True
-                else:
-                    logging.info("Could not delet particle on coords %s", str(coords))
-                    return False
-            else:
-                return False
-        else:
-            return False
+        logging.info("Could not delet particle on coords %s", str(coords))
+        return False
 
     def take_particle(self):
         """
@@ -1299,8 +1249,10 @@ class Particle(matter.Matter):
                     return False
             else:
                 logging.info("particle with particle id %s is not in the sim", str(id))
+                return False
         else:
             logging.info("particle cannot taken because particle is carrieng either a particle or a particle", str(id))
+            return False
 
     def take_particle_in(self, dir):
         """
@@ -1324,10 +1276,11 @@ class Particle(matter.Matter):
                     logging.info("particle could not be taken")
                     return False
             else:
-                pass
                 logging.info("particl is not in the sim")
+                return False
         else:
             logging.info("particle cannot be  taken")
+            return False
 
     def take_particle_on(self, x=None, y=None):
         """
@@ -1378,9 +1331,8 @@ class Particle(matter.Matter):
             self.csv_particle_writer.write_particle(particles_dropped=1)
             logging.info("Particle succesfull dropped")
             return True
-        else:
-            logging.info("No particle taken to drop")
-            return False
+        logging.info("No particle taken to drop")
+        return False
 
     def drop_particle_in(self, dir):
         """
@@ -1471,8 +1423,7 @@ class Particle(matter.Matter):
             self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
             self.sim.csv_round_writer.update_metrics( marker_created=1)
             return  new_marker
-        else:
-            return False
+        return False
 
     def create_marker_in(self, dir=None, color=black, alpha=1):
         """
@@ -1493,9 +1444,8 @@ class Particle(matter.Matter):
                 return new_marker
             else:
                 return False
-        else:
-            logging.info("Not created marker on coords %s", str(coords))
-            return False
+        logging.info("Not created marker on coords %s", str(coords))
+        return False
 
     def create_marker_on(self, x=None, y=None, color=black, alpha=1):
         """
@@ -1519,9 +1469,8 @@ class Particle(matter.Matter):
                     return new_marker
             else:
                 return False
-        else:
-            logging.info("Not created marker on coords %s", str(coords))
-            return False
+        logging.info("Not created marker on coords %s", str(coords))
+        return False
 
     def delete_marker(self):
         """
@@ -1535,9 +1484,8 @@ class Particle(matter.Matter):
             if self.sim.remove_marker_on(self.coords):
                 self.csv_particle_writer.write_particle(marker_deleted=1)
                 return True
-        else:
-            logging.info("Could not delet marker")
-            return False
+        logging.info("Could not delet marker")
+        return False
 
     def delete_marker_with(self, marker_id):
         """
@@ -1551,9 +1499,9 @@ class Particle(matter.Matter):
         logging.info("is going to delete a marker with id %s", str(marker_id))
         if self.sim.remove_marker(marker_id):
             self.csv_particle_writer.write_particle(marker_deleted=1)
-            return
-        else:
-            logging.info("Could not delet marker with marker id %s", str(marker_id))
+            return True
+        logging.info("Could not delet marker with marker id %s", str(marker_id))
+        return False
 
     def delete_marker_in(self, dir=None):
         """
@@ -1571,8 +1519,10 @@ class Particle(matter.Matter):
             if self.sim.remove_marker_on(coords):
                 logging.info("Deleted marker with marker on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(marker_deleted=1)
-            else:
-                logging.info("Could not delet marker on coords %s", str(coords))
+                return True
+
+        logging.info("Could not delet marker on coords %s", str(coords))
+        return False
 
     def delete_marker_on(self, x=None, y=None):
         """
@@ -1589,11 +1539,7 @@ class Particle(matter.Matter):
                     logging.info("Deleted marker  oords %s", str(coords))
                     self.csv_particle_writer.write_particle(marker_deleted=1)
                     return True
-                else:
-                    logging.info("Could not delet marker on coords %s", str(coords))
-                    return False
-            else:
-                return False
-        else:
-            return False
+
+        logging.info("Could not delet marker on coords %s", str(coords))
+        return False
 

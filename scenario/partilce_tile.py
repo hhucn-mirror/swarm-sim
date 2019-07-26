@@ -1,6 +1,6 @@
 from scenario.scenario_std_lib import *
 
-max = 10
+max = 12
 def scenario(sim):
     # sim.add_tile(0.0, 2.0)
     # sim.add_tile(3.0, 2.0)
