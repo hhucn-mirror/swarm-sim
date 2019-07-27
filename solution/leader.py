@@ -1,9 +1,9 @@
 
 # elects leader with the highest id
-def elect(particleList):
-    for particle in particleList:
+def elect(particle_list):
+    for particle in particle_list:
         send_max_id_to_all_nbs(particle)
-    for particle in particleList:
+    for particle in particle_list:
         if particle.number == particle.read_memory_with("MaxID"):
             particle.write_memory_with("Leader", 1)
             particle.set_color(4)
@@ -16,3 +16,5 @@ def send_max_id_to_all_nbs(particle):
             particle.write_to_with(nb, "MaxID", particle.read_memory_with("MaxID"))
             send_max_id_to_all_nbs(nb)
 
+def get_random_particle(particle_list):
+    return particle_list[0]

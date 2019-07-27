@@ -21,16 +21,12 @@ def scenario(sim):
                 added = added+1
                 break
 
-        #random.shuffle(list)
-        #list = sim.get_particle_list()
-
-
     assign_new_numbers(list)
 
 def assign_new_numbers(particleList):
     i = 0
 
-    #random.shuffle(particleList)
+    random.shuffle(particleList)
     while i < len(particleList):
         particleList[i].__setattr__("number", i)
         i = i+1

@@ -20,9 +20,9 @@ def scenario(sim):
 	sim.add_particle(1.0, -2.0)2"""
 
 
-	x = 0
+	x = 6
 	y = 0
-	while y < 127:
+	while y < 24:
 		sim.add_particle(x+(0.5*y), y)
 		y = y + 1
 

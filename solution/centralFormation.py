@@ -1,4 +1,5 @@
 import math
+import solution.leader as leader
 
 NE = 0
 E = 1
@@ -21,10 +22,6 @@ def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if (sim.get_actual_round() == 1):
         initialize(sim)
-        '''i = 0
-        while i < len(placed_particles):
-            print(placed_particles[i].coords)
-            i = i+1'''
 
     if (sim.get_actual_round() % 2 == 1):
         # calculation for movement
@@ -38,7 +35,7 @@ def solution(sim):
 
             for leaf in leafs:
                 if leaf not in placed_particles:
-                    path = find_shortest_path(spantree, particle, leaf)
+                    path = find_shortest_path(graph, particle, leaf)
                     for particle in path:
                         particle.set_color(8)
                     write_replace_directions(1, path)
@@ -55,7 +52,7 @@ def initialize(sim):
         particle.write_memory_with("Dir", None)
         amount = amount + 1
 
-    centerParticle = sim.get_particle_list()[0]
+    centerParticle = leader.get_random_particle(sim.get_particle_list())
     centerPos = centerParticle.coords
 
     form = sim.config_data.formation
@@ -95,8 +92,6 @@ def create_markersT(sim, pos):
 
 # line formula
 def create_markersL(sim, pos):
-    print("HIER")
-
     markerCount = 0
     particleCount = amount
 
@@ -106,13 +101,12 @@ def create_markersL(sim, pos):
 
         if markerCount < particleCount:
                 sim.add_marker(x, y)
-        else:
-            return
-        markerCount = markerCount + 1
+                markerCount = markerCount + 1
 
 # square formula
 def create_markersS(sim, pos):
-    n = round(math.sqrt(amount))
+    n = math.ceil(math.sqrt(amount))
+
     d = 0
     markerCount = 0
     particleCount = amount
@@ -142,7 +136,8 @@ def create_markersH(sim, pos):
     positions = [pos]
 
     i = 0
-    while True:
+
+    while markerCount < particleCount:
         current_pos = positions[i]
 
         dir = 0
@@ -151,13 +146,9 @@ def create_markersH(sim, pos):
             positions.append(new_coords)
             dir = dir + 1
 
-
-        if markerCount < particleCount:
-            if sim.get_marker_map_coords().get(current_pos) == None:
-                sim.add_marker(current_pos[0], current_pos[1])
-                markerCount = markerCount + 1
-        else:
-            return
+        if sim.get_marker_map_coords().get(current_pos) == None:
+            sim.add_marker(current_pos[0], current_pos[1])
+            markerCount = markerCount + 1
         i = i+1
 
 
