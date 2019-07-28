@@ -14,6 +14,7 @@ class CommEvent(Enum):
     ReceiverOutOfMem = 10
 
 
+# TODO: Make event queue Vergleiche mit ONE
 def success_event(sender, receiver, message, event):
 
     if event == CommEvent.MessageDeliveredDirect:

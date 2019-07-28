@@ -7,11 +7,9 @@ scan_radius = 1
 
 
 def solution(sim):
-    global particles
-
+    particles = sim.get_particle_list()
     if sim.get_actual_round() == 1:
-        particles = sim.get_particle_list()
-        generate_random_messages(particles, len(particles)*10)
+        generate_random_messages(particles, len(particles)*10, sim)
 
         # initialize the particle mobility models
         particle_number = 0

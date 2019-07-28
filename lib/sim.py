@@ -39,6 +39,7 @@ blue = 5
 
 
 class Sim:
+    # TODO: use config file to set e.g. Routing algorithm (merge with master branch necessary)
     def __init__(self, seed=1, max_round=10, solution="None", size_x = 0, size_y = 0,
                  scenario_name = None, max_particles = 50,
                  mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",

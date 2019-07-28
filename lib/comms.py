@@ -18,7 +18,7 @@ class Message:
 
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round: int, ttl: int, content=''):
+    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None):
         self.original_sender = sender
         self.receiver = receiver
         self.seq_number = Message.seq_number
@@ -31,7 +31,7 @@ class Message:
         self.hop_count = 0
         Message.seq_number += 1
 
-        if content == '' or content is None:
+        if content is None:
             self.__generate_random()
         else:
             self.content = content
@@ -42,7 +42,7 @@ class Message:
             success_event(sender, receiver, self, CommEvent.ReceiverOutOfMem)
 
     def __create_msg_key(self):
-        return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
+        return id(self)
 
     def __generate_random(self):
         self.content = uuid.uuid5(self.original_sender.get_id(), 'random_msg')
@@ -141,8 +141,7 @@ def send_message(msg_store, sender, receiver, message: Message):
             return CommEvent.MessageForwarded
 
 
-def generate_random_messages(particle_list, amount, ttl_range=None):
-    sim = particle_list[0].sim
+def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     if ttl_range is not tuple:
         ttl_range = (1, round(sim.get_max_round()/10))
     for _ in range(amount):
