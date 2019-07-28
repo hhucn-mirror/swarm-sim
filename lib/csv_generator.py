@@ -279,9 +279,7 @@ class CsvRoundData:
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
         writer_round.writerow(['Scenario','Solution', 'Seed', 'Rounds Total',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
+                                'Success Rate Sum',
                                 'Particle Counter',
                                 'Partilcle Steps Total',  'Particle Steps Avg',
                                 'Particle Steps Min', 'Particle Steps Max',
@@ -291,14 +289,6 @@ class CsvRoundData:
         csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
 
                          data['Success Counter'].sum(),
-
-                         data['Success Counter'].sum()/ data['Round Number'].sum(),
-
-                         data['Success Counter'].mean(), data['Success Counter'].min(),
-                         data['Success Counter'].max(),
-
-                         data['Success Round'].min(),
-                         data['Success Round'].max(),
 
                          self.particle_num,
 
@@ -325,9 +315,7 @@ class CsvRoundData:
         """Average Min Max for all other metrics"""
         writer_round.writerow(['Scenario','Solution', 'Seed', 'Rounds Total',
                                  'Particle Counter',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
+                                'Success Rate Sum',
                                 'Particle Counter',
                                 'Partilcle Steps Total',  'Particle Steps Avg',
                                 'Particle Steps Min', 'Particle Steps Max',
@@ -336,16 +324,8 @@ class CsvRoundData:
 
         csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
 
-                          self.particle_num,
+                         self.particle_num,
                          data['Success Counter'].sum(),
-                         data['Success Counter'].sum()/ data['Round Number'].sum(),
-
-                         data['Success Counter'].mean(), data['Success Counter'].min(),
-                         data['Success Counter'].max(),
-
-                         data['Success Round'].min(),
-                         data['Success Round'].max(),
-
                          self.particle_num,
 
                          data['Particle Steps'].sum(), data['Particle Steps'].mean(),
