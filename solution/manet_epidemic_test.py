@@ -1,6 +1,7 @@
 from lib.comms import generate_random_messages
 from lib.mobility_model import MobilityModel, Mode
 import lib.routing
+from lib.directions import Directions
 
 
 scan_radius = 1
@@ -14,6 +15,7 @@ def solution(sim):
         generate_random_messages(particles, len(particles)*10)
         # initialize the particle mobility models
         i = 0
+        #myparticles = particles[0]
         for particle in particles:
             if i < 4:
                 # top-left
@@ -31,12 +33,9 @@ def solution(sim):
                 # bottom-right
                 p_zone = (0, -sim.get_sim_y_size(), sim.get_sim_x_size(), 0)
                 m_group = 3
-            if i % 4 == 0:
-                p_role = lib.routing.MANeTRole.Router
-                m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Random)
-            else:
-                p_role = lib.routing.MANeTRole.Node
-                m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Zonal, zone=p_zone)
+
+            p_role = lib.routing.MANeTRole.Node
+            m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Zonal, zone=p_zone)
 
             m_model.set(particle)
             r_params = lib.routing.RoutingParameters(lib.routing.Algorithm.Epidemic, scan_radius,
@@ -46,8 +45,9 @@ def solution(sim):
     else:
         if sim.get_actual_round() % 5 == 0:
             generate_random_messages(particles, len(particles))
-        for particle in particles:
-            lib.routing.next_step(particle)
-            # move the particle to the next location
-            m_model = MobilityModel.get(particle)
-            particle.move_to(m_model.next_direction(current_x_y=particle.coords))
+        ##for particle in particles:
+        lib.routing.next_step(particles[0])
+        # move the particle to the next location
+        m_model = MobilityModel.get(particles[0])
+        nextelem = m_model.next_direction(current_x_y=particles[0].coords)
+        particles[0].move_to(nextelem)

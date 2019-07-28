@@ -116,19 +116,28 @@ class MobilityModel:
     def __zonal__(self, current_x_y):
         (x, y) = current_x_y
         # check if at min_x then head anywhere but west
-        exceptions = []
-        if x <= self.min_x:
-            exceptions.extend([Directions.W, Directions.SW, Directions.NW])
-        # check if at max_x then head anywhere but east
-        elif x >= self.max_x:
-            exceptions.append([Directions.E, Directions.SE, Directions.NE])
-        # check if at min_y then head anywhere but south
-        if y <= self.min_y:
-            exceptions.extend([Directions.SE, Directions.SW])
-        elif y >= self.max_x:
-            exceptions.extend([Directions.NE, Directions.NW])
-        return MobilityModel.random_direction(exceptions)
+        directions = {Directions.W,
+                      Directions.SW,
+                      Directions.NW,
+                      Directions.E,
+                      Directions.SE,
+                      Directions.NE}
+
+        if self.min_x >= x:
+            directions = directions.difference({Directions.W, Directions.SW, Directions.NW})
+        if self.max_x <= x:
+            directions = directions.difference({Directions.E, Directions.SE, Directions.NE})
+        if self.min_y >= y:
+            directions = directions.difference({Directions.SE, Directions.SW})
+        if self.max_y <= y:
+            directions = directions.difference({Directions.NE, Directions.NW})
+
+        print("X_MAX=" + str(self.max_x) + " Y_MAX=" + str(self.max_y))
+        print("X_MIN=" + str(self.min_x) + " Y_MIN=" + str(self.min_y))
+        print("x:Y=" + str(current_x_y) + " Directions" + str(directions))
+        print("-----------------------------")
+        return MobilityModel.random_direction(list(directions))
 
     @staticmethod
-    def random_direction(exceptions=[]):
-        return random.choice(directions_list(exceptions)).value
+    def random_direction(exceptions=[Directions.W, Directions.SW, Directions.NW, Directions.E, Directions.SE, Directions.NE]):
+        return random.choice(exceptions).value

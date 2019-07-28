@@ -11,8 +11,8 @@ import random
 
 from lib import particle, tile, location
 
-x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5]
-y_offset = [1, 0, -1, -1, 0, 1]
+x_offset = [1, 0.5, -0.5, -1 , -0.5, 0.5]
+y_offset = [0, -1, -1, 0, 1, 1]
 
 NE = 0
 E = 1
