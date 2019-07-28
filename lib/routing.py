@@ -1,7 +1,7 @@
 from enum import Enum
 
-from lib.colors import Colors
-from lib.comms import CommEvent, Message, send_message
+from lib.comms import Message, send_message
+from lib.meta import success_event
 
 
 class Algorithm(Enum):
@@ -38,7 +38,7 @@ class RoutingParameters:
 
 
 def next_step(particle, scan_radius=None):
-    if len(particle.send_store.keys()) == 0 and len(particle.fwd_store.keys()) == 0:
+    if len(particle.send_store) == 0 and len(particle.fwd_store) == 0:
         return
     routing_params = RoutingParameters.get(particle)
 
@@ -58,24 +58,14 @@ def __next_step_epidemic__(particle, routing_params, nearby=None):
             return
 
     for neighbour in nearby:
-        for key in list(particle.send_store.keys()):
-            try:
-                item = particle.send_store[key]
-                if isinstance(item, Message):
-                    comm_event = send_message(particle.send_store, particle, neighbour, item)
-                    __success_event__(particle, neighbour, item, comm_event)
-            except KeyError:
-                # ignore deleted keys
-                pass
-        for key in list(particle.fwd_store.keys()):
-            try:
-                item = particle.fwd_store[key]
-                if isinstance(item, Message):
-                    comm_event = send_message(particle.fwd_store, particle, neighbour, item)
-                    __success_event__(particle, neighbour, item, comm_event)
-            except KeyError:
-                # ignore deleted keys
-                pass
+        for item in list(particle.send_store):
+            if isinstance(item, Message):
+                comm_event = send_message(particle.send_store, particle, neighbour, item)
+                success_event(particle, neighbour, item, comm_event)
+        for item in list(particle.fwd_store):
+            if isinstance(item, Message):
+                comm_event = send_message(particle.fwd_store, particle, neighbour, item)
+                success_event(particle, neighbour, item, comm_event)
 
 
 def __next_step_epidemic_manet__(particle, routing_params):
@@ -89,30 +79,3 @@ def __next_step_epidemic_manet__(particle, routing_params):
 
     elif routing_params.manet_role == MANeTRole.Router:
         __next_step_epidemic__(particle, routing_params)
-
-
-def __success_event__(sender, receiver, message, event):
-
-    if event == CommEvent.MessageDeliveredDirect:
-        message.original_sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered_directly=1)
-        receiver.csv_particle_writer.write_particle(messages_received=1)
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly=1, messages_received=1)
-        receiver.set_color(Colors.cyan.value)
-    elif event == CommEvent.MessageDelivered:
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
-        receiver.csv_particle_writer.write_particle(messages_received=1)
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered=1, messages_received=1)
-        receiver.set_color(Colors.green.value)
-    elif event == CommEvent.MessageForwarded:
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_forwarded=1)
-        receiver.csv_particle_writer.write_particle(messages_received=1)
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_forwarded=1, messages_received=1)
-        sender.set_color(Colors.violet.value)
-    elif event == CommEvent.MessageTTLExpired:
-        sender.sim.csv_round_writer.update_metrics(message_ttl_expired=1)
-        message.original_sender.set_color(Colors.red.value)
-    elif event == CommEvent.ReceiverOutOfMem:
-        sender.sim.csv_round_writer.update_metrics(receiver_out_of_mem=1)
-        sender.set_color(Colors.red.value)
-
-    print("CommEvent: " + str(event.name))

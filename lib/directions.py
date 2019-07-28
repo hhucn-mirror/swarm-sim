@@ -16,4 +16,5 @@ class Directions(Enum):
     W = 3
     NW = 4
     NE = 5
+    S = 6
 

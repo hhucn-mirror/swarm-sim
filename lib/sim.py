@@ -13,8 +13,8 @@ import logging
 from lib import csv_generator, particle, tile, location, vis
 from lib.gnuplot_generator import generate_gnuplot
 
-x_offset = [1, 0.5, -0.5, -1 , -0.5, 0.5]
-y_offset = [0, -1, -1, 0, 1, 1]
+x_offset = [1, 0.5, -0.5, -1 , -0.5, 0.5, 0]
+y_offset = [0, -1, -1, 0, 1, 1, 0]
 
 
 NE=0
@@ -23,6 +23,7 @@ SE = 2
 SW = 3
 W = 4
 NW = 5
+S = 6
 
 
 direction = [NE, E, SE, SW, W, NW]

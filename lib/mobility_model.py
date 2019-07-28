@@ -116,6 +116,7 @@ class MobilityModel:
     def __zonal__(self, current_x_y):
         (x, y) = current_x_y
         # check if at min_x then head anywhere but west
+
         directions = {Directions.W,
                       Directions.SW,
                       Directions.NW,
@@ -132,7 +133,8 @@ class MobilityModel:
         if self.max_y <= y:
             directions = directions.difference({Directions.NE, Directions.NW})
 
-        return MobilityModel.random_direction(list(directions))
+        next_dir = MobilityModel.random_direction(list(directions))
+        return next_dir
 
     @staticmethod
     def random_direction(exceptions=[Directions.W, Directions.SW, Directions.NW, Directions.E, Directions.SE, Directions.NE]):
