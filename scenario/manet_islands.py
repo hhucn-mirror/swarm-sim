@@ -9,10 +9,10 @@ bottom = -top
 
 def scenario(world):
     # add tile boundaries
-    for x in range(abs(world.get_sim_x_size())):
+    for x in range(int(abs(world.get_sim_x_size()))):
         world.add_tile(x, 0)
         world.add_tile(-x, 0)
-    for y in range(0, abs(world.get_sim_y_size()), 2):
+    for y in range(0, int(abs(world.get_sim_y_size())), 2):
         world.add_tile(0, y)
         world.add_tile(0, -y)
     # top-left

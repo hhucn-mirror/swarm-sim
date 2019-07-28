@@ -11,8 +11,8 @@ import random
 
 from lib import particle, tile, location
 
-x_offset = [1, 0.5, -0.5, -1 , -0.5, 0.5]
-y_offset = [0, -1, -1, 0, 1, 1]
+x_offset = [1, 0.5, -0.5, -1 , -0.5, 0.5, 0]
+y_offset = [0, -1, -1, 0, 1, 1, 0]
 
 NE = 0
 E = 1
@@ -20,8 +20,9 @@ SE = 2
 SW = 3
 W = 4
 NW = 5
+S = 6
 
-direction = [NE, E, SE, SW, W, NW]
+direction = [NE, E, SE, SW, W, NW, S]
 
 read = 0
 write = 1

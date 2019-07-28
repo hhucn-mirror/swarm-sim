@@ -42,10 +42,11 @@ class Message:
             success_event(sender, receiver, self, CommEvent.ReceiverOutOfMem)
 
     def __create_msg_key(self):
-        return uuid.uuid5(self.receiver.get_id(), str('msg_%d' % self.seq_number))
+
+        return uuid.uuid5(uuid.UUID(self.receiver.get_id()), str('msg_%d' % self.seq_number))
 
     def __generate_random(self):
-        self.content = uuid.uuid5(self.original_sender.get_id(), 'random_msg')
+        self.content = uuid.uuid5(uuid.UUID(self.original_sender.get_id()), 'random_msg')
 
 
 # @deprecated
