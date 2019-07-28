@@ -132,10 +132,6 @@ class MobilityModel:
         if self.max_y <= y:
             directions = directions.difference({Directions.NE, Directions.NW})
 
-        print("X_MAX=" + str(self.max_x) + " Y_MAX=" + str(self.max_y))
-        print("X_MIN=" + str(self.min_x) + " Y_MIN=" + str(self.min_y))
-        print("x:Y=" + str(current_x_y) + " Directions" + str(directions))
-        print("-----------------------------")
         return MobilityModel.random_direction(list(directions))
 
     @staticmethod
