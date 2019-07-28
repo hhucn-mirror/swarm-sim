@@ -10,7 +10,7 @@ import concurrent.futures
 def main(argv):
     max_round = 1000000
     seed_start = 1
-    seed_end = 50
+    seed_end = 30
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
 
