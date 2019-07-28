@@ -47,7 +47,13 @@ class CsvParticleFile:
                         particle.csv_particle_writer.tile_created, particle.csv_particle_writer.tile_deleted,
                         particle.csv_particle_writer.tiles_dropped,
                         particle.csv_particle_writer.tile_read, particle.csv_particle_writer.tiles_taken,
-                        particle.csv_particle_writer.tile_write, particle.csv_particle_writer.success]
+                        particle.csv_particle_writer.tile_write, particle.csv_particle_writer.success,
+                        particle.csv_particle_writer.messages_sent, particle.csv_particle_writer.messages_forwarded,
+                        particle.csv_particle_writer.messages_delivered,
+                        particle.csv_particle_writer.messages_delivered_directly,
+                        particle.csv_particle_writer.messages_received
+
+                        ]
         self.writer.writerow(csv_iterator)
 
 
@@ -56,8 +62,8 @@ class CsvParticleData:
         self.id = particle_id
         self.number=particle_number
         self.steps = 0
-        self.particle_created=0
-        self.particle_deleted=0
+        self.particle_created = 0
+        self.particle_deleted = 0
         self.particles_dropped = 0
         self.particle_read = 0
         self.particles_taken = 0
@@ -74,14 +80,19 @@ class CsvParticleData:
         self.memory_write = 0
         self.tiles_taken = 0
         self.tiles_dropped = 0
-        self.success=0
-
+        self.success = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_delivered_directly = 0
+        self.messages_received = 0
 
     def write_particle(self, steps= 0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
                        particles_taken=0,
                        particle_write=0, tile_created=0, tile_deleted=0, tile_read=0, tile_write=0, marker_read=0,
                        marker_write=0, marker_created=0, marker_deleted=0, memory_read=0, memory_write=0,
-                        tiles_taken = 0, tiles_dropped = 0, success=0):
+                       tiles_taken=0, tiles_dropped=0, success=0,  messages_sent=0, messages_forwarded=0,
+                       messages_delivered=0, messages_delivered_directly=0, messages_received=0):
         self.steps = self.steps + steps
         self.particle_created=self.particle_created+particle_created
         self.particle_deleted=self.particle_deleted+particle_deleted
@@ -102,6 +113,11 @@ class CsvParticleData:
         self.tiles_taken = self.tiles_taken + tiles_taken
         self.tiles_dropped = self.tiles_dropped + tiles_dropped
         self.success = self.success+success
+        self.messages_sent += messages_sent
+        self.messages_forwarded += messages_forwarded
+        self.messages_delivered += messages_delivered
+        self.messages_delivered_directly += messages_delivered_directly
+        self.messages_received += messages_received
 
 
 
@@ -161,6 +177,14 @@ class CsvRoundData:
         self.tiles_dropped = 0
         self.tiles_taken_sum = 0
         self.tiles_dropped_sum = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_delivered_directly = 0
+        self.messages_received = 0
+        self.message_ttl_expired = 0
+        self.receiver_out_of_mem = 0
+
         self.directory = directory
         self.file_name = directory + '/rounds.csv'
         self.csv_file = open(self.file_name, 'w', newline='')
@@ -209,7 +233,9 @@ class CsvRoundData:
                         particle_write = 0, tile_write = 0, marker_write = 0, memory_write = 0,
                         particle_created=0, tile_created=0, marker_created=0,
                         particle_deleted=0, tile_deleted=0, marker_deleted=0, tiles_taken=0, tiles_dropped=0,
-                        particles_taken=0, particles_dropped=0):
+                        particles_taken=0, particles_dropped=0, messages_sent=0, messages_forwarded=0,
+                        messages_delivered=0, messages_delivered_directly=0, messages_received=0, message_ttl_expired=0,
+                        receiver_out_of_mem=0):
         logging.debug("CSV: Starting writing_rounds")
         self.marker_created_sum = self.marker_created_sum + marker_created
         self.marker_deleted_sum = self.marker_deleted_sum + marker_deleted
@@ -230,6 +256,13 @@ class CsvRoundData:
         self.tile_write_sum = self.tile_write_sum + tile_write
         self.particles_taken_sum = self.particles_taken_sum + particles_taken
         self.particles_dropped_sum = self.particles_dropped_sum + particles_dropped
+        self.messages_sent += messages_sent
+        self.messages_forwarded += messages_forwarded
+        self.messages_delivered += messages_delivered
+        self.messages_delivered_directly += messages_delivered_directly
+        self.messages_received += messages_received
+        self.message_ttl_expired += message_ttl_expired
+        self.receiver_out_of_mem += receiver_out_of_mem
 
         if self.actual_round == self.sim.get_actual_round():
             self.steps = self.steps + steps
@@ -292,7 +325,10 @@ class CsvRoundData:
                         self.tile_num, self.tile_created, self.tile_created_sum,
                         self.tile_deleted, self.tile_deleted_sum, self.tiles_dropped, self.tiles_dropped_sum,
                         self.tile_read, self.tile_read_sum, self.tiles_taken, self.tiles_taken_sum,
-                        self.tile_write, self.tile_write_sum]
+                        self.tile_write, self.tile_write_sum,
+                        self.messages_sent, self.messages_forwarded, self.messages_delivered,
+                        self.messages_delivered_directly, self.messages_received,
+                        self.message_ttl_expired, self.receiver_out_of_mem]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = round
         self.steps=0
@@ -316,6 +352,13 @@ class CsvRoundData:
         self.success_counter = 0
         self.particles_taken = 0
         self.particles_dropped = 0
+        self.messages_sent = 0
+        self.messages_forwarded = 0
+        self.messages_delivered = 0
+        self.messages_delivered_directly = 0
+        self.messages_received = 0
+        self.message_ttl_expired = 0
+        self.receiver_out_of_mem = 0
 
     def aggregate_metrics(self):
         self.csv_file.close()
