@@ -225,3 +225,7 @@ TSWLatexianTemp*
 .idea/encodings.xml
 outputs/*
 system.log
+.idea/workspace.xml
+.idea/SwarmSim.iml
+.idea/swarm-sim.iml
+.idea/misc.xml
