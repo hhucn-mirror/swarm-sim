@@ -30,10 +30,11 @@ def initialize_particle(particle):
     #nh: neighborhood
     setattr(particle, "nh_dist_list", [math.inf, math.inf, math.inf, math.inf, math.inf, math.inf,])
     setattr(particle, "rcv_buf", {})
-    setattr(particle, "prev_dir", None)
-    setattr(particle, "next_dir", None)
+    setattr(particle, "snd_buf", {})
+    setattr(particle, "prev_dir", False)
+    setattr(particle, "next_dir", False)
     setattr(particle, "first_send", True)
-    setattr(particle, "p_max_table", [])
+    setattr(particle, "p_max_table", {})
 
     # t: tile
     setattr(particle, "dest_t", None)
@@ -48,12 +49,11 @@ def initialize_particle(particle):
 
 
 def reset_attributes(particle):
-    particle.next_dir = None
-    data_clearing(particle)
-
-
-def data_clearing(particle):
     particle.own_dist = math.inf
+    particle.nh_dist_list.clear()
+    particle.nh_dist_list = [math.inf, math.inf, math.inf, math.inf, math.inf, math.inf, ]
+    particle.p_max.reset()
+    particle.next_dir = False
 
 
 def coating_alg(particle):
