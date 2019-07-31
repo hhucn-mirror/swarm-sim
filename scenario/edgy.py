@@ -15,11 +15,11 @@ start_positions = {"TopRight": [(10.5, 11.0), (11.0, 10.0), (10.0, 10.0), (9.5, 
                    'BottomEnclosed': [(-0.5, -9.0), (-1.5, -9.0), (-1.0, -10.0), (-0.0, -10.0), (0.5, -11.0), (-0.5, -11.0)]}
 
 
-def scenario(sim, config_data):
+def scenario(sim):
     draw_terrain(sim)
 
-    for i in range(0, config_data.particles_num):
-        sim.add_particle((start_positions[config_data.start_position][i][0]), (start_positions[config_data.start_position][i][1]))
+    for i in range(0, sim.config_data.particles_num):
+        sim.add_particle((start_positions[sim.config_data.start_position][i][0]), (start_positions[sim.config_data.start_position][i][1]))
 
 
 def get_starting_positions():

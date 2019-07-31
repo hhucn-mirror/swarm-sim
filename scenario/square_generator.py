@@ -1,7 +1,4 @@
-
-square = [(0,0), (0,2), (2,2),(2,0)]
-
-def scenario(sim, config_data):
+def scenario(sim):
     starting_point=(0,0)
     square_size = 10
     end_point_on_x = () #stores the last point on the first x line

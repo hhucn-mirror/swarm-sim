@@ -54,6 +54,7 @@ class Sim:
         :param max_particles: the maximal number of particles that are allowed to be or created in this sim
         """
         random.seed(config_data.seedvalue)
+        self.config_data = config_data
         self.__max_round = config_data.max_round
         self.__round_counter = 1
         self.__seed=config_data.seedvalue
@@ -105,11 +106,11 @@ class Sim:
         self.csv_particle_movement = csv_generator.CsvParticleMovement(self, directory=self.directory, particle_num=self.particle_num)
 
         mod = importlib.import_module('scenario.' + config_data.scenario)
-        mod.scenario(self, config_data)
+        mod.scenario(self)
         if config_data.random_order:
             random.shuffle(self.particles)
 
-    def run(self, config_data):
+    def run(self):
         """
         Runs the simulator either with or without visualization
         At the end it aggregate the data and generate a gnuplot
@@ -117,10 +118,10 @@ class Sim:
         """
         if self.visualization != 0:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
-            window.run(config_data)
+            window.run()
         else:
             while self.get_actual_round() <= self.get_max_round() and self.__end is False:
-                self.solution_mod.solution(self, config_data)
+                self.solution_mod.solution(self)
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.csv_particle_movement.update_all_particles(self.get_particle_list(), self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1

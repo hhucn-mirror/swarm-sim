@@ -98,7 +98,7 @@ def swarm_sim(options):
 
     logging.info('Started')
     simulator = sim.Sim(config_data)
-    simulator.run(config_data)
+    simulator.run()
     logging.info('Finished')
 
 

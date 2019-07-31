@@ -2,13 +2,6 @@ import random
 import math
 
 
-E = 0
-SE = 1
-SW = 2
-W = 3
-NW = 4
-NE = 5
-
 black = 1
 gray = 2
 red = 3
@@ -19,9 +12,19 @@ orange = 7
 cyan = 8
 violet = 9
 
-dirs = [E, SE, SW, W, NW, NE]
-x_offset = [0.5, 1,  0.5, -0.5, -1, -0.5]
-y_offset = [1, 0, -1, -1,  0, 1]
+x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
+y_offset = [ 1, 0, -1,   -1,    0,  1]
+
+
+NE=0
+E = 1
+SE = 2
+SW = 3
+W = 4
+NW = 5
+
+
+direction = [NE, E, SE, SW, W, NW]
 
 dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, SW, W, NW, NE, E],
@@ -452,13 +455,13 @@ def move(sim, particle, next_location):
     discover_adjacent_locations(sim, particle)
 
 
-def solution(sim, config_data):
+def solution(sim):
     global all_marked
 
     done_particles = 0
 
-    scenario_name = config_data.scenario
-    search_algorithm = config_data.search_algorithm
+    scenario_name = sim.config_data.scenario
+    search_algorithm = sim.config_data.search_algorithm
 
     sim.csv_round_writer.set_start_communication_round("NaN")
     sim.csv_round_writer.set_communication_frequency("NaN")
