@@ -28,7 +28,8 @@ def solution(sim):
 
         # Scanning for the particles in the vicinity
         immediate_neighbors = particle.scan_for_particle_in(1)
-        particle_edges = len(immediate_neighbors)
+        if immediate_neighbors is not None:
+            particle_edges = len(immediate_neighbors)
         neighbor_list = particle.scan_for_particle_within(2)
 
         can_move = True
@@ -42,9 +43,10 @@ def solution(sim):
             checks = check_connectivity_after_move(particle.coords, neighbor_list, move_direction)
             if checks[0]:
                 new_location_edges = checks[1]
-                if new_location_edges - particle_edges > -1 and particle.read_memory_with("light") is not None:
+                delta_edges = new_location_edges - particle_edges
+                if delta_edges > (- sim.param_delta) and particle.read_memory_with("light") is not None:
                     particle.move_to(move_direction)
-                elif random.randint(0, 10) == 0:
+                elif random.randint(0, sim.param_lambda) == 0:
                     particle.move_to(move_direction)
 
 

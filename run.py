@@ -37,6 +37,8 @@ class ConfigData():
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
         self.location_mm_size = config.getint("Matter", "location_mm_size")
         self.dir_name = None
+        self.param_lambda = 1
+        self.param_delta = 1
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
@@ -50,7 +52,7 @@ def swarm_sim( argv ):
     multiple_sim=0
     local_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
+        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:p:q:", ["solution=", "scenario="])
     except getopt.GetoptError:
         print('Error: run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
@@ -72,6 +74,11 @@ def swarm_sim( argv ):
             config_data.visualization = int(arg)
         elif opt in ("-d"):
             local_time = str(arg)
+        elif opt in ("-p"):
+            config_data.param_lambda = int(arg)
+        elif opt in ("-q"):
+            config_data.param_delta = int(arg)
+
 
 
     #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -81,7 +88,7 @@ def swarm_sim( argv ):
     if multiple_sim == 1:
         config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-               str(config_data.seedvalue)
+               str(config_data.seedvalue) + "_" + str(config_data.param_lambda) + "_" + str(config_data.param_delta)
 
         config_data.dir_name = "./outputs/mulitple/"+ config_data.dir_name
 
@@ -92,7 +99,7 @@ def swarm_sim( argv ):
         config_data.dir_name = "./outputs/" + config_data.dir_name
     if not os.path.exists(config_data.dir_name):
         os.makedirs(config_data.dir_name)
-
+    # print("s: " + str(seedvalue) + ", l: " + str(param_lambda) + ", d: " + str(param_delta))
     logging.info('Started')
     simulator = sim.Sim( config_data )
     simulator.run()

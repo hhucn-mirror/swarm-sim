@@ -19,6 +19,15 @@ direction = [NE, E, SE, SW, W, NW]
 def solution(sim):
     # Checking if the goal has been reached
     check_all_goal_params(sim)
+    avg_coords = [0.0, 0.0]
+    for particle in sim.particles:
+        avg_coords[0] = avg_coords[0] + particle.coords[0]
+        avg_coords[1] = avg_coords[1] + particle.coords[1]
+    avg_coords[0] = avg_coords[0] / len(sim.particles)
+    avg_coords[1] = avg_coords[1] / len(sim.particles)
+
+    print("X: " + str(avg_coords[0]) + " - " + str(avg_coords[1]))
+
 
     ##########
     for particle in sim.get_particle_list():
@@ -33,8 +42,8 @@ def solution(sim):
             if check_if_particle_occupies_pos(dir_newpos, particle) and check_if_tile_occupies_pos(dir_newpos, particle):
                 newpos = determine_coords_from_direction(particle.coords, dir_newpos)
                 neighbors_at_newpos = determine_neighbors_at_vacant_location(particle, dir_newpos)
-                triangles = check_for_triangles(particle.coords, neighbors)
-                triangles_newpos = check_for_triangles(newpos, neighbors_at_newpos)
+                triangles = len(neighbors)
+                triangles_newpos = len(neighbors_at_newpos)
 
                 properties_checked = check_properties(neighbors, neighbors_at_newpos, particle.coords, newpos)
                 q = random.uniform(0, 1)
@@ -44,6 +53,8 @@ def solution(sim):
                         particle.move_to(dir_newpos)
                     elif random.choice([0, 1, 2, 4]) == 0:
                         particle.move_to(dir_newpos)
+
+
 
 
 def check_if_particle_occupies_pos(move_direction, particle):
@@ -88,26 +99,6 @@ def determine_choice_from_vacant_positions(immediate_neighbors, particle):
             possible_choices.append(dir)
     dir_l2 = random.choice(possible_choices)
     return dir_l2
-
-
-def check_for_triangles(coords, list_neighbors):
-    list_occupancies = [0, 0, 0, 0, 0, 0]
-    for i in range(0, 6):
-        nb_coords = determine_coords_from_direction(coords, i)
-        for nb in list_neighbors:
-            if compare_coords(nb.coords,nb_coords):
-                list_occupancies[i] = 1
-    index_start = 0
-    triangles = 0
-    for i in range(0, 6):
-        if list_occupancies[i] == 0:
-            index_start = i
-    for i in range(0 + index_start, 6 + index_start):
-        if list_occupancies[i % 6] == 1 and list_occupancies[(i+1) % 6] == 1:
-            triangles = triangles + 1;
-            list_occupancies[i % 6] = 2
-            list_occupancies[(i+1) % 6] = 2
-    return triangles
 
 
 def check_properties(particle_neighbors, location_neighbors, particle_coords, location_coords):

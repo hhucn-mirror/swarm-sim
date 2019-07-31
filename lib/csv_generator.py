@@ -168,6 +168,9 @@ class CsvRoundData:
         self.tiles_dropped_sum = 0
         self.directional_metrics_sum = [0, 0, 0, 0, 0, 0]
         self.directional_metrics = [0, 0, 0, 0, 0, 0]
+        self.goal_first_tile = -1
+        self.goal_half_of_tiles = -1
+        self.goal_all_tiles = -1
         self.directory = directory
         self.file_name = directory + '/rounds.csv'
         self.csv_file = open(self.file_name, 'w', newline='')
@@ -303,6 +306,14 @@ class CsvRoundData:
                 self.directional_metrics = directional_metrics
         logging.debug("CSV: Ending writing_rounds")
 
+    def update_goals(self, goalnum, value):
+        if goalnum == 0:
+            self.goal_first_tile = value
+        elif goalnum == 1:
+            self.goal_half_of_tiles = value
+        elif goalnum == 2:
+            self.goal_all_tiles = value
+
     def next_line(self, round):
         csv_iterator = ['', self.scenario, self.solution, self.seed, round,
                         self.success_counter, self.success_round,
@@ -378,6 +389,7 @@ class CsvRoundData:
                                 'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max',
                                 'Steps NE (0)', 'Steps E  (1)', 'Steps SE (2)',
                                 'Steps SW (3)', 'Steps W  (4)', 'Steps NW (5)',
+                                'Goal: First Tile', 'Goal: Half of Tiles', 'Goal: All Tiles'
                                ])
 
         csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
@@ -421,7 +433,8 @@ class CsvRoundData:
                          data['Tile Write'].max(),
 
                          data['Steps NE (0)'].sum(), data['Steps E  (1)'].sum(), data['Steps SE (2)'].sum(),
-                         data['Steps SW (3)'].sum(), data['Steps W  (4)'].sum(), data['Steps NW (5)'].sum()
+                         data['Steps SW (3)'].sum(), data['Steps W  (4)'].sum(), data['Steps NW (5)'].sum(),
+                         self.goal_first_tile, self.goal_half_of_tiles, self.goal_all_tiles
                          ]
 
         writer_round.writerow(csv_interator)

@@ -7,15 +7,18 @@ def check_all_goal_params(sim):
     if not GoalStateSaver.first_particle_passed:
         GoalStateSaver.first_particle_passed = goal_first_particle_passed(sim.particles, distance)
         if GoalStateSaver.first_particle_passed:
+            sim.csv_round_writer.update_goals(0, sim.get_actual_round())
             print("FIRST PASSED at ", sim.get_actual_round())
 
     if not GoalStateSaver.half_particles_passed:
         GoalStateSaver.half_particles_passed = goal_half_particles_passed(sim.particles, distance)
         if GoalStateSaver.half_particles_passed:
+            sim.csv_round_writer.update_goals(1, sim.get_actual_round())
             print("HALF PASSED at ", sim.get_actual_round())
 
     if goal_all_particles_passed(sim.particles, distance):
         GoalStateSaver.all_particles_passed = True
+        sim.csv_round_writer.update_goals(2, sim.get_actual_round())
         print("ALL PASSED at ", sim.get_actual_round())
         sim.success_termination()
 
