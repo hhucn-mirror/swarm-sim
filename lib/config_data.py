@@ -40,6 +40,7 @@ class ConfigData:
         self.start_position = config_section_map(config, "Marking")['start_position']
         self.particles_num = config.getint("Marking", "particles_num")
 
+        self.sq_size = config.getint("Marking", "sq_size")
 
 def config_section_map(config, section):
     """

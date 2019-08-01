@@ -486,6 +486,8 @@ def solution(sim):
                         all_marked = True
                         sim.csv_round_writer.marking_success()
                         sim.csv_round_writer.set_marking_success_round(sim.get_actual_round())
+                        sim.success_termination()
+                        return
 
             if not particle.alternative_reached:
 
@@ -495,10 +497,18 @@ def solution(sim):
                     particle.reverse_path.clear()
                     particle.next_location = particle.alternative_location
                     move(sim, particle, particle.next_location)
+                    if len(particle.unvisited_queue) <= 0:
+                        mark_location(sim, particle)
+                        sim.success_termination()
+                        return
                     continue
 
                 particle.next_location = particle.reverse_path.pop()
                 move(sim, particle, particle.next_location)
+                if len(particle.unvisited_queue) <= 0:
+                    mark_location(sim, particle)
+                    sim.success_termination()
+                    return
                 continue
 
             if particle.stuck:
@@ -522,12 +532,20 @@ def solution(sim):
                     particle.alternative_locations.clear()
                     particle.next_location = particle.target_location
                     move(sim, particle, particle.next_location)
+                    if len(particle.unvisited_queue) <= 0:
+                        mark_location(sim, particle)
+                        sim.success_termination()
+                        return
                     continue
 
                 try:
                     next_location = follow_wall(particle, particle.target_location)
                     particle.next_location = next_location
                     move(sim, particle, particle.next_location)
+                    if len(particle.unvisited_queue) <= 0:
+                        mark_location(sim, particle)
+                        sim.success_termination()
+                        return
                     continue
 
                 except ValueError:
@@ -540,6 +558,10 @@ def solution(sim):
             if not particle.target_reached:
                 particle.next_location = get_next_location(particle, particle.target_location)
                 move(sim, particle, particle.next_location)
+                if len(particle.unvisited_queue) <= 0:
+                    mark_location(sim, particle)
+                    sim.success_termination()
+                    return
                 continue
 
             if len(particle.unvisited_queue) > 0:
@@ -548,6 +570,10 @@ def solution(sim):
                     particle.target_reached = True
                     particle.next_location = particle.unvisited_queue[particle.search_algorithm]
                     move(sim, particle, particle.next_location)
+                    if len(particle.unvisited_queue) <= 0:
+                        mark_location(sim, particle)
+                        sim.success_termination()
+                        return
                     continue
 
                 else:
@@ -557,6 +583,10 @@ def solution(sim):
                         particle.target_reached = True
                         particle.next_location = nearest_unvisited
                         move(sim, particle, particle.next_location)
+                        if len(particle.unvisited_queue) <= 0:
+                            mark_location(sim, particle)
+                            sim.success_termination()
+                            return
                         continue
 
                     else:
@@ -564,11 +594,16 @@ def solution(sim):
                         particle.target_location = nearest_unvisited
                         particle.next_location = get_next_location(particle, particle.target_location)
                         move(sim, particle, particle.next_location)
+                        if len(particle.unvisited_queue) <= 0:
+                            mark_location(sim, particle)
+                            sim.success_termination()
+                            return
                         continue
 
-            else:
+            if len(particle.unvisited_queue) <= 0:
                 mark_location(sim, particle)
-
+                sim.success_termination()
+                return
                 if particle.current_location.coords == particle.start_location.coords:
                     particle.target_reached = True
 

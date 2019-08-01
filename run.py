@@ -21,6 +21,8 @@ def get_options():
     parser.add_argument("-p", "--particles", dest="particles", help="Number of Particles: 1 -> 6")
     parser.add_argument("-a", "--searchalgorithm", dest="searchalgorithm",
                         help="Searching Algorithm: 0=BFS, 1=DFS, 2=MIXED")
+    parser.add_argument("-q", "--sq_size", dest="sq_size", help="Size of Square: 2 -> Inf")
+
     options = parser.parse_args()
     return options
 
@@ -62,6 +64,8 @@ def swarm_sim(options):
         config_data.start_position = str(options.startpos)
     if options.particles:
         config_data.particles_num = int(options.particles)
+    if options.sq_size:
+        config_data.sq_size = int(options.sq_size)
 
     logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
 
@@ -73,23 +77,20 @@ def swarm_sim(options):
         search_algorithm = "MIXED"
 
     if multiple_sim == 1:
-        config_data.dir_name = config_data.scenario.rsplit('.', 1)[0] + \
-                               "_" + str(config_data.particles_num) + "Part" + \
+        config_data.dir_name = str(local_time) + \
+                               "_" +config_data.scenario.rsplit('.', 1)[0] + \
                                "_" + config_data.solution.rsplit('.', 1)[0] + \
                                "_" + search_algorithm + \
-                               "_" + config_data.start_position + \
-                               "/" + str(config_data.seedvalue)
+                               "/" + str(config_data.sq_size)
 
         config_data.dir_name = "./outputs/multiple/" + config_data.dir_name
 
     else:
         config_data.dir_name = local_time + "_" + \
                                config_data.scenario.rsplit('.', 1)[0] + \
-                               "_" + str(config_data.particles_num) + "Part" + \
                                "_" + config_data.solution.rsplit('.', 1)[0] + \
                                "_" + search_algorithm + \
-                               "_" + config_data.start_position + \
-                               "_" + str(config_data.seedvalue)
+                                "_" + str(config_data.sq_size)
 
         config_data.dir_name = "./outputs/" + config_data.dir_name
 
