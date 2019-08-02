@@ -1,4 +1,3 @@
-import solution.leader as l
 import solution.help_methods as hm
 
 NE = 0
@@ -7,36 +6,6 @@ SE = 2
 SW = 3
 W = 4
 NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
-
-def solution(sim):
-    print("Runde", sim.get_actual_round())
-
-    if sim.get_actual_round() == 1:
-        hm.init_particles(sim.get_particle_list())
-        l.elect(sim.get_particle_list())
-
-    for particle in sim.get_particle_list():
-        if sim.get_actual_round() % 7 == 1:
-            announce_next(particle)
-        elif sim.get_actual_round() % 7 == 2:
-            update_leaders(particle)
-        elif sim.get_actual_round() % 7 == 3:
-            hm.neighbour_of_leader(particle)
-        elif sim.get_actual_round() % 7 == 4:
-            calc_move(particle)
-        elif sim.get_actual_round() % 7 == 5:
-            if particle.read_memory_with("Moving") == 0:
-                announce_right_placed_to_leaders(particle)
-            else:
-                hm.get_first_to_move(particle)
-        elif sim.get_actual_round() % 7 == 6:
-            hm.update_state(particle)
-        elif sim.get_actual_round() % 7 == 0:
-            hm.refresh_mem(particle)
-            hm.is_formed(sim)
 
 def announce_next(particle):
     if particle.read_memory_with("Leader") == 1:
@@ -97,7 +66,6 @@ def update_leaders(particle):
             if nw is not None and nw.read_memory_with("Leader") == 0:
                 particle.write_to_with(nw, "Leader", 2)
                 nw.set_color(5)
-
 
 def calc_move(particle):
     if particle.read_memory_with("Leader") == 1 and particle.read_memory_with("WayForN") is not None and particle.read_memory_with("Moving") == 0:
