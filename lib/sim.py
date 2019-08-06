@@ -98,6 +98,7 @@ class Sim:
         self.border = config_data.border
         self.param_lambda = config_data.param_lambda
         self.param_delta = config_data.param_delta
+        self.multiple = config_data.multiple
         self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                            solution=self.solution_mod,
                                                            seed=config_data.seedvalue,

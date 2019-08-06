@@ -1,9 +1,7 @@
-import random
-
-from lib.particle_graph_2 import check_connectivity_after_move, check_for_connectivity_in_merged_graphs, \
+from solution.particle_graph_2 import check_for_connectivity_in_merged_graphs, \
     create_graph, run_search_with_exclusion
-from lib.utils import *
-from lib.goal_params import *
+from solution.utils import *
+from solution.goal_params import *
 
 NE = 0
 E = 1

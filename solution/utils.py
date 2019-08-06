@@ -118,5 +118,7 @@ class GoalStateSaver:
 
 class SimulationParamsSaver:
     hexagon_radius = 0
+    delta_light = 0
+    delta_edges = 0
 
 

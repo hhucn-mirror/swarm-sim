@@ -1,4 +1,5 @@
-from lib.utils import GoalStateSaver
+from solution.utils import GoalStateSaver
+import random
 # Could theoretically fit in the solution file itself, but order-wise it makes sense to put this here!
 
 
@@ -20,6 +21,14 @@ def check_all_goal_params(sim):
         GoalStateSaver.all_particles_passed = True
         sim.csv_round_writer.update_goals(2, sim.get_actual_round())
         print("ALL PASSED at ", sim.get_actual_round())
+        avg_coords = [0.0, 0.0]
+        for particle in sim.particles:
+            avg_coords[0] = avg_coords[0] + particle.coords[0]
+            avg_coords[1] = avg_coords[1] + particle.coords[1]
+        avg_coords[0] = avg_coords[0] / len(sim.particles)
+        avg_coords[1] = avg_coords[1] / len(sim.particles)
+        print("SWARM CENTER at: " + str(avg_coords[0]) + " " + str(avg_coords[1]) +
+              " for |" + str(random.seed) + "_" + str(sim.param_lambda) + "_" + str(sim.param_delta))
         sim.success_termination()
 
 

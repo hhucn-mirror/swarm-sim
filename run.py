@@ -37,8 +37,9 @@ class ConfigData():
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
         self.location_mm_size = config.getint("Matter", "location_mm_size")
         self.dir_name = None
-        self.param_lambda = 1
-        self.param_delta = 1
+        self.param_lambda = 0
+        self.param_delta = 0
+        self.multiple = False
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
@@ -80,12 +81,12 @@ def swarm_sim( argv ):
             config_data.param_delta = int(arg)
 
 
-
     #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
     logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
 
 
     if multiple_sim == 1:
+        config_data.multiple = True
         config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                str(config_data.seedvalue) + "_" + str(config_data.param_lambda) + "_" + str(config_data.param_delta)

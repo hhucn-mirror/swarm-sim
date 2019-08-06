@@ -29,11 +29,11 @@ def main(argv):
     nTime = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
     max_round = 2500
     seed_start = 1
-    seed_end = 2
-    param_lambda_min = 10
-    param_lambda_max = 11
-    param_delta_min = 1
-    param_delta_max = 2
+    seed_end = 50
+    param_lambda_min = 1
+    param_lambda_max = 5
+    param_delta_min = -2
+    param_delta_max = 1
     for param_lambda in range(param_lambda_min, param_lambda_max + 1):
         for param_delta in range(param_delta_min, param_delta_max + 1):
 
