@@ -35,7 +35,8 @@ class CsvParticleFile:
                                   'Tile Read', 'Tiles Taken',
                                   'Tile Write', 'Success',
                                   'Messages Sent', 'Messages Forwarded', 'Messages Delivered',
-                                  'Messages Delivered Directly', 'Messages Received'
+                                  'Messages Delivered Directly', 'Messages Received',
+                                  'Messages TTL Expired', 'Out of Memory'
                                   ])
 
     def write_particle(self, particle):
@@ -55,7 +56,9 @@ class CsvParticleFile:
                         particle.csv_particle_writer.messages_sent, particle.csv_particle_writer.messages_forwarded,
                         particle.csv_particle_writer.messages_delivered,
                         particle.csv_particle_writer.messages_delivered_directly,
-                        particle.csv_particle_writer.messages_received
+                        particle.csv_particle_writer.messages_received,
+                        particle.csv_particle_writer.messages_ttl_expired,
+                        particle.csv_particle_writer.out_of_mem
                         ]
         self.writer.writerow(csv_iterator)
 
@@ -89,13 +92,16 @@ class CsvParticleData:
         self.messages_delivered = 0
         self.messages_delivered_directly = 0
         self.messages_received = 0
+        self.messages_ttl_expired = 0
+        self.out_of_mem = 0
 
     def write_particle(self, steps=0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
                        particles_taken=0,
                        particle_write=0, tile_created=0, tile_deleted=0, tile_read=0, tile_write=0, location_read=0,
                        location_write=0, location_created=0, location_deleted=0, memory_read=0, memory_write=0,
                        tiles_taken=0, tiles_dropped=0, success=0, messages_sent=0, messages_forwarded=0,
-                       messages_delivered=0, messages_delivered_directly=0, messages_received=0):
+                       messages_delivered=0, messages_delivered_directly=0, messages_received=0,
+                       messages_ttl_expired=0, out_of_mem=0):
         self.steps = self.steps + steps
         self.particle_created = self.particle_created + particle_created
         self.particle_deleted = self.particle_deleted + particle_deleted
@@ -121,6 +127,8 @@ class CsvParticleData:
         self.messages_delivered += messages_delivered
         self.messages_delivered_directly += messages_delivered_directly
         self.messages_received += messages_received
+        self.messages_ttl_expired += messages_ttl_expired
+        self.out_of_mem += out_of_mem
 
 
 class CsvRoundData:
@@ -214,7 +222,7 @@ class CsvRoundData:
                                     'Tile Write', 'Tile Write Sum',
                                     'Messages Sent', 'Messages Forwarded',
                                     'Messages Delivered', 'Messages Delivered Directly',
-                                    'Messages Received', 'Message TTL Expired',
+                                    'Messages Received', 'Messages TTL Expired',
                                     'Receiver Out Of Mem'
                                     ])
 
@@ -405,7 +413,7 @@ class CsvRoundData:
                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max',
                                'Messages Sent Sum', 'Messages Forwarded Sum',
                                'Messages Delivered Sum', 'Messages Delivered Directly Sum',
-                               'Messages Received Sum', 'Message TTL Expired',
+                               'Messages Received Sum', 'Messages TTL Expired',
                                'Receiver Out Of Mem Sum'
                                ])
 
@@ -486,7 +494,7 @@ class CsvRoundData:
                          data['Messages Received'].sum(),
 
 
-                         data['Message TTL Expired'].sum(),
+                         data['Messages TTL Expired'].sum(),
 
                          data['Receiver Out Of Mem'].sum()
                          ]

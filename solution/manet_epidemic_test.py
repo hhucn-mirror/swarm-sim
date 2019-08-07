@@ -24,7 +24,7 @@ def solution(sim):
             particle_number += 1
     else:
         if sim.get_actual_round() % 5 == 0:
-            generate_random_messages(particles, len(particles))
+            generate_random_messages(particles, len(particles), sim)
         for particle in particles:
             lib.routing.next_step(particle)
             # move the particle to the next location

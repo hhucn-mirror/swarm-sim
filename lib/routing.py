@@ -1,8 +1,6 @@
 from enum import Enum
 
 from lib.comms import Message, send_message
-from lib.meta import success_event
-
 
 class Algorithm(Enum):
     Epidemic = 0,
@@ -60,12 +58,10 @@ def __next_step_epidemic__(particle, routing_params, nearby=None):
     for neighbour in nearby:
         for item in list(particle.send_store):
             if isinstance(item, Message):
-                comm_event = send_message(particle.send_store, particle, neighbour, item)
-                success_event(particle, neighbour, item, comm_event)
+                send_message(particle.send_store, particle, neighbour, item)
         for item in list(particle.fwd_store):
             if isinstance(item, Message):
-                comm_event = send_message(particle.fwd_store, particle, neighbour, item)
-                success_event(particle, neighbour, item, comm_event)
+                send_message(particle.fwd_store, particle, neighbour, item)
 
 
 def __next_step_epidemic_manet__(particle, routing_params):

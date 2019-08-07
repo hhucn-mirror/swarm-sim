@@ -3,7 +3,7 @@ import uuid
 from deprecated import deprecated
 from enum import Enum
 
-from lib.meta import success_event, CommEvent
+from lib.meta import EventType, NetworkEvent
 
 
 class BufferStrategy(Enum):
@@ -39,7 +39,8 @@ class Message:
         try:
             sender.send_store.append(self)
         except OverflowError:
-            success_event(sender, receiver, self, CommEvent.ReceiverOutOfMem)
+            event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, self)
+            sender.sim.event_queue.put(event)
 
     def __create_msg_key(self):
         return id(self)
@@ -116,7 +117,8 @@ def send_message(msg_store, sender, receiver, message: Message):
         except KeyError:
             pass
         finally:
-            return CommEvent.MessageTTLExpired
+            event = NetworkEvent(EventType.MessageTTLExpired, sender, receiver, message)
+            sender.sim.event_queue.put(event)
 
     if receiver.get_id() == message.receiver.get_id():
         store = receiver.rcv_store
@@ -125,7 +127,8 @@ def send_message(msg_store, sender, receiver, message: Message):
     try:
         store.append(message)
     except OverflowError:
-        success_event(sender, receiver, message, CommEvent.ReceiverOutOfMem)
+        event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, message)
+        sender.sim.event_queue.put(event)
     finally:
         if receiver.get_id() == message.receiver.get_id():
             try:
@@ -134,11 +137,14 @@ def send_message(msg_store, sender, receiver, message: Message):
                 pass
             finally:
                 if sender.get_id() == message.original_sender.get_id():
-                    return CommEvent.MessageDeliveredDirect
+                    event = NetworkEvent(EventType.MessageDeliveredDirect, sender, receiver, message)
+                    sender.sim.event_queue.put(event)
                 else:
-                    return CommEvent.MessageDelivered
+                    event = NetworkEvent(EventType.MessageDelivered, sender, receiver, message)
+                    sender.sim.event_queue.put(event)
         else:
-            return CommEvent.MessageForwarded
+            event = NetworkEvent(EventType.MessageForwarded, sender, receiver, message)
+            sender.sim.event_queue.put(event)
 
 
 def generate_random_messages(particle_list, amount, sim, ttl_range=None):

@@ -14,7 +14,9 @@ import math
 
 from lib import csv_generator, matter
 from lib.directions import Directions
+from lib.eventqueue import EventQueue
 from lib.messagestore import MessageStore
+from lib.meta import NetworkEvent, EventType
 
 black = 1
 gray = 2
@@ -56,6 +58,7 @@ class Particle(matter.Matter):
         self.send_store = MessageStore(maxlen=message_store_size)
         self.fwd_store = MessageStore(maxlen=message_store_size)
         self.rcv_store = MessageStore(maxlen=message_store_size)
+        self.event_queue = EventQueue()
 
     @staticmethod
     def coords_to_sim(coords):
