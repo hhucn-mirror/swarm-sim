@@ -31,21 +31,21 @@ initialRadius=10
 direction = [NE, E, SE, SW, W, NW]
 
 def density(particles):
-    sumAverageDistances=0
-    sumTotalDistance = 0
-    sumneighbors=0
+    sum_avg_dist=0
+    sum_total_dist = 0
+    sum_neighbors=0
     min_density = 100000000000
     max_density = -1
+
     for particle in particles:
         sum_distances=0
+        avg_dist_to_all_neighbors = 0
         print("P", particle.number)
-        for i in range(1,initialRadius+1):
-            if particle.scan_for_particle_in(hop=i) is not None:
-                sum_distances=sum_distances+len(particle.scan_for_particle_in(hop=i))*i
-                print("for Hop:", i, " sumdistance ",  sum_distances)
-        if particle.scan_for_particle_within(hop=initialRadius) is not None:
-            x=len(particle.scan_for_particle_within(hop=initialRadius))
-            averageDistanceToAllNeighbors=sum_distances/x
+        sum_distances = initial_radius(particle, sum_distances)
+        p_in_init_rad = particle.scan_for_particle_within(hop=initialRadius)
+        if p_in_init_rad is not None:
+            x=len(p_in_init_rad)
+            avg_dist_to_all_neighbors=sum_distances/x
             print("neighbors within initial_radius", initialRadius, " are ", x)
             print(" and a total of distances of ", sum_distances)
             density = x
@@ -54,31 +54,38 @@ def density(particles):
                 max_density = density
             if density < min_density:
                 min_density = density
-            sumneighbors +=x
-        else:
-            averageDistanceToAllNeighbors=0
-        sumAverageDistances+=averageDistanceToAllNeighbors
-        sumTotalDistance += sum_distances
-        print(" has the sumAverageDistances", sumAverageDistances )
-    if sumAverageDistances==0:
-        return 0
-    else:
-        print(" Final sumAverageDistances", sumAverageDistances)
-        print(" Final sum of all neighbors", sumneighbors)
+            sum_neighbors +=x
+        sum_avg_dist+=avg_dist_to_all_neighbors
+        sum_total_dist += sum_distances
+        print(" has the sum_avg_dist", sum_avg_dist )
+
+    if sum_avg_dist > 0:
+        print(" Final sum_avg_dist", sum_avg_dist)
+        print(" Final sum of all neighbors", sum_neighbors)
         print("numbers of particles ", len(particles))
 
-        print("Average Distance=  sumAverageDistances/len(particles)= ", sumTotalDistance,"/",len(particles),"=",
-              float(sumTotalDistance/len(particles)))
-        print("average density= sumneighbors/len(particles)) =", sumneighbors,"/",len(particles),"=",
-              float(sumneighbors/len(particles)))
+        print("Average Distance=  sum_avg_dist/len(particles)= ", sum_total_dist,"/",len(particles),"=",
+              float(sum_total_dist/len(particles)))
+        print("average density= sum_neighbors/len(particles)) =", sum_neighbors,"/",len(particles),"=",
+              float(sum_neighbors/len(particles)))
         print("min density ", min_density , "max density", max_density, "particles every", initialRadius, "hops")
 
-        print("Asma Densitiy Radius = sumAverageDistances/len(particles) =",sumAverageDistances,"/",len(particles),"=",
-              float(sumAverageDistances/len(particles)))
-        print("Asma Density = sumneighbors/sumAverageDistances =", sumneighbors,"/",sumAverageDistances,"=",
-              float(sumneighbors/sumAverageDistances))
+        print("Asma Densitiy Radius = sum_avg_dist/len(particles) =",sum_avg_dist,"/",len(particles),"=",
+              float(sum_avg_dist/len(particles)))
+        print("Asma Density = sum_neighbors/sum_avg_dist =", sum_neighbors,"/",sum_avg_dist,"=",
+              float(sum_neighbors/sum_avg_dist))
 
-        return([sumneighbors/sumAverageDistances,int(sumAverageDistances/len(particles))])
+        return([sum_neighbors/sum_avg_dist,int(sum_avg_dist/len(particles))])
+    return 0
+
+
+def initial_radius(particle, sum_distances):
+    for i in range(1, initialRadius + 1):
+        p_in_i_range = particle.scan_for_particle_in(hop=i)
+        if p_in_i_range is not None:
+            sum_distances = sum_distances + len(p_in_i_range) * i
+            print("for Hop:", i, " sumdistance ", sum_distances)
+    return sum_distances
 
 
 def neighbor_topological_metric_random(particle):
@@ -100,7 +107,6 @@ def solution(sim):
     critical=0
     print(len(sim.particles))
     calculated_dir=0
-    calculated_dis=0
     sim.set_calculated_dir(0)
     sim.set_calculated_dis(0)
     sim.set_mems(0)
@@ -108,25 +114,18 @@ def solution(sim):
     sim.set_density(dense)
     sim.set_densityRadius(radius)
     print("round=",sim.get_actual_round())
-    if size_of_one_flock(sim.particles[0],len(sim.particles))<len(sim.particles):
-        print('There is more than one Flock, Flock size=',size_of_one_flock(sim.particles[0],len(sim.particles)))
-        sim.set_end()
-    elif (sim.get_actual_round()==sim.get_max_round()):
-        sim.set_end()
-    # Initialisation
-    if sim.get_actual_round() == 1:
-        sim.set_critical(critical)
-        sim.set_safe(safe)
-        sim.set_uncomfortable(uncomfortable)
-        for particle in sim.particles:
-            dir = random.choice(direction)
-            particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
+
+    #check for termination
+    check_termination(sim)
+
     for particle in sim.particles:
+        # Initialisation
+        init(critical, particle, safe, sim, uncomfortable)
+
+        neighbor_in_vr = particle.scan_for_particle_within(hop=vr)
         # a lonely particle moves randomly
-        if particle.scan_for_particle_within(hop=vr) is None:
-            dir = random.choice(direction)
-            particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
-            particle.move_to(dir)
+        if neighbor_in_vr is None:
+            move_lonely_particle(particle)
         else:
             # make neighbors list based of interaction type
             nearest_neighbors = []
@@ -141,64 +140,103 @@ def solution(sim):
                 list_of_neighbors = neighbor_topological_metric(particle)
                 sim.set_calculated_dis(sim.get_calculated_dis() + len(list_of_neighbors))
             else:
-                list_of_neighbors = particle.scan_for_particle_within(hop=vr)
+                list_of_neighbors = neighbor_in_vr
                 sim.set_calculated_dis(sim.get_calculated_dis() + len(list_of_neighbors))
 
             # classify your neighbors in 3 lists depending on how far they are
             classify_neighbors(particle, list_of_neighbors, nearest_neighbors, middle_neighbors,
-                               farthest_neighbors)
+                               farthest_neighbors, neighbor_in_vr)
 
             # **************** applicate flocking rules with your neighbors****************
             # seperation rule with nearest neighbors
             # uncomfortable situation
             if len(nearest_neighbors) > 0:
-                uncomfortable+=1
-                calculated_dir += len(nearest_neighbors)
-                # count how many particles there are in every direction
-                count = count_particle_in_dir(particle, nearest_neighbors)
-                dir = get_min_dir(count)
-                if particle.get_particle_in(dir) is None:
-                    particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
-                    particle.move_to(dir)
-                    #particle.move_to_in_bounds(dir)
+                calculated_dir, uncomfortable = seperation_rule(calculated_dir, nearest_neighbors, particle,
+                                                                uncomfortable)
 
             # Alignement rule with middle neighbors
             # safe situation (interaction with all observed neighbors)
             # particle moves like middle neighbors and toward farthest neighbors
             elif len(middle_neighbors) > 0:
-                safe+=1
-                neighbors = middle_neighbors
-                # get the direction in which the most of your neighbors are moving
-                count = count_dir_from_memory(particle, neighbors)
-                sim.set_mems(sim.get_mems() + len(neighbors))
-                if len(farthest_neighbors) > 0:
-                    calculated_dir += len(farthest_neighbors)
-                    count1 = count_particle_in_dir(particle, farthest_neighbors)
-                    for i in range(0, 6):
-                        count[i] += count1[i]
-                dir = get_max_dir(count)
-                if particle.get_particle_in(dir) is None:
-                    particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
-                    particle.move_to(dir)
-                    #particle.move_to_in_bounds(dir)
+                calculated_dir, safe = alignment_rule(calculated_dir, farthest_neighbors, middle_neighbors, particle,
+                                                      safe, sim)
 
             # cohesion rule with farthest neighbors
             # critical situation
             else:
-                critical+=1
-                if len(farthest_neighbors) > 0:
-                    # find the direction in witch the most neighbours are reachable
-                    count = count_particle_in_dir(particle, farthest_neighbors)
-                    calculated_dir += len(farthest_neighbors)
-                    dir = get_max_dir(count)
-                    if particle.get_particle_in(dir) is None:
-                        particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
-                        particle.move_to(dir)
-                        #particle.move_to_in_bounds(dir)
+                calculated_dir, critical = cohesion_rule(calculated_dir, critical, farthest_neighbors, particle)
             sim.set_calculated_dir(calculated_dir)
     sim.set_critical(critical)
     sim.set_safe(safe)
     sim.set_uncomfortable(uncomfortable)
+
+
+def init(critical, particle, safe, sim, uncomfortable):
+    if sim.get_actual_round() == 1:
+        sim.set_critical(critical)
+        sim.set_safe(safe)
+        sim.set_uncomfortable(uncomfortable)
+        dir = random.choice(direction)
+        particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
+
+
+def check_termination(sim):
+    if size_of_one_flock(sim.particles[0], len(sim.particles)) < len(sim.particles) or \
+            sim.get_actual_round() == sim.get_max_round():
+        print('There is more than one Flock, Flock size=', size_of_one_flock(sim.particles[0], len(sim.particles)))
+        sim.set_end()
+
+
+def move_lonely_particle(particle):
+    dir = random.choice(direction)
+    particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
+    particle.move_to(dir)
+
+
+def cohesion_rule(calculated_dir, critical, farthest_neighbors, particle):
+    critical += 1
+    if len(farthest_neighbors) > 0:
+        # find the direction in witch the most neighbours are reachable
+        count = count_particle_in_dir(particle, farthest_neighbors)
+        calculated_dir += len(farthest_neighbors)
+        dir = get_max_dir(count)
+        if particle.get_particle_in(dir) is None:
+            particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
+            particle.move_to(dir)
+            # particle.move_to_in_bounds(dir)
+    return calculated_dir, critical
+
+
+def alignment_rule(calculated_dir, farthest_neighbors, middle_neighbors, particle, safe, sim):
+    safe += 1
+    neighbors = middle_neighbors
+    # get the direction in which the most of your neighbors are moving
+    count = count_dir_from_memory(particle, neighbors)
+    sim.set_mems(sim.get_mems() + len(neighbors))
+    if len(farthest_neighbors) > 0:
+        calculated_dir += len(farthest_neighbors)
+        count1 = count_particle_in_dir(particle, farthest_neighbors)
+        for i in range(0, 6):
+            count[i] += count1[i]
+    dir = get_max_dir(count)
+    if particle.get_particle_in(dir) is None:
+        particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
+        particle.move_to(dir)
+        # particle.move_to_in_bounds(dir)
+    return calculated_dir, safe
+
+
+def seperation_rule(calculated_dir, nearest_neighbors, particle, uncomfortable):
+    uncomfortable += 1
+    calculated_dir += len(nearest_neighbors)
+    # count how many particles there are in every direction
+    count = count_particle_in_dir(particle, nearest_neighbors)
+    dir = get_min_dir(count)
+    if particle.get_particle_in(dir) is None:
+        particle.write_memory_with(key=particle.get_id, data=get_direction_data(dir))
+        particle.move_to(dir)
+        # particle.move_to_in_bounds(dir)
+    return calculated_dir, uncomfortable
 
 
 #Output: the direction in which the fewest neighbors are reachable
@@ -259,19 +297,16 @@ def direction_of_target(x, y):
     if y == 0:
         if x > 0:
             return [E]
-        else:
-            return [W]
+        return [W]
     else:
         if x == 0.5 * y:
             if x > 0:
                 return [NE]
-            else:
-                return [SW]
+            return [SW]
         else:
             if x > 0:
                 return [SE]
-            else:
-                return [NW]
+            return [NW]
 
 
 # gives the directions in witch a target can be reached when the target by going in more than one direction as quickly
@@ -281,21 +316,19 @@ def directions_of_target(x, y):
             return [NE, E]
         elif x <= 0 - (1 + 0.5 * y):
             return [NW, W]
-        else:
-            return [NE, NW]
+        return [NE, NW]
     else:
         if x >= 1 + 0.5 * abs(y):
             return [SE, E]
         elif x <= 0 - (1 + 0.5 * abs(y)):
             return [SW, W]
-        else:
-            return [SE, SW]
+        return [SE, SW]
 
 
 # gives a list of directions in witch a target-Point could be reached from an origin Point
-def proportional_directions(origin, targetPoint):
-    x = targetPoint[0] - origin[0]
-    y = targetPoint[1] - origin[1]
+def proportional_directions(origin, target_point):
+    x = target_point[0] - origin[0]
+    y = target_point[1] - origin[1]
     if target_on_dir(x, y):
         return direction_of_target(x, y)
     else:
@@ -335,61 +368,50 @@ def get_direction_integer(dirr):
 
 
 #check if a particle is in a list
-def neighbor_not_in_list(N_list, random_neighbor):
-    for i in range(0,len(N_list)):
-        if N_list[i]==random_neighbor:
+def neighbor_not_in_list(n_list, random_neighbor):
+    for i in range(0,len(n_list)):
+        if n_list[i]==random_neighbor:
             return 0
     return 1
 
 
 #add neighbors from temp lists to the neighbors list with respecting the number of observed neighbors
-def add_neighbors_to_list(particle, radius, N_list):
+def add_neighbors_to_list(particle, radius, n_list):
     temp_list=particle.scan_for_particle_in(hop=radius)
     if temp_list is not None:
-        if len(temp_list)<number_of_neighbors-len(N_list):
-            N_list.extend(temp_list)
+        if len(temp_list)<number_of_neighbors-len(n_list):
+            n_list.extend(temp_list)
         else:
-            for i in range(0,number_of_neighbors-len(N_list)):
-                N_list.append(temp_list[i])
+            for i in range(0,number_of_neighbors-len(n_list)):
+                n_list.append(temp_list[i])
 
 
 #create list of neighbors to observe in a topological interaction
 def neighbor_topological_metric(particle):
-    N_list=[]
+    n_list=[]
     radius=0
     stop=0
-    while len(N_list)<number_of_neighbors and stop==0:
+    while len(n_list)<number_of_neighbors and stop==0:
         if radius<vr:
             radius+=1
-            add_neighbors_to_list(particle,radius,N_list)
+            add_neighbors_to_list(particle,radius,n_list)
         else:
             stop=1
-    return N_list
-
+    return n_list
 
 
 # classify your neighbors in 3 lists: nearest neighbors (within min_distance) middle_neighbors
 # (between min and max_ distance) farthest neighbors are in a distance greater than max-distance.
-def classify_neighbors(particle,list_of_neighbors, nearest_neighbors, middle_neighbors, farthest_neighbors):
-    listmin=particle.scan_for_particle_within(hop=min_distance)
-    listmax=particle.scan_for_particle_within(hop=max_distance)
-    listvr=particle.scan_for_particle_within(hop=vr)
+def classify_neighbors(particle,list_of_neighbors, nearest_neighbors, middle_neighbors, farthest_neighbors, list_vr):
+    list_min = particle.scan_for_particle_within(hop=min_distance)
+    list_max = particle.scan_for_particle_within(hop=max_distance)
     for particle1 in list_of_neighbors:
-        if listmin is not None:
-            if particle1 in listmin:
-                nearest_neighbors.append(particle1)
-            elif  listmax is not None and particle1 in listmax:
-                middle_neighbors.append(particle1)
-            elif  listvr is not None and particle1 in listvr:
-                farthest_neighbors.append(particle1)
-        elif listmax is not None:
-            if particle1 in listmax:
-                middle_neighbors.append(particle1)
-            elif listvr is not None and particle1 in listvr:
-                farthest_neighbors.append(particle1)
-        elif listvr is not None:
-            if particle1 in listvr:
-                farthest_neighbors.append(particle1)
+        if list_min is not None and particle1 in list_min:
+            nearest_neighbors.append(particle1)
+        elif list_max is not None and particle1 in list_max:
+            middle_neighbors.append(particle1)
+        elif list_vr is not None and particle1 in list_vr:
+            farthest_neighbors.append(particle1)
 
 
 #this function counts how many flocks there are in the world.
