@@ -101,6 +101,7 @@ class Sim:
 
         self.formation = config_data.formation
         self.p_amount = config_data.p_amount
+        self.dynamic = config_data.dynamic
 
 
         self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,

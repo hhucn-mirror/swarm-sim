@@ -25,6 +25,10 @@ def solution(sim):
         l.elect(sim.get_particle_list())
         form = sim.config_data.formation
 
+    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 8:
+        new = hm.add_random_particle(sim)
+        hm.init_particle(new)
+
     for particle in sim.get_particle_list():
         if sim.get_actual_round() % 7 == 1:
             announce_next(particle)

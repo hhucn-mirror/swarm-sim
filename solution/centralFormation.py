@@ -1,5 +1,6 @@
 import math
 import solution.leader as leader
+from solution.help_methods import add_random_particle
 
 NE = 0
 E = 1
@@ -22,6 +23,10 @@ def solution(sim):
     print("Runde = ", sim.get_actual_round())
     if (sim.get_actual_round() == 1):
         initialize(sim)
+
+    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 3:
+        new = add_random_particle(sim)
+        new.write_memory_with("Dir", None)
 
     if (sim.get_actual_round() % 2 == 1):
         # calculation for movement

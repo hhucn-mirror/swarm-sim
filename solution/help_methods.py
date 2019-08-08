@@ -3,15 +3,19 @@
 # initialize the memory of the particles
 def init_particles(particleList):
     for particle in particleList:
-        particle.write_memory_with("MaxID", particle.number)
-        particle.write_memory_with("Leader", 0)
-        particle.write_memory_with("Mark", 0)
-        particle.write_memory_with("AnnounceNext", None)
-        particle.write_memory_with("Order", None)
-        particle.write_memory_with("Direction", None)
-        particle.write_memory_with("Moving", 0)
-        particle.write_memory_with("WayForN", None)
-        particle.write_memory_with("UpdateState", None)
+        init_particle(particle)
+
+
+def init_particle(particle):
+    particle.write_memory_with("MaxID", particle.number)
+    particle.write_memory_with("Leader", 0)
+    particle.write_memory_with("Mark", 0)
+    particle.write_memory_with("AnnounceNext", None)
+    particle.write_memory_with("Order", None)
+    particle.write_memory_with("Direction", None)
+    particle.write_memory_with("Moving", 0)
+    particle.write_memory_with("WayForN", None)
+    particle.write_memory_with("UpdateState", None)
 
 
 def set_nbs_announceNext_to_false(particle):
@@ -130,3 +134,13 @@ def is_formed(sim):
         if particle.read_memory_with("Leader") != 1:
             return
     sim.success_termination()
+
+def add_random_particle(sim):
+    for particle in sim.get_particle_list():
+        i = 0
+        while i < 6:
+            if particle.get_particle_in(i) is None:
+                pos = sim.get_coords_in_dir(particle.coords, i)
+                new = sim.add_particle(pos[0], pos[1])
+                return new
+            i = i+1

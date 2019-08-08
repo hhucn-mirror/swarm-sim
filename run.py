@@ -39,6 +39,7 @@ class ConfigData():
 
         self.formation = config.getint("Criteria", "formation")
         self.p_amount = config.getint("Criteria", "p_amount")
+        self.dynamic = config.getint("Criteria", "dynamic")
 
         self.dir_name = None
 
