@@ -19,11 +19,11 @@ noise=0
 noise_interval=10
 
 # define minimum and maximum distance
-min_distance = 2
-max_distance = 7
+min_distance = 1
+max_distance = 2
 
 # visual range
-vr = 7
+vr = 6
 
 #set the initial radius to calculate density
 initialRadius=10
@@ -114,13 +114,14 @@ def solution(sim):
     sim.set_density(dense)
     sim.set_densityRadius(radius)
     print("round=",sim.get_actual_round())
-
+    if sim.get_actual_round() == 1:
+        init(critical, safe, sim, uncomfortable)
     #check for termination
     check_termination(sim)
 
     for particle in sim.particles:
         # Initialisation
-        init(critical, particle, safe, sim, uncomfortable)
+
 
         neighbor_in_vr = particle.scan_for_particle_within(hop=vr)
         # a lonely particle moves randomly
@@ -171,13 +172,13 @@ def solution(sim):
     sim.set_uncomfortable(uncomfortable)
 
 
-def init(critical, particle, safe, sim, uncomfortable):
-    if sim.get_actual_round() == 1:
+def init(critical, safe, sim, uncomfortable):
         sim.set_critical(critical)
         sim.set_safe(safe)
         sim.set_uncomfortable(uncomfortable)
-        dir = random.choice(direction)
-        particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
+        for particle in sim.particles:
+            dir = random.choice(direction)
+            particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
 
 
 def check_termination(sim):
