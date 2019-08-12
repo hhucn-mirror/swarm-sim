@@ -12,6 +12,7 @@ import math
 import logging
 from lib import csv_generator, particle, tile, marker, vis
 from lib.gnuplot_generator import generate_gnuplot
+from lib.comms import Message
 
 
 x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
@@ -101,6 +102,9 @@ class Sim:
                                                            tiles_num=0, particle_num=0,
                                                            steps=0, directory=self.directory)
 
+        self.memory = {}
+
+
         mod = importlib.import_module('scenario.' + config_data.scenario)
         mod.scenario(self)
         if config_data.random_order:
@@ -121,6 +125,7 @@ class Sim:
                 self.solution_mod.solution(self)
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
+                self.try_deliver_messages()
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
@@ -629,3 +634,20 @@ class Sim:
             return True
         else:
             return False
+
+    def add_message_on(self, target_id, round_number, msg):
+        if round_number in self.memory.keys():
+            self.memory[round_number] = self.memory.get(target_id).append((target_id, msg))
+        else:
+            self.memory[round_number] = [(target_id, msg)]
+
+    def try_deliver_messages(self):
+        if self.__round_counter in self.memory.keys():
+            m_particles = self.get_particle_map_id()
+            tuples_particles = self.memory.pop(self.__round_counter)
+            for e in tuples_particles:
+                p_id = e[0]
+                p_msg = e[1]
+                if p_id in m_particles.keys():
+                    p = m_particles.get(p_id)
+                    p.write_memory(p_msg)

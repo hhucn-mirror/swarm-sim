@@ -1,6 +1,7 @@
 from lib.comms import generate_random_messages
 from lib.mobility_model import MobilityModel, Mode
 import lib.routing
+import lib.particle
 
 
 scan_radius = 1
@@ -24,6 +25,10 @@ def solution(sim):
                                                      manet_role=p_role, manet_group=m_group)
             r_params.set(particle)
             particle_number += 1
+
+        print("----------------")
+        sim.add_message_on(particles[0].get_id(), 3, "hallo")
+        liste = sim.get_particle_map_id()
     else:
         if sim.get_actual_round() % 5 == 0:
             generate_random_messages(particles, len(particles))
