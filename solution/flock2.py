@@ -34,7 +34,11 @@ direction = [NE, E, SE, SW, W, NW]
 def density(particles):
     density_list = []
     for particle in particles:
-        density_list.append(len(particle.scan_for_particle_within(hop=density_radius)))
+       DensityNeighbors=particle.scan_for_particle_within(hop=density_radius)
+        if DensityNeighbors is not None:
+            density_list.append(len(DensityNeighbors))
+        else:
+            density_list.append(0)
     min_density=density_list[0]
     max_density = density_list[0]
     sum_density=density_list[0]
