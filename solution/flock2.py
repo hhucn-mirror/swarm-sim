@@ -19,73 +19,33 @@ noise=0
 noise_interval=10
 
 # define minimum and maximum distance
-min_distance = 1
-max_distance = 2
+min_distance = 2
+max_distance = 7
 
 # visual range
-vr = 6
+vr = 7
 
 #set the initial radius to calculate density
-initialRadius=10
+#initialRadius=10
+density_radius=5
 
 direction = [NE, E, SE, SW, W, NW]
 
 def density(particles):
-    sum_avg_dist=0
-    sum_total_dist = 0
-    sum_neighbors=0
-    min_density = 100000000000
-    max_density = -1
-
+    density_list = []
     for particle in particles:
-        sum_distances=0
-        avg_dist_to_all_neighbors = 0
-        print("P", particle.number)
-        sum_distances = initial_radius(particle, sum_distances)
-        p_in_init_rad = particle.scan_for_particle_within(hop=initialRadius)
-        if p_in_init_rad is not None:
-            x=len(p_in_init_rad)
-            avg_dist_to_all_neighbors=sum_distances/x
-            print("neighbors within initial_radius", initialRadius, " are ", x)
-            print(" and a total of distances of ", sum_distances)
-            density = x
-            print("with a Density of", density, "particle every", initialRadius,"hops")
-            if density > max_density:
-                max_density = density
-            if density < min_density:
-                min_density = density
-            sum_neighbors +=x
-        sum_avg_dist+=avg_dist_to_all_neighbors
-        sum_total_dist += sum_distances
-        print(" has the sum_avg_dist", sum_avg_dist )
-
-    if sum_avg_dist > 0:
-        print(" Final sum_avg_dist", sum_avg_dist)
-        print(" Final sum of all neighbors", sum_neighbors)
-        print("numbers of particles ", len(particles))
-
-        print("Average Distance=  sum_avg_dist/len(particles)= ", sum_total_dist,"/",len(particles),"=",
-              float(sum_total_dist/len(particles)))
-        print("average density= sum_neighbors/len(particles)) =", sum_neighbors,"/",len(particles),"=",
-              float(sum_neighbors/len(particles)))
-        print("min density ", min_density , "max density", max_density, "particles every", initialRadius, "hops")
-
-        print("Asma Densitiy Radius = sum_avg_dist/len(particles) =",sum_avg_dist,"/",len(particles),"=",
-              float(sum_avg_dist/len(particles)))
-        print("Asma Density = sum_neighbors/sum_avg_dist =", sum_neighbors,"/",sum_avg_dist,"=",
-              float(sum_neighbors/sum_avg_dist))
-
-        return([sum_neighbors/sum_avg_dist,int(sum_avg_dist/len(particles))])
-    return 0
-
-
-def initial_radius(particle, sum_distances):
-    for i in range(1, initialRadius + 1):
-        p_in_i_range = particle.scan_for_particle_in(hop=i)
-        if p_in_i_range is not None:
-            sum_distances = sum_distances + len(p_in_i_range) * i
-            print("for Hop:", i, " sumdistance ", sum_distances)
-    return sum_distances
+        density_list.append(len(particle.scan_for_particle_within(hop=density_radius)))
+    min_density=density_list[0]
+    max_density = density_list[0]
+    sum_density=density_list[0]
+    for i in range(1,len(density_list)-1):
+        if min_density>density_list[i]:
+            min_density=density_list[i]
+        if max_density<density_list[i]:
+            max_density=density_list[i]
+        sum_density+=density_list[i]
+    avg_density=sum_density/len(particles)
+    return(avg_density,min_density,max_density)
 
 
 def neighbor_topological_metric_random(particle):
@@ -110,18 +70,18 @@ def solution(sim):
     sim.set_calculated_dir(0)
     sim.set_calculated_dis(0)
     sim.set_mems(0)
-    [dense, radius] = density(sim.particles)
-    sim.set_density(dense)
-    sim.set_densityRadius(radius)
+    [avg_density,min_density,max_density] = density(sim.particles)
+    sim.set_density(avg_density)
+    #density radius zu fluctuation ändern
+    sim.set_densityFluctuation(max_density-min_density)
     print("round=",sim.get_actual_round())
-    if sim.get_actual_round() == 1:
-        init(critical, safe, sim, uncomfortable)
+
     #check for termination
     check_termination(sim)
 
     for particle in sim.particles:
         # Initialisation
-
+        init(critical, particle, safe, sim, uncomfortable)
 
         neighbor_in_vr = particle.scan_for_particle_within(hop=vr)
         # a lonely particle moves randomly
@@ -172,13 +132,13 @@ def solution(sim):
     sim.set_uncomfortable(uncomfortable)
 
 
-def init(critical, safe, sim, uncomfortable):
+def init(critical, particle, safe, sim, uncomfortable):
+    if sim.get_actual_round() == 1:
         sim.set_critical(critical)
         sim.set_safe(safe)
         sim.set_uncomfortable(uncomfortable)
-        for particle in sim.particles:
-            dir = random.choice(direction)
-            particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
+        dir = random.choice(direction)
+        particle.write_memory_with(key=particle.get_id(), data=get_direction_data(dir))
 
 
 def check_termination(sim):
@@ -427,4 +387,5 @@ def size_of_one_flock(particle,n):
                 if temp_list[j] not in flock_list:
                     flock_list.append(temp_list[j])
     return len(flock_list)
+
 
