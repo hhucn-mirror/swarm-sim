@@ -88,7 +88,7 @@ class CsvRoundData:
                                     'Particle Counter',
                                     'Particle Read', 'Particle Read Sum',
                                     'Particle Write', 'Particle Write Sum',
-                                    'Density','Density Radius',
+                                    'Density','Density Fluctuation',
                                     'Calculated directions','Calculated distances','memreads',
                                     'safe','critical','uncomfortable'
                                     ])
@@ -115,7 +115,7 @@ class CsvRoundData:
             self.particle_write = self.particle_write + particle_write
             self.memory_write = self.memory_write + memory_write
             self.density=self.sim.get_density()
-            self.densityRadius=self.sim.get__densityRadius()
+            self.densityFluctuation=self.sim.get__densityFluctuation()
             self.calculated_dir=self.sim.get_calculated_dir()
             self.calculated_dis=self.sim.get_calculated_dis()
             self.memory_reads=self.sim.get_mems()
@@ -129,7 +129,7 @@ class CsvRoundData:
             self.particle_write = particle_write
             self.memory_write = memory_write
             self.density = self.sim.get_density()
-            self.densityRadius=self.sim.get__densityRadius()
+            self.densityFluctuation=self.sim.get__densityFluctuation()
             self.calculated_dir=self.sim.get_calculated_dir()
             self.calculated_dis=self.sim.get_calculated_dis()
             self.memory_reads = self.sim.get_mems()
@@ -145,7 +145,7 @@ class CsvRoundData:
                         self.particle_read, self.particle_read_sum,
                         self.particle_write, self.particle_write_sum,
                         self.density,
-                        self.densityRadius,
+                        self.densityFluctuation,
                         self.calculated_dir,
                         self.calculated_dis,
                         self.memory_reads,
@@ -173,7 +173,7 @@ class CsvRoundData:
                                 'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
                                 'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
                                 'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
-                                'Density Avg', 'Density Min','Density Max','Max-Min Density', 'Density Radius',
+                                'Density Avg', 'Density Min','Density Max','Max-Min Density', 'Density Fluctuation',
                                'calculated dir sum','calculated dir avg','calculated dir min','calculated dir max',
                                'calculated distance sum', 'calculated distance avg', 'calculated distance min', 'calculated distance max',
                                'memory reads sum', 'memory reads average',
@@ -202,7 +202,7 @@ class CsvRoundData:
 
                          data['Density'].mean(),data['Density'].min(),data['Density'].max(),
                          data['Density'].max()-data['Density'].min(),
-                         data['Density Radius'].mean(),
+                         data['Density Fluctuation'].mean(),
 
                          data['Calculated directions'].sum(),data['Calculated directions'].mean(),
                          data['Calculated directions'].min(),data['Calculated directions'].max(),
