@@ -182,17 +182,17 @@ class Sim:
         """
         return self.__density
 
-    def set_densityRadius(self,radius):
+    def set_densityFluctuation(self,radius):
         """
         save the the radius of calculated density
         """
-        self.__densityRadius=radius
+        self.__densityFluctuation=radius
 
-    def get__densityRadius(self):
+    def get__densityFluctuation(self):
         """
         returns the density radius
         """
-        return self.__densityRadius
+        return self.__densityFluctuation
     def set_mems(self,mems):
         """
         """
