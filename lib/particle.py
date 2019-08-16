@@ -14,9 +14,7 @@ import math
 
 from lib import csv_generator, matter
 from lib.directions import Directions
-from lib.eventqueue import EventQueue
-from lib.messagestore import MessageStore
-from lib.meta import NetworkEvent, EventType
+from lib.messagestore import MessageStore, BufferStrategy
 
 black = 1
 gray = 2
@@ -31,7 +29,6 @@ SW = 3
 W = 4
 NW = 5
 
-message_store_size = 5
 
 read = 0
 write = 1
@@ -41,7 +38,8 @@ particle_counter = 0
 class Particle(matter.Matter):
     """In the classe location all the methods for the characterstic of a location is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0):
+    def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0, ms_size=100,
+                 ms_strategy=BufferStrategy.fifo):
         """Initializing the location constructor"""
         super().__init__(sim, x, y, color, alpha, type="particle", mm_limit=mm_limit, mm_size=mm_size)
         global particle_counter
@@ -55,10 +53,9 @@ class Particle(matter.Matter):
         self.steps = 0
         self.created = False
         self.csv_particle_writer = csv_generator.CsvParticleData(self.get_id(), self.number)
-        self.send_store = MessageStore(maxlen=message_store_size)
-        self.fwd_store = MessageStore(maxlen=message_store_size)
-        self.rcv_store = MessageStore(maxlen=message_store_size)
-        self.event_queue = EventQueue()
+        self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.fwd_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
 
     @staticmethod
     def coords_to_sim(coords):

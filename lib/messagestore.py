@@ -1,33 +1,30 @@
 from collections import deque
+from enum import Enum
 
-from lib.comms import BufferStrategy
+
+class BufferStrategy(Enum):
+    fifo = 0
+    lifo = 1
 
 
 class MessageStore(deque):
 
     def __init__(self, init=None, maxlen=None, strategy=BufferStrategy.fifo):
-        self.strategy = strategy
+        if type(strategy) == str:
+            self.strategy = BufferStrategy[strategy]
+        else:
+            self.strategy = strategy
         if not init:
             super().__init__(maxlen=maxlen)
         else:
             super().__init__(init, maxlen=maxlen)
 
     def append(self, x):
-        if self.strategy == BufferStrategy.lifo:
-            if self.maxlen == len(self):
-                super().pop(len(x))
-            super().append(x)
-        else:
-            super().append(x)
+        # pop the right element if max len reached
+        if self.maxlen == len(self) and self.strategy == BufferStrategy.lifo:
+            super().pop()
+
+        super().append(x)
         if self.maxlen == len(self):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
-
-    def __getitem__(self, index):
-        if self.strategy == BufferStrategy.mru:
-            x = super().pop(index)
-            super().appendleft(x)
-        elif self.strategy == BufferStrategy.lru:
-            x = super().pop(index)
-            super().append(x)
-        super().__getitem__(index)

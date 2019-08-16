@@ -43,6 +43,11 @@ def core(argv):
     mm_tile= config.getint("Matter", "tile_mm_size")
     mm_location=config.getint("Matter", "location_mm_size")
 
+    scan_radius = config.getint("Routing", "scan_radius")
+    message_ttl = config.getint("Routing", "message_ttl")
+    ms_size = config.getint("Routing", "ms_size")
+    ms_strategy = config.get("Routing", "ms_strategy")
+
     multiple_sim=0
 
     try:
@@ -82,18 +87,15 @@ def core(argv):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-
-
     logging.info('Started')
 
-
-
     simulator=sim.Sim(seed=seedvalue, max_round=max_round, solution=solution_file.rsplit('.',1)[0],
-                          size_x=size_x, size_y=size_y, scenario_name=scenario_file,
-                           max_particles=max_particles, mm_limitation=mm_limitation,
-                           particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
-                           dir=directory, random_order=random_order,
-                          visualization=visualization)
+                      size_x=size_x, size_y=size_y, scenario_name=scenario_file,
+                      max_particles=max_particles, mm_limitation=mm_limitation,
+                      particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
+                      dir=directory, random_order=random_order,
+                      visualization=visualization,
+                      scan_radius=scan_radius, message_ttl=message_ttl, ms_size=ms_size, ms_strategy=ms_strategy)
 
     simulator.run()
     logging.info('Finished')

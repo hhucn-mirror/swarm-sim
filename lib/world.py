@@ -36,7 +36,7 @@ blue = 5
 class World:
     def __init__(self, size_x=0, size_y=0, world_name=None, sim=None, max_particles=50,
                  mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
-                 csv_round="", random_order=False):
+                 csv_round="", random_order=False, ms_size=100):
         """Initializing the World constructor
 
         :param size_x: the maximal size of the x axes
@@ -55,6 +55,7 @@ class World:
         self.particle_map_coords = {}
         self.particle_map_id = {}
         self.particle_mm_size = particle_mm_size
+        self.particle_ms_size = ms_size
         self.__particle_deleted = False
         self.tiles_num = 0
         self.tiles = []
@@ -262,7 +263,7 @@ class World:
             if self.check_coords(x, y) == True:
                 if (x, y) not in self.get_particle_map_coords():
                     new_particle = particle.Particle(self, x, y, color, alpha, self.mm_limitation,
-                                                     self.particle_mm_size)
+                                                     self.particle_mm_size, ms_size=self.particle_ms_size)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle

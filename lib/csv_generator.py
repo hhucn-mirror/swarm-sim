@@ -14,6 +14,8 @@ import os
 
 import pandas as pd
 
+from lib.comms import Message
+
 
 class CsvParticleFile:
     def __init__(self, directory):
@@ -58,7 +60,7 @@ class CsvParticleFile:
                         particle.csv_particle_writer.messages_delivered_directly,
                         particle.csv_particle_writer.messages_received,
                         particle.csv_particle_writer.messages_ttl_expired,
-                        particle.csv_particle_writer.out_of_mem
+                        particle.csv_particle_writer.out_of_mem,
                         ]
         self.writer.writerow(csv_iterator)
 
@@ -189,6 +191,8 @@ class CsvRoundData:
         self.messages_delivered_directly = 0
         self.messages_received = 0
         self.message_ttl_expired = 0
+        self.messages_delivered_unique = 0
+        self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
 
         self.directory = directory
@@ -223,6 +227,7 @@ class CsvRoundData:
                                     'Messages Sent', 'Messages Forwarded',
                                     'Messages Delivered', 'Messages Delivered Directly',
                                     'Messages Received', 'Messages TTL Expired',
+                                    'Messages Delivered Unique', 'Messages Delivered Directly Unique',
                                     'Receiver Out Of Mem'
                                     ])
 
@@ -244,8 +249,9 @@ class CsvRoundData:
                        particle_created=0, tile_created=0, location_created=0,
                        particle_deleted=0, tile_deleted=0, location_deleted=0, tiles_taken=0, tiles_dropped=0,
                        particles_taken=0, particles_dropped=0, messages_sent=0, messages_forwarded=0,
-                       messages_delivered=0, messages_delivered_directly=0, messages_received=0, message_ttl_expired=0,
-                       receiver_out_of_mem=0):
+                       messages_delivered=0, messages_delivered_directly=0, messages_received=0,
+                       messages_delivered_unique=0, messages_delivered_directly_unique=0,
+                       message_ttl_expired=0, receiver_out_of_mem=0):
         logging.debug("CSV: Starting writing_rounds")
         self.location_created_sum = self.location_created_sum + location_created
         self.location_deleted_sum = self.location_deleted_sum + location_deleted
@@ -272,6 +278,8 @@ class CsvRoundData:
         self.messages_delivered_directly += messages_delivered_directly
         self.messages_received += messages_received
         self.message_ttl_expired += message_ttl_expired
+        self.messages_delivered_unique += messages_delivered_unique
+        self.messages_delivered_directly_unique += messages_delivered_directly_unique
         self.receiver_out_of_mem += receiver_out_of_mem
 
         if self.actual_round == self.sim.get_actual_round():
@@ -338,7 +346,8 @@ class CsvRoundData:
                         self.tile_write, self.tile_write_sum,
                         self.messages_sent, self.messages_forwarded, self.messages_delivered,
                         self.messages_delivered_directly, self.messages_received,
-                        self.message_ttl_expired, self.receiver_out_of_mem]
+                        self.message_ttl_expired, self.messages_delivered_unique,
+                        self.messages_delivered_directly_unique, self.receiver_out_of_mem]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = round
         self.steps = 0
@@ -368,6 +377,8 @@ class CsvRoundData:
         self.messages_delivered_directly = 0
         self.messages_received = 0
         self.message_ttl_expired = 0
+        self.messages_delivered_unique = 0
+        self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
 
     def aggregate_metrics(self):
@@ -414,6 +425,7 @@ class CsvRoundData:
                                'Messages Sent Sum', 'Messages Forwarded Sum',
                                'Messages Delivered Sum', 'Messages Delivered Directly Sum',
                                'Messages Received Sum', 'Messages TTL Expired',
+                               'Messages Delivered Unique Sum', 'Messages Delivered Directly Unique Sum',
                                'Receiver Out Of Mem Sum'
                                ])
 
@@ -496,8 +508,90 @@ class CsvRoundData:
 
                          data['Messages TTL Expired'].sum(),
 
+                         data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
+
+
                          data['Receiver Out Of Mem'].sum()
                          ]
 
         writer_round.writerow(csv_interator)
         csv_file.close()
+
+
+class CsvMessageData:
+    def __init__(self, sim, solution, directory="outputs/"):
+        self.sim = sim
+        self.solution = solution
+        self.messages = {}
+
+        self.actual_round = sim.get_actual_round()
+        self.directory = directory
+        self.file_name = directory + '/messages.csv'
+        self.csv_file = open(self.file_name, 'w', newline='')
+        self.writer = csv.writer(self.csv_file)
+
+        self.writer.writerow(['Key', 'Number',
+                              'Original Sender Number', 'Receiver Number',
+                              'Sent Count',
+                              'Forwarding Count', 'Delivery Count',
+                              'Direct Delivery Count',
+                              'Initial Sent Round', 'First Delivery Round',
+                              'First Delivery Hop Count'
+                              ])
+
+    def write_rows(self):
+        for key, m_data in self.messages.items():
+            self.writer.writerow([key, m_data.seq_number,
+                                  m_data.sender, m_data.receiver,
+                                  m_data.sent, m_data.forwarded,
+                                  m_data.delivered, m_data.delivered_direct,
+                                  m_data.sent_round, m_data.delivery_round,
+                                  m_data.hop_count
+                                  ])
+        self.csv_file.close()
+
+    def add_messages(self, messages):
+        if hasattr(messages, '__iter__'):
+            for m in messages:
+                self.add_message(m)
+
+    def add_message(self, message: Message):
+        if message.key not in self.messages.keys():
+            self.messages[message.key] = MessageData(message)
+
+    def update_metrics(self, message: Message, sent=0, forwarded=0,
+                       delivered=0, delivered_direct=0, delivery_round=None,
+                       ):
+        self.add_message(message)
+        m_data = self.messages[message.key]
+        if not delivery_round:
+            hop_count = None
+        else:
+            hop_count = message.hop_count
+        m_data.update_metric(sent, forwarded, delivered, delivered_direct, delivery_round, hop_count)
+        self.messages[message.key] = m_data
+
+
+class MessageData:
+    def __init__(self, message: Message):
+        self.key = message.key
+        self.seq_number = message.seq_number
+        self.sender = message.original_sender.number
+        self.receiver = message.receiver.number
+        self.sent = 0
+        self.sent_round = message.start_round
+        self.forwarded = 0
+        self.delivered = 0
+        self.delivered_direct = 0
+        self.delivery_round = None
+        self.hop_count = None
+
+    def update_metric(self, sent=0, forwarded=0, delivered=0, delivered_direct=0, delivery_round=None, hop_count=None):
+        self.sent += sent
+        self.forwarded += forwarded
+        self.delivered += delivered
+        self.delivered_direct += delivered_direct
+        if delivery_round and not self.delivery_round:
+            self.delivery_round = delivery_round
+        if hop_count and not self.hop_count:
+            self.hop_count = hop_count

@@ -10,8 +10,10 @@ import importlib
 import random
 
 import logging
+from collections import deque
+from threading import Thread
+
 from lib import csv_generator, particle, tile, location, vis
-from lib.eventqueue import EventQueue
 from lib.gnuplot_generator import generate_gnuplot
 from lib.meta import NetworkEvent, EventType
 
@@ -45,7 +47,8 @@ class Sim:
     def __init__(self, seed=1, max_round=10, solution="None", size_x = 0, size_y = 0,
                  scenario_name = None, max_particles = 50,
                  mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
-                 random_order=False, visualization=False, window_size_x=600, window_size_y=800):
+                 random_order=False, visualization=False, window_size_x=600, window_size_y=800,
+                 scan_radius=5, message_ttl=200, ms_size=100, ms_strategy=None):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -74,6 +77,8 @@ class Sim:
         self.particle_map_coords = {}
         self.particle_map_id = {}
         self.particle_mm_size=particle_mm_size
+        self.particle_ms_size = ms_size
+        self.particle_ms_strategy = ms_strategy
         self.__particle_deleted=False
         self.tiles_num = 0
         self.tiles = []
@@ -100,11 +105,15 @@ class Sim:
         self.visualization = visualization
         self.window_size_x = window_size_x
         self.window_size_y = window_size_y
+        self.scan_radius = scan_radius
+        self.message_ttl = message_ttl
+
         self.csv_round_writer = csv_generator.CsvRoundData(self, solution=solution.rsplit('.', 1)[0],
                                                            seed=seed,
                                                            tiles_num=0, particle_num=0,
                                                            steps=0, directory=dir)
-        self.event_queue = EventQueue()
+        self.csv_msg_writer = csv_generator.CsvMessageData(self, solution=solution.rsplit('.', 1)[0], directory=dir)
+        self.event_queue = deque()
 
         mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
         mod.scenario(self)
@@ -128,7 +137,8 @@ class Sim:
                 # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
-
+        # write message data rows
+        self.csv_msg_writer.write_rows()
         # creating gnu plots
         self.csv_round_writer.aggregate_metrics()
         particle_file = csv_generator.CsvParticleFile(self.directory)
@@ -361,7 +371,9 @@ class Sim:
         if len(self.particles) < self.max_particles:
             if  self.check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha, self.mm_limitation, self.particle_mm_size)
+                    new_particle= particle.Particle(self, x, y, color, alpha, self.mm_limitation, self.particle_mm_size,
+                                                    ms_size=self.particle_ms_size,
+                                                    ms_strategy=self.particle_ms_strategy)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -633,34 +645,75 @@ class Sim:
         Processes the EventQueue of the simulator and updates corresponding csv metrics. Called every round.
         :return: Nothing
         """
-        while not self.event_queue.empty():
-            net_event: NetworkEvent = self.event_queue.get()
-            if net_event.event_type == EventType.MessageDeliveredDirect:
+        t = Thread(target=self.__process_event_queue__())
+        t.start()
+
+    def __process_event_queue__(self):
+        while not len(self.event_queue) == 0:
+            net_event: NetworkEvent = self.event_queue.pop()
+            event_type: EventType = net_event.event_type
+
+            if event_type == EventType.MessageSent:
+                net_event.sender.csv_particle_writer.write_particle(messages_sent=1)
+                # add to message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1)
+            elif event_type == EventType.MessageDeliveredUnique:
+                # update round metrics
+                self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_unique=1, messages_received=1)
+                # update particle metrics for both sender and receiver
+                net_event.sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
+                net_event.receiver.csv_particle_writer.write_particle(messages_received=1)
+                # update message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1, delivered=1,
+                                                   delivery_round=self.get_actual_round())
+            elif event_type == EventType.MessageDeliveredDirectUnique:
+                # update round metrics
+                self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly_unique=1,
+                                                     messages_received=1)
+                # update particle metrics for both sender and receiver
+                net_event.sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
+                net_event.receiver.csv_particle_writer.write_particle(messages_received=1)
+                # update message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1, delivered_direct=1, delivered=1,
+                                                   delivery_round=self.get_actual_round())
+            elif event_type == EventType.MessageDeliveredDirect:
                 # update round metrics
                 self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly=1,
                                                      messages_received=1)
                 # update particle metrics for both sender and receiver
                 net_event.sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered_directly=1)
                 net_event.receiver.csv_particle_writer.write_particle(messages_received=1)
-            elif net_event == EventType.MessageDelivered:
+                # update message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1, delivered_direct=1,
+                                                   delivery_round=self.get_actual_round())
+            elif event_type == EventType.MessageDelivered:
                 # update round metrics
                 self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered=1, messages_received=1)
                 # update particle metrics for both sender and receiver
                 net_event.sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
                 net_event.receiver.csv_particle_writer.write_particle(messages_received=1)
-            elif net_event == EventType.MessageForwarded:
+                # update message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1, delivered=1,
+                                                   delivery_round=self.get_actual_round())
+            elif event_type == EventType.MessageForwarded:
                 # update round metrics
-                self.csv_round_writer.update_metrics(messages_sent=1, messages_forwarded=1, messages_received=1)
+                self.csv_round_writer.update_metrics(messages_sent=1, messages_forwarded=1)
                 # update particle metrics for both sender and receiver
                 net_event.sender.csv_particle_writer.write_particle(messages_sent=1, messages_forwarded=1)
-                net_event.receiver.csv_particle_writer.write_particle(messages_received=1)
-            elif net_event == EventType.MessageTTLExpired:
+                # update message data
+                self.csv_msg_writer.update_metrics(net_event.message, sent=1, forwarded=1)
+            elif event_type == EventType.MessageTTLExpired:
                 # update round metrics
                 self.csv_round_writer.update_metrics(message_ttl_expired=1)
                 # update particle metrics for the sender
-                net_event.sender.csv_particle_writer.write_particle(message_ttl_expired=1)
-            elif net_event == EventType.ReceiverOutOfMem:
+                net_event.sender.csv_particle_writer.write_particle(messages_ttl_expired=1)
+            elif event_type == EventType.ReceiverOutOfMem:
                 # update round metrics
                 self.csv_round_writer.update_metrics(receiver_out_of_mem=1)
                 # update particle metrics for the receiver
                 net_event.receiver.csv_particle_writer.write_particle(out_of_mem=1)
+
+    @staticmethod
+    def log_net_event(event: NetworkEvent):
+        logging.info('Round {} - {} Hop count: {} '.format(event.event_round,
+                                                           event.event_type, event.message.hop_count))
