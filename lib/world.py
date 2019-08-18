@@ -310,21 +310,21 @@ class World:
             alpha = 1
         if len(self.particles) < self.config_data.max_particles:
             if  self.check_coords(x,y) == True:
-                if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha)
-                    self.particles_created.append(new_particle)
-                    self.particle_map_coords[new_particle.coords] = new_particle
-                    self.particle_map_id[new_particle.get_id()] = new_particle
-                    self.particles.append(new_particle)
-                    new_particle.touch()
-                    self.csv_round.update_particle_num(len(self.particles))
-                    self.init_particles.append(new_particle)
-                    new_particle.created=True
-                    logging.info("Created particle at %s", new_particle.coords)
-                    return new_particle
-                else:
-                    print("for x %f and y %f not not possible because Particle exist   ", x, y)
-                    return False
+                #if (x,y) not in self.get_particle_map_coords():
+                new_particle= particle.Particle(self, x, y, color, alpha)
+                self.particles_created.append(new_particle)
+                self.particle_map_coords[new_particle.coords] = new_particle
+                self.particle_map_id[new_particle.get_id()] = new_particle
+                self.particles.append(new_particle)
+                new_particle.touch()
+                self.csv_round.update_particle_num(len(self.particles))
+                self.init_particles.append(new_particle)
+                new_particle.created=True
+                logging.info("Created particle at %s", new_particle.coords)
+                return new_particle
+                #else:
+                    #print("for x %f and y %f not not possible because Particle exist   ", x, y)
+                    #return False
             else:
                  print ("for x %f and y %f not possible to draw ", x, y)
                  return False

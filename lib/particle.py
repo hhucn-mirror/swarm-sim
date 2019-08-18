@@ -108,15 +108,15 @@ class Particle(matter.Matter):
             if self.coords in self.world.particle_map_coords:
                 del self.world.particle_map_coords[self.coords]
 
-            if not dir_coord in self.world.particle_map_coords:
-                self.coords = dir_coord
-                self.world.particle_map_coords[self.coords] = self
-                logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.world.csv_round.update_metrics( steps=1)
-                self.csv_particle_writer.write_particle(steps=1)
-                self.touch()
-                self.check_for_carried_tile_or_particle()
-                return True
+            #if not dir_coord in self.world.particle_map_coords:
+            self.coords = dir_coord
+            self.world.particle_map_coords[self.coords] = self
+            logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
+            self.world.csv_round.update_metrics( steps=1)
+            self.csv_particle_writer.write_particle(steps=1)
+            self.touch()
+            self.check_for_carried_tile_or_particle()
+            #return True
         return False
 
     def check_for_carried_tile_or_particle(self):
