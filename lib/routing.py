@@ -1,6 +1,7 @@
 from enum import Enum
 
 from lib.comms import Message, send_message
+from lib.meta import NetworkEvent, EventType
 
 
 class Algorithm(Enum):
@@ -31,6 +32,10 @@ class SendEvent:
 class RoutingParameters:
 
     def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0, delivery_delay=2):
+        if type(algorithm) == str:
+            self.mode = Algorithm[algorithm]
+        else:
+            self.algorithm = algorithm
         self.algorithm = algorithm
         self.manet_role = manet_role
         self.manet_group = manet_group
@@ -41,6 +46,8 @@ class RoutingParameters:
         self.send_events = []
 
     def create_event(self, messages, current_round, store, sender, receiver):
+        for message in messages:
+            sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, current_round, message))
         return SendEvent(messages, current_round, self.delivery_delay, store, sender, receiver)
 
     def add_events(self, events):
@@ -50,12 +57,21 @@ class RoutingParameters:
         if not self.send_events:
             return []
         send_events = self.send_events[0]
-        if len(send_events) > 1:
-            if send_events[0][0].start_round + send_events[0][0].delay == current_round:
-                return send_events
+        if type(send_events[0]) == list:
+            try:
+                if send_events[0][0].start_round + send_events[0][0].delay == current_round:
+                    self.send_events.pop(0)
+                    return send_events
+            except IndexError:
+                return []
         else:
-            if send_events[0].start_round + send_events[0].delay == current_round:
-                return send_events
+            try:
+                if send_events[0].start_round + send_events[0].delay == current_round:
+                    self.send_events.pop(0)
+                    return send_events
+            except IndexError:
+                return []
+        return []
 
     def set(self, particle):
         setattr(particle, "routing_params", self)
@@ -71,8 +87,6 @@ class RoutingParameters:
 
 
 def next_step(particle, current_round, scan_radius=None):
-    if len(particle.send_store) == 0 and len(particle.fwd_store) == 0:
-        return
     routing_params = RoutingParameters.get(particle)
 
     if scan_radius is not None:
@@ -95,6 +109,7 @@ def __next_step_epidemic__(particle, routing_params, current_round, nearby=None)
                     event.fire_event()
             else:
                 send_event.fire_event()
+        routing_params.set(particle)
 
 
 def __create_send_events__(particle, routing_params, current_round, nearby=None):
@@ -106,10 +121,12 @@ def __create_send_events__(particle, routing_params, current_round, nearby=None)
     send_events = []
     fwd_events = []
     for neighbour in nearby:
-        send_events.append(routing_params.create_event(list(particle.send_store),
-                                                       current_round, particle.send_store, particle, neighbour))
-        fwd_events.append(routing_params.create_event(list(particle.fwd_store),
-                                                      current_round, particle.fwd_store, particle, neighbour))
+        if list(particle.send_store):
+            send_events.append(routing_params.create_event(list(particle.send_store),
+                                                           current_round, particle.send_store, particle, neighbour))
+        if list(particle.fwd_store):
+            fwd_events.append(routing_params.create_event(list(particle.fwd_store),
+                                                          current_round, particle.fwd_store, particle, neighbour))
     routing_params.add_events([send_events, fwd_events])
     routing_params.set(particle)
 

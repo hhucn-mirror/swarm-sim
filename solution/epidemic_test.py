@@ -1,5 +1,5 @@
 from lib.comms import generate_random_messages
-from lib.mobility_model import MobilityModel, Mode
+from lib.mobility_model import MobilityModel
 import lib.routing
 
 
@@ -13,13 +13,19 @@ def solution(sim):
     if sim.get_actual_round() == 1:
         # initialize the particle mobility models
         for particle in particles:
-            m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Random)
+            m_model = MobilityModel(particle.coords[0], particle.coords[1], sim.mobility_model_mode)
             m_model.set(particle)
-            r_params = lib.routing.RoutingParameters(lib.routing.Algorithm.Epidemic, scan_radius=sim.scan_radius,
+            r_params = lib.routing.RoutingParameters(algorithm=sim.routing_algorithm,
+                                                     scan_radius=sim.scan_radius,
                                                      delivery_delay=2)
             r_params.set(particle)
-        generate_random_messages(particles, 20, sim)
+        # initially generate 5 message per particle
+        generate_random_messages(particles, amount=5, sim=sim)
     else:
+        # generate 1 message per particle, every 10 rounds
+        if sim.get_actual_round() % 20 == 0:
+            generate_random_messages(particles, amount=1, sim=sim)
+            print("Current round: {}".format(sim.get_actual_round()))
         # move in every round starting from the second one
         for particle in particles:
             m_model = MobilityModel.get(particle)

@@ -21,6 +21,10 @@ class MobilityModel:
         return getattr(particle, "mobility_model")
 
     def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=()):
+        if type(mode) == str:
+            self.mode = Mode[mode]
+        else:
+            self.mode = mode
         if mode == Mode.Random_Mode:
             mode = random.choice(list(Mode)[:-1])
         if mode == Mode.Zonal:
@@ -132,5 +136,6 @@ class MobilityModel:
         return MobilityModel.random_direction(exceptions)
 
     @staticmethod
-    def random_direction(exceptions=[]):
-        return random.choice(directions_list(exceptions)).value
+    def random_direction(exceptions=[Directions.S]):
+        dirs = directions_list(exceptions)
+        return random.choice(dirs).value

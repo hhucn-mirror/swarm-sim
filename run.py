@@ -12,6 +12,10 @@ from lib import  sim
 
 
 #visualization=True
+from lib.messagestore import BufferStrategy
+from lib.mobility_model import MobilityModel, Mode
+from lib.routing import Algorithm
+
 
 def core(argv):
     """In the main function first the config is getting parsed and than
@@ -47,6 +51,28 @@ def core(argv):
     message_ttl = config.getint("Routing", "message_ttl")
     ms_size = config.getint("Routing", "ms_size")
     ms_strategy = config.get("Routing", "ms_strategy")
+    algorithm = config.get("Routing", "algorithm")
+    delivery_delay = config.getint("Routing", "delivery_delay")
+
+    mobility_model_mode = config.get("MobilityModel", "mode")
+
+    try:
+        ms_strategy = BufferStrategy[ms_strategy]
+    except ValueError:
+        print('Error: ms_strategy in config needs to be of type BufferStrategy. See messagestore.py.')
+        sys.exit(2)
+
+    try:
+        algorithm = Algorithm[algorithm]
+    except ValueError:
+        print('Error: algorithm in config needs to be of type Algorithm. See routing.py.')
+        sys.exit(2)
+
+    try:
+        mobility_model_mode = Mode[mobility_model_mode]
+    except ValueError:
+        print('Error: mobility_model_mode in config needs to be of type Mode. See mobility_model.py.')
+        sys.exit(2)
 
     multiple_sim=0
 
@@ -94,8 +120,11 @@ def core(argv):
                       max_particles=max_particles, mm_limitation=mm_limitation,
                       particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
                       dir=directory, random_order=random_order,
-                      visualization=visualization,
-                      scan_radius=scan_radius, message_ttl=message_ttl, ms_size=ms_size, ms_strategy=ms_strategy)
+                      visualization=visualization, window_size_x=window_size_x, window_size_y=window_size_y,
+                      scan_radius=scan_radius, message_ttl=message_ttl, ms_size=ms_size, ms_strategy=ms_strategy,
+                      routing_algorithm=algorithm, delivery_delay=delivery_delay,
+                      mobility_model_mode=mobility_model_mode
+                      )
 
     simulator.run()
     logging.info('Finished')

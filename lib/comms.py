@@ -123,6 +123,7 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     else:
         ttl_range = (sim.message_ttl, sim.message_ttl)
     for sender in particle_list:
-        for _ in range(amount):
+        for _ in range(0, amount):
             receiver = random.choice([particle for particle in particle_list if particle != sender])
-            Message(sender, receiver, start_round=sim.get_actual_round(), ttl=random.randint(ttl_range[0], ttl_range[1]))
+            Message(sender, receiver, start_round=sim.get_actual_round(),
+                    ttl=random.randint(ttl_range[0], ttl_range[1]))

@@ -125,7 +125,7 @@ class Particle(matter.Matter):
         :param dir: The direction must be either: E, SE, SW, W, NW, or NE
         :return: True: Success Moving;  False: Non moving
         """
-        if dir == Directions.S.value:
+        if dir == 6:
             return False
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
@@ -160,7 +160,7 @@ class Particle(matter.Matter):
             :param dir: The direction must be either: E, SE, SW, W, NW, or NE
             :return: True: Success Moving;  False: Non moving
         """
-        if dir == Directions.S.value:
+        if dir == 6:
             return False
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         sim_coord = self.coords_to_sim(dir_coord)
