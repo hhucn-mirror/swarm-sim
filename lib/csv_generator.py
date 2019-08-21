@@ -519,7 +519,19 @@ class CsvRoundData:
 
 
 class CsvMessageData:
+    """
+    Collects sending, forwarding and delivery information for a dictionary of message objects in a csv.
+    Contains :class:`~csv_generatore.MessageData` objects.
+    """
     def __init__(self, sim, solution, directory="outputs/"):
+        """
+        :param sim: Simulator instance
+        :type sim: :class:`~sim.Sim`
+        :param solution: The solution the simulator executes.
+        :type solution: str
+        :param directory: The directory for the csv to be put in.
+        :type directory: str
+        """
         self.sim = sim
         self.solution = solution
         self.messages = {}
@@ -540,6 +552,9 @@ class CsvMessageData:
                               ])
 
     def write_rows(self):
+        """
+        Writes rows for all messages.
+        """
         for key, m_data in self.messages.items():
             self.writer.writerow([key, m_data.seq_number,
                                   m_data.sender, m_data.receiver,
@@ -551,17 +566,42 @@ class CsvMessageData:
         self.csv_file.close()
 
     def add_messages(self, messages):
+        """
+        Adds messages to the messages dictionary.
+        :param messages: iterable type of messages
+        :type messages: Iterable
+        """
         if hasattr(messages, '__iter__'):
             for m in messages:
                 self.add_message(m)
 
     def add_message(self, message: Message):
+        """
+        Adds a new message to track.
+        :param message: The message to track.
+        :type message: :class:`~comms.Message`
+        """
         if message.key not in self.messages.keys():
             self.messages[message.key] = MessageData(message)
 
     def update_metrics(self, message: Message, sent=0, forwarded=0,
                        delivered=0, delivered_direct=0, delivery_round=None,
                        ):
+        """
+        Updates the corresponding parameter values for a :param message: in the messages dictionary.
+        :param message: The tracked message which statistics are updated.
+        :type message: :class:`~message.Message`
+        :param sent: The amount it was sent.
+        :type sent: int
+        :param forwarded: The amount it was forwarded.
+        :type forwarded: int
+        :param delivered: The amount it was delivered.
+        :type delivered: int
+        :param delivered_direct: The amount it was delivered directly from sender to receiver.
+        :type delivered_direct: int
+        :param delivery_round: The round the message was delivered in.
+        :type delivery_round: int
+        """
         self.add_message(message)
         m_data = self.messages[message.key]
         if not delivery_round:
@@ -573,7 +613,14 @@ class CsvMessageData:
 
 
 class MessageData:
+    """
+    The tracking data for a message.
+    """
     def __init__(self, message: Message):
+        """
+        :param message:
+        :type message: :class:`~comms.Message`
+        """
         self.key = message.key
         self.seq_number = message.seq_number
         self.sender = message.original_sender.number
@@ -587,6 +634,21 @@ class MessageData:
         self.hop_count = None
 
     def update_metric(self, sent=0, forwarded=0, delivered=0, delivered_direct=0, delivery_round=None, hop_count=None):
+        """
+        Updates the statistics.
+        :param sent: The amount it was sent.
+        :type sent: int
+        :param forwarded: The amount it was forwarded.
+        :type forwarded: int
+        :param delivered: The amount it was delivered.
+        :type delivered: int
+        :param delivered_direct: The amount it was delivered directly from sender to receiver.
+        :type delivered_direct: int
+        :param delivery_round: The round the message was delivered in.
+        :type delivery_round: int
+        :param hop_count: The hop count of the message object.
+        :type hop_count: int
+        """
         self.sent += sent
         self.forwarded += forwarded
         self.delivered += delivered

@@ -8,10 +8,24 @@ class BufferStrategy(Enum):
 
 
 class MessageStore(deque):
+    """
+    A simple expansion of collections.deque that implements fifo and lifo strategies.
+    """
 
     def __init__(self, init=None, maxlen=None, strategy=BufferStrategy.fifo):
+        """
+        :param init: Initial deque.
+        :type init: Iterable
+        :param maxlen: Maximum length of the deque.
+        :type maxlen: int
+        :param strategy: Buffering strategy of the deque.
+        :type strategy: :class:`~messagestore.BufferStrategy` or string
+        """
         if type(strategy) == str:
-            self.strategy = BufferStrategy[strategy]
+            try:
+                self.strategy = BufferStrategy[strategy]
+            except ValueError:
+                self.strategy = BufferStrategy.fifo
         else:
             self.strategy = strategy
         if not init:

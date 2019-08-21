@@ -18,9 +18,28 @@ class MobilityModel:
 
     @staticmethod
     def get(particle):
+        """
+        Gets the MobilityModel instance of a :param particle:.
+        :param particle: The particle containing the MobilityModel.
+        :type particle: :class:`~particle.Particle`
+        :return: The mobility model of :param particle:.
+        :rtype: :class:`~mobility_model.MobilityModel`
+        """
         return getattr(particle, "mobility_model")
 
     def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=()):
+        """
+        :param start_x: Starting x coordinate of the model.
+        :type start_x: float
+        :param start_y: Starting y coordinate of the model.
+        :type start_y: float
+        :param mode: Mode of the model.
+        :type mode: :class:`~mobility_model.Mode`
+        :param length: Length of a walk if :param mode: is Random_Walk.
+        :type length: tuple
+        :param zone: Tuple or list of coordinates describing a zone to restrict the movement to.
+        :type zone: tuple or list
+        """
         if type(mode) == str:
             self.mode = Mode[mode]
         else:
@@ -47,12 +66,29 @@ class MobilityModel:
         self.current_dir = self.starting_dir
 
     def set(self, particle):
+        """
+        Sets the mobility_model attribute of :param particle:.
+        :param particle: The particle to modify.
+        :type particle: particle: :class:`~particle.Particle`
+        """
         setattr(particle, "mobility_model", self)
 
     def __return_direction(self):
+        """
+        Returns the return direction of a Back_And_Forth model.
+        :return: Return direction value.
+        :rtype: int
+        """
         return self.starting_dir - 3 if self.starting_dir > 2 else self.starting_dir + 3
     
     def next_direction(self, current_x_y=None):
+        """
+        Returns the next direction of the model.
+        :param current_x_y: Current x,y coordinate tuple
+        :type current_x_y:
+        :return: Next direction value.
+        :rtype: int
+        """
         if self.mode == Mode.Back_And_Forth:
             return self.__back_and_forth__()
         elif self.mode == Mode.Random_Walk:
@@ -67,10 +103,20 @@ class MobilityModel:
             return self.__zonal__(current_x_y)
 
     def __random__(self):
+        """
+        Returns the next random direction.
+        :return: Next direction
+        :rtype: int
+        """
         self.current_dir = MobilityModel.random_direction()
         return self.current_dir
 
     def __circle__(self):
+        """
+        Returns the next direction of the Circle model.
+        :return: Next direction
+        :rtype: int
+        """
         if self.steps < self.route_length:
             self.steps += 1
         else:
@@ -95,6 +141,11 @@ class MobilityModel:
         return self.current_dir
 
     def __random_walk__(self):
+        """
+        Returns the next direction of the Random_Walk model.
+        :return: Next direction
+        :rtype: int
+        """
         if self.steps < self.route_length:
             self.steps += 1
             return self.current_dir
@@ -104,6 +155,11 @@ class MobilityModel:
             return self.__random__()
 
     def __back_and_forth__(self):
+        """
+        Returns the next direction of the Back_And_Forth model.
+        :return: Next direction
+        :rtype: int
+        """
         if 0 < self.steps < self.route_length:
             self.steps += 1
             return self.starting_dir
@@ -118,6 +174,11 @@ class MobilityModel:
             return self.return_dir
 
     def __zonal__(self, current_x_y):
+        """
+        Returns the next direction of the Zonal model.
+        :return: Next direction
+        :rtype: int
+        """
         (x, y) = current_x_y
         # check if at min_x then head anywhere but west
         exceptions = []
@@ -137,5 +198,12 @@ class MobilityModel:
 
     @staticmethod
     def random_direction(exceptions=[Directions.S]):
+        """
+        Returns a random direction value excluding :param exceptions:.
+        :param exceptions: An iterable of exceptions.
+        :type exceptions: Iterable
+        :return: Random direction
+        :rtype: int
+        """
         dirs = directions_list(exceptions)
         return random.choice(dirs).value
