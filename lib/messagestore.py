@@ -43,7 +43,10 @@ class MessageStore(deque):
             if self.strategy == BufferStrategy.lifo:
                 k = list(self)[-1].key
                 super().pop()
-            self.keys.pop(k)
+            try:
+                self.keys.pop(k)
+            except KeyError:
+                pass
 
         super().append(m)
         if self.maxlen == len(self):
