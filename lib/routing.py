@@ -45,6 +45,16 @@ class SendEvent:
         for m in self.messages:
             send_message(self.store, self.sender, self.receiver, m)
 
+    def check_delay(self, current_round):
+        """
+        Checks whether the message is ready to be delivered.
+        :param current_round: Current simulator round
+        :type current_round: int.
+        :return: If message is ready to be delivered
+        :rtype: bool
+        """
+        return self.start_round + self.delay == current_round
+
 
 class RoutingParameters:
 
@@ -114,21 +124,18 @@ class RoutingParameters:
         if not self.send_events:
             return []
         send_events = self.send_events[0]
-        if type(send_events[0]) == list:
-            try:
-                if send_events[0][0].start_round + send_events[0][0].delay == current_round:
-                    self.send_events.pop(0)
-                    return send_events
-            except IndexError:
-                return []
-        else:
-            try:
-                if send_events[0].start_round + send_events[0].delay == current_round:
-                    self.send_events.pop(0)
-                    return send_events
-            except IndexError:
-                return []
-        return []
+        try:
+            if send_events[0][0].check_delay(current_round):
+                self.send_events.pop(0)
+                return send_events
+        except IndexError:
+            pass
+        try:
+            if send_events[1][0].check_delay(current_round):
+                self.send_events.pop(0)
+                return send_events
+        except IndexError:
+            return []
 
     def set(self, particle):
         setattr(particle, "routing_params", self)
@@ -159,48 +166,52 @@ class RoutingParameters:
         return rp1.manet_group == rp2.manet_group
 
 
-def next_step(particle, current_round, scan_radius=None):
+def next_step(particles, current_round, scan_radius=None):
     """
-    Executes the next step of the routing model.
-    :param particle: The particle which routing model should be executed.
-    :type particle: :class:`~particle.Particle`
+    Executest the next routing steps for each particle in order.
+    :param particles: List of particles
+    :type particles: list
     :param current_round: Current simulator round.
     :type current_round: int
-    :param scan_radius: The radius to scan by the :param particle:.
+    :param scan_radius: Particle scan radius.
     :type scan_radius: int
     """
-    routing_params = RoutingParameters.get(particle)
+    # execute the SendEvents for each particle
+    for particle in particles:
+        routing_params = RoutingParameters.get(particle)
 
-    if scan_radius is not None:
-        routing_params.scan_radius = scan_radius
+        __execute_send_events__(routing_params, current_round)
 
-    if routing_params.algorithm == Algorithm.Epidemic:
-        __next_step_epidemic__(particle, routing_params, current_round)
-    elif routing_params.algorithm == Algorithm.Epidemic_MANeT:
-        __next_step_epidemic_manet__(particle, routing_params, current_round)
+    # create new SendEvents for each particle
+
+    for particle in particles:
+        routing_params = RoutingParameters.get(particle)
+        if scan_radius is not None:
+            routing_params.scan_radius = scan_radius
+
+        if routing_params.algorithm == Algorithm.Epidemic_MANeT:
+            __create_send__events_manet__(particle, routing_params, current_round)
+        elif routing_params.algorithm == Algorithm.Epidemic:
+            __create_send_events__(particle, routing_params, current_round)
 
 
-def __next_step_epidemic__(particle, routing_params, current_round, nearby=None):
+def __execute_send_events__(routing_params, current_round):
     """
-    Executes the next step for Epidemic routing.
-    :param particle: The particle which routing model should be executed.
-    :type particle: :class:`~particle.Particle`
+    Gets the next step send events and executest them.
     :param routing_params: The routing parameters of :param particle:.
     :type routing_params: :class:`~routing.RoutingParameters`
     :param current_round: Current simulator round.
     :type current_round: int
     """
-    __create_send_events__(particle, routing_params, current_round, nearby)
     # check for messages to send
     send_events = routing_params.get_next_events(current_round)
     if send_events:
         for send_event in send_events:
-            if type(send_event) == list:
+            if isinstance(send_event, SendEvent):
+                send_event.fire_event()
+            else:
                 for event in send_event:
                     event.fire_event()
-            else:
-                send_event.fire_event()
-        routing_params.set(particle)
 
 
 def __create_send_events__(particle, routing_params, current_round, nearby=None):
@@ -221,19 +232,19 @@ def __create_send_events__(particle, routing_params, current_round, nearby=None)
     send_events = []
     fwd_events = []
     for neighbour in nearby:
-        if list(particle.send_store):
+        if len(particle.send_store):
             send_events.append(routing_params.create_event(list(particle.send_store),
                                                            current_round, particle.send_store, particle, neighbour))
         if list(particle.fwd_store):
             fwd_events.append(routing_params.create_event(list(particle.fwd_store),
                                                           current_round, particle.fwd_store, particle, neighbour))
-    routing_params.add_events([send_events, fwd_events])
-    routing_params.set(particle)
+    if len(send_events) > 0 or len(fwd_events) > 0:
+        routing_params.add_events([send_events, fwd_events])
 
 
-def __next_step_epidemic_manet__(particle, routing_params, current_round):
+def __create_send__events_manet__(particle, routing_params, current_round):
     """
-    Executes the next step for Epidemic MANeT routing.
+    Creates SendEvents for a :param particle: depending on MANeT role.
     :param particle: The particle which routing model should be executed.
     :type particle: :class:`~particle.Particle`
     :param routing_params: The routing parameters of :param particle:.
@@ -247,7 +258,7 @@ def __next_step_epidemic_manet__(particle, routing_params, current_round):
 
     if routing_params.manet_role == MANeTRole.Node:
         nearby = [neighbour for neighbour in nearby if RoutingParameters.same_manet_group(particle, neighbour)]
-        __next_step_epidemic__(particle, routing_params, current_round, nearby)
+        __create_send_events__(particle, routing_params, current_round, nearby)
 
     elif routing_params.manet_role == MANeTRole.Router:
-        __next_step_epidemic__(particle, routing_params, current_round)
+        __create_send_events__(particle, routing_params, current_round)

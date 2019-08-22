@@ -1,6 +1,8 @@
 from collections import deque
 from enum import Enum
 
+from lib.comms import Message
+
 
 class BufferStrategy(Enum):
     fifo = 0
@@ -21,6 +23,7 @@ class MessageStore(deque):
         :param strategy: Buffering strategy of the deque.
         :type strategy: :class:`~messagestore.BufferStrategy` or string
         """
+        self.keys = {}
         if type(strategy) == str:
             try:
                 self.strategy = BufferStrategy[strategy]
@@ -33,12 +36,36 @@ class MessageStore(deque):
         else:
             super().__init__(init, maxlen=maxlen)
 
-    def append(self, x):
+    def append(self, m: Message):
         # pop the right element if max len reached
-        if self.maxlen == len(self) and self.strategy == BufferStrategy.lifo:
-            super().pop()
+        if self.maxlen == len(self):
+            k = list(self)[0].key
+            if self.strategy == BufferStrategy.lifo:
+                k = list(self)[-1].key
+                super().pop()
+            self.keys.pop(k)
 
-        super().append(x)
+        super().append(m)
         if self.maxlen == len(self):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
+        self.__append_key__(m.key, self.index(m))
+
+    def remove(self, message):
+        try:
+            super().remove(message)
+            self.keys.pop(message.key)
+        except ValueError:
+            pass
+        except KeyError:
+            pass
+
+    def contains_key(self, key):
+        return key in self.keys
+
+    def get_by_key(self, key):
+        return list(self)[self.keys[key]]
+
+    def __append_key__(self, key, m_index):
+        if key not in self.keys:
+            self.keys[key] = m_index

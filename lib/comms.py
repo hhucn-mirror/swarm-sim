@@ -1,5 +1,5 @@
+import copy
 import random
-import uuid
 
 from lib.meta import EventType, NetworkEvent
 
@@ -44,6 +44,14 @@ class Message:
             sender.sim.event_queue.append(event)
         sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, start_round, self))
 
+    def __copy__(self):
+        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content)
+        new.key = self.key
+        new.seq_number = self.seq_number
+        new.hop_count = self.hop_count
+        Message.seq_number -= 1
+        return new
+
     def __create_msg_key(self):
         """
         :return: the builtin identity of message.
@@ -64,6 +72,11 @@ class Message:
         """
         self.sender = sender
 
+    def update_delivery(self, delivery_round):
+        if self.delivery_round == 0:
+            self.delivery_round = delivery_round
+        self.delivered += 1
+
 
 def send_message(msg_store, sender, receiver, message: Message):
     """
@@ -81,18 +94,22 @@ def send_message(msg_store, sender, receiver, message: Message):
 
     current_round = sender.sim.get_actual_round()
 
+    original = message
+    message = copy.copy(message)
+
     # remove from original store if ttl expired after this send
     if message.hop_count+1 == message.ttl:
-        ttl_expired(message, msg_store, sender, receiver, current_round)
-        return
+        ttl_expired(original, msg_store, sender, receiver, current_round)
 
     net_event = None
     if receiver.get_id() == message.receiver.get_id():
-        net_event = __deliver_message(msg_store, message, sender, receiver, current_round)
+        net_event = __deliver_message(message, sender, receiver, current_round)
+        # remove original upon delivery
+        msg_store.remove(original)
     else:
         # only forward if the receiver does not yet have the message
         store = receiver.fwd_store
-        if not has_message(store, message):
+        if not store.contains_key(message.key):
             ___store_message__(store, message, sender, receiver, current_round)
             net_event = NetworkEvent(EventType.MessageForwarded, sender, receiver, current_round, message)
 
@@ -138,12 +155,10 @@ def has_message(store, message: Message):
     return message in store
 
 
-def __deliver_message(original_store, message, sender, receiver, current_round):
+def __deliver_message(message, sender, receiver, current_round):
     """
-    Delivers :param message: from :param sender: to :param receiver: and deletes it from :param original_store:.
+    Delivers :param message: from :param sender: to :param receiver:.
     Also creates corresponding NetworkEvent in simulator EventQueue.
-    :param original_store: The MessageStore that contains :param message:
-    :type original_store: :class:`~messagestore.MessageStore`
     :param message: The message to send.
     :type message: :class:`~comms.Message`
     :param sender: The sender of :param message:.
@@ -158,22 +173,19 @@ def __deliver_message(original_store, message, sender, receiver, current_round):
     """
     store = receiver.rcv_store
 
+    message.update_delivery(current_round)
+
     if sender.get_id() == message.original_sender.get_id():
-        if not has_message(store, message):
+        if not store.contains_key(message.key):
             net_event = NetworkEvent(EventType.MessageDeliveredDirectUnique, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDeliveredDirect, sender, receiver, current_round, message)
     else:
-        if not has_message(store, message):
+        if not store.contains_key(message.key):
             net_event = NetworkEvent(EventType.MessageDeliveredUnique, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDelivered, sender, receiver, current_round, message)
     ___store_message__(store, message, sender, receiver, current_round)
-    # delete delivered message
-    try:
-        original_store.remove(message)
-    except ValueError:
-        pass
     return net_event
 
 

@@ -17,17 +17,18 @@ def solution(sim):
             m_model.set(particle)
             r_params = lib.routing.RoutingParameters(algorithm=sim.routing_algorithm,
                                                      scan_radius=sim.scan_radius,
-                                                     delivery_delay=2)
+                                                     delivery_delay=sim.delivery_delay)
             r_params.set(particle)
         # initially generate 5 message per particle
-        generate_random_messages(particles, amount=5, sim=sim)
+        generate_random_messages(particles, amount=2, sim=sim)
     else:
-        # generate 1 message per particle, every 10 rounds
-        if sim.get_actual_round() % 20 == 0:
-            generate_random_messages(particles, amount=1, sim=sim)
-            print("Current round: {}".format(sim.get_actual_round()))
+        # generate 1 message per particle, every 20 rounds
+        # if sim.get_actual_round() % 20 == 0:
+        #    generate_random_messages(particles, amount=1, sim=sim)
+        #    print("Current round: {}".format(sim.get_actual_round()))
         # move in every round starting from the second one
         for particle in particles:
             m_model = MobilityModel.get(particle)
             particle.move_to_in_bounds(m_model.next_direction())
-            lib.routing.next_step(particle, sim.get_actual_round())
+
+        lib.routing.next_step(particles, sim.get_actual_round())
