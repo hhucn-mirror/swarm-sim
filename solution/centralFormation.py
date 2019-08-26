@@ -195,8 +195,13 @@ def create_spantree(particle):
 
             dict = []
             for nb in nbs:
-                if nb not in queue and nb not in explored:
-                    dict.append(nb)
+                if node.check_on_marker():
+                    if nb not in queue and nb not in explored:
+                        dict.append(nb)
+                else:
+                    if nb not in queue and nb not in explored:
+                        if not nb.check_on_marker():
+                            dict.append(nb)
 
             queue = queue + dict
             new_graph.update({node: dict})
