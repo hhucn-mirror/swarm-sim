@@ -31,24 +31,28 @@ def solution(sim):
     if (sim.get_actual_round() % 2 == 1):
         # calculation for movement
         calc_placed_particles(sim)
-        particle = which_particle_to_move(sim)
+        particle = which_particle_to_move()
         create_graph(sim)
 
         if particle != None:
-            spantree = create_spantree(particle)
-            leafs = get_leafs(spantree)
-
-            for leaf in leafs:
-                if leaf not in placed_particles:
-                    path = find_shortest_path(graph, particle, leaf)
-                    for particle in path:
-                        particle.set_color(8)
-                    write_replace_directions(1, path)
-                    return
+            calc_move(particle)
     else:
         move_and_refresh(path)
         delete_structures()
         is_formed(sim)
+
+def calc_move(particle):
+    global path
+    spantree = create_spantree(particle)
+    leafs = get_leafs(spantree)
+
+    for leaf in leafs:
+        if leaf not in placed_particles:
+            path = find_shortest_path(spantree, particle, leaf)
+            for particle in path:
+                particle.set_color(8)
+            write_replace_directions(1, path)
+            return
 
 def initialize(sim):
 
@@ -159,7 +163,7 @@ def create_markersH(sim, pos):
 
 ###########################################
 
-def which_particle_to_move(sim):
+def which_particle_to_move():
     for particle in placed_particles:
         i = 0
         while i < 6:

@@ -12,9 +12,9 @@ screenshot_file_type = '.png'
 
 # control parameters
 zoom_enabled = True
-zoom_min = 4
+zoom_min = 8
 zoom_max = 128
-zoom_init = 16
+zoom_init = 45#16
 zoom_speed = 1 / 50
 
 translation_enabled = True

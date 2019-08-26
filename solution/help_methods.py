@@ -7,7 +7,6 @@ def init_particles(particleList):
 
 
 def init_particle(particle):
-    particle.write_memory_with("MaxID", particle.number)
     particle.write_memory_with("Leader", 0)
     particle.write_memory_with("Mark", 0)
     particle.write_memory_with("AnnounceNext", None)
