@@ -20,13 +20,3 @@ def scenario(sim):
                 sim.add_particle(coords[0], coords[1])
                 added = added+1
                 break
-
-    assign_new_numbers(list)
-
-def assign_new_numbers(particleList):
-    i = 0
-
-    random.shuffle(particleList)
-    while i < len(particleList):
-        particleList[i].__setattr__("number", i)
-        i = i+1
