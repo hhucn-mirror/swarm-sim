@@ -8,16 +8,14 @@ W = 4
 NW = 5
 
 def announce_next(particle):
-    if particle.read_memory_with("Leader") == 1:
-        if particle.read_memory_with("AnnounceNext") is None:
-
-            sw = particle.get_particle_in(SW)
-            se = particle.get_particle_in(SE)
-            if sw is not None and se is not None:
-                particle.write_memory_with("AnnounceNext", 1)
-            else:
-                particle.write_memory_with("AnnounceNext", 0)
-                hm.set_nbs_announceNext_to_false(particle)
+    if particle.read_memory_with("Leader") == 1 and particle.read_memory_with("AnnounceNext") is None:
+        sw = particle.get_particle_in(SW)
+        se = particle.get_particle_in(SE)
+        if sw is not None and se is not None:
+            particle.write_memory_with("AnnounceNext", 1)
+        else:
+            particle.write_memory_with("AnnounceNext", 0)
+            hm.set_nbs_announce_next_false(particle)
 
 def update_leaders(particle):
     if particle.read_memory_with("Leader") == 1:

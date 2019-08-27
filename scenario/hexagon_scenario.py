@@ -18,9 +18,6 @@ def scenario(sim):
 			positions.append(new_coords)
 			dir = dir + 1
 
-		x = current_pos[0]
-		y = current_pos[1]
-
 		try:
 			sim.get_particle_map_coords()[(current_pos[0]), current_pos[1]]
 		except KeyError:

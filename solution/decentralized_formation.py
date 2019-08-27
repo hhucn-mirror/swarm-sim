@@ -1,9 +1,9 @@
 import solution.leader as l
 import solution.help_methods as hm
-import solution.decentralizedHexagon3 as d_hex
-import solution.decentralizedSquare3 as d_squ
-import solution.decentralizedTriangle3 as d_tri
-import solution.decentralizedLine3 as d_line
+import solution.decentralized_hexagon as d_hex
+import solution.decentralized_square as d_squ
+import solution.decentralized_triangle as d_tri
+import solution.decentralized_line as d_line
 
 NE = 0
 E = 1
@@ -25,9 +25,7 @@ def solution(sim):
         l.elect(sim.get_particle_list())
         form = sim.config_data.formation
 
-    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 8:
-        new = hm.add_random_particle(sim)
-        hm.init_particle(new)
+    add_new_particle(sim)
 
     for particle in sim.get_particle_list():
         if sim.get_actual_round() % 7 == 1:
@@ -88,3 +86,8 @@ def announce_right_placed_to_leaders(particle):
         d_tri.announce_right_placed_to_leaders(particle)
     elif form == 4:
         d_line.announce_right_placed_to_leaders(particle)
+
+def add_new_particle(sim):
+    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 8:
+        new = hm.add_random_particle(sim)
+        hm.init_particle(new)

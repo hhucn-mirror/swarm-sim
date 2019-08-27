@@ -24,9 +24,7 @@ def solution(sim):
     if (sim.get_actual_round() == 1):
         initialize(sim)
 
-    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 3:
-        new = add_random_particle(sim)
-        new.write_memory_with("Dir", None)
+    add_new_particle(sim)
 
     if (sim.get_actual_round() % 2 == 1):
         # calculation for movement
@@ -55,98 +53,94 @@ def calc_move(particle):
             return
 
 def initialize(sim):
-
     global amount
     for particle in sim.get_particle_list():
         particle.write_memory_with("Dir", None)
         amount = amount + 1
 
-    centerParticle = leader.get_random_particle(sim.get_particle_list())
-    centerPos = centerParticle.coords
-
+    center_particle = leader.get_random_particle(sim.get_particle_list())
+    center_pos = center_particle.coords
     form = sim.config_data.formation
-
-
     if form == 1:
-        create_markersH(sim, centerPos)
+        create_markers_hexagon(sim, center_pos)
     elif form == 2:
-        create_markersS(sim, centerPos)
+        create_markers_square(sim, center_pos)
     elif form == 3:
-        create_markersT(sim, centerPos)
+        create_markers_triangle(sim, center_pos)
     elif form == 4:
-        create_markersL(sim, centerPos)
+        create_markers_line(sim, center_pos)
 
 # triangle formula
-def create_markersT(sim, pos):
+def create_markers_triangle(sim, pos):
     d = 0
-    markerCount = 0
-    particleCount = amount
-    startPos = [0, 0]
+    marker_count = 0
+    particle_count = amount
+    start_pos = [0, 0]
 
     while True:
         i = 0
-        startPos[0] = pos[0] - (0.5 * d)
-        startPos[1] = pos[1] - (1 * d)
+        start_pos[0] = pos[0] - (0.5 * d)
+        start_pos[1] = pos[1] - (1 * d)
 
         while i <= d:
-            x = startPos[0]+(1*i)
-            y = startPos[1]
-            if markerCount < particleCount:
+            x = start_pos[0]+(1*i)
+            y = start_pos[1]
+            if marker_count < particle_count:
                 sim.add_marker(x, y)
             else:
                 return
-            markerCount = markerCount + 1
+            marker_count = marker_count + 1
             i = i + 1
         d = d + 1
 
 # line formula
-def create_markersL(sim, pos):
-    markerCount = 0
-    particleCount = amount
+def create_markers_line(sim, pos):
+    marker_count = 0
+    particle_count = amount
 
-    while markerCount < particleCount:
-        x = pos[0] + (1*markerCount)
+    while marker_count < particle_count:
+        x = pos[0] + (1*marker_count)
         y = pos[1]
 
-        if markerCount < particleCount:
+        if marker_count < particle_count:
                 sim.add_marker(x, y)
-                markerCount = markerCount + 1
+                marker_count = marker_count + 1
 
 # square formula
-def create_markersS(sim, pos):
+def create_markers_square(sim, pos):
     n = math.ceil(math.sqrt(amount))
 
     d = 0
-    markerCount = 0
-    particleCount = amount
+    marker_count = 0
+    particle_count = amount
 
-    startPos = [0, 0]
+    start_pos = [0, 0]
 
     while True:
         i = 0
-        startPos[0] = pos[0] - (0.5 * d)
-        startPos[1] = pos[1] - (1 * d)
+        start_pos[0] = pos[0] - (0.5 * d)
+        start_pos[1] = pos[1] - (1 * d)
         while i < n:
-            x = startPos[0]+(1*i)
-            y = startPos[1]
-            if markerCount < particleCount:
+            x = start_pos[0]+(1*i)
+            y = start_pos[1]
+            if marker_count < particle_count:
                 sim.add_marker(x, y)
-                markerCount = markerCount + 1
+                marker_count = marker_count + 1
             else:
                 return
             i = i + 1
         d = d+1
 
 # hexagon formula
-def create_markersH(sim, pos):
-    markerCount = 0
-    particleCount = amount
+def create_markers_hexagon(sim, pos):
+    marker_count = 0
+    particle_count = amount
 
     positions = [pos]
 
     i = 0
 
-    while markerCount < particleCount:
+    while marker_count < particle_count:
         current_pos = positions[i]
 
         dir = 0
@@ -157,7 +151,7 @@ def create_markersH(sim, pos):
 
         if sim.get_marker_map_coords().get(current_pos) == None:
             sim.add_marker(current_pos[0], current_pos[1])
-            markerCount = markerCount + 1
+            marker_count = marker_count + 1
         i = i+1
 
 
@@ -191,26 +185,24 @@ def create_spantree(particle):
     while queue:
         node = queue.pop(0)
         if node not in explored:
-            nbs = graph[node]
-
-            dict = []
-            for nb in nbs:
-                if node.check_on_marker():
-                    if nb not in queue and nb not in explored:
-                        dict.append(nb)
-                else:
-                    if nb not in queue and nb not in explored:
-                        if not nb.check_on_marker():
-                            dict.append(nb)
-
+            dict = calc_way(node, queue, explored)
             queue = queue + dict
             new_graph.update({node: dict})
             explored.append(node)
-
     return new_graph
 
-def get_leafs(spantree):
+def calc_way(node, queue, explored):
+    dict = []
 
+    nbs = graph[node]
+    for nb in nbs:
+        if node.check_on_marker() and nb not in queue and nb not in explored:
+            dict.append(nb)
+        else:
+            if nb not in queue and nb not in explored and not nb.check_on_marker():
+                dict.append(nb)
+    return dict
+def get_leafs(spantree):
     leafs = []
 
     for key in spantree.keys():
@@ -278,3 +270,8 @@ def is_formed(sim):
         if not particle.check_on_marker():
             return
     sim.success_termination()
+
+def add_new_particle(sim):
+    if sim.config_data.dynamic == 1 and sim.get_actual_round() == 3:
+        new = add_random_particle(sim)
+        new.write_memory_with("Dir", None)

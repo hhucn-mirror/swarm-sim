@@ -1,8 +1,8 @@
 
 
 # initialize the memory of the particles
-def init_particles(particleList):
-    for particle in particleList:
+def init_particles(particle_list):
+    for particle in particle_list:
         init_particle(particle)
 
 
@@ -17,12 +17,12 @@ def init_particle(particle):
     particle.write_memory_with("UpdateState", None)
 
 
-def set_nbs_announceNext_to_false(particle):
+def set_nbs_announce_next_false(particle):
     nbs = particle.scan_for_particle_within(1)
     for nb in nbs:
         if nb.read_memory_with("Leader") == 1 and nb.read_memory_with("AnnounceNext") != 0:
             particle.write_to_with(nb,"AnnounceNext", 0)
-            set_nbs_announceNext_to_false(nb)
+            set_nbs_announce_next_false(nb)
 
 def neighbour_of_leader(particle):
     if particle.read_memory_with("Leader") == 0:

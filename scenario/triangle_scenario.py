@@ -7,16 +7,16 @@ def scenario(sim):
 	created = 0
 	amount = sim.config_data.p_amount
 
-	startPos = [0, 0]
+	start_pos = [0, 0]
 	pos = [0, 0]
 	while True:
 		i = 0
-		startPos[0] = pos[0] - (0.5 * d)
-		startPos[1] = pos[1] - (1 * d)
+		start_pos[0] = pos[0] - (0.5 * d)
+		start_pos[1] = pos[1] - (1 * d)
 
 		while i <= d:
-			x = startPos[0] + (1 * i)
-			y = startPos[1]
+			x = start_pos[0] + (1 * i)
+			y = start_pos[1]
 			if created < amount:
 				sim.add_particle(x, y)
 				print(sim.get_particle_map_coords()[0,0])
