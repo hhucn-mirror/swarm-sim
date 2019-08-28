@@ -56,7 +56,6 @@ class MobilityModel:
             self.min_y = start_y - length[1]
             self.max_x = start_x + length[1]
             self.max_y = start_y + length[1]
-        self.mode = mode
         self.steps = 0
         self.min_length = length[0]
         self.max_length = length[1]

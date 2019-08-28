@@ -6,8 +6,8 @@ class EventType(Enum):
     MessageDelivered = 1
     MessageDeliveredDirect = 2
     MessageForwarded = 3
-    MessageDeliveredUnique = 4
-    MessageDeliveredDirectUnique = 5
+    MessageDeliveredFirst = 4
+    MessageDeliveredFirstDirect = 5
     MessageTTLExpired = 6
     #
     ReceiverOutOfMem = 10

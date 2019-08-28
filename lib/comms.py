@@ -26,7 +26,7 @@ class Message:
         self.sender = sender
         self.receiver = receiver
         self.seq_number = Message.seq_number
-        self.key = self.__create_msg_key()
+        self.key = self.__create_msg_key__()
         self.delivered = 0
         self.start_round = start_round
         self.delivery_round = 0
@@ -52,7 +52,7 @@ class Message:
         Message.seq_number -= 1
         return new
 
-    def __create_msg_key(self):
+    def __create_msg_key__(self):
         """
         :return: the builtin identity of message.
         """
@@ -103,7 +103,7 @@ def send_message(msg_store, sender, receiver, message: Message):
 
     net_event = None
     if receiver.get_id() == message.receiver.get_id():
-        net_event = __deliver_message(message, sender, receiver, current_round)
+        net_event = __deliver_message__(message, sender, receiver, current_round)
         # remove original upon delivery
         msg_store.remove(original)
     else:
@@ -142,20 +142,7 @@ def ttl_expired(message, store, sender, receiver, current_round):
         sender.sim.event_queue.append(event)
 
 
-def has_message(store, message: Message):
-    """
-    Checks if message in store.
-    :param store: The store to be checked.
-    :type store: :class:`~messagestore.MessageStore`
-    :param message: The message to be checked.
-    :type message: :class:`~comms.Message`
-    :return: ? message in store
-    :rtype: bool
-    """
-    return message in store
-
-
-def __deliver_message(message, sender, receiver, current_round):
+def __deliver_message__(message, sender, receiver, current_round):
     """
     Delivers :param message: from :param sender: to :param receiver:.
     Also creates corresponding NetworkEvent in simulator EventQueue.
@@ -177,12 +164,12 @@ def __deliver_message(message, sender, receiver, current_round):
 
     if sender.get_id() == message.original_sender.get_id():
         if not store.contains_key(message.key):
-            net_event = NetworkEvent(EventType.MessageDeliveredDirectUnique, sender, receiver, current_round, message)
+            net_event = NetworkEvent(EventType.MessageDeliveredFirstDirect, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDeliveredDirect, sender, receiver, current_round, message)
     else:
         if not store.contains_key(message.key):
-            net_event = NetworkEvent(EventType.MessageDeliveredUnique, sender, receiver, current_round, message)
+            net_event = NetworkEvent(EventType.MessageDeliveredFirst, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDelivered, sender, receiver, current_round, message)
     ___store_message__(store, message, sender, receiver, current_round)

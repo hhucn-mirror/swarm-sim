@@ -523,20 +523,16 @@ class CsvMessageData:
     Collects sending, forwarding and delivery information for a dictionary of message objects in a csv.
     Contains :class:`~csv_generatore.MessageData` objects.
     """
-    def __init__(self, sim, solution, directory="outputs/"):
+    def __init__(self, solution, directory="outputs/"):
         """
-        :param sim: Simulator instance
-        :type sim: :class:`~sim.Sim`
         :param solution: The solution the simulator executes.
         :type solution: str
         :param directory: The directory for the csv to be put in.
         :type directory: str
         """
-        self.sim = sim
         self.solution = solution
         self.messages = {}
 
-        self.actual_round = sim.get_actual_round()
         self.directory = directory
         self.file_name = directory + '/messages.csv'
         self.csv_file = open(self.file_name, 'w', newline='')

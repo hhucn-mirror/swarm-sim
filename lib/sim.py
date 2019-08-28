@@ -119,7 +119,7 @@ class Sim:
                                                            seed=seed,
                                                            tiles_num=0, particle_num=0,
                                                            steps=0, directory=dir)
-        self.csv_msg_writer = csv_generator.CsvMessageData(self, solution=solution.rsplit('.', 1)[0], directory=dir)
+        self.csv_msg_writer = csv_generator.CsvMessageData(self, directory=dir)
         self.event_queue = deque()
 
         mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
@@ -664,7 +664,7 @@ class Sim:
                 net_event.sender.csv_particle_writer.write_particle(messages_sent=1)
                 # add to message data
                 self.csv_msg_writer.update_metrics(net_event.message, sent=1)
-            elif event_type == EventType.MessageDeliveredUnique:
+            elif event_type == EventType.MessageDeliveredFirst:
                 # update round metrics
                 self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_unique=1, messages_received=1)
                 # update particle metrics for both sender and receiver
@@ -673,7 +673,7 @@ class Sim:
                 # update message data
                 self.csv_msg_writer.update_metrics(net_event.message, delivered=1,
                                                    delivery_round=self.get_actual_round())
-            elif event_type == EventType.MessageDeliveredDirectUnique:
+            elif event_type == EventType.MessageDeliveredFirstDirect:
                 # update round metrics
                 self.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly_unique=1,
                                                      messages_received=1)

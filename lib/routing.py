@@ -55,6 +55,28 @@ class SendEvent:
         """
         return self.start_round + self.delay == current_round
 
+    @staticmethod
+    def create_event(messages, current_round, store, sender, receiver):
+        """
+        Creates NetworkEvents in the simulators EventQueue for each message to be send
+        :param messages: Iterable of messages.
+        :type messages: Iterable
+        :param current_round: Current round of the simulator.
+        :type current_round: int
+        :param store: The store the :param messages: originate from.
+        :type store: :class:`~messagestore.MessageStore`
+        :param sender: Sender of the messages.
+        :type sender: :class:`~particle.Particle`
+        :param receiver: Receiver of the messages
+        :type receiver: :class:`~particle.Particle`
+        :return: The SendEvent for the iterable of messages
+        :rtype: :class:`~routing.SendEvent`
+        """
+        delivery_delay = RoutingParameters.get(sender).delivery_delay
+        for message in messages:
+            sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, current_round, message))
+        return SendEvent(messages, current_round, delivery_delay, store, sender, receiver)
+
 
 class RoutingParameters:
 
@@ -72,10 +94,9 @@ class RoutingParameters:
         :type delivery_delay: int
         """
         if type(algorithm) == str:
-            self.mode = Algorithm[algorithm]
+            self.algorithm = Algorithm[algorithm]
         else:
             self.algorithm = algorithm
-        self.algorithm = algorithm
         self.manet_role = manet_role
         self.manet_group = manet_group
         if manet_role is None:
@@ -83,26 +104,6 @@ class RoutingParameters:
         self.scan_radius = scan_radius
         self.delivery_delay = delivery_delay
         self.send_events = []
-
-    def create_event(self, messages, current_round, store, sender, receiver):
-        """
-        Creates NetworkEvents in the simulators EventQueue for each message to be send
-        :param messages: Iterable of messages.
-        :type messages: Iterable
-        :param current_round: Current round of the simulator.
-        :type current_round: int
-        :param store: The store the :param messages: originate from.
-        :type store: :class:`~messagestore.MessageStore`
-        :param sender: Sender of the messages.
-        :type sender: :class:`~particle.Particle`
-        :param receiver: Receiver of the messages
-        :type receiver: :class:`~particle.Particle`
-        :return: The SendEvent for the iterable of messages
-        :rtype: :class:`~routing.SendEvent`
-        """
-        for message in messages:
-            sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, current_round, message))
-        return SendEvent(messages, current_round, self.delivery_delay, store, sender, receiver)
 
     def add_events(self, events):
         """
@@ -190,9 +191,9 @@ def next_step(particles, current_round, scan_radius=None):
             routing_params.scan_radius = scan_radius
 
         if routing_params.algorithm == Algorithm.Epidemic_MANeT:
-            __create_send__events_manet__(particle, routing_params, current_round)
+            __create_send_events_manet__(particle, current_round)
         elif routing_params.algorithm == Algorithm.Epidemic:
-            __create_send_events__(particle, routing_params, current_round)
+            __create_send_events__(particle, current_round)
 
 
 def __execute_send_events__(routing_params, current_round):
@@ -214,16 +215,15 @@ def __execute_send_events__(routing_params, current_round):
                     event.fire_event()
 
 
-def __create_send_events__(particle, routing_params, current_round, nearby=None):
+def __create_send_events__(particle, current_round, nearby=None):
     """
     Creates SendEvents for a :param particle:.
     :param particle: The particle which creates SendEvents.
     :type particle: :class:`~particle.Particle`
-    :param routing_params: The routing parameters of :param particle:.
-    :type routing_params: :class:`~routing.RoutingParameters`
     :param current_round: Current simulator round.
     :type current_round: int
     """
+    routing_params = RoutingParameters.get(particle)
     if nearby is None:
         nearby = particle.scan_for_particle_within(hop=routing_params.scan_radius)
         if nearby is None:
@@ -233,32 +233,31 @@ def __create_send_events__(particle, routing_params, current_round, nearby=None)
     fwd_events = []
     for neighbour in nearby:
         if len(particle.send_store):
-            send_events.append(routing_params.create_event(list(particle.send_store),
-                                                           current_round, particle.send_store, particle, neighbour))
+            send_events.append(SendEvent.create_event(list(particle.send_store),
+                                                      current_round, particle.send_store, particle, neighbour))
         if list(particle.fwd_store):
-            fwd_events.append(routing_params.create_event(list(particle.fwd_store),
-                                                          current_round, particle.fwd_store, particle, neighbour))
+            fwd_events.append(SendEvent.create_event(list(particle.fwd_store),
+                                                     current_round, particle.fwd_store, particle, neighbour))
     if len(send_events) > 0 or len(fwd_events) > 0:
         routing_params.add_events([send_events, fwd_events])
 
 
-def __create_send__events_manet__(particle, routing_params, current_round):
+def __create_send_events_manet__(particle, current_round):
     """
     Creates SendEvents for a :param particle: depending on MANeT role.
     :param particle: The particle which routing model should be executed.
     :type particle: :class:`~particle.Particle`
-    :param routing_params: The routing parameters of :param particle:.
-    :type routing_params: :class:`~routing.RoutingParameters`
     :param current_round: Current simulator round.
     :type current_round: int
     """
+    routing_params = RoutingParameters.get(particle)
     nearby = particle.scan_for_particle_within(hop=routing_params.scan_radius)
     if nearby is None:
         return
 
     if routing_params.manet_role == MANeTRole.Node:
         nearby = [neighbour for neighbour in nearby if RoutingParameters.same_manet_group(particle, neighbour)]
-        __create_send_events__(particle, routing_params, current_round, nearby)
+        __create_send_events__(particle, current_round, nearby)
 
     elif routing_params.manet_role == MANeTRole.Router:
-        __create_send_events__(particle, routing_params, current_round)
+        __create_send_events__(particle, current_round)
