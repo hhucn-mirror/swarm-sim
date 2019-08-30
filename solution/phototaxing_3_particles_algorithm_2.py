@@ -1,6 +1,7 @@
 import logging
 import random
-from lib.tile import blue
+from solution.utils import *
+from solution.goal_params import check_all_goal_params
 
 NE = 0
 E = 1
@@ -14,22 +15,25 @@ direction = [NE, E, SE, SW, W, NW]
 
 
 def solution(sim):
-    success_round = -1
+    check_all_goal_params(sim)
 
     for particle in sim.get_particle_list():
         # For every particle in every round, the light beams need to be retraced first
         delete_light_information(sim)
         init_full_light_propagation(sim)
 
+        param_lambda = sim.param_lambda
+        param_delta = sim.param_delta
+        if not sim.multiple:
+            param_lambda = 6
+            param_delta = -1
+
         # Scanning for the particles in the vicinity
         neighbor_list = particle.scan_for_particle_in(1)
         choices = []
         move_decr_edges = False
 
-        # Those are divisors that will be used in a later calculation
-        div_lambda = 5  # The divisor is multiplied with this if the move decreases edges
-        prob_divisor = 1
-        div_gamma = 5  # The divisor is multiplied with this if there is no light
+
 
         # This begins the location detection algorithm
         # If there is only one neighbor, the particle may proceed similarly to the 2-particle algorithm
@@ -75,11 +79,13 @@ def solution(sim):
                         newdir = nbsum/2
                         choices.append(int(newdir))
 
-        # This calculates the move probability according to the ASU algoritm
+        # The divisor is multiplied with this if the move decreases edges
+        prob_divisor = 1
+        # This calculates the move probability according to the ASU algorithm
         if move_decr_edges:
-            prob_divisor = div_lambda
+            prob_divisor = param_delta
         if particle.read_memory_with("light") is None:
-            prob_divisor = prob_divisor * div_gamma
+            prob_divisor = prob_divisor * param_lambda
         choice = random.choice((0, 1))
         can_move = True
 
@@ -89,115 +95,10 @@ def solution(sim):
         nb_tiles = particle.scan_for_tile_in(1)
         if nb_tiles is not None:
             for tile in nb_tiles:
-                if tile.read_memory_with("goal-tile") is not None:
-                    if success_round == -1:
-                        success_round = sim.get_actual_round()
-                        print("Success at: ", success_round)
-                        sim.success_termination()
-                elif len(choices)-1 >= choice and \
-                        determine_direction_from_coords(particle.coords, tile.coords) == choices[choice]:
+                if len(choices)-1 >= choice and \
+                    determine_direction_from_coords(particle.coords, tile.coords) == choices[choice]:
                     can_move = False
 
         if len(choices)-1 >= choice and can_move:
-            if random.randint(1, prob_divisor) == 1:
+            if random.randint(0, prob_divisor - 1) == 0:
                 particle.move_to(choices[choice])
-
-
-# Deletes all the light-entries in the particles to make a fresh start
-def delete_light_information(sim):
-    for particle in sim.get_particle_list():
-        if particle.read_memory_with("light") is not None:
-            particle.delete_memeory_with("light")
-
-
-# Initializes the light propagation. Checks each tile for the light-emission entry and starts the algorithm
-def init_full_light_propagation(sim):
-    for tile in sim.get_tiles_list():
-        dirval = tile.read_memory_with("light_emission")
-        if dirval is not None:
-            # print("SEARCHING: ", dirval)
-            light_propagation(sim, tile.coords[0], tile.coords[1], dirval)
-
-
-# Refer to light_emission_and_random_movement.py for documentation
-def light_propagation(sim, x, y, dirval):
-
-    if dirval == 0:
-        y = y+2
-    elif dirval == 1:
-        x = x + 0.5
-        y = y + 1
-    elif dirval == 2:
-        x = x + 1
-    elif dirval == 3:
-        x = x + 0.5
-        y = y + 1
-    elif dirval == 4:
-        y = y - 2
-    elif dirval == 5:
-        x = x - 0.5
-        y = y - 1
-    elif dirval == 6:
-        x = x + 1
-    elif dirval == 7:
-        x = x - 0.5
-        y = y + 1
-
-    coords = (x, y)
-
-    tile_dict = sim.get_tile_map_coords()
-    potential_tile = tile_dict.get(coords, None)
-
-    particle_dict = sim.get_particle_map_coords()
-    potential_particle = particle_dict.get(coords, None)
-
-    if x < 15:
-        if potential_tile is None and potential_particle is None:
-            light_propagation(sim, x, y, dirval)
-        elif potential_particle is not None:
-            # print("found")
-            potential_particle.write_memory_with("light", 1)
-
-
-# Refer to phototaxing_2_particles_algorithm.py for documentation
-def determine_direction_from_coords(coords_a, coords_b):
-    delta_x = coords_a[0] - coords_b[0]
-    delta_y = coords_a[1] - coords_b[1]
-
-    if delta_x == 0 and delta_y == 0:
-        return -1
-    elif delta_x == -0.5 and delta_y == -1:
-        return 0
-    elif delta_x == -1 and delta_y == 0:
-        return 1
-    elif delta_x == -0.5 and delta_y == 1:
-        return 2
-    elif delta_x == 0.5 and delta_y == 1:
-        return 3
-    elif delta_x == 1 and delta_y == 0:
-        return 4
-    elif delta_x == 0.5 and delta_y == -1:
-        return 5
-    else:
-        return -1
-
-
-# Refer to phototaxing_2_particles_algorithm.py for documentation
-def determine_coords_from_direction(coords, dirval):
-    coords_new = (coords[0], coords[1])
-    x = coords[0]
-    y = coords[1]
-
-    if dirval == 0:
-        coords_new = (x + 0.5, y + 1)
-    elif dirval == 1:
-        coords_new = (x+1, y)
-    elif dirval == 2:
-        coords_new = (x + 0.5, y - 1)
-    elif dirval == 3:
-        coords_new = (x - 0.5, y - 1)
-    elif dirval == 4:
-        coords_new = (x - 1, y)
-    elif dirval == 5:
-        coords_new = (x - 0.5, y + 1)
-    return coords_new

@@ -1,4 +1,4 @@
-from solution.particle_graph_2 import check_for_connectivity_in_merged_graphs, \
+from solution.particle_graph import check_for_connectivity_in_merged_graphs, \
     create_graph, run_search_with_exclusion
 from solution.utils import *
 from solution.goal_params import *
@@ -17,15 +17,17 @@ direction = [NE, E, SE, SW, W, NW]
 def solution(sim):
     # Checking if the goal has been reached
     check_all_goal_params(sim)
-    avg_coords = [0.0, 0.0]
-    for particle in sim.particles:
-        avg_coords[0] = avg_coords[0] + particle.coords[0]
-        avg_coords[1] = avg_coords[1] + particle.coords[1]
-    avg_coords[0] = avg_coords[0] / len(sim.particles)
-    avg_coords[1] = avg_coords[1] / len(sim.particles)
+    # avg_coords = [0.0, 0.0]
+    # for particle in sim.particles:
+    #     avg_coords[0] = avg_coords[0] + particle.coords[0]
+    #     avg_coords[1] = avg_coords[1] + particle.coords[1]
+    # avg_coords[0] = avg_coords[0] / len(sim.particles)
+    # avg_coords[1] = avg_coords[1] / len(sim.particles)
 
-    print("X: " + str(avg_coords[0]) + " - " + str(avg_coords[1]))
+    # print("X: " + str(avg_coords[0]) + " - " + str(avg_coords[1]))
 
+    if sim.get_actual_round() > 1000:
+        sim.success_termination()
 
     ##########
     for particle in sim.get_particle_list():
@@ -33,26 +35,28 @@ def solution(sim):
         # For every particle in every round, the light beams need to be retraced first
         delete_light_information(sim)
         init_full_light_propagation(sim)
-
-        neighbors = particle.scan_for_particle_in(1)
-        if len(neighbors) < 5:
-            dir_newpos = random.choice([0, 1, 2, 3, 4, 5])
-            if check_if_particle_occupies_pos(dir_newpos, particle) and check_if_tile_occupies_pos(dir_newpos, particle):
-                newpos = determine_coords_from_direction(particle.coords, dir_newpos)
-                neighbors_at_newpos = determine_neighbors_at_vacant_location(particle, dir_newpos)
-                triangles = len(neighbors)
-                triangles_newpos = len(neighbors_at_newpos)
-
-                properties_checked = check_properties(neighbors, neighbors_at_newpos, particle.coords, newpos)
-                q = random.uniform(0, 1)
-                equation = lmbd ** (triangles_newpos - triangles)
-                if properties_checked and q < equation:
-                    if particle.read_memory_with("light") is not None:
-                        particle.move_to(dir_newpos)
-                    elif random.choice([0, 1, 2, 4]) == 0:
-                        particle.move_to(dir_newpos)
+        if particle.read_memory_with("light") is not None:
+            phototaxing_asu(lmbd, particle)
+        elif random.choice([0, 1, 2, 4]) == 0:
+            phototaxing_asu(lmbd, particle)
 
 
+
+def phototaxing_asu(lmbd, particle):
+    neighbors = particle.scan_for_particle_in(1)
+    if len(neighbors) < 5:
+        dir_newpos = random.choice([0, 1, 2, 3, 4, 5])
+        if check_if_particle_occupies_pos(dir_newpos, particle) and check_if_tile_occupies_pos(dir_newpos, particle):
+            newpos = determine_coords_from_direction(particle.coords, dir_newpos)
+            neighbors_at_newpos = determine_neighbors_at_vacant_location(particle, dir_newpos)
+            triangles = len(neighbors)
+            triangles_newpos = len(neighbors_at_newpos)
+
+            properties_checked = check_properties(neighbors, neighbors_at_newpos, particle.coords, newpos)
+            q = random.uniform(0, 1)
+            equation = lmbd ** (triangles_newpos - triangles)
+            if properties_checked and q < equation:
+                particle.move_to(dir_newpos)
 
 
 def check_if_particle_occupies_pos(move_direction, particle):

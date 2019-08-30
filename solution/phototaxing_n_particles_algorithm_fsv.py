@@ -1,4 +1,4 @@
-from solution.particle_graph_2 import check_connectivity_after_move
+from solution.particle_graph import check_connectivity_after_move
 from solution.utils import *
 from solution.goal_params import *
 
@@ -27,7 +27,7 @@ def solution(sim):
         param_lambda = sim.param_lambda
         param_delta = sim.param_delta
         if not sim.multiple:
-            param_lambda = 6
+            param_lambda = 5
             param_delta = -1
 
         # Scanning for the particles in the vicinity
@@ -44,6 +44,7 @@ def solution(sim):
             can_move = False
 
         if can_move:
+            # Checks returns a boolean (is the graph locally connected) and the neighbor edges at the new location
             checks = check_connectivity_after_move(particle.coords, neighbor_list, move_direction)
             if checks[0]:
                 new_location_edges = checks[1]

@@ -2,6 +2,8 @@ from lib.tile import gray, blue, red, black
 
 
 def scenario(sim):
+    sim.add_location(0, 0)
+
     # This creates the initial tiles in the middle (y-axis)
     sim.add_tile(10, 20, color=gray)
     sim.add_tile(20, 0, color=blue)
@@ -26,7 +28,7 @@ def scenario(sim):
 
     # Now we add the particles
     radius = 3
-    sim.add_particle(0,0, color=red)
+    sim.add_particle(0, 0, color=red)
     displacement = - radius + 0.5
     iteration = 0
     for i in range(1, radius+1):

@@ -26,7 +26,7 @@ def scenario(sim):
 
     for tile in sim.tiles:
         if tile.color == [0.8, 0.0, 0.0]:
-            tile.write_memory_with("light_emission", 2)
+            tile.write_memory_with("light_emission", 1)
 
     radius = 3  # This value determines the radius of the particle hexagon that is to be created
     sim.add_particle(0, 0, color=red)

@@ -1,5 +1,7 @@
+from lib.tile import black, red
 
-
+#This method takes a two neighboring coordinates
+# and interpolates the direction from coordinate A to coordinate B
 def determine_direction_from_coords(coords_a, coords_b):
     delta_x = coords_a[0] - coords_b[0]
     delta_y = coords_a[1] - coords_b[1]
@@ -21,7 +23,8 @@ def determine_direction_from_coords(coords_a, coords_b):
     else:
         return -1
 
-
+# This method takes a coordinate and a direction
+# and returns the neighboring coordinate in that given direction
 def determine_coords_from_direction(coords, dirval):
     coords_new = (coords[0], coords[1])
     x = coords[0]
@@ -41,7 +44,7 @@ def determine_coords_from_direction(coords, dirval):
         coords_new = (x - 0.5, y + 1)
     return coords_new
 
-
+# This method compares two coordinates to see if they are identical
 def compare_coords(coords_a, coords_b):
     if len(coords_a) == 2 and len(coords_b) == 2:
         if coords_a[0] == coords_b[0] and coords_a[1] == coords_b[1]:
@@ -49,16 +52,17 @@ def compare_coords(coords_a, coords_b):
 
     return False
 
-
+# This method inverts a direction
 def inv_dir(dir):
     return (dir+3) % 6
 
 
-# Deletes all the light-entries in the particles to make a fresh start
+# Deletes all the light-entries in the particles' memory to make a fresh start
 def delete_light_information(sim):
     for particle in sim.get_particle_list():
         if particle.read_memory_with("light") is not None:
             particle.delete_memeory_with("light")
+            particle.set_color(black)
 
 
 # Initializes the light propagation. Checks each tile for the light-emission entry and starts the algorithm
@@ -70,28 +74,23 @@ def init_full_light_propagation(sim):
             light_propagation(sim, tile.coords[0], tile.coords[1], dirval)
 
 
-# Refer to light_emission_and_random_movement.py for documentation
+# This method propagates the light. It stops when it encounters a particle or a tile
 def light_propagation(sim, x, y, dirval):
-
     if dirval == 0:
-        y = y+2
+        x = x + 0.5
+        y = y + 1
     elif dirval == 1:
-        x = x + 0.5
-        y = y + 1
+        x = x + 1
     elif dirval == 2:
-        x = x + 1
-    elif dirval == 3:
         x = x + 0.5
-        y = y + 1
+        y = y + -1
+    elif dirval == 3:
+        x = x + -0.5
+        y = y + -1
     elif dirval == 4:
-        y = y - 2
+        x = x - 1
     elif dirval == 5:
-        x = x - 0.5
-        y = y - 1
-    elif dirval == 6:
-        x = x + 1
-    elif dirval == 7:
-        x = x - 0.5
+        x = x + -0.5
         y = y + 1
 
     coords = (x, y)
@@ -102,23 +101,19 @@ def light_propagation(sim, x, y, dirval):
     particle_dict = sim.get_particle_map_coords()
     potential_particle = particle_dict.get(coords, None)
 
-    if x < 35:
+    #This threshold can be expanded if the simulations becomes bigger
+    if -50 < x < 50 and -50 < y < 50:
         if potential_tile is None and potential_particle is None:
             light_propagation(sim, x, y, dirval)
         elif potential_particle is not None:
-            # print("found")
             potential_particle.write_memory_with("light", 1)
+            potential_particle.set_color(red)
 
-
+#This saves the goal states for the simulation
 class GoalStateSaver:
     first_particle_passed = False
     half_particles_passed = False
     all_particles_passed = False
 
-
-class SimulationParamsSaver:
-    hexagon_radius = 0
-    delta_light = 0
-    delta_edges = 0
 
 

@@ -1,7 +1,9 @@
 from .utils import compare_coords
 from .utils import determine_coords_from_direction
 
-
+# This method constructs a graph out of the neighbors of a particle
+# and makes connections whenever two particles are adjacent
+# It returns a list of the graph nodes
 def create_graph(neighbors):
     list_particle_nodes = []
     neighbors_nodes = []
@@ -21,7 +23,7 @@ def create_graph(neighbors):
                     node.make_connection(nb_dir, node2)
     return list_particle_nodes
 
-
+# This method checks whether the graph stays locally connected if a particle moves from coords in direction dir
 def check_connectivity_after_move(coords, neighbors, dir):
     list_particle_nodes = create_graph(neighbors)
     coords_empty_space = determine_coords_from_direction(coords, dir)
@@ -38,14 +40,14 @@ def check_connectivity_after_move(coords, neighbors, dir):
     checked = check_visited(list_particle_nodes)
     return [checked, len(dummy_node.list_connections)]
 
-
+# This method simply runs a DFS on the neighborhood graph
 def run_search_from(particle_node):
     if not particle_node.visited:
         particle_node.visited = True
         for conn in particle_node.list_connections:
             run_search_from(conn.particle_node)
 
-
+# This runs the search algorithm, while excluding a specific coordinate/particle
 def run_search_with_exclusion(particle_node, coords_to_exclude):
     particle = particle_node.particle
     if not particle_node.visited and particle is not None and not compare_coords(particle.coords, coords_to_exclude):
@@ -53,14 +55,15 @@ def run_search_with_exclusion(particle_node, coords_to_exclude):
         for conn in particle_node.list_connections:
             run_search_from(conn.particle_node)
 
-
+# This checks if all nodes of a graph have been visited
 def check_visited(list_particle_nodes):
     for node in list_particle_nodes:
         if not node.visited:
             return False
     return True
 
-
+# This takes two neighborhood graphs and merges them at the points where the particles connect
+# and then checks whether this merged graph is locally connected
 def check_for_connectivity_in_merged_graphs(nb_graph1, nb_graph2):
     nodes_graph1 = create_graph(nb_graph1)
     nodes_graph2 = create_graph(nb_graph2)
@@ -71,7 +74,7 @@ def check_for_connectivity_in_merged_graphs(nb_graph1, nb_graph2):
     run_search_from(nodes_graph1[0])
     return check_visited(nodes_graph1) and check_visited(nodes_graph2)
 
-
+# The particle node contains the particle as well as the connections that it makes to its neighbors
 class ParticleNode:
     particle = None
     list_connections = []
