@@ -2,6 +2,7 @@ from lib.comms import generate_random_messages
 from lib.mobility_model import MobilityModel, Mode
 import lib.routing
 import lib.particle
+from lib.point import Point
 
 
 scan_radius = 1
@@ -27,7 +28,8 @@ def solution(sim):
             particle_number += 1
 
         print("----------------")
-        sim.add_message_on(particles[0].get_id(), 3, "hallo")
+#        sim.memory.add_scheduled_message_on(particles[0].get_id(), 3, "hallo")
+        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(0, 0), 0, 1, 5)
         liste = sim.get_particle_map_id()
     else:
         if sim.get_actual_round() % 5 == 0:

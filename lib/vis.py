@@ -429,7 +429,7 @@ class VisWindow(pyglet.window.Window):
                 mod.solution(self.sim)
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
-                    self.sim.try_deliver_messages()
+                    self.sim.memory.try_deliver_messages(self.sim)
                     self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
                     self.sim.inc_round_cnter()  # increase simulation round counter by one.
             self.dispatch_events()
