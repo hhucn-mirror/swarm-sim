@@ -12,7 +12,7 @@ TODO: Erase Memory
 import logging, math
 from lib import csv_generator, matter
 from lib.directions import Directions
-from lib.messagestore import MessageStore
+from lib.messagestore import MessageStore, BufferStrategy
 
 black = 1
 gray = 2
@@ -32,7 +32,6 @@ SW = 3
 W = 4
 NW = 5
 
-message_store_size = 5
 
 read = 0
 write = 1
@@ -41,9 +40,10 @@ particle_counter=0
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1):
-        """Initializing the marker constructor"""
-        super().__init__( sim, (x, y), color, alpha, type="particle", mm_size=sim.config_data.particle_mm_size)
+    def __init__(self, sim, x, y, color=black, alpha=1, mm_size=0, ms_size=100,
+                 ms_strategy=BufferStrategy.fifo):
+        """Initializing the location constructor"""
+        super().__init__(sim, (x,y), color, alpha, type="particle", mm_size=mm_size)
         global particle_counter
         particle_counter+=1
         self.number=particle_counter
@@ -54,10 +54,10 @@ class Particle(matter.Matter):
         self.__isCarried = False
         self.steps = 0
         self.created = False
-        self.csv_particle_writer = csv_generator.CsvParticleData( self.get_id(), self.number)
-        self.send_store = MessageStore(maxlen=message_store_size)
-        self.fwd_store = MessageStore(maxlen=message_store_size)
-        self.rcv_store = MessageStore(maxlen=message_store_size)
+        self.csv_particle_writer = csv_generator.CsvParticleData(self.get_id(), self.number)
+        self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.fwd_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
 
     def coords_to_sim(self, coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)
@@ -127,6 +127,9 @@ class Particle(matter.Matter):
         :param dir: The direction must be either: E, SE, SW, W, NW, or NE
         :return: True: Success Moving;  False: Non moving
         """
+
+        if dir == 6:
+            return False
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         dir, dir_coord = self.check_within_border(dir, dir_coord)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
@@ -167,6 +170,9 @@ class Particle(matter.Matter):
             :param dir: The direction must be either: E, SE, SW, W, NW, or NE
             :return: True: Success Moving;  False: Non moving
         """
+        if dir == 6:
+            return False
+
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         sim_coord = self.coords_to_sim(dir_coord)
         if self.sim.get_sim_x_size() >=  abs(sim_coord[0]) and \

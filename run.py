@@ -6,7 +6,11 @@ import getopt
 import logging
 import os
 import sys
+from lib.messagestore import BufferStrategy
 from datetime import datetime
+from lib.mobility_model import Mode
+from lib.routing import Algorithm
+
 
 from lib import  sim
 
@@ -36,7 +40,18 @@ class ConfigData():
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
 #        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
+
+        self.scan_radius = 5
         self.dir_name = None
+        self.mm_limit = 0
+        self.mm_size = 0
+        self.ms_size = 100,
+        self.ms_strategy = BufferStrategy.fifo
+        self.delivery_delay = 2
+        self.routing_algorithm = Algorithm.Epidemic
+        self.mobility_model_mode = Mode.Random
+        self.message_ttl = 200
+        self.seed = 1
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
@@ -98,4 +113,3 @@ def swarm_sim( argv ):
 
 if __name__ == "__main__":
     swarm_sim(sys.argv[1:])
-
