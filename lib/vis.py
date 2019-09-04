@@ -1,10 +1,12 @@
-import datetime, math, os, time
+import datetime
+import importlib
+import math
+import os
+import time
+
+import pyglet.window.key as key
 from pyglet.gl import *
 from pyglet.window import mouse, Window
-import pyglet.window.key as key
-import importlib
-import subprocess
-import pandas as pd
 
 # screenshot manager parameters
 screenshot_directory = 'screenshots/'
@@ -60,7 +62,8 @@ class ScreenshotManager:
     #prefix = dt.isoformat(sep = '_', timespec = 'seconds').replace(':', '') + '_'
     prefix = dt.isoformat(sep='_').replace(':', '') + '_'
 
-    def takeScreenshot(self):
+    @staticmethod
+    def takeScreenshot():
         if not os.path.exists(screenshot_directory):
             os.makedirs(screenshot_directory)
 
@@ -101,10 +104,10 @@ class View:
 
     def update(self):
         halfZoomRec = 0.5 / self.zoom
-        self.left = self.focusPos[0] - halfZoomRec * self.width;
-        self.right = self.focusPos[0] + halfZoomRec * self.width;
-        self.bottom = self.focusPos[1] - halfZoomRec * self.height;
-        self.top = self.focusPos[1] + halfZoomRec * self.height;
+        self.left = self.focusPos[0] - halfZoomRec * self.width
+        self.right = self.focusPos[0] + halfZoomRec * self.width
+        self.bottom = self.focusPos[1] - halfZoomRec * self.height
+        self.top = self.focusPos[1] + halfZoomRec * self.height
 
 
 class VisWindow(Window):
