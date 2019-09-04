@@ -222,3 +222,6 @@ TSWLatexianTemp*
 
 # python compiled
 *.pyc
+
+# pycharm
+.idea/
