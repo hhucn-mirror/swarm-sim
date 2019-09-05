@@ -1,13 +1,13 @@
 def scenario(world):
 
-    # Ameisen
+    # Ants
     part_num = 0
     while part_num < 31:
         ant = world.add_particle(0, 0)
         setattr(ant, "list", [])
         part_num += 1
 
-    # Futter
+    # Food
     world.add_tile(6.0, 8.0)
     world.add_tile(-6.5, 7.0)
     world.add_tile(6.0, -8.0)

@@ -21,6 +21,11 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
+search_mode = 1
+track_follow_mode = 4
+home_mode = 7
+base = 1
+track = 4
 
 # Walk towards target coordinates
 def walk(target_co, particle):
@@ -172,7 +177,7 @@ def go_home(particle):
 
 # Decrease lifespan of a track
 def evaporation(marker):
-    if (marker.get_color() == 4):
+    if (marker.get_color() == track):
         marker.set_alpha(marker.get_alpha() - 0.01)
 
 
@@ -189,8 +194,8 @@ def food_stack(food, particle):
 # Give color of marker back, if it's a track
 def marker_color(world, particle):
     for marker in world.get_marker_list():
-        if (particle.coords == marker.coords and marker.get_color() == 4):
-            return 4
+        if (particle.coords == marker.coords and marker.get_color() == track):
+            return track
 
 # Particle respawn
 def respawn(world):
@@ -213,25 +218,26 @@ def solution(world):
             world.remove_marker(marker.get_id())
 
         # Get home coords
-        if (marker.get_color() == 1):
+        if (marker.get_color() == base):
             home = marker
 
     for particle in world.get_particle_list():
 
         life_span(particle)
+
         # Kill ant, when no life span
         if (particle.get_alpha() == 0):
             world.remove_particle(particle.get_id())
 
         # Search for food
-        if (particle.get_color() == 1):
+        if (particle.get_color() == search_mode):
             last_pos = particle.coords
             particle.move_to(random.choice(direction))
             way_home(last_pos, particle)
 
         # If found food, go in home-mode
         if (particle.check_on_tile() == True):
-            particle.set_color(7)
+            particle.set_color(home_mode)
 
             for food in world.get_tiles_list():
                 food_stack(food, particle)
@@ -240,8 +246,8 @@ def solution(world):
                     world.remove_tile_on(food.coords)
 
         # If in home-mode, go home and lay track
-        if (particle.get_color() == 7):
-            particle.create_marker(4)
+        if (particle.get_color() == home_mode):
+            particle.create_marker(track)
             if (particle.list != None):
                 go_home(particle)
             #walk(home_co, particle)
@@ -249,8 +255,8 @@ def solution(world):
             particle.set_alpha(1)
 
         # If found track, follow
-        if (marker_color(world, particle) == 4 and particle.get_color() != 7):
-            particle.set_color(4)
+        if (marker_color(world, particle) == track and particle.get_color() != home_mode):
+            particle.set_color(track_follow_mode)
             last_pos = particle.coords
             next_step = particle.scan_for_marker_within(1)
             follow(next_step, particle)
@@ -258,13 +264,13 @@ def solution(world):
 
         # If home, go back in search-mode
         if (particle.coords == home.coords):
-            particle.set_color(1)
+            particle.set_color(search_mode)
             # Reset way home list
             particle.list = []
 
         # If track die, go back in search-mode
-        if (particle.get_color() == 4 and particle.check_on_marker() == False):
-            particle.set_color(1)
+        if (particle.get_color() == track_follow_mode and particle.check_on_marker() == False):
+            particle.set_color(search_mode)
 
     # If all food is collected, success
     if (len(world.get_tiles_list()) == 0):
