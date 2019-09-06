@@ -18,6 +18,16 @@ def scenario(sim):
     scenario_file = open(sim.directory + '/random_{}.py'.format(particle_count), 'w', newline='\n')
     scenario_file.writelines(['from lib.colors import Colors\n', '\n\n', 'def scenario(sim):\n'])
 
+    # add borders
+    scenario_file.writelines(['    # add borders as tiles\n'])
+    for x in range(x_min - 2, x_max + 2):
+        for y in [y_min - 2, y_max + 2]:
+            sim.add_tile(x, y, Colors.red.value)
+            scenario_file.writelines(['    sim.add_tile({}, {}, Colors.red.value)\n'.format(x, y)])
+            if x != y:
+                sim.add_tile(y, x, Colors.blue.value)
+                scenario_file.writelines(['    sim.add_tile({}, {}, Colors.blue.value)\n'.format(x, y)])
+
     coords = []
     for _ in range(particle_count):
         x, y = random.randint(x_min, x_max), random.randrange(y_min, y_max, 2)
