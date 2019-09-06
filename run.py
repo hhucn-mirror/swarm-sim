@@ -41,17 +41,19 @@ class ConfigData():
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
 #        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
 
-        self.scan_radius = 5
-        self.dir_name = None
-        self.mm_limit = 0
-        self.mm_size = 0
-        self.ms_size = 100,
-        self.ms_strategy = BufferStrategy.fifo
-        self.delivery_delay = 2
-        self.routing_algorithm = Algorithm.Epidemic
-        self.mobility_model_mode = Mode.Random
-        self.message_ttl = 200
-        self.seed = 1
+        self.scan_radius = config.getint("Routing", "scan_radius")
+
+        self.dir_name = None #TODO
+        self.mm_limit = config.getint("Matter", "mm_limitation") #TODO
+        self.mm_size = config.getint("Matter", "particle_mm_size") #TODO
+        self.seed = config.getint("Simulator", "seedvalue") #TODO
+
+        self.ms_size = config.getint("Routing", "ms_size")
+        self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
+        self.delivery_delay = config.getint("Routing", "delivery_delay")
+        self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
+        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
+        self.message_ttl = config.getint("Routing", "message_ttl")
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than

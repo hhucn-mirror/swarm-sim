@@ -146,7 +146,7 @@ class Sim:
         for particle in self.init_particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
-        generate_gnuplot(self.directory)
+#        generate_gnuplot(self.directory)
         return
 
     def success_termination(self):

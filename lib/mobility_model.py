@@ -5,12 +5,12 @@ from lib.directions import Directions, directions_list
 
 
 class Mode(Enum):
-    Random_Walk = 0,
-    Back_And_Forth = 1,
-    Circle = 2,
-    Random = 3,
-    Static = 4,
-    Zonal = 5,
+    Random_Walk = 0
+    Back_And_Forth = 1
+    Circle = 2
+    Random = 3
+    Static = 4
+    Zonal = 5
     Random_Mode = 6
 
 

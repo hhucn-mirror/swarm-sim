@@ -5,12 +5,12 @@ from lib.meta import NetworkEvent, EventType
 
 
 class Algorithm(Enum):
-    Epidemic = 0,
+    Epidemic = 0
     Epidemic_MANeT = 1
 
 
 class MANeTRole(Enum):
-    Router = 0,
+    Router = 0
     Node = 1
 
 

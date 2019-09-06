@@ -24,6 +24,7 @@ As the starting round for all six messages is 1, we can for example expect messa
 """
 
 
+
 class DeliveryAssertions:
     def __init__(self, message, delivery_round, hop_count):
         self.message = message
