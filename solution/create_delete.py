@@ -3,8 +3,11 @@ This solution is an example for creating and deleting, particles, tiles or marke
 """
 #Standard Lib that has to be in each solution
 from lib.std_lib import *
+from lib.oppnet import opp_solution
+
 
 def solution(sim):
+
     if sim.get_actual_round() == 1:
         for particle in sim.get_particle_list():
             print("Sim started")
@@ -41,3 +44,5 @@ def solution(sim):
     if sim.get_actual_round() == 15:
         sim.get_particle_list()[0].delete_particle()
         sim.get_particle_list()[0].delete_marker()
+
+    opp_solution.process_event_queue(sim)

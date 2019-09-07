@@ -6,10 +6,10 @@ import getopt
 import logging
 import os
 import sys
-from lib.messagestore import BufferStrategy
+from lib.oppnet.messagestore import BufferStrategy
 from datetime import datetime
-from lib.mobility_model import Mode
-from lib.routing import Algorithm
+from lib.oppnet.mobility_model import Mode
+from lib.oppnet.routing import Algorithm
 
 
 from lib import  sim
@@ -30,6 +30,16 @@ class ConfigData():
             self.solution = config.get("File", "solution")
         except (configparser.NoOptionError) as noe:
             self.solution = "solution.py"
+        try:
+            self.csv_generator_path = config.get("File", "csv_generator")
+        except configparser.NoOptionError as noe:
+            self.csv_generator_path = "lib.csv_generator.py"
+
+        try:
+            self.particle_path = config.get("File", "particle")
+        except configparser.NoOptionError as noe:
+            self.particle_path = "lib.particle.py"
+
         self.size_x = config.getfloat("Simulator", "size_x")
         self.size_y = config.getfloat("Simulator", "size_y")
         self.window_size_x = config.getint("Simulator", "window_size_x")

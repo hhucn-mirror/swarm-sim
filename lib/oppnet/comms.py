@@ -2,7 +2,9 @@ import copy
 import random
 
 
-from lib.meta import EventType, NetworkEvent
+from lib.oppnet.meta import EventType, NetworkEvent
+from lib.oppnet.opp_solution import event_queue
+
 
 class Message:
 
@@ -41,8 +43,7 @@ class Message:
             sender.send_store.append(self)
         except OverflowError:
             event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, start_round, self)
-            sender.sim.event_queue.append(event)
-        sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, start_round, self))
+            event_queue.append(event)
 
     def __copy__(self):
         new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content)
@@ -115,7 +116,7 @@ def send_message(msg_store, sender, receiver, message: Message):
 
     # put the corresponding event into the simulator event queue
     if net_event:
-        sender.sim.event_queue.append(net_event)
+        event_queue.append(net_event)
 
 
 def ttl_expired(message, store, sender, receiver, current_round):
@@ -139,7 +140,7 @@ def ttl_expired(message, store, sender, receiver, current_round):
         pass
     finally:
         event = NetworkEvent(EventType.MessageTTLExpired, sender, receiver, current_round, message)
-        sender.sim.event_queue.append(event)
+        event_queue.append(event)
 
 
 def __deliver_message__(message, sender, receiver, current_round):
@@ -196,7 +197,7 @@ def ___store_message__(store, message, sender, receiver, current_round):
         store.append(message)
     except OverflowError:
         event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, current_round, message)
-        sender.sim.event_queue.append(event)
+        event_queue.append(event)
 
 
 def generate_random_messages(particle_list, amount, sim, ttl_range=None):

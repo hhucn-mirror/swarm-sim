@@ -1,6 +1,6 @@
-from lib.comms import generate_random_messages
-from lib.mobility_model import MobilityModel
-import lib.routing
+from lib.oppnet.comms import generate_random_messages
+from lib.oppnet.mobility_model import MobilityModel
+import lib.oppnet.routing
 
 
 message_amount = 50
@@ -15,9 +15,9 @@ def solution(sim):
         for particle in particles:
             m_model = MobilityModel(particle.coords[0], particle.coords[1], sim.mobility_model_mode)
             m_model.set(particle)
-            r_params = lib.routing.RoutingParameters(algorithm=sim.routing_algorithm,
-                                                     scan_radius=sim.scan_radius,
-                                                     delivery_delay=sim.delivery_delay)
+            r_params = lib.oppnet.routing.RoutingParameters(algorithm=sim.routing_algorithm,
+                                                            scan_radius=sim.scan_radius,
+                                                            delivery_delay=sim.delivery_delay)
             r_params.set(particle)
         # initially generate 5 message per particle
         generate_random_messages(particles, amount=2, sim=sim)
@@ -31,4 +31,4 @@ def solution(sim):
             m_model = MobilityModel.get(particle)
             particle.move_to_in_bounds(m_model.next_direction())
 
-        lib.routing.next_step(particles, sim.get_actual_round())
+        lib.oppnet.routing.next_step(particles, sim.get_actual_round())

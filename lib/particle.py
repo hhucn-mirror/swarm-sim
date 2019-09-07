@@ -11,8 +11,7 @@ TODO: Erase Memory
 
 import logging, math
 from lib import csv_generator, matter
-from lib.directions import Directions
-from lib.messagestore import MessageStore, BufferStrategy
+from lib.oppnet.messagestore import MessageStore, BufferStrategy
 
 black = 1
 gray = 2
@@ -40,13 +39,12 @@ particle_counter=0
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, mm_size=0, ms_size=100,
-                 ms_strategy=BufferStrategy.fifo):
+    def __init__(self, sim, x, y, color=black, alpha=1, mm_size=0):
         """Initializing the location constructor"""
-        super().__init__(sim, (x,y), color, alpha, type="particle", mm_size=mm_size)
+        super().__init__(sim, (x, y), color, alpha, type="particle", mm_size=mm_size)
         global particle_counter
-        particle_counter+=1
-        self.number=particle_counter
+        particle_counter += 1
+        self.number = particle_counter
         self.__isCarried = False
         self.created = False
         self.carried_tile = None
@@ -55,9 +53,7 @@ class Particle(matter.Matter):
         self.steps = 0
         self.created = False
         self.csv_particle_writer = csv_generator.CsvParticleData(self.get_id(), self.number)
-        self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
-        self.fwd_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
-        self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+
 
     def coords_to_sim(self, coords):
         return coords[0], coords[1] * math.sqrt(3 / 4)

@@ -1,7 +1,8 @@
 from enum import Enum
 
-from lib.comms import send_message
-from lib.meta import NetworkEvent, EventType
+from lib.oppnet.comms import send_message
+from lib.oppnet.meta import NetworkEvent, EventType
+from lib.oppnet.opp_solution import event_queue
 
 
 class Algorithm(Enum):
@@ -74,7 +75,7 @@ class SendEvent:
         """
         delivery_delay = RoutingParameters.get(sender).delivery_delay
         for message in messages:
-            sender.sim.event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, current_round, message))
+            event_queue.append(NetworkEvent(EventType.MessageSent, sender, receiver, current_round, message))
         return SendEvent(messages, current_round, delivery_delay, store, sender, receiver)
 
 

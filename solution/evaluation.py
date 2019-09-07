@@ -1,6 +1,9 @@
-from lib.comms import generate_random_messages, Message
-from lib.mobility_model import MobilityModel
-import lib.routing
+from lib.oppnet.comms import Message
+from lib.oppnet.mobility_model import MobilityModel
+import lib.oppnet.routing
+from lib.oppnet import opp_solution
+
+
 
 """
 Made for scenario:
@@ -37,7 +40,6 @@ class DeliveryAssertions:
 
 
 def solution(sim):
-
     particles = sim.get_particle_list()
     global delivery_assertions
 
@@ -46,9 +48,9 @@ def solution(sim):
         for particle in particles:
             m_model = MobilityModel(particle.coords[0], particle.coords[1], sim.mobility_model_mode)
             m_model.set(particle)
-            r_params = lib.routing.RoutingParameters(algorithm=sim.routing_algorithm,
-                                                     scan_radius=sim.scan_radius,
-                                                     delivery_delay=sim.delivery_delay)
+            r_params = lib.oppnet.routing.RoutingParameters(algorithm=sim.routing_algorithm,
+                                                            scan_radius=sim.scan_radius,
+                                                            delivery_delay=sim.delivery_delay)
             r_params.set(particle)
 
         # expected hop count 1
@@ -88,7 +90,7 @@ def solution(sim):
         m_model = MobilityModel.get(particle)
         particle.move_to_in_bounds(m_model.next_direction())
 
-    lib.routing.next_step(particles, sim.get_actual_round())
+    lib.oppnet.routing.next_step(particles, sim.get_actual_round())
 
     # check the assertions
     if sim.get_actual_round() == sim.get_max_round():
@@ -101,3 +103,5 @@ def solution(sim):
                 print("Assertion for message {} failed".format(m.seq_number))
             except KeyError:
                 print("Message {} not delivered".format(m.seq_number))
+
+    opp_solution.process_event_queue(sim)
