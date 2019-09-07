@@ -172,7 +172,6 @@ def follow(next_step, particle):
 
 # Go home the way you came
 def go_home(particle):
-    if (particle.list != None):
         particle.move_to(particle.list[-1])
         del (particle.list[-1])
 
@@ -184,7 +183,7 @@ def evaporation(marker):
 
 # Decrease particle lifespan
 def life_span(particle):
-    particle.set_alpha(particle.get_alpha() - 0.01)
+    particle.set_alpha(particle.get_alpha() - 0.005)
 
 
 # Decrease stack of food
