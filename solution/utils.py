@@ -46,8 +46,7 @@ def determine_coords_from_direction(coords, dirval):
 
 # This method compares two coordinates to see if they are identical
 def compare_coords(coords_a, coords_b):
-    if len(coords_a) == 2 and len(coords_b) == 2:
-        if coords_a[0] == coords_b[0] and coords_a[1] == coords_b[1]:
+    if len(coords_a) == 2 and len(coords_b) == 2 and coords_a[0] == coords_b[0] and coords_a[1] == coords_b[1]:
             return True
 
     return False
@@ -108,12 +107,6 @@ def light_propagation(sim, x, y, dirval):
         elif potential_particle is not None:
             potential_particle.write_memory_with("light", 1)
             potential_particle.set_color(red)
-
-#This saves the goal states for the simulation
-class GoalStateSaver:
-    first_particle_passed = False
-    half_particles_passed = False
-    all_particles_passed = False
 
 
 

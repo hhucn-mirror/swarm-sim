@@ -17,44 +17,32 @@ direction = [NE, E, SE, SW, W, NW]
 def solution(sim):
     # Checking if the goal has been reached
     check_all_goal_params(sim)
-    # avg_coords = [0.0, 0.0]
-    # for particle in sim.particles:
-    #     avg_coords[0] = avg_coords[0] + particle.coords[0]
-    #     avg_coords[1] = avg_coords[1] + particle.coords[1]
-    # avg_coords[0] = avg_coords[0] / len(sim.particles)
-    # avg_coords[1] = avg_coords[1] / len(sim.particles)
 
-    # print("X: " + str(avg_coords[0]) + " - " + str(avg_coords[1]))
-
-    if sim.get_actual_round() > 1000:
-        sim.success_termination()
-
-    ##########
     for particle in sim.get_particle_list():
-        lmbd = 4
+        # The ASU/GT paper uses these values
+        param_lambda = 4
+        param_delta = 4
+
         # For every particle in every round, the light beams need to be retraced first
         delete_light_information(sim)
         init_full_light_propagation(sim)
-        if particle.read_memory_with("light") is not None:
-            phototaxing_asu(lmbd, particle)
-        elif random.choice([0, 1, 2, 4]) == 0:
-            phototaxing_asu(lmbd, particle)
+        if particle.read_memory_with("light") is not None or random.randint(0, param_lambda - 1) == 0:
+            compression_asugt(param_delta, particle)
 
 
-
-def phototaxing_asu(lmbd, particle):
+# This is the compression algorithm from the ASU/GT paper
+def compression_asugt(param_delta, particle):
     neighbors = particle.scan_for_particle_in(1)
     if len(neighbors) < 5:
         dir_newpos = random.choice([0, 1, 2, 3, 4, 5])
         if check_if_particle_occupies_pos(dir_newpos, particle) and check_if_tile_occupies_pos(dir_newpos, particle):
             newpos = determine_coords_from_direction(particle.coords, dir_newpos)
             neighbors_at_newpos = determine_neighbors_at_vacant_location(particle, dir_newpos)
-            triangles = len(neighbors)
-            triangles_newpos = len(neighbors_at_newpos)
-
+            old_pos_edges = len(neighbors)
+            new_pos_edges = len(neighbors_at_newpos)
             properties_checked = check_properties(neighbors, neighbors_at_newpos, particle.coords, newpos)
             q = random.uniform(0, 1)
-            equation = lmbd ** (triangles_newpos - triangles)
+            equation = param_delta ** (new_pos_edges - old_pos_edges)
             if properties_checked and q < equation:
                 particle.move_to(dir_newpos)
 
@@ -89,20 +77,7 @@ def determine_neighbors_at_vacant_location(particle, dir):
     return neighbors
 
 
-def determine_choice_from_vacant_positions(immediate_neighbors, particle):
-    possible_choices = []
-    for dir in range(0, 6):
-        coords = determine_coords_from_direction(particle.coords, dir)
-        found = False
-        for nb in immediate_neighbors:
-            if compare_coords(coords, nb.coords):
-                found = True
-        if not found:
-            possible_choices.append(dir)
-    dir_l2 = random.choice(possible_choices)
-    return dir_l2
-
-
+# The compression algorithm has to check two properties (outlined in the compression paper)
 def check_properties(particle_neighbors, location_neighbors, particle_coords, location_coords):
     common_list = []
     for nb1 in particle_neighbors:

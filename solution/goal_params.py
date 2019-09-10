@@ -1,22 +1,24 @@
-from solution.utils import GoalStateSaver
 import random
-# Could theoretically fit in the solution file itself, but order-wise it makes sense to put this here!
 
 
 def check_all_goal_params(sim):
+    # This value measures the distance from (0,0) to the finishing line
     distance = 12
+    # This checks if the first particle has touched the finishing line
     if not GoalStateSaver.first_particle_passed:
         GoalStateSaver.first_particle_passed = goal_first_particle_passed(sim.particles, distance)
         if GoalStateSaver.first_particle_passed:
             sim.csv_round_writer.update_goals(0, sim.get_actual_round())
             print("FIRST PASSED at ", sim.get_actual_round())
 
+    # This checks if half of the particles have crossed the finishing line
     if not GoalStateSaver.half_particles_passed:
         GoalStateSaver.half_particles_passed = goal_half_particles_passed(sim.particles, distance)
         if GoalStateSaver.half_particles_passed:
             sim.csv_round_writer.update_goals(1, sim.get_actual_round())
             print("HALF PASSED at ", sim.get_actual_round())
 
+    # This checks if all of the particles have crossed the finishing line
     if goal_all_particles_passed(sim.particles, distance):
         GoalStateSaver.all_particles_passed = True
         sim.csv_round_writer.update_goals(2, sim.get_actual_round())
@@ -57,3 +59,9 @@ def goal_half_particles_passed(particles_list, distance):
         return True
     return False
 
+
+# This saves the goal states for the simulation statically
+class GoalStateSaver:
+    first_particle_passed = False
+    half_particles_passed = False
+    all_particles_passed = False

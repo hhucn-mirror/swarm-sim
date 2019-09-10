@@ -28,7 +28,7 @@ def scenario(sim):
     # 2 = East
     for tile in sim.tiles:
         if tile.get_color() == red:
-            tile.write_memory_with("light_emission", 2)
+            tile.write_memory_with("light_emission", 1)
 
     # Now we add the particles
     sim.add_particle(0, 0)

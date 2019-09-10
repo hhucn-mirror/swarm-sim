@@ -25,12 +25,10 @@ def scenario(sim):
 
     for tile in sim.tiles:
         if tile.color == [0.8, 0.0, 0.0]:
-            tile.write_memory_with("light_emission", 2)
-        elif tile.color == [0.0, 0.0, 0.8]:
-            tile.write_memory_with("goal-tile", 1)
+            tile.write_memory_with("light_emission", 1)
 
     # Now we add the particles
-    sim.add_particle(0, 0, color=red)
-    sim.add_particle(-1, 0, color=blue)
-    sim.add_particle(-2, 0, color=black)
+    sim.add_particle(0, 0)
+    sim.add_particle(-1, 0)
+    sim.add_particle(-2, 0)
     sim.add_location(0, 0)
