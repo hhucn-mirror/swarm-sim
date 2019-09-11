@@ -227,6 +227,8 @@ def __create_send_events__(particle, current_round, nearby=None):
     routing_params = RoutingParameters.get(particle)
     if nearby is None:
         nearby = particle.scan_for_particle_within(hop=routing_params.scan_radius)
+        if len(nearby) != 2:
+            print("bla")
         if nearby is None:
             return
 
