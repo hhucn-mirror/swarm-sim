@@ -1,7 +1,6 @@
 import copy
 import random
 
-
 from lib.oppnet.meta import EventType, NetworkEvent
 from lib.oppnet.opp_solution import event_queue
 
@@ -213,7 +212,9 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     :type sim: :class:`~sim.Sim`
     :param ttl_range: Min and max value for the TTL value to be randomly drawn from for each message.
     :type ttl_range: tuple
+    :return: list of generated messages
     """
+    messages = []
     if ttl_range is not None:
         if ttl_range is not tuple:
             ttl_range = (1, round(sim.get_max_round()/10))
@@ -222,5 +223,6 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     for sender in particle_list:
         for _ in range(0, amount):
             receiver = random.choice([particle for particle in particle_list if particle != sender])
-            Message(sender, receiver, start_round=sim.get_actual_round(),
-                    ttl=random.randint(ttl_range[0], ttl_range[1]))
+            messages.append(Message(sender, receiver, start_round=sim.get_actual_round(),
+                                    ttl=random.randint(ttl_range[0], ttl_range[1])))
+    return messages
