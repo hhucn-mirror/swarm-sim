@@ -7,14 +7,18 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 
 import importlib
-import random
-import math
 import logging
+import math
+import random
 
 from lib import tile, marker, vis
 
-x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
-y_offset = [1, 0, -1, -1, 0, 1, 0]
+# TODO: Why was this changed? Results in particles not being able to move straight east/west on a line
+# x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
+# y_offset = [1, 0, -1, -1, 0, 1, 0]
+# old offsets
+x_offset = [1, 0.5, -0.5, -1, -0.5, 0.5, 0]
+y_offset = [0, -1, -1, 0, 1, 1, 0]
 
 NE = 0
 E = 1
