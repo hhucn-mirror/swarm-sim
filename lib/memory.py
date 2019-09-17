@@ -46,6 +46,8 @@ class Memory:
             print("wrong mode")
 
     def try_deliver_delta_messages(self,sim):
+        actual_round = sim.get_actual_round()
+        print(actual_round)
         new_memory = {}
         for target in self.memory.keys():
             new_msgs = []
@@ -55,13 +57,13 @@ class Memory:
                 start_round = m[2]
                 delta = m[3]
                 expirerate = m[4]
-                past_rounds = sim.get_actual_round() - start_round
+                past_rounds = actual_round - start_round
                 distance = delta * past_rounds
                 x = abs(position.getx()-sim.get_particle_map_id()[target].coords[0])
                 y = abs(position.gety()-sim.get_particle_map_id()[target].coords[1])
                 distance_start_target = math.sqrt(x**2 + y**2)
                 if distance < expirerate:
-                    if distance <= distance_start_target:
+                    if distance >= distance_start_target:
                         sim.get_particle_map_id()[target].write_memory(msg)
                     else:
                         new_msgs.append(m)
