@@ -36,6 +36,9 @@ class MessageStore(deque):
         else:
             super().__init__(init, maxlen=maxlen)
 
+    def __len__(self):
+        return super().__len__()
+
     def append(self, m: Message):
         # pop the right element if max len reached
         if self.maxlen == len(self):

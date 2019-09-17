@@ -9,7 +9,7 @@ class Message:
 
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None):
+    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None, is_copy=False):
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
@@ -38,14 +38,18 @@ class Message:
 
         Message.seq_number += 1
 
+        if not is_copy:
+            self.__append_to_store__()
+
+    def __append_to_store__(self):
         try:
-            sender.send_store.append(self)
+            self.sender.send_store.append(self)
         except OverflowError:
-            event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, start_round, self)
+            event = NetworkEvent(EventType.ReceiverOutOfMem, self.sender, self.receiver, self.start_round, self)
             event_queue.append(event)
 
     def __copy__(self):
-        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content)
+        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True)
         new.key = self.key
         new.seq_number = self.seq_number
         new.hop_count = self.hop_count
