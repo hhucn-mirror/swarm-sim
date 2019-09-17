@@ -1,7 +1,7 @@
 import random
 from enum import Enum
 
-from lib.directions import Directions, directions_list
+from lib.directions import Directions
 
 
 class Mode(Enum):
@@ -20,7 +20,7 @@ class MobilityModel:
     def get(particle):
         return getattr(particle, "mobility_model")
 
-    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=()):
+    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=(), starting_dir=None):
         if mode == Mode.Random_Mode:
             mode = random.choice(list(Mode)[:-1])
         if mode == Mode.Zonal:
@@ -37,7 +37,10 @@ class MobilityModel:
         self.steps = 0
         self.min_length = length[0]
         self.max_length = length[1]
-        self.starting_dir = self.random_direction()
+        if not starting_dir:
+            self.starting_dir = self.random_direction()
+        else:
+            self.starting_dir = starting_dir
         self.route_length = random.randint(self.min_length, self.max_length)
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir
@@ -100,7 +103,7 @@ class MobilityModel:
             return self.__random__()
 
     def __back_and_forth__(self):
-        if 0 < self.steps < self.route_length:
+        if 0 <= self.steps < self.route_length:
             self.steps += 1
             return self.starting_dir
         elif self.steps == self.route_length:
@@ -137,5 +140,7 @@ class MobilityModel:
         return next_dir
 
     @staticmethod
-    def random_direction(exceptions=[Directions.W, Directions.SW, Directions.NW, Directions.E, Directions.SE, Directions.NE]):
+    def random_direction(exceptions=None):
+        if exceptions is None:
+            exceptions = [Directions.W, Directions.SW, Directions.NW, Directions.E, Directions.SE, Directions.NE]
         return random.choice(exceptions).value
