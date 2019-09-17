@@ -7,16 +7,21 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 
 import importlib
-import random
-import math
 import logging
 from lib import csv_generator, particle, tile, marker, vis
 from lib.gnuplot_generator import generate_gnuplot
 from lib.memory import Memory, MemoryMode
+import math
+import random
 
+from lib import tile, marker, vis
 
-x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
-y_offset = [1, 0, -1, -1, 0, 1, 0]
+# TODO: Why was this changed? Results in particles not being able to move straight east/west on a line
+# x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
+# y_offset = [1, 0, -1, -1, 0, 1, 0]
+# old offsets
+x_offset = [1, 0.5, -0.5, -1, -0.5, 0.5, 0]
+y_offset = [0, -1, -1, 0, 1, 1, 0]
 
 NE = 0
 E = 1
@@ -58,6 +63,8 @@ class Sim:
         self.__seed=config_data.seedvalue
         self.__solution = config_data.solution
         self.solution_mod = importlib.import_module('solution.' + config_data.solution)
+        self.csv_mod = importlib.import_module(config_data.csv_generator_path)
+        self.particle_mod = importlib.import_module(config_data.particle_path)
         self.__end = False
         self.mm_limitation=config_data.mm_limitation
         self.init_particles=[]
@@ -68,6 +75,8 @@ class Sim:
         self.particle_map_coords = {}
         self.particle_map_id = {}
         self.particle_mm_size = config_data.particle_mm_size
+        self.particle_ms_size = config_data.ms_size
+        self.particle_ms_strategy = config_data.ms_strategy
         self.__particle_deleted=False
         self.tiles_num = 0
         self.tiles = []
@@ -94,22 +103,24 @@ class Sim:
         self.visualization = config_data.visualization
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
+        self.scan_radius = config_data.scan_radius
+        self.message_ttl = config_data.message_ttl
+        self.delivery_delay = config_data.delivery_delay
+        self.routing_algorithm = config_data.routing_algorithm
+        self.mobility_model_mode = config_data.mobility_model_mode
         self.border = config_data.border
         self.config_data = config_data
-        self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
-                                                           solution=self.solution_mod,
-                                                           seed=config_data.seedvalue,
+        self.csv_round_writer = self.csv_mod.CsvRoundData(self, solution=config_data.solution.rsplit('.', 1)[0],
+                                                           seed=config_data.seed,
                                                            tiles_num=0, particle_num=0,
-                                                           steps=0, directory=self.directory)
+                                                           steps=0, directory=config_data.dir_name)
 
         self.memory = Memory(MemoryMode.Delta)
 
-
-        mod = importlib.import_module('scenario.' + config_data.scenario)
+        mod = importlib.import_module('scenario.' + config_data.scenario.rsplit('.', 1)[0])
         mod.scenario(self)
         if config_data.random_order:
             random.shuffle(self.particles)
-
 
     def run(self):
         """
@@ -117,28 +128,30 @@ class Sim:
         At the end it aggregate the data and generate a gnuplot
         :return:
         """
-        if self.visualization !=  0:
+        if self.visualization != 0:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
             window.run()
         else:
-            while self.get_actual_round() <= self.get_max_round() and self.__end == False:
+            while self.get_actual_round() <= self.get_max_round() and self.__end is False:
                 self.solution_mod.solution(self)
+                # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
                 self.memory.try_deliver_messages(self)
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.directory)
+        particle_csv = self.csv_mod.CsvParticleFile(self.directory)
         for particle in self.init_particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
-        generate_gnuplot(self.directory)
+#        generate_gnuplot(self.directory)
         return
 
     def success_termination(self):
         self.csv_round_writer.success()
         self.set_end()
+
 
     def get_max_round(self):
         """
@@ -368,7 +381,7 @@ class Sim:
         if len(self.particles) < self.max_particles:
             if  self.check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha)
+                    new_particle = self.particle_mod.Particle(self, x, y, color, alpha)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -608,7 +621,6 @@ class Sim:
             return True
         else:
             return False
-
 
     def remove_marker_on(self, coords):
         """

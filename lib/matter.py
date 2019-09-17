@@ -33,7 +33,7 @@ color_map = {
 class Matter():
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, coords, color=black, alpha=1, type=None, mm_size=100):
+    def __init__(self, sim, coords, color=black, alpha=1, type = None, mm_size=100):
         """Initializing the marker constructor"""
         self.coords = coords
         self.color = color_map[color]

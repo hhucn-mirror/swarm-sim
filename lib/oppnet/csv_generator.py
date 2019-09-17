@@ -138,6 +138,7 @@ class CsvRoundData:
                  steps=0, directory='outputs/'):
         self.sim = sim
 
+        self.csv_msg_writer = CsvMessageData(self, directory=directory)
         self.task = task
         self.solution = solution
         self.actual_round = sim.get_actual_round()
@@ -546,6 +547,10 @@ class CsvMessageData:
                               'Initial Sent Round', 'First Delivery Round',
                               'First Delivery Hop Count'
                               ])
+
+    def __del__(self):
+        # write message data rows
+        self.write_rows()
 
     def write_rows(self):
         """

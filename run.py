@@ -6,7 +6,11 @@ import getopt
 import logging
 import os
 import sys
+from lib.oppnet.messagestore import BufferStrategy
 from datetime import datetime
+from lib.oppnet.mobility_model import Mode
+from lib.oppnet.routing import Algorithm
+
 
 from lib import  sim
 
@@ -26,6 +30,16 @@ class ConfigData():
             self.solution = config.get("File", "solution")
         except (configparser.NoOptionError) as noe:
             self.solution = "solution.py"
+        try:
+            self.csv_generator_path = config.get("File", "csv_generator")
+        except configparser.NoOptionError as noe:
+            self.csv_generator_path = "lib.csv_generator.py"
+
+        try:
+            self.particle_path = config.get("File", "particle")
+        except configparser.NoOptionError as noe:
+            self.particle_path = "lib.particle.py"
+
         self.size_x = config.getfloat("Simulator", "size_x")
         self.size_y = config.getfloat("Simulator", "size_y")
         self.window_size_x = config.getint("Simulator", "window_size_x")
@@ -36,7 +50,20 @@ class ConfigData():
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
 #        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
-        self.dir_name = None
+
+        self.scan_radius = config.getint("Routing", "scan_radius")
+
+        self.dir_name = None #TODO
+        self.mm_limit = config.getint("Matter", "mm_limitation") #TODO
+        self.mm_size = config.getint("Matter", "particle_mm_size") #TODO
+        self.seed = config.getint("Simulator", "seedvalue") #TODO
+
+        self.ms_size = config.getint("Routing", "ms_size")
+        self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
+        self.delivery_delay = config.getint("Routing", "delivery_delay")
+        self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
+        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
+        self.message_ttl = config.getint("Routing", "message_ttl")
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
@@ -98,4 +125,3 @@ def swarm_sim( argv ):
 
 if __name__ == "__main__":
     swarm_sim(sys.argv[1:])
-
