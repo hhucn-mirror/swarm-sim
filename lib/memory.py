@@ -55,12 +55,12 @@ class Memory:
                 start_round = m[2]
                 delta = m[3]
                 expirerate = m[4]
-                past_rounds = sim.get_actual_round() -  start_round
+                past_rounds = sim.get_actual_round() - start_round
                 distance = delta * past_rounds
                 x = abs(position.getx()-sim.get_particle_map_id()[target].coords[0])
                 y = abs(position.gety()-sim.get_particle_map_id()[target].coords[1])
                 distance_start_target = math.sqrt(x**2 + y**2)
-                if distance<expirerate:
+                if distance < expirerate:
                     if distance <= distance_start_target:
                         sim.get_particle_map_id()[target].write_memory(msg)
                     else:
@@ -68,7 +68,6 @@ class Memory:
             if len(new_msgs) > 0:
                 new_memory[target] = new_msgs
         self.memory = new_memory
-
 
     def try_deliver_messages(self, sim):
             self.option[self.mode](self, sim)
