@@ -42,7 +42,7 @@ def walk(target_co, particle):
     else:  # (particle.coords[0] > target_co[0] and particle.coords[1] == target_co[1])
         go_to = 4  # [W]
     particle.move_to(go_to)
-
+"""
 # Get dir for way home
 def way_home(last_pos, particle):
     if (particle.coords[0] < last_pos[0] and particle.coords[1] < last_pos[1]):
@@ -58,7 +58,7 @@ def way_home(last_pos, particle):
     else:  # (particle.coords[0] > target_co[0] and particle.coords[1] == target_co[1])
         go_to = 4  # [W]
     particle.list.append(go_to)
-
+"""
 # Follow track
 def follow(next_step, particle):
     if (next_step != None):
@@ -172,9 +172,8 @@ def follow(next_step, particle):
 
 # Go home the way you came
 def go_home(particle):
-    if (particle.list != None):
-        particle.move_to(particle.list[-1])
-        del (particle.list[-1])
+    particle.move_to(particle.list[-1])
+    del (particle.list[-1])
 
 # Decrease lifespan of a track
 def evaporation(marker):
@@ -203,6 +202,12 @@ def respawn(world):
     while len(world.get_particle_list()) < 31:
         ant = world.add_particle(0, 0)
         setattr(ant, "list", [])
+# Invert dir
+def invert_dir(dir):
+    if dir >= 3:
+        return dir - 3
+    else:
+        return dir + 3
 
 # Start
 ###################################################################################################################################################################################
@@ -232,9 +237,11 @@ def solution(world):
 
         # Search for food
         if (particle.get_color() == search_mode):
-            last_pos = particle.coords
-            particle.move_to(random.choice(direction))
-            way_home(last_pos, particle)
+            #last_pos = particle.coords
+            next_pos = random.choice(direction)
+            particle.move_to(next_pos)
+            particle.list.append(invert_dir(next_pos))
+            #way_home(last_pos, particle)
 
         # If found food, go in home-mode
         if (particle.check_on_tile() == True):
@@ -249,7 +256,7 @@ def solution(world):
         # If in home-mode, go home and lay track
         if (particle.get_color() == home_mode):
             particle.create_marker(track)
-            if (particle.list != None):
+            if (particle.list != []):
                 go_home(particle)
             #walk(home_co, particle)
             # Restore life span
