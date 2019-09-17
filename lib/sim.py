@@ -13,6 +13,7 @@ from lib.gnuplot_generator import generate_gnuplot
 from lib.memory import Memory, MemoryMode
 import math
 import random
+import matplotlib.pyplot as plt
 
 from lib import tile, marker, vis
 
@@ -116,7 +117,8 @@ class Sim:
                                                            steps=0, directory=config_data.dir_name)
 
         self.memory = Memory(MemoryMode.Delta)
-
+        self.plotdata_x = []
+        self.plotdata_y = []
         mod = importlib.import_module('scenario.' + config_data.scenario.rsplit('.', 1)[0])
         mod.scenario(self)
         if config_data.random_order:
@@ -138,6 +140,12 @@ class Sim:
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
                 self.memory.try_deliver_messages(self)
+                if len(self.memory.memory) > 0:
+                    self.plotdata_x.append(self.get_actual_round())
+                    self.plotdata_y.append(len(self.memory.memory[0]))
+                else:
+                    self.plotdata_x.append(self.get_actual_round())
+                    self.plotdata_y.append(0)
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
@@ -146,6 +154,9 @@ class Sim:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
 #        generate_gnuplot(self.directory)
+
+        plt.plot(self.plotdata_x, self.plotdata_y)
+        plt.show()
         return
 
     def success_termination(self):

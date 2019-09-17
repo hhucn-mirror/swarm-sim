@@ -38,7 +38,7 @@ class Memory:
     def add_delta_message_on(self, target_id, msg, position, start_round, delta, expirerate):
         if self.mode == MemoryMode.Delta:
             if target_id in self.memory.keys():
-                self.memory[target_id] = self.memory.get(target_id).append((msg, position, start_round, delta, expirerate))
+                self.memory.get(target_id).append((msg, position, start_round, delta, expirerate))
             else:
                 self.memory[target_id] = [(msg, position, start_round, delta, expirerate)]
         else:
@@ -64,6 +64,7 @@ class Memory:
                 distance_start_target = math.sqrt(x**2 + y**2)
                 if distance < expirerate:
                     if distance >= distance_start_target:
+                        print("delivered")
                         sim.get_particle_map_id()[target].write_memory(msg)
                     else:
                         new_msgs.append(m)
