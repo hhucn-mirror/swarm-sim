@@ -29,7 +29,8 @@ def solution(sim):
             # move the particle to the next location
             m_model = MobilityModel.get(particle)
             direction = m_model.next_direction(current_x_y=particle.coords)
-            particle.move_to(direction)
+            if direction:
+                particle.move_to(direction)
 
 
 def get_zone_and_group(particle_number, sim):

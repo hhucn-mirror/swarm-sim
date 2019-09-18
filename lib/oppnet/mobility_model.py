@@ -1,7 +1,7 @@
 import random
 from enum import Enum
 
-from lib.directions import Directions
+from ..std_lib import NE, E, SE, SW, W, NW
 
 
 class Mode(Enum):
@@ -63,7 +63,7 @@ class MobilityModel:
         elif self.mode == Mode.Random:
             return self.__random__()
         elif self.mode == Mode.Static:
-            return Directions.S.value
+            return False
         elif self.mode == Mode.Zonal:
             return self.__zonal__(current_x_y)
         elif self.mode == Mode.POI:
@@ -77,18 +77,18 @@ class MobilityModel:
         if self.steps < self.route_length:
             self.steps += 1
         else:
-            if self.current_dir == Directions.NE.value:
-                self.current_dir = Directions.NW.value
-            elif self.current_dir == Directions.NW.value:
-                self.current_dir = Directions.W.value
-            elif self.current_dir == Directions.W.value:
-                self.current_dir = Directions.SW.value
-            elif self.current_dir == Directions.SW.value:
-                self.current_dir = Directions.SE.value
-            elif self.current_dir == Directions.SE.value:
-                self.current_dir = Directions.E.value
-            elif self.current_dir == Directions.E.value:
-                self.current_dir = Directions.NE.value
+            if self.current_dir == NE:
+                self.current_dir = NW
+            elif self.current_dir == NW:
+                self.current_dir = W
+            elif self.current_dir == W:
+                self.current_dir = SW
+            elif self.current_dir == SW:
+                self.current_dir = SE
+            elif self.current_dir == SE:
+                self.current_dir = E
+            elif self.current_dir == E:
+                self.current_dir = NE
             self.steps = 1
             # new circle if we walked a full circle
             if self.current_dir == self.starting_dir:
@@ -124,21 +124,21 @@ class MobilityModel:
         (x, y) = current_x_y
         # check if at min_x then head anywhere but west
 
-        directions = {Directions.W,
-                      Directions.SW,
-                      Directions.NW,
-                      Directions.E,
-                      Directions.SE,
-                      Directions.NE}
+        directions = {W,
+                      SW,
+                      NW,
+                      E,
+                      SE,
+                      NE}
 
         if self.min_x >= x:
-            directions = directions.difference({Directions.W, Directions.SW, Directions.NW})
+            directions = directions.difference({W, SW, NW})
         if self.max_x <= x:
-            directions = directions.difference({Directions.E, Directions.SE, Directions.NE})
+            directions = directions.difference({E, SE, NE})
         if self.min_y >= y:
-            directions = directions.difference({Directions.SE, Directions.SW})
+            directions = directions.difference({SE, SW})
         if self.max_y <= y:
-            directions = directions.difference({Directions.NE, Directions.NW})
+            directions = directions.difference({NE, NW})
 
         next_dir = MobilityModel.random_direction(list(directions))
         return next_dir
@@ -147,32 +147,32 @@ class MobilityModel:
         if current_x_y == self.poi:
             print("mobility_model.py - poi():"
                   "Particle reached POI: {}".format(self.poi))
-            return Directions.S.value
+            return False
 
         # southern movement
         if current_x_y[1] > self.poi[1]:
             # western movement
             if current_x_y[0] > self.poi[0]:
-                return Directions.SW.value
+                return SW
             # eastern movement
             elif current_x_y[0] < self.poi[0]:
-                return Directions.SE.value
+                return SE
         # northern movement
         elif current_x_y[1] < self.poi[1]:
             # western movement
             if current_x_y[0] > self.poi[0]:
-                return Directions.NW.value
+                return NW
             # eastern movement
             elif current_x_y[0] < self.poi[0]:
-                return Directions.NE.value
+                return NE
 
         if current_x_y[0] < self.poi[0]:
-            return Directions.E.value
+            return E
         else:
-            return Directions.W.value
+            return W
 
     @staticmethod
     def random_direction(exceptions=None):
         if exceptions is None:
-            exceptions = [Directions.W, Directions.SW, Directions.NW, Directions.E, Directions.SE, Directions.NE]
-        return random.choice(exceptions).value
+            exceptions = [W, SW, NW, E, SE, NE]
+        return random.choice(exceptions)

@@ -28,6 +28,8 @@ def solution(sim):
         # move in every round starting from the second one
         for particle in particles:
             m_model = MobilityModel.get(particle)
-            particle.move_to_in_bounds(m_model.next_direction())
+            next_direction = m_model.next_direction(current_x_y=particle.coords)
+            if next_direction:
+                particle.move_to_in_bounds(next_direction)
 
         lib.oppnet.routing.next_step(particles, sim.get_actual_round())
