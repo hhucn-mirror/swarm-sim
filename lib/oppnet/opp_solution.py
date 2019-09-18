@@ -12,11 +12,11 @@ def process_event_queue(sim):
     Processes the EventQueue of the simulator and updates corresponding csv metrics. Called every round.
     :return: Nothing
     """
-    t = Thread(target=process_event_queue__(sim))
+    t = Thread(target=__process_event_queue__(sim))
     t.start()
 
 
-def process_event_queue__(sim):
+def __process_event_queue__(sim):
     while not len(event_queue) == 0:
         net_event: NetworkEvent = event_queue.pop()
         event_type: EventType = net_event.event_type

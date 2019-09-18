@@ -1,7 +1,6 @@
-from lib.oppnet.comms import generate_random_messages
-from lib.oppnet.mobility_model import MobilityModel
 import lib.oppnet.routing
-
+from lib.oppnet.communication import generate_random_messages
+from lib.oppnet.mobility_model import MobilityModel
 
 message_amount = 50
 

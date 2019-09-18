@@ -1,6 +1,6 @@
 from enum import Enum
 
-from lib.oppnet.comms import send_message
+from lib.oppnet.communication import send_message
 from lib.oppnet.meta import NetworkEvent, EventType
 from lib.oppnet.opp_solution import event_queue
 
@@ -57,7 +57,7 @@ class SendEvent:
         return self.start_round + self.delay == current_round
 
     @staticmethod
-    def create_event(messages, current_round, store, sender, receiver):
+    def create_net_events(messages, current_round, store, sender, receiver):
         """
         Creates NetworkEvents in the simulators EventQueue for each message to be send
         :param messages: Iterable of messages.
@@ -234,11 +234,11 @@ def __create_send_events__(particle, current_round, nearby=None):
     fwd_events = []
     for neighbour in nearby:
         if len(particle.send_store):
-            send_events.append(SendEvent.create_event(list(particle.send_store),
-                                                      current_round, particle.send_store, particle, neighbour))
+            send_events.append(SendEvent.create_net_events(list(particle.send_store),
+                                                           current_round, particle.send_store, particle, neighbour))
         if list(particle.fwd_store):
-            fwd_events.append(SendEvent.create_event(list(particle.fwd_store),
-                                                     current_round, particle.fwd_store, particle, neighbour))
+            fwd_events.append(SendEvent.create_net_events(list(particle.fwd_store),
+                                                          current_round, particle.fwd_store, particle, neighbour))
     if len(send_events) > 0 or len(fwd_events) > 0:
         routing_params.add_events([send_events, fwd_events])
 

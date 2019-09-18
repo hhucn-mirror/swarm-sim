@@ -1,7 +1,7 @@
 from collections import deque
 from enum import Enum
 
-from lib.oppnet.comms import Message
+from lib.oppnet.communication import Message
 
 
 class BufferStrategy(Enum):

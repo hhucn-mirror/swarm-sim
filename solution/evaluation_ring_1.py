@@ -1,9 +1,7 @@
-from lib.oppnet.comms import Message
-from lib.oppnet.mobility_model import MobilityModel
 import lib.oppnet.routing
 from lib.oppnet import opp_solution
-
-
+from lib.oppnet.communication import Message
+from lib.oppnet.mobility_model import MobilityModel
 
 """
 Made for scenario:

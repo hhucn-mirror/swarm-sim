@@ -1,7 +1,6 @@
-from lib.oppnet.comms import generate_random_messages
-from lib.oppnet.mobility_model import MobilityModel, Mode
 import lib.oppnet.routing
-
+from lib.oppnet.communication import generate_random_messages
+from lib.oppnet.mobility_model import MobilityModel, Mode
 
 scan_radius = 1
 
@@ -26,7 +25,7 @@ def solution(sim):
         if sim.get_actual_round() % 5 == 0:
             generate_random_messages(particles, len(particles), sim)
         for particle in particles:
-            lib.oppnet.routing.next_step(particle)
+            lib.oppnet.routing.next_step(particle, sim.get_actual_round())
             # move the particle to the next location
             m_model = MobilityModel.get(particle)
             direction = m_model.next_direction(current_x_y=particle.coords)

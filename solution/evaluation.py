@@ -1,9 +1,7 @@
-from lib.oppnet.comms import Message
-from lib.oppnet.mobility_model import MobilityModel
 import lib.oppnet.routing
 from lib.oppnet import opp_solution
-
-
+from lib.oppnet.communication import Message
+from lib.oppnet.mobility_model import MobilityModel
 
 """
 Made for scenario:
@@ -25,7 +23,6 @@ As the starting round for all six messages is 1, we can for example expect messa
 2 with delivery_delay = 1. Messages 5 and 6 would be expected in round 3 as they take one more hop.
 
 """
-
 
 
 class DeliveryAssertions:
