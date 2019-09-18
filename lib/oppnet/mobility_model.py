@@ -11,7 +11,8 @@ class Mode(Enum):
     Random = 3
     Static = 4
     Zonal = 5
-    Random_Mode = 6
+    POI = 6
+    Random_Mode = 7
 
 
 class MobilityModel:
@@ -20,7 +21,7 @@ class MobilityModel:
     def get(particle):
         return getattr(particle, "mobility_model")
 
-    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=(), starting_dir=None):
+    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=(), starting_dir=None, poi=()):
         if mode == Mode.Random_Mode:
             mode = random.choice(list(Mode)[:-1])
         if mode == Mode.Zonal:
@@ -42,6 +43,7 @@ class MobilityModel:
         else:
             self.starting_dir = starting_dir
         self.route_length = random.randint(self.min_length, self.max_length)
+        self.poi = poi
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir
 
@@ -64,6 +66,8 @@ class MobilityModel:
             return Directions.S.value
         elif self.mode == Mode.Zonal:
             return self.__zonal__(current_x_y)
+        elif self.mode == Mode.POI:
+            return self.__poi__(current_x_y)
 
     def __random__(self):
         self.current_dir = MobilityModel.random_direction()
@@ -138,6 +142,34 @@ class MobilityModel:
 
         next_dir = MobilityModel.random_direction(list(directions))
         return next_dir
+
+    def __poi__(self, current_x_y):
+        if current_x_y == self.poi:
+            print("mobility_model.py - poi():"
+                  "Particle reached POI: {}".format(self.poi))
+            return Directions.S.value
+
+        # southern movement
+        if current_x_y[1] > self.poi[1]:
+            # western movement
+            if current_x_y[0] > self.poi[0]:
+                return Directions.SW.value
+            # eastern movement
+            elif current_x_y[0] < self.poi[0]:
+                return Directions.SE.value
+        # northern movement
+        elif current_x_y[1] < self.poi[1]:
+            # western movement
+            if current_x_y[0] > self.poi[0]:
+                return Directions.NW.value
+            # eastern movement
+            elif current_x_y[0] < self.poi[0]:
+                return Directions.NE.value
+
+        if current_x_y[0] < self.poi[0]:
+            return Directions.E.value
+        else:
+            return Directions.W.value
 
     @staticmethod
     def random_direction(exceptions=None):
