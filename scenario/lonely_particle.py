@@ -1,5 +1,9 @@
-import scenario.std_lib as std
-import lib.header as header
-def scenario(world):
-    world.add_particle(0,0)
-    std.add_tiles_as_hexagon(world, 10, color=header.dark_green)
+
+def scenario(sim):
+
+    for i in range(-7,7):
+        sim.add_particle(i, 0)
+    for i in range(-7,7):
+        sim.add_particle(i+0.5, 1)
+
+    print("Particle amount", len(sim.get_particle_list()))
