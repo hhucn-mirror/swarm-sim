@@ -80,6 +80,14 @@ class World:
         self.csv_round.success()
         self.set_end()
 
+    def get_max_round(self):
+        """
+        The max round number
+
+        :return: maximum round number
+        """
+        return self.config_data.max_round
+
     def get_actual_round(self):
         """
         The actual round number

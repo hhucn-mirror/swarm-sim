@@ -23,7 +23,7 @@ info_plot=[[]]
 filler_actual_count=[]
 calc_count=0
 table_calcs= ""
-def solution(sim):
+def solution(world):
     global calc_count
     global table_calcs
     #max count for plots and table size
@@ -35,8 +35,8 @@ def solution(sim):
 
     #initializes particles with attributes sum =0, weight=1, particle_count=0 and check_term=0
     #besides one particle which gets a sum value =1
-    if sim.get_actual_round()==1:
-        for rnd_particle in sim.get_particle_list():
+    if world.get_actual_round()==1:
+        for rnd_particle in world.get_particle_list():
             setattr(rnd_particle, "sum", 0)
             setattr(rnd_particle, "weight", 1)
             setattr(rnd_particle, "particle_count",0)
@@ -48,20 +48,20 @@ def solution(sim):
                 s = str(i)
                 setattr(rnd_particle, "already_calc_with_"+s,-1)
 
-        random.choice(sim.get_particle_list()).sum =1
-        for i in range(len(sim.get_particle_list())):
+        random.choice(world.get_particle_list()).sum =1
+        for i in range(len(world.get_particle_list())):
             info_plot.append([0])
 
-    if sim.get_actual_round() == 1 and len(sim.get_particle_list()) <= table_size_max:
+    if world.get_actual_round() == 1 and len(world.get_particle_list()) <= table_size_max:
         table_calcs = "|rounds  |"
-        for i in range(0, len(sim.get_particle_list())):
+        for i in range(0, len(world.get_particle_list())):
             table_calcs = table_calcs + "___p" + '{:_<4d}'.format(i) + "|"
 
         table_calcs = table_calcs + "\n" + "|round:_0|"
         helper_sum_list=[]
-        for i in range(0,len(sim.get_particle_list())):
+        for i in range(0, len(world.get_particle_list())):
             helper_sum_list.append(0)
-        for particle in sim.get_particle_list():
+        for particle in world.get_particle_list():
             print(particle.number)
             helper_sum_list[particle.number-1]=particle.sum
         for i in helper_sum_list:
@@ -74,11 +74,11 @@ def solution(sim):
 
     #helper variables
     counter1=0
-    helper_particle_list=sim.get_particle_list().copy()
+    helper_particle_list=world.get_particle_list().copy()
     #print(len(helper_particle_list))
 
-    if sim.get_actual_round() > 1 and len(sim.get_particle_list()) <= table_size_max:
-        table_calcs+="\n|round:"+'{:_>2d}'.format(sim.get_actual_round())+"|"
+    if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
+        table_calcs+="\n|round:" +'{:_>2d}'.format(world.get_actual_round()) + "|"
 
     while(len(helper_particle_list)!=0):
         #choose a random particle
@@ -126,7 +126,7 @@ def solution(sim):
                 #termination helper
                 print("difference: old/new sum:",abs(current_sum-rnd_particle.sum))
                 #checks if it has already calculates with that neighbour in the last round
-                table_calcs+=next_line_table(sim.get_particle_list())
+                table_calcs+=next_line_table(world.get_particle_list())
                 calc_count+=1
                 table_calcs+="  "+str(rnd_particle.number-1)+"-->"+str(rnd_particle.get_particle_in(neighbour_found_in_dir).number-1)
                 if(abs(current_sum-rnd_particle.sum)> 0):
@@ -145,29 +145,29 @@ def solution(sim):
         #protocol
         rnd_particle.knows_the_particle=0
 
-    for particle in sim.get_particle_list():
+    for particle in world.get_particle_list():
         info_plot[particle.number].append(particle.particle_count)
 
-    for particle in sim.get_particle_list():
+    for particle in world.get_particle_list():
         farbe=set_color_g(particle)
         particle.set_color(farbe)
 
 
     #terminates when all particles had a new_sum with a difference belove the threshold in compersion to the round before
-    if 0 not in checklist_for_threshold or sim.get_actual_round()== sim.get_max_round():
-        print("Terminated in round : ", sim.get_actual_round())
+    if 0 not in checklist_for_threshold or world.get_actual_round()== world.get_max_round():
+        print("Terminated in round : ", world.get_actual_round())
         i=0
-        for particle in sim.get_particle_list():
+        for particle in world.get_particle_list():
             print("partikel_nr:",i)
             print("schätzt partikelanzahl im system auf:",particle.particle_count)
             i+=1
 
-        for i in range(0,sim.get_actual_round()+1):
-            filler_actual_count.append(len(sim.get_particle_list()))
+        for i in range(0, world.get_actual_round() + 1):
+            filler_actual_count.append(len(world.get_particle_list()))
 
-        if len(sim.get_particle_list()) <= table_size_max:
-            for particle in sim.get_particle_list():
-                x = np.arange(0,sim.get_actual_round()+1,1)
+        if len(world.get_particle_list()) <= table_size_max:
+            for particle in world.get_particle_list():
+                x = np.arange(0, world.get_actual_round() + 1, 1)
                 #print(x)
                 y = info_plot[particle.number]
                 #print(y)
@@ -181,12 +181,12 @@ def solution(sim):
         #average estimation per round
         average_plotter=[]
 
-        for i in range(0,sim.get_actual_round()+1):
+        for i in range(0, world.get_actual_round() + 1):
             average = 0
-            for particle in sim.get_particle_list():
+            for particle in world.get_particle_list():
                 average+=info_plot[particle.number][i]
-            average_plotter.append(average/len(sim.get_particle_list()))
-        x2 = np.arange(0, sim.get_actual_round() + 1, 1)
+            average_plotter.append(average / len(world.get_particle_list()))
+        x2 = np.arange(0, world.get_actual_round() + 1, 1)
         #print(x2)
         y2 = average_plotter
         #print(y2)
@@ -196,18 +196,18 @@ def solution(sim):
         ax2.set(xlabel='rounds', ylabel='Average', title='Average estimation of all particles ')
 
 
-        if sim.get_actual_round() > 1 and len(sim.get_particle_list()) <= table_size_max:
-            table_calcs+=next_line_table(sim.get_particle_list())
+        if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
+            table_calcs+=next_line_table(world.get_particle_list())
             print(table_calcs)
         print("Calculation count between particles", calc_count)
-        print("Average estimation:", average / len(sim.get_particle_list()))
+        print("Average estimation:", average / len(world.get_particle_list()))
         plt.show()
-        sim.set_end()
+        world.set_end()
 
 
 
-    if sim.get_actual_round() > 0:
-        for particle in sim.get_particle_list():
+    if world.get_actual_round() > 0:
+        for particle in world.get_particle_list():
             free_space_in_dir=search_personal_space(particle)
             if free_space_in_dir != -1:
                 particle.move_to(free_space_in_dir)
