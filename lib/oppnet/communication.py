@@ -175,7 +175,8 @@ def __deliver_message__(message, sender, receiver, current_round):
             net_event = NetworkEvent(EventType.MessageDeliveredFirst, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDelivered, sender, receiver, current_round, message)
-    ___store_message__(store, message, sender, receiver, current_round)
+    if not store.contains_key(message.key):
+        ___store_message__(store, message, sender, receiver, current_round)
     return net_event
 
 
