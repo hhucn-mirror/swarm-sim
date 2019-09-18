@@ -247,7 +247,7 @@ def solution(world):
             table_calcs+=next_line_table(world.get_particle_list())
             print(table_calcs)
         print("Calculation count between particles", calc_count)
-        print("Calculations per node", calc_count / (world.get_sim_y_size() * world.get_sim_x_size()))
+        print("Calculations per node", calc_count / (world.get_world_y_size() * world.get_world_x_size()))
         print("Average estimation:", average_plotter[len(average_plotter)-1])
         # Abweichung : Tatsächlicher Wert / Durchschnittswert | Min | Max ( all particle ) | Standardabweichung
         # absolut/relativ

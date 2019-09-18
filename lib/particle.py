@@ -117,7 +117,7 @@ class Particle(matter.Matter):
 
     def check_within_border(self, dir, dir_coord):
         if self.world.config_data.border == 1 and \
-                (abs(dir_coord[0]) > self.world.get_sim_x_size() or abs(dir_coord[1]) > self.world.get_sim_y_size()):
+                (abs(dir_coord[0]) > self.world.get_world_x_size() or abs(dir_coord[1]) > self.world.get_world_y_size()):
             dir = dir - 3 if dir > 2 else dir + 3
             dir_coord = self.world.get_coords_in_dir(self.coords, dir)
         return dir, dir_coord
