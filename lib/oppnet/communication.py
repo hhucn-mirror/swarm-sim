@@ -1,8 +1,7 @@
 import copy
 import random
 
-from lib.oppnet.meta import EventType, NetworkEvent
-from lib.oppnet.opp_solution import event_queue
+from lib.oppnet.meta import EventType, process_event
 
 
 class Message:
@@ -44,8 +43,7 @@ class Message:
         try:
             self.sender.send_store.append(self)
         except OverflowError:
-            event = NetworkEvent(EventType.ReceiverOutOfMem, self.sender, self.receiver, self.start_round, self)
-            event_queue.append(event)
+            process_event(EventType.ReceiverOutOfMem, self.sender, self.receiver, self)
 
     def __copy__(self):
         new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True)
@@ -102,26 +100,22 @@ def send_message(msg_store, sender, receiver, message: Message):
 
     # remove from original store if ttl expired after this send
     if message.hops + 1 == message.ttl:
-        ttl_expired(original, msg_store, sender, receiver, current_round)
+        ttl_expired(original, msg_store, sender, receiver)
 
-    net_event = None
     if receiver.get_id() == message.receiver.get_id():
-        net_event = __deliver_message__(message, sender, receiver, current_round)
+        __deliver_message__(message, sender, receiver, current_round)
         # remove original upon delivery
         msg_store.remove(original)
     else:
         # only forward if the receiver does not yet have the message
         store = receiver.fwd_store
         if not store.contains_key(message.key):
-            ___store_message__(store, message, sender, receiver, current_round)
-            net_event = NetworkEvent(EventType.MessageForwarded, sender, receiver, current_round, message)
-
-    # put the corresponding event into the simulator event queue
-    if net_event:
-        event_queue.append(net_event)
+            message.inc_hops()
+            ___store_message__(store, message, sender, receiver)
+            process_event(EventType.MessageForwarded, sender, receiver, message)
 
 
-def ttl_expired(message, store, sender, receiver, current_round):
+def ttl_expired(message, store, sender, receiver):
     """
     Handle expiry of TTL. Delete the message from :param store: and append a corresponding NetworkEvent in the
     simulator EventQueue.
@@ -133,16 +127,13 @@ def ttl_expired(message, store, sender, receiver, current_round):
     :type sender: :class:`~particle.Particle`
     :param receiver: The intended receiver of the message.
     :type receiver: :class:`~particle.Particle`
-    :param current_round: The current simulator round
-    :type current_round: int
     """
     try:
         store.remove(message)
     except ValueError:
         pass
     finally:
-        event = NetworkEvent(EventType.MessageTTLExpired, sender, receiver, current_round, message)
-        event_queue.append(event)
+        process_event(EventType.MessageTTLExpired, sender, receiver, message)
 
 
 def __deliver_message__(message, sender, receiver, current_round):
@@ -164,23 +155,23 @@ def __deliver_message__(message, sender, receiver, current_round):
     store = receiver.rcv_store
 
     message.update_delivery(current_round)
+    message.inc_hops()
 
     if sender.get_id() == message.original_sender.get_id():
         if not store.contains_key(message.key):
-            net_event = NetworkEvent(EventType.MessageDeliveredFirstDirect, sender, receiver, current_round, message)
+            process_event(EventType.MessageDeliveredFirstDirect, sender, receiver, message)
         else:
-            net_event = NetworkEvent(EventType.MessageDeliveredDirect, sender, receiver, current_round, message)
+            process_event(EventType.MessageDeliveredDirect, sender, receiver, message)
     else:
         if not store.contains_key(message.key):
-            net_event = NetworkEvent(EventType.MessageDeliveredFirst, sender, receiver, current_round, message)
+            process_event(EventType.MessageDeliveredFirst, sender, receiver, message)
         else:
-            net_event = NetworkEvent(EventType.MessageDelivered, sender, receiver, current_round, message)
+            process_event(EventType.MessageDelivered, sender, receiver, message)
     if not store.contains_key(message.key):
-        ___store_message__(store, message, sender, receiver, current_round)
-    return net_event
+        ___store_message__(store, message, sender, receiver)
 
 
-def ___store_message__(store, message, sender, receiver, current_round):
+def ___store_message__(store, message, sender, receiver):
     """
     Puts the :param message: in the :param receiver:'s :param store: and handles OverflowError by creating
     a ReceiverOutOfMem NetworkEvent. The actual overflow is handled internally in the :param store:
@@ -192,15 +183,11 @@ def ___store_message__(store, message, sender, receiver, current_round):
     :type sender: :class:`~particle.Particle`
     :param receiver: The receiver of the message.
     :type receiver: :class:`~particle.Particle`
-    :param current_round: The current simulator round.
-    :type current_round: int
     """
-    message.inc_hops()
     try:
         store.append(message)
     except OverflowError:
-        event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, current_round, message)
-        event_queue.append(event)
+        process_event(EventType.ReceiverOutOfMem, sender, receiver, message)
 
 
 def generate_random_messages(particle_list, amount, sim, ttl_range=None):

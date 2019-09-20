@@ -542,7 +542,7 @@ class CsvMessageData:
                               'Forwarding Count', 'Delivery Count',
                               'Direct Delivery Count',
                               'Initial Sent Round', 'First Delivery Round',
-                              'First Delivery Hop'
+                              'First Delivery Hops', 'Minimum Hops'
                               ])
 
     def __del__(self):
@@ -559,7 +559,7 @@ class CsvMessageData:
                                   m_data.sent, m_data.forwarded,
                                   m_data.delivered, m_data.delivered_direct,
                                   m_data.sent_round, m_data.delivery_round,
-                                  m_data.hops
+                                  m_data.first_hops, m_data.min_hops
                                   ])
         self.csv_file.close()
 
@@ -629,7 +629,8 @@ class MessageData:
         self.delivered = 0
         self.delivered_direct = 0
         self.delivery_round = None
-        self.hops = None
+        self.first_hops = None
+        self.min_hops = None
 
     def update_metric(self, sent=0, forwarded=0, delivered=0, delivered_direct=0, delivery_round=None, hops=None):
         """
@@ -653,5 +654,9 @@ class MessageData:
         self.delivered_direct += delivered_direct
         if delivery_round and not self.delivery_round:
             self.delivery_round = delivery_round
-        if hops and not self.hops:
-            self.hops = hops
+        if hops:
+            if not self.first_hops:
+                self.first_hops = hops
+                self.min_hops = hops
+            elif hops < self.min_hops:
+                self.min_hops = hops
