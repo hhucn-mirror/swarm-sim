@@ -1,5 +1,4 @@
 import lib.oppnet.routing
-from lib.oppnet import opp_solution
 from lib.oppnet.communication import Message
 from lib.oppnet.mobility_model import MobilityModel, Mode
 from lib.std_lib import black, E
@@ -48,5 +47,3 @@ def solution(sim):
                 particle.move_to_in_bounds(next_direction)
 
         lib.oppnet.routing.next_step(particles, sim.get_actual_round())
-
-    opp_solution.process_event_queue(sim)

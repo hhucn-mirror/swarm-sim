@@ -1,5 +1,4 @@
 import lib.oppnet.routing
-from lib.oppnet import opp_solution
 from lib.oppnet.communication import Message
 from lib.oppnet.mobility_model import MobilityModel
 
@@ -102,5 +101,3 @@ def solution(sim):
                 print("Assertion for message {} failed".format(m.seq_number))
             except KeyError:
                 print("Message {} not delivered".format(m.seq_number))
-
-    opp_solution.process_event_queue(sim)
