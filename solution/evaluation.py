@@ -26,14 +26,14 @@ As the starting round for all six messages is 1, we can for example expect messa
 
 
 class DeliveryAssertions:
-    def __init__(self, message, delivery_round, hop_count):
+    def __init__(self, message, delivery_round, hops):
         self.message = message
         self.delivery_round = delivery_round
-        self.hop_count = hop_count
+        self.hops = hops
 
     def execute(self, message):
         assert message.delivery_round == self.delivery_round
-        assert message.hop_count == self.hop_count
+        assert message.hops == self.hops
 
 
 def solution(sim):
@@ -66,7 +66,7 @@ def solution(sim):
 
         for m in [m1, m2, m3, m4]:
             delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hop_count=hops))
+                                                          hops=hops))
 
         # expected hop count 2
         # expected delivery round 3
@@ -74,14 +74,14 @@ def solution(sim):
         # left to right
         m5 = Message(particles[0], particles[2], 1, sim.message_ttl)
         delivery_assertions.append(DeliveryAssertions(m5, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hop_count=hops))
+                                                      hops=hops))
 
         # expected hop count 2
         # expected delivery round 3
         # right to left
         m6 = Message(particles[2], particles[0], 1, sim.message_ttl)
         delivery_assertions.append(DeliveryAssertions(m6, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hop_count=hops))
+                                                      hops=hops))
 
     for particle in particles:
         m_model = MobilityModel.get(particle)
