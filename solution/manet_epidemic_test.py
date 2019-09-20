@@ -1,9 +1,6 @@
-import lib.particle
-from lib.point import Point
-from lib.oppnet.comms import generate_random_messages
-from lib.oppnet.mobility_model import MobilityModel, Mode
 import lib.oppnet.routing
-
+from lib.oppnet.communication import generate_random_messages
+from lib.oppnet.mobility_model import MobilityModel, Mode
 
 scan_radius = 1
 
@@ -11,14 +8,29 @@ scan_radius = 1
 def solution(sim):
     particles = sim.get_particle_list()
     if sim.get_actual_round() == 1:
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(100, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(80, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(60, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(50, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(20, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(5, 0), 0, 1, 1000)
-        sim.memory.add_delta_message_on(particles[0].get_id(), "hallo", Point(0, 0), 0, 1, 1000)
+        generate_random_messages(particles, len(particles)*10, sim)
 
+        # initialize the particle mobility models
+        particle_number = 0
+        for particle in particles:
+            p_zone, m_group = get_zone_and_group(particle_number, sim)
+            p_role, m_model = get_role_and_model(particle_number, particle, p_zone)
+
+            m_model.set(particle)
+            r_params = lib.oppnet.routing.RoutingParameters(lib.oppnet.routing.Algorithm.Epidemic, scan_radius,
+                                                            manet_role=p_role, manet_group=m_group)
+            r_params.set(particle)
+            particle_number += 1
+    else:
+        if sim.get_actual_round() % 5 == 0:
+            generate_random_messages(particles, len(particles), sim)
+        for particle in particles:
+            lib.oppnet.routing.next_step(particle, sim.get_actual_round())
+            # move the particle to the next location
+            m_model = MobilityModel.get(particle)
+            direction = m_model.next_direction(current_x_y=particle.coords)
+            if direction:
+                particle.move_to(direction)
 
 
 def get_zone_and_group(particle_number, sim):

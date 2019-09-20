@@ -9,9 +9,10 @@ TODO: Erase Memory
 
 """
 
-import logging, math
+import logging
+import math
+
 from lib import csv_generator, matter
-from lib.oppnet.messagestore import MessageStore, BufferStrategy
 
 black = 1
 gray = 2
@@ -124,7 +125,7 @@ class Particle(matter.Matter):
         :return: True: Success Moving;  False: Non moving
         """
 
-        if dir == 6:
+        if dir == -1:
             return False
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         dir, dir_coord = self.check_within_border(dir, dir_coord)

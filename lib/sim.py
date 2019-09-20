@@ -17,12 +17,8 @@ import matplotlib.pyplot as plt
 
 from lib import tile, marker, vis
 
-# TODO: Why was this changed? Results in particles not being able to move straight east/west on a line
-# x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
-# y_offset = [1, 0, -1, -1, 0, 1, 0]
-# old offsets
-x_offset = [1, 0.5, -0.5, -1, -0.5, 0.5, 0]
-y_offset = [0, -1, -1, 0, 1, 1, 0]
+x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
+y_offset = [1, 0, -1, -1, 0, 1, 0]
 
 NE = 0
 E = 1

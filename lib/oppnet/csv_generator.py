@@ -14,7 +14,7 @@ import os
 
 import pandas as pd
 
-from lib.oppnet.comms import Message
+from lib.oppnet.communication import Message
 
 
 class CsvParticleFile:
@@ -138,7 +138,7 @@ class CsvRoundData:
                  steps=0, directory='outputs/'):
         self.sim = sim
 
-        self.csv_msg_writer = CsvMessageData(self, directory=directory)
+        self.csv_msg_writer = CsvMessageData(directory)
         self.task = task
         self.solution = solution
         self.actual_round = sim.get_actual_round()
@@ -524,16 +524,13 @@ class CsvMessageData:
     Collects sending, forwarding and delivery information for a dictionary of message objects in a csv.
     Contains :class:`~csv_generatore.MessageData` objects.
     """
-    def __init__(self, solution, directory="outputs/"):
+
+    def __init__(self, directory="outputs/"):
         """
-        :param solution: The solution the simulator executes.
-        :type solution: str
         :param directory: The directory for the csv to be put in.
         :type directory: str
         """
-        self.solution = solution
         self.messages = {}
-
         self.directory = directory
         self.file_name = directory + '/messages.csv'
         self.csv_file = open(self.file_name, 'w', newline='')
@@ -545,7 +542,7 @@ class CsvMessageData:
                               'Forwarding Count', 'Delivery Count',
                               'Direct Delivery Count',
                               'Initial Sent Round', 'First Delivery Round',
-                              'First Delivery Hop Count'
+                              'First Delivery Hop'
                               ])
 
     def __del__(self):
@@ -562,7 +559,7 @@ class CsvMessageData:
                                   m_data.sent, m_data.forwarded,
                                   m_data.delivered, m_data.delivered_direct,
                                   m_data.sent_round, m_data.delivery_round,
-                                  m_data.hop_count
+                                  m_data.hops
                                   ])
         self.csv_file.close()
 
@@ -606,10 +603,10 @@ class CsvMessageData:
         self.add_message(message)
         m_data = self.messages[message.key]
         if not delivery_round:
-            hop_count = None
+            hops = None
         else:
-            hop_count = message.hop_count
-        m_data.update_metric(sent, forwarded, delivered, delivered_direct, delivery_round, hop_count)
+            hops = message.hops
+        m_data.update_metric(sent, forwarded, delivered, delivered_direct, delivery_round, hops)
         self.messages[message.key] = m_data
 
 
@@ -632,9 +629,9 @@ class MessageData:
         self.delivered = 0
         self.delivered_direct = 0
         self.delivery_round = None
-        self.hop_count = None
+        self.hops = None
 
-    def update_metric(self, sent=0, forwarded=0, delivered=0, delivered_direct=0, delivery_round=None, hop_count=None):
+    def update_metric(self, sent=0, forwarded=0, delivered=0, delivered_direct=0, delivery_round=None, hops=None):
         """
         Updates the statistics.
         :param sent: The amount it was sent.
@@ -647,8 +644,8 @@ class MessageData:
         :type delivered_direct: int
         :param delivery_round: The round the message was delivered in.
         :type delivery_round: int
-        :param hop_count: The hop count of the message object.
-        :type hop_count: int
+        :param hops: The hops of the message object.
+        :type hops: int
         """
         self.sent += sent
         self.forwarded += forwarded
@@ -656,5 +653,5 @@ class MessageData:
         self.delivered_direct += delivered_direct
         if delivery_round and not self.delivery_round:
             self.delivery_round = delivery_round
-        if hop_count and not self.hop_count:
-            self.hop_count = hop_count
+        if hops and not self.hops:
+            self.hops = hops

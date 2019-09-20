@@ -1,6 +1,5 @@
 import math
 from enum import Enum
-from lib.oppnet.comms import Message
 
 class MemoryMode(Enum):
     Schedule = 0

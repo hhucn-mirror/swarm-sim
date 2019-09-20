@@ -1,7 +1,7 @@
 from collections import deque
 from enum import Enum
 
-from lib.oppnet.comms import Message
+from lib.oppnet.communication import Message
 
 
 class BufferStrategy(Enum):
@@ -35,6 +35,9 @@ class MessageStore(deque):
             super().__init__(maxlen=maxlen)
         else:
             super().__init__(init, maxlen=maxlen)
+
+    def __len__(self):
+        return super().__len__()
 
     def append(self, m: Message):
         # pop the right element if max len reached

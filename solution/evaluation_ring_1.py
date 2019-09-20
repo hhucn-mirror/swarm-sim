@@ -1,9 +1,7 @@
-from lib.oppnet.comms import Message
-from lib.oppnet.mobility_model import MobilityModel
 import lib.oppnet.routing
 from lib.oppnet import opp_solution
-
-
+from lib.oppnet.communication import Message
+from lib.oppnet.mobility_model import MobilityModel
 
 """
 Made for scenario:
@@ -70,7 +68,9 @@ def solution(sim):
 
     for particle in particles:
         m_model = MobilityModel.get(particle)
-        particle.move_to_in_bounds(m_model.next_direction())
+        next_direction = m_model.next_direction(current_x_y=particle.coords)
+        if next_direction:
+            particle.move_to_in_bounds(next_direction)
 
     lib.oppnet.routing.next_step(particles, sim.get_actual_round())
 

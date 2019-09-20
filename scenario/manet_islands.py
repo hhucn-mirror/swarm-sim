@@ -1,4 +1,4 @@
-from lib.colors import Colors
+from lib.std_lib import violett, yellow, green, red
 
 num_part_per = 5
 left = -2.5
@@ -16,26 +16,24 @@ def scenario(world):
         world.add_tile(0, y)
         world.add_tile(0, -y)
     # top-left
-    world.add_particle(left, top, color=Colors.violet.value)
+    world.add_particle(left, top, color=violett)
 
-    world.add_particle(left + 1, top, color=Colors.violet.value)
-    world.add_particle(left + 0.5, top-1, color=Colors.violet.value)
-    world.add_particle(left - 0.5, top-1, color=Colors.violet.value)
+    world.add_particle(left + 1, top, color=violett)
+    world.add_particle(left + 0.5, top - 1, color=violett)
+    world.add_particle(left - 0.5, top - 1, color=violett)
 
     # bottom-left
-    world.add_particle(left, bottom, color=Colors.yellow.value)
-    world.add_particle(left + 1, bottom, color=Colors.yellow.value)
-    world.add_particle(left + 0.5, bottom + 1, color=Colors.yellow.value)
-    world.add_particle(left - 0.5, bottom + 1, color=Colors.yellow.value)
+    world.add_particle(left, bottom, color=yellow)
+    world.add_particle(left + 1, bottom, color=yellow)
+    world.add_particle(left + 0.5, bottom + 1, color=yellow)
+    world.add_particle(left - 0.5, bottom + 1, color=yellow)
     # top-right
-    world.add_particle(right, top, color=Colors.green.value)
-    world.add_particle(right - 1, top, color=Colors.green.value)
-    world.add_particle(right - 0.5, top-1, color=Colors.green.value)
-    world.add_particle(right + 0.5, top-1, color=Colors.green.value)
+    world.add_particle(right, top, color=green)
+    world.add_particle(right - 1, top, color=green)
+    world.add_particle(right - 0.5, top - 1, color=green)
+    world.add_particle(right + 0.5, top - 1, color=green)
     # bottom-right
-    world.add_particle(right - 1, bottom, color=Colors.red.value)
-    world.add_particle(right - 0.5, bottom + 1, color=Colors.red.value)
-    world.add_particle(right + 0.5, bottom + 1, color=Colors.red.value)
-    world.add_particle(right, bottom, color=Colors.red.value)
-
-
+    world.add_particle(right - 1, bottom, color=red)
+    world.add_particle(right - 0.5, bottom + 1, color=red)
+    world.add_particle(right + 0.5, bottom + 1, color=red)
+    world.add_particle(right, bottom, color=red)

@@ -6,10 +6,9 @@ from lib.oppnet.opp_solution import event_queue
 
 
 class Message:
-
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None):
+    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None, is_copy=False):
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
@@ -33,22 +32,26 @@ class Message:
         self.delivery_round = 0
         self.forwarder = None
         self.ttl = ttl
-        self.hop_count = 0
+        self.hops = 0
         self.content = content
 
         Message.seq_number += 1
 
+        if not is_copy:
+            self.__append_to_store__()
+
+    def __append_to_store__(self):
         try:
-            sender.send_store.append(self)
+            self.sender.send_store.append(self)
         except OverflowError:
-            event = NetworkEvent(EventType.ReceiverOutOfMem, sender, receiver, start_round, self)
+            event = NetworkEvent(EventType.ReceiverOutOfMem, self.sender, self.receiver, self.start_round, self)
             event_queue.append(event)
 
     def __copy__(self):
-        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content)
+        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True)
         new.key = self.key
         new.seq_number = self.seq_number
-        new.hop_count = self.hop_count
+        new.hops = self.hops
         Message.seq_number -= 1
         return new
 
@@ -58,11 +61,11 @@ class Message:
         """
         return id(self)
 
-    def inc_hop_count(self):
+    def inc_hops(self):
         """
         Increments message hop count
         """
-        self.hop_count += 1
+        self.hops += 1
 
     def set_sender(self, sender):
         """
@@ -98,7 +101,7 @@ def send_message(msg_store, sender, receiver, message: Message):
     message = copy.copy(message)
 
     # remove from original store if ttl expired after this send
-    if message.hop_count+1 == message.ttl:
+    if message.hops + 1 == message.ttl:
         ttl_expired(original, msg_store, sender, receiver, current_round)
 
     net_event = None
@@ -172,7 +175,8 @@ def __deliver_message__(message, sender, receiver, current_round):
             net_event = NetworkEvent(EventType.MessageDeliveredFirst, sender, receiver, current_round, message)
         else:
             net_event = NetworkEvent(EventType.MessageDelivered, sender, receiver, current_round, message)
-    ___store_message__(store, message, sender, receiver, current_round)
+    if not store.contains_key(message.key):
+        ___store_message__(store, message, sender, receiver, current_round)
     return net_event
 
 
@@ -191,7 +195,7 @@ def ___store_message__(store, message, sender, receiver, current_round):
     :param current_round: The current simulator round.
     :type current_round: int
     """
-    message.inc_hop_count()
+    message.inc_hops()
     try:
         store.append(message)
     except OverflowError:
@@ -217,7 +221,7 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     messages = []
     if ttl_range is not None:
         if ttl_range is not tuple:
-            ttl_range = (1, round(sim.get_max_round()/10))
+            ttl_range = (1, round(sim.get_max_round() / 10))
     else:
         ttl_range = (sim.message_ttl, sim.message_ttl)
     for sender in particle_list:
