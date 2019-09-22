@@ -1,31 +1,15 @@
-import logging
-import random
 
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
+def solution(sim):
 
-
-direction = [NE, E, SE, SW, W, NW]
-
-ttl = 0
-dir = NE
-max = 0
-
-
-
-def solution(sim, world):
-
-    for particle in world.get_particle_list():
+    for particle in sim.get_particle_list():
         global ttl
         global max
         global dir
 
-        if sim.get_actual_round() == 0:
+        if sim.get_actual_round() == 1:
             max = 0
             ttl = 0
             dir = NE
@@ -45,6 +29,6 @@ def solution(sim, world):
             elif dir==SE:
                 dir=NE
 
-        particle.create_location()
+        particle.create_marker()
         particle.move_to(dir)
         ttl = ttl - 1

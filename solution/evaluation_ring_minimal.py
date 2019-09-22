@@ -1,4 +1,5 @@
 import lib.oppnet.routing
+from lib.oppnet import opp_solution
 from lib.oppnet.communication import Message
 from lib.oppnet.mobility_model import MobilityModel
 
@@ -7,7 +8,7 @@ Made for scenario:
     sim.add_particle(-1, 0)
     sim.add_particle(0, 0)
     sim.add_particle(1, 0)
-    
+
 This solution is supposed to evaluate assertions for message delivery within a small network of three particles, which
 are only pair wise in range, i.e. particle 1 at x=-1, y=0, can see particle 2 at x=0, y=0 but not particle 3 at x=1,
 y=0. Therefore delivery from particle 1 to particle 3 and in reverse will take two hops (delivery via particle 2, that
@@ -25,14 +26,14 @@ As the starting round for all six messages is 1, we can for example expect messa
 
 
 class DeliveryAssertions:
-    def __init__(self, message, delivery_round, hops):
+    def __init__(self, message, delivery_round, hop_count):
         self.message = message
         self.delivery_round = delivery_round
-        self.hops = hops
+        self.hop_count = hop_count
 
     def execute(self, message):
         assert message.delivery_round == self.delivery_round
-        assert message.hops == self.hops
+        assert message.hop_count == self.hop_count
 
 
 def solution(sim):
@@ -54,33 +55,12 @@ def solution(sim):
         start_round = 1
         hops = 1
         # left to middle
-        m1 = Message(particles[0], particles[1], 1, sim.message_ttl)
-        # middle to left
-        m2 = Message(particles[1], particles[0], 1, sim.message_ttl)
-        # middle to right
-        m3 = Message(particles[1], particles[2], 1, sim.message_ttl)
-        # right to middle
-        m4 = Message(particles[2], particles[1], 1, sim.message_ttl)
+        m1 = Message(particles[0], particles[int(len(particles) / 2)], 1, sim.message_ttl)
         delivery_assertions = []
 
-        for m in [m1, m2, m3, m4]:
+        for m in [m1]:
             delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        hops = 2
-        # left to right
-        m5 = Message(particles[0], particles[2], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m5, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        # right to left
-        m6 = Message(particles[2], particles[0], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m6, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
+                                                          hop_count=hops))
 
     for particle in particles:
         m_model = MobilityModel.get(particle)
@@ -101,3 +81,5 @@ def solution(sim):
                 print("Assertion for message {} failed".format(m.seq_number))
             except KeyError:
                 print("Message {} not delivered".format(m.seq_number))
+
+    opp_solution.process_event_queue(sim)

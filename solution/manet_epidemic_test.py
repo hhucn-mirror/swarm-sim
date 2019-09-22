@@ -1,7 +1,6 @@
-from lib.comms import generate_random_messages
-from lib.mobility_model import MobilityModel, Mode
-import lib.routing
-
+import lib.oppnet.routing
+from lib.oppnet.communication import generate_random_messages
+from lib.oppnet.mobility_model import MobilityModel, Mode
 
 scan_radius = 1
 
@@ -18,18 +17,20 @@ def solution(sim):
             p_role, m_model = get_role_and_model(particle_number, particle, p_zone)
 
             m_model.set(particle)
-            r_params = lib.routing.RoutingParameters(lib.routing.Algorithm.Epidemic, scan_radius,
-                                                     manet_role=p_role, manet_group=m_group)
+            r_params = lib.oppnet.routing.RoutingParameters(lib.oppnet.routing.Algorithm.Epidemic, scan_radius,
+                                                            manet_role=p_role, manet_group=m_group)
             r_params.set(particle)
             particle_number += 1
     else:
         if sim.get_actual_round() % 5 == 0:
             generate_random_messages(particles, len(particles), sim)
         for particle in particles:
-            lib.routing.next_step(particle)
+            lib.oppnet.routing.next_step(particle, sim.get_actual_round())
             # move the particle to the next location
             m_model = MobilityModel.get(particle)
-            particle.move_to(m_model.next_direction(current_x_y=particle.coords))
+            direction = m_model.next_direction(current_x_y=particle.coords)
+            if direction:
+                particle.move_to(direction)
 
 
 def get_zone_and_group(particle_number, sim):
@@ -54,9 +55,9 @@ def get_zone_and_group(particle_number, sim):
 
 def get_role_and_model(particle_number, particle, p_zone):
     if particle_number % 4 == 0:
-        p_role = lib.routing.MANeTRole.Router
+        p_role = lib.oppnet.routing.MANeTRole.Router
         m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Static)
     else:
-        p_role = lib.routing.MANeTRole.Node
+        p_role = lib.oppnet.routing.MANeTRole.Node
         m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Static, zone=p_zone)
     return p_role, m_model

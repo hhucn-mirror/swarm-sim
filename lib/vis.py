@@ -1,12 +1,10 @@
-import datetime
-import importlib
-import math
-import os
-import time
-
-import pyglet.window.key as key
+import datetime, math, os, time
 from pyglet.gl import *
-from pyglet.window import mouse, Window
+from pyglet.window import mouse
+import pyglet.window.key as key
+import importlib
+import subprocess
+import pandas as pd
 
 # screenshot manager parameters
 screenshot_directory = 'screenshots/'
@@ -40,7 +38,8 @@ rounds_per_second = 10
 # tile_alpha = 0.6
 particle_alpha = 1
 
-location_alpha = 1
+marker_alpha = 1
+
 
 
 def coords_to_sim(coords):
@@ -61,8 +60,6 @@ class ScreenshotManager:
     dt = datetime.datetime.now()
     #prefix = dt.isoformat(sep = '_', timespec = 'seconds').replace(':', '') + '_'
     prefix = dt.isoformat(sep='_').replace(':', '') + '_'
-
-    @staticmethod
     def takeScreenshot():
         if not os.path.exists(screenshot_directory):
             os.makedirs(screenshot_directory)
@@ -104,13 +101,13 @@ class View:
 
     def update(self):
         halfZoomRec = 0.5 / self.zoom
-        self.left = self.focusPos[0] - halfZoomRec * self.width
-        self.right = self.focusPos[0] + halfZoomRec * self.width
-        self.bottom = self.focusPos[1] - halfZoomRec * self.height
-        self.top = self.focusPos[1] + halfZoomRec * self.height
+        self.left = self.focusPos[0] - halfZoomRec * self.width;
+        self.right = self.focusPos[0] + halfZoomRec * self.width;
+        self.bottom = self.focusPos[1] - halfZoomRec * self.height;
+        self.top = self.focusPos[1] + halfZoomRec * self.height;
 
 
-class VisWindow(Window):
+class VisWindow(pyglet.window.Window):
     def __init__(self, window_size_x, window_size_y, sim):
         #super().__init__(sim.get_sim_x_size(), sim.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
         super().__init__(window_size_x, window_size_y , resizable=window_resizable, vsync=False, caption="Simulator")
@@ -121,7 +118,7 @@ class VisWindow(Window):
         self.sim = sim
         self.init_tile_vertex_list()
         self.init_particle_vertex_list()
-        self.init_location_vertex_list()
+        self.init_marker_vertex_list()
         self.view = View()
 
         self.particleTexture = pyglet.image.load('lib/images/particle.png').get_mipmapped_texture()
@@ -152,7 +149,6 @@ class VisWindow(Window):
 
     def exit_callback(self):
         self.close()
-
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.view.scroll(x, y, scroll_x, scroll_y)
 
@@ -210,7 +206,7 @@ class VisWindow(Window):
     def draw(self):
         self.update_tiles()
         self.update_particles()
-        self.update_locations()
+        self.update_markers()
         glLoadIdentity()
         glOrtho(self.view.left, self.view.right, self.view.bottom, self.view.top, 1, -1)
 
@@ -226,7 +222,7 @@ class VisWindow(Window):
         if len(self.sim.tiles) != 0:
             self.tile_vertex_list.draw(GL_QUADS)
         self.particle_vertex_list.draw(GL_QUADS)
-        self.location_vertex_list.draw(GL_QUADS)
+        self.marker_vertex_list.draw(GL_QUADS)
 
         self.flip()
 
@@ -270,6 +266,7 @@ class VisWindow(Window):
                                                                     #list(range(0,8 * len(self.sim.tiles))),
                                                                     'v2f', 't2f', 'c4f')
         self.update_tiles(True)
+
 
     def update_tiles(self, update_all=False):
         foreground = []
@@ -315,13 +312,13 @@ class VisWindow(Window):
             texRight = 1 / 8
             texBottom = 5 / 8
             texTop = 6 / 8
-            tile_alpha = 1
+            #tile_alpha = 1
         else:
             texLeft = 7 / 8
-            texRight = 8 / 8
+            texRight = 1 # 8/8
             texBottom = 4 / 8
             texTop = 5 / 8
-            tile_alpha = 0.5
+            #tile_alpha = 0.5
 
         self.tile_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom, texRight, texTop,
                                                               texLeft, texTop]
@@ -350,6 +347,7 @@ class VisWindow(Window):
         else:
             pass
 
+
     def update_particle(self, i, particle):
         weird = 256 / 220
         pos = coords_to_sim(particle.coords)
@@ -365,58 +363,58 @@ class VisWindow(Window):
             texRight = 1 / 8
             texBottom = 7 / 8
             texTop = 6 / 8
-            particle.set_alpha(0.5)
+            #particle.set_alpha(0.5)
         else:
             texLeft = 0 / 8
             texRight = 1 / 8
             texBottom = 0 / 8
             texTop = 1 / 8
-            particle.set_alpha(1)
+            #particle.set_alpha(1)
         self.particle_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
         self.particle_vertex_list.colors[16 * i: 16 * i + 16] = (particle.color + [particle.get_alpha()]) * 4
 
-    def init_location_vertex_list(self):
-        self.location_vertex_list = self.location_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.sim.locations), 'v2f', 't2f', 'c4f')
-        self.update_locations(True)
+    def init_marker_vertex_list(self):
+        self.marker_vertex_list = self.marker_vertex_list = pyglet.graphics.vertex_list \
+            (4 * len(self.sim.markers), 'v2f', 't2f', 'c4f')
+        self.update_markers(True)
 
-    def update_locations(self, update_all=True):
-        if (len(self.sim.locations) != 0):
-            if self.sim.get_location_deleted():
-                self.location_vertex_list.resize(4 * len(self.sim.locations))
-                self.sim.set_location_deleted()
+    def update_markers(self, update_all=True):
+        if (len(self.sim.markers) != 0):
+            if self.sim.get_marker_deleted():
+                self.marker_vertex_list.resize(4 * len(self.sim.markers))
+                self.sim.set_marker_deleted()
                 update_all = True
-            for i, location in enumerate(self.sim.locations):
-                if location.created:
-                    self.location_vertex_list.resize(4 * len(self.sim.locations))
+            for i, marker in enumerate(self.sim.markers):
+                if marker.created:
+                    self.marker_vertex_list.resize(4 * len(self.sim.markers))
                     # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
-                    location.created = False
-                if update_all or location.modified:
-                    self.update_location(i, location)
-                    location.modified = False
+                    marker.created = False
+                if update_all or marker.modified:
+                    self.update_marker(i, marker)
+                    marker.modified = False
         else:
             pass
 
 
-    def update_location(self, i, location):
+    def update_marker(self, i, marker):
         weird = 256 / 220
-        pos = coords_to_sim(location.coords)
+        pos = coords_to_sim(marker.coords)
         x = pos[0]
         y = pos[1]
 
-        self.location_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
+        self.marker_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
                                                                 y + weird, x - weird, y + weird]
         texLeft = 7/8
-        texRight = 8/8
+        texRight = 1 #8/8
         texBottom = 0/8
         texTop = 1/8
 
-        self.location_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
+        self.marker_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
-        self.location_vertex_list.colors[16 * i: 16 * i + 16] = (location.color + [location.get_alpha()]) * 4
+        self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_alpha()]) * 4
 
     def run(self):
         p = 0
@@ -431,7 +429,6 @@ class VisWindow(Window):
                 mod.solution(self.sim)
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
-                    self.sim.process_event_queue()
                     self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
                     self.sim.inc_round_cnter()  # increase simulation round counter by one.
             self.dispatch_events()

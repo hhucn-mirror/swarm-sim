@@ -1,9 +1,11 @@
-"""The location module provides the interface to the locations. A location is any point on
+"""The marker module provides the interface to the markers. A marker is any point on
  the coordinate system of the simulators sim"""
+
 
 import uuid
 import logging
 from datetime import datetime
+
 
 black = 1
 gray = 2
@@ -28,24 +30,24 @@ color_map = {
 }
 
 
-class Matter:
-    """In the classe location all the methods for the characterstic of a location is included"""
+class Matter():
+    """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
-        """Initializing the location constructor"""
-        self.coords = (x, y)
+    def __init__(self, sim, coords, color=black, alpha=1, type = None, mm_size=100):
+        """Initializing the marker constructor"""
+        self.coords = coords
         self.color = color_map[color]
-        self.__id = uuid.uuid4()
-        self.memory_delay_time = 3
-        self.memory_delay = True
-        self.memory_buffer = []
-        self._tmp_memory = []
+        self.__id = str(uuid.uuid4())
+        self.memory_delay_time=3
+        self.memory_delay=True
+        self.memory_buffer=[]
+        self._tmp_memory=[]
         self.sim = sim
-        self._memory = {}
-        self.__modified = False
-        self.__alpha = alpha
+        self._memory={}
+        self.__modified=False
+        self.__alpha=alpha
         self.type = type
-        self.mm_limit = mm_limit
+        self.mm_limit = sim.config_data.mm_limitation
         self.mm_size = mm_size
 
     def set_alpha(self, alpha):
@@ -56,22 +58,19 @@ class Matter:
         :return: None
         """
         if (0 <= alpha <= 1):
-            self.__alpha = round(alpha, 2)
-            self.touch()
+            self.__alpha = round(alpha,2)
         elif alpha < 0:
             self.__alpha = 0
-            self.touch()
         elif alpha > 1:
             self.__alpha = 1
-            self.touch()
-
+        self.touch()
     def get_alpha(self):
         """
         Returns the alpha value of the particle
 
         :return: alpha
         """
-        return round(self.__alpha, 2)
+        return round(self.__alpha,2)
 
     def read_memory_with(self, key):
         """
@@ -86,7 +85,7 @@ class Matter:
         #         if key ==
         if key in self._memory:
             tmp_memory = self._memory[key]
-            self.sim.csv_round_writer.update_metrics(memory_read=1)
+            self.sim.csv_round_writer.update_metrics( memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
             return None
         if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:
@@ -95,12 +94,13 @@ class Matter:
 
     def read_whole_memory(self):
         """
-        Reads all  locations own memory based on a give keywoard
+        Reads all  markers own memory based on a give keywoard
 
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
-        if self._memory != None:
+        if self._memory != None :
+            self.sim.csv_round_writer.update_metrics(memory_read=1)
             return self._memory
         else:
             return None
@@ -114,13 +114,14 @@ class Matter:
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len(self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
             self.sim.csv_round_writer.update_metrics(memory_write=1)
             return True
         else:
             return False
-            # write csv
+            #write csv
+
 
     def write_memory(self, data):
         """
@@ -131,40 +132,53 @@ class Matter:
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len(self._memory) < self.mm_size) or not self.mm_limit:
-            self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
-            self.sim.csv_round_writer.update_metrics(memory_write=1)
-            return True
+        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+                self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
+                self.sim.csv_round_writer.update_metrics(memory_write=1)
+                return True
         else:
             return False
-            # write csv
+            #write csv
+
 
     def delete_memeory_with(self, key):
         del self._memory[key]
 
     def delete_whole_memeory(self):
-        self._memory.clear()
+         self._memory.clear()
+
 
     def get_id(self):
         """
-        Gets the location id
-        :return: Location id
+        Gets the marker id
+        :return: marker id
         """
         return self.__id
 
     def set_color(self, color):
         """
-        Sets the location color
+        Sets the marker color
 
-        :param color: Location color
+        :param color: marker color
         :return: None
         """
-        if type(color) == int:
+        if type (color) == int:
             self.color = color_map[color]
         else:
             self.color = color
-
         self.touch()
+
+
+    def get_color(self):
+        """
+        Sets the marker color
+
+        :param color: marker color
+        :return: None
+        """
+        for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+         if code == self.color:
+           return(color)
 
     def touch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""
@@ -173,3 +187,4 @@ class Matter:
     def untouch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""
         self.modified = False
+

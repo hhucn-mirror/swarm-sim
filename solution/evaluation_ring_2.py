@@ -24,15 +24,16 @@ As the starting round for all six messages is 1, we can for example expect messa
 """
 
 
+
 class DeliveryAssertions:
-    def __init__(self, message, delivery_round, hops):
+    def __init__(self, message, delivery_round, hop_count):
         self.message = message
         self.delivery_round = delivery_round
-        self.hops = hops
+        self.hop_count = hop_count
 
     def execute(self, message):
         assert message.delivery_round == self.delivery_round
-        assert message.hops == self.hops
+        assert message.hop_count == self.hop_count
 
 
 def solution(sim):
@@ -54,33 +55,17 @@ def solution(sim):
         start_round = 1
         hops = 1
         # left to middle
-        m1 = Message(particles[0], particles[1], 1, sim.message_ttl)
-        # middle to left
-        m2 = Message(particles[1], particles[0], 1, sim.message_ttl)
-        # middle to right
-        m3 = Message(particles[1], particles[2], 1, sim.message_ttl)
-        # right to middle
-        m4 = Message(particles[2], particles[1], 1, sim.message_ttl)
+        msg_list = []
+        for i in range(0, len(particles)):
+            target = (int(len(particles)/2) + i)%len(particles)
+            msg_list.append(Message(particles[i], particles[target], start_round=sim.get_actual_round(),
+                                    ttl=sim.message_ttl))
+
         delivery_assertions = []
 
-        for m in [m1, m2, m3, m4]:
+        for m in msg_list:
             delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        hops = 2
-        # left to right
-        m5 = Message(particles[0], particles[2], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m5, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        # right to left
-        m6 = Message(particles[2], particles[0], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m6, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
+                                                          hop_count=hops))
 
     for particle in particles:
         m_model = MobilityModel.get(particle)
