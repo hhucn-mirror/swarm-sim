@@ -19,13 +19,19 @@ NW = 5
 direction = [NE, E, SE, SW, W, NW]
 info_plot=[[]]
 filler_actual_count=[]
+filler_actual_count.append(0)
 calc_count=0
 table_calcs= ""
 aging_factor=0.05
+initial_size=0
+
 
 def solution(world):
     global calc_count
     global table_calcs
+    global initial_size
+    if world.get_actual_round()==1:
+        initial_size=len(world.get_particle_list())
     #max count for plots and table size
     table_size_max=10
     # configurations for Gossip
@@ -42,13 +48,13 @@ def solution(world):
             setattr(rnd_particle, "particle_count",0)
             #for average|min|max calc | local
             setattr(rnd_particle, "current_min", 0)
-            setattr(rnd_particle, "current_max", 0)
-            setattr(rnd_particle, "current_average", 0)
-            setattr(rnd_particle, "min_rounds", 100)
+            setattr(rnd_particle, "current_max", 1)
+            setattr(rnd_particle, "current_average", 1)
+            setattr(rnd_particle, "min_rounds", 70)
             setattr(rnd_particle, "actual_round", 0)
             # for average|min|max calc | global
             setattr(rnd_particle, "min", 0)
-            setattr(rnd_particle, "max", 0)
+            setattr(rnd_particle, "max", 1)
             setattr(rnd_particle, "average", 1)
             # version number
             setattr(rnd_particle, "version_number", 1)
@@ -99,7 +105,9 @@ def solution(world):
         if(neighbour_found_in_dir!=-1):
             current_sum_neighbour=rnd_particle.get_particle_in(neighbour_found_in_dir).sum
 
-            if (rnd_particle.max-rnd_particle.average)<np.ceil(rnd_particle.current_average*aging_factor) and rnd_particle.actual_round>=rnd_particle.min_rounds:
+            if abs((rnd_particle.current_max-rnd_particle.average))<np.ceil(rnd_particle.average*aging_factor) and \
+                    abs(rnd_particle.current_min-rnd_particle.average)<np.ceil(rnd_particle.average*aging_factor) and \
+                    rnd_particle.actual_round>=rnd_particle.min_rounds :
                 reset_to_master(rnd_particle)
 
             print("version nr:", rnd_particle.version_number)
@@ -107,10 +115,10 @@ def solution(world):
             if rnd_particle.version_number < rnd_particle_neighbour.version_number:
                 reset_particle(rnd_particle,rnd_particle_neighbour)
 
-            if rnd_particle.version_number > rnd_particle_neighbour.version_number:
-                reset_particle(rnd_particle_neighbour,rnd_particle)
+            #if rnd_particle.version_number > rnd_particle_neighbour.version_number:
+            #    reset_particle(rnd_particle_neighbour,rnd_particle)
 
-        if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0):
+        if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0 and rnd_particle.version_number==rnd_particle_neighbour.version_number):
 
             #aging information from last round
             consider_measurement(rnd_particle)
@@ -128,10 +136,11 @@ def solution(world):
             #prints
             #print_information(rnd_particle,neighbour_found_in_dir, current_sum, current_sum_neighbour)
             print("berechneten average:",rnd_particle.average)
-            print("berechneten max", rnd_particle.max)
+            print("current max", rnd_particle.current_max)
             #Table
-            table_calcs+=next_line_table(world.get_particle_list())
-            table_calcs += "  " + str(rnd_particle.number - 1) + "-->" + str(rnd_particle.get_particle_in(neighbour_found_in_dir).number - 1)
+            if(initial_size<=table_size_max):
+                table_calcs+=next_line_table(world.get_particle_list())
+                table_calcs += "  " + str(rnd_particle.number - 1) + "-->" + str(rnd_particle.get_particle_in(neighbour_found_in_dir).number - 1)
             #Amount of calculations between particles increased by 1
             calc_count+=1
             #
@@ -153,6 +162,30 @@ def solution(world):
     print("ROUND:", world.get_actual_round())
     print("max round", world.get_max_round())
 
+
+
+###########################################
+#REMOVING PARTICLES
+
+    if world.get_actual_round()==100:
+        for i in range(0,10):
+            rnd_particle=random.choice(world.get_particle_list())
+            world.remove_particle(rnd_particle.get_id())
+            print("removed and its now:", len(world.get_particle_list()))
+
+    if world.get_actual_round()==200:
+        for i in range(0,10):
+            rnd_particle=random.choice(world.get_particle_list())
+            world.remove_particle(rnd_particle.get_id())
+            print("removed and its now:", len(world.get_particle_list()))
+
+##########################################
+
+
+    filler_actual_count.append(len(world.get_particle_list()))
+
+
+
     if world.get_actual_round()== world.get_max_round():
         print("Terminated in round : ", world.get_actual_round())
         i=0
@@ -161,12 +194,12 @@ def solution(world):
             print("schätzt partikelanzahl im system auf:",particle.particle_count)
             print("partikel_version_number",particle.version_number )
 
-        for i in range(0, world.get_actual_round() + 1):
-            filler_actual_count.append(len(world.get_particle_list()))
+        #for i in range(0, world.get_actual_round() + 1):
+        #    filler_actual_count.append(len(world.get_particle_list()))
 
         if len(world.get_particle_list()) <= table_size_max:
             for particle in world.get_particle_list():
-                x = np.arange(0, world.get_actual_round() + 1, 1)
+                x = np.arange(1, world.get_actual_round() + 1, 1)
                 #print(x)
                 y = info_plot[particle.number]
                 #print(y)
@@ -269,7 +302,7 @@ def solution(world):
 
 def reset_to_master(particle):
     particle.sum=1
-    particle.current_min = 0
+    particle.current_min = 1
     particle.current_max = 1
     particle.current_average = 1
     particle.version_number=int(particle.version_number+random.randint(1,round(particle.average)))
@@ -278,10 +311,11 @@ def reset_to_master(particle):
 
 def reset_particle(rnd_particle, rnd_particle_neighbour):
     rnd_particle.sum = 0
-    rnd_particle.current_min = rnd_particle_neighbour.min
-    rnd_particle.current_max = rnd_particle_neighbour.max
-    rnd_particle.current_average = rnd_particle_neighbour.average
-    rnd_particle.version_number=rnd_particle_neighbour.version_number
+    rnd_particle.current_min = 0
+    rnd_particle.current_max = 0
+    rnd_particle.current_average = 0
+    rnd_particle.version_number= rnd_particle_neighbour.version_number
+    rnd_particle.actual_round=0
 
 
 
