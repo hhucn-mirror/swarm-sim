@@ -20,5 +20,5 @@ def solution(sim):
         for particle in particles:
             m_model = MobilityModel.get(particle)
             next_direction = m_model.next_direction(current_x_y=particle.coords)
-            if next_direction:
+            if next_direction is not False:
                 particle.move_to_in_bounds(next_direction)
