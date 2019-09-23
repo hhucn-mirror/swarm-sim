@@ -8,14 +8,14 @@ def scenario(world):
         part_num += 1
 
     # Food
-    world.add_tile(6.0, 8.0)
-    world.add_tile(-6.5, 7.0)
-    world.add_tile(6.0, -8.0)
-    world.add_tile(-6.5, -7.0)
+    # world.add_tile(6.0, 8.0)
+    # world.add_tile(-6.5, 7.0)
+    # world.add_tile(6.0, -8.0)
+    # world.add_tile(-6.5, -7.0)
     world.add_tile(0.5, 7.0)
-    world.add_tile(6.5, -1.0)
-    world.add_tile(-4.5, 1.0)
-    world.add_tile(-0.5, -7.0)
+    # world.add_tile(6.5, -1.0)
+    # world.add_tile(-4.5, 1.0)
+    # world.add_tile(-0.5, -7.0)
 
     # Base
     world.add_marker(0, 0, 1)
