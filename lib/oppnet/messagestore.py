@@ -52,10 +52,11 @@ class MessageStore(deque):
                 pass
 
         super().append(m)
+        self.__append_key__(m.key, self.index(m))
+
         if self.maxlen == len(self):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
-        self.__append_key__(m.key, self.index(m))
 
     def remove(self, message):
         try:
