@@ -8,5 +8,5 @@ class Particle(Particle):
                  ms_strategy=BufferStrategy.fifo):
         super().__init__(sim, x, y, color, alpha, mm_size=mm_size)
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
-        self.fwd_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.signal_velocity = 1

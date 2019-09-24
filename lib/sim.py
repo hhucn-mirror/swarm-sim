@@ -8,9 +8,7 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 import importlib
 import logging
-from lib import csv_generator, particle, tile, marker, vis
-from lib.gnuplot_generator import generate_gnuplot
-from lib.memory import Memory, MemoryMode
+from lib.oppnet.memory import Memory, MemoryMode
 import math
 import random
 import matplotlib.pyplot as plt
@@ -131,11 +129,11 @@ class Sim:
             window.run()
         else:
             while self.get_actual_round() <= self.get_max_round() and self.__end is False:
+                self.memory.try_deliver_messages(self)
                 self.solution_mod.solution(self)
                 # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
-                self.memory.try_deliver_messages(self)
                 if len(self.memory.memory) > 0:
                     self.plotdata_x.append(self.get_actual_round())
                     self.plotdata_y.append(len(self.memory.memory[0]))

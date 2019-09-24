@@ -122,8 +122,8 @@ def swarm_sim( argv ):
     logging.info('Started')
     simulator = sim.Sim( config_data )
     simulator.run()
-    plt.plot([1, 2, 3, 4])
-    plt.ylabel('some numbers')
+    #plt.plot([1, 2, 3, 4])
+    #plt.ylabel('some numbers')
     plt.show()
     logging.info('Finished')
 

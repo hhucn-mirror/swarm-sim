@@ -1,5 +1,7 @@
 import copy
 import random
+from lib.point import Point
+
 
 from lib.oppnet.meta import EventType, process_event
 
@@ -7,7 +9,7 @@ from lib.oppnet.meta import EventType, process_event
 class Message:
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None, is_copy=False):
+    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None, is_copy=False, actual_receiver=None):
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
@@ -23,6 +25,10 @@ class Message:
         """
         self.original_sender = sender
         self.sender = sender
+        if is_copy:
+            self.actual_receiver = actual_receiver
+        else:
+            self.actual_receiver = receiver
         self.receiver = receiver
         self.seq_number = Message.seq_number
         self.key = self.__create_msg_key__()
@@ -36,8 +42,18 @@ class Message:
 
         Message.seq_number += 1
 
-        if not is_copy:
-            self.__append_to_store__()
+
+    def get_receiver(self):
+        return self.receiver
+
+    def set_receiver(self, receiver):
+        self.receiver = receiver
+
+    def get_actual_receiver(self):
+        return self.actual_receiver
+
+    def set_actual_receiver(self, receiver):
+        self.actual_receiver = receiver
 
     def __append_to_store__(self):
         try:
@@ -45,10 +61,15 @@ class Message:
         except OverflowError:
             process_event(EventType.ReceiverOutOfMem, self.sender, self.receiver, self)
 
+    def get_sender(self):
+        return self.sender
+
+
     def __copy__(self):
-        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True)
+        new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True,
+                         actual_receiver=self.get_actual_receiver())
         new.key = self.key
-        new.seq_number = self.seq_number
+        new.seq_p = self.seq_number
         new.hops = self.hops
         Message.seq_number -= 1
         return new
@@ -79,7 +100,7 @@ class Message:
         self.delivered += 1
 
 
-def send_message(msg_store, sender, receiver, message: Message):
+def send_message(sender, receiver, message: Message):
     """
     Puts the :param message: object in the receiver's corresponding MessageStore. Depending on if the message is
     delivered to the sender or forwarded.
@@ -96,23 +117,23 @@ def send_message(msg_store, sender, receiver, message: Message):
     current_round = sender.sim.get_actual_round()
 
     original = message
-    message = copy.copy(message)
+    message = copy.copy(original)
+    message.set_sender(sender)
+    message.set_receiver(receiver)
+    message.inc_hops()  # TODO : move to coppy function ????
+    msg_store = sender.send_store
+
+    if message.hops == message.ttl:
+        ttl_expired(original, msg_store, sender, receiver)
+        return
+    memory = sender.sim.memory
+
 
     # remove from original store if ttl expired after this send
-    if message.hops + 1 == message.ttl:
-        ttl_expired(original, msg_store, sender, receiver)
-
-    if receiver.get_id() == message.receiver.get_id():
-        __deliver_message__(message, sender, receiver, current_round)
+    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]), current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
+    if receiver.get_id() == message.get_actual_receiver().get_id():
         # remove original upon delivery
         msg_store.remove(original)
-    else:
-        # only forward if the receiver does not yet have the message
-        store = receiver.fwd_store
-        if not store.contains_key(message.key):
-            message.inc_hops()
-            ___store_message__(store, message, sender, receiver)
-            process_event(EventType.MessageForwarded, sender, receiver, message)
 
 
 def ttl_expired(message, store, sender, receiver):
@@ -168,10 +189,10 @@ def __deliver_message__(message, sender, receiver, current_round):
         else:
             process_event(EventType.MessageDelivered, sender, receiver, message)
     if not store.contains_key(message.key):
-        ___store_message__(store, message, sender, receiver)
+        store_message(store, message, sender, receiver)
 
 
-def ___store_message__(store, message, sender, receiver):
+def store_message(message, sender, receiver):
     """
     Puts the :param message: in the :param receiver:'s :param store: and handles OverflowError by creating
     a ReceiverOutOfMem NetworkEvent. The actual overflow is handled internally in the :param store:
@@ -184,6 +205,16 @@ def ___store_message__(store, message, sender, receiver):
     :param receiver: The receiver of the message.
     :type receiver: :class:`~particle.Particle`
     """
+    if message.get_actual_receiver().number == message.get_receiver().number:  # TODO: ???
+        print("{} :: {}".format(message.actual_receiver.number, message.receiver.number))
+        store = receiver.rcv_store
+        process_event(EventType.MessageDelivered, message.sender, message.receiver, message)
+        if message.original_sender == message.sender:
+            process_event(EventType.MessageDeliveredDirect, message.sender, message.receiver, message)
+    else:
+        store = receiver.send_store
+        if not(store.contains_key(message.key)):
+            process_event(EventType.MessageForwarded, message.sender, message.receiver, message)  # TODO: remove receiver sender
     try:
         store.append(message)
     except OverflowError:

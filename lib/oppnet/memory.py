@@ -1,5 +1,8 @@
 import math
 from enum import Enum
+from lib.oppnet.communication import store_message
+from lib.oppnet.meta import process_event, EventType
+
 
 class MemoryMode(Enum):
     Schedule = 0
@@ -36,15 +39,17 @@ class Memory:
 
     def add_delta_message_on(self, target_id, msg, position, start_round, delta, expirerate):
         if self.mode == MemoryMode.Delta:
+            process_event(EventType.MessageSent, msg.sender, msg.receiver, msg)  # TODO rethink section
             if target_id in self.memory.keys():
                 self.memory.get(target_id).append((msg, position, start_round, delta, expirerate))
             else:
                 self.memory[target_id] = [(msg, position, start_round, delta, expirerate)]
+
         else:
             #TODO: throw error
             print("wrong mode")
 
-    def try_deliver_delta_messages(self,sim):
+    def try_deliver_delta_messages(self, sim):
         actual_round = sim.get_actual_round()
         print(actual_round)
         new_memory = {}
@@ -63,8 +68,7 @@ class Memory:
                 distance_start_target = math.sqrt(x**2 + y**2)
                 if distance < expirerate:
                     if distance >= distance_start_target:
-                        print("delivered")
-                        sim.get_particle_map_id()[target].write_memory(msg)
+                        store_message(msg, msg.get_sender(), msg.get_receiver())
                     else:
                         new_msgs.append(m)
             if len(new_msgs) > 0:

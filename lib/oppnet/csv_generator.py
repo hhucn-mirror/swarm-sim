@@ -622,7 +622,7 @@ class MessageData:
         self.key = message.key
         self.seq_number = message.seq_number
         self.sender = message.original_sender.number
-        self.receiver = message.receiver.number
+        self.receiver = message.actual_receiver.number
         self.sent = 0
         self.sent_round = message.start_round
         self.forwarded = 0

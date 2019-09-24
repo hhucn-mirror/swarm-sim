@@ -54,50 +54,6 @@ def solution(sim):
         start_round = 1
         hops = 1
         # left to middle
-        m1 = Message(particles[0], particles[1], 1, sim.message_ttl)
-        # middle to left
-        m2 = Message(particles[1], particles[0], 1, sim.message_ttl)
-        # middle to right
-        m3 = Message(particles[1], particles[2], 1, sim.message_ttl)
-        # right to middle
-        m4 = Message(particles[2], particles[1], 1, sim.message_ttl)
-        delivery_assertions = []
-
-        for m in [m1, m2, m3, m4]:
-            delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        hops = 2
-        # left to right
-        m5 = Message(particles[0], particles[2], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m5, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
-
-        # expected hop count 2
-        # expected delivery round 3
-        # right to left
-        m6 = Message(particles[2], particles[0], 1, sim.message_ttl)
-        delivery_assertions.append(DeliveryAssertions(m6, delivery_round=sim.delivery_delay * hops + start_round,
-                                                      hops=hops))
-
-    for particle in particles:
-        m_model = MobilityModel.get(particle)
-        next_direction = m_model.next_direction(current_x_y=particle.coords)
-        if next_direction:
-            particle.move_to_in_bounds(next_direction)
-
+        m1 = Message(particles[0], particles[2], 1, sim.message_ttl)
+        particles[0].send_store.append(m1)
     lib.oppnet.routing.next_step(particles, sim.get_actual_round())
-
-    # check the assertions
-    if sim.get_actual_round() == sim.get_max_round():
-        for assertion in delivery_assertions:
-            m = assertion.message
-            rcv_store = m.receiver.rcv_store
-            try:
-                assertion.execute(rcv_store.get_by_key(m.key))
-            except AssertionError:
-                print("Assertion for message {} failed".format(m.seq_number))
-            except KeyError:
-                print("Message {} not delivered".format(m.seq_number))
