@@ -12,5 +12,5 @@ class Particle(Particle):
         if not ms_strategy:
             ms_strategy = sim.particle_ms_strategy
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
-        self.fwd_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.signal_velocity = 1

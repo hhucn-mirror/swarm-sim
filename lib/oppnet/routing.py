@@ -180,20 +180,13 @@ def next_step(particles, current_round, scan_radius=None):
     # execute the SendEvents for each particle
     for particle in particles:
         routing_params = RoutingParameters.get(particle)
-
-        __execute_send_events__(routing_params, current_round)
-
-    # create new SendEvents for each particle
-
-    for particle in particles:
-        routing_params = RoutingParameters.get(particle)
         if scan_radius is not None:
             routing_params.scan_radius = scan_radius
 
         if routing_params.algorithm == Algorithm.Epidemic_MANeT:
             __create_send_events_manet__(particle, current_round)
         elif routing_params.algorithm == Algorithm.Epidemic:
-            __create_send_events__(particle, current_round)
+            __next_step_epidemic(particle, current_round)
 
 
 def __execute_send_events__(routing_params, current_round):
@@ -215,7 +208,7 @@ def __execute_send_events__(routing_params, current_round):
                     event.fire_event()
 
 
-def __create_send_events__(particle, current_round, nearby=None):
+def __next_step_epidemic(sender, current_round, nearby=None):
     """
     Creates SendEvents for a :param particle:.
     :param particle: The particle which creates SendEvents.
@@ -223,23 +216,16 @@ def __create_send_events__(particle, current_round, nearby=None):
     :param current_round: Current simulator round.
     :type current_round: int
     """
-    routing_params = RoutingParameters.get(particle)
+
+    routing_params = RoutingParameters.get(sender)
     if nearby is None:
-        nearby = particle.scan_for_particle_within(hop=routing_params.scan_radius)
+        nearby = sender.scan_for_particle_within(hop=routing_params.scan_radius)
         if nearby is None:
             return
 
-    send_events = []
-    fwd_events = []
-    for neighbour in nearby:
-        if len(particle.send_store):
-            send_events.append(SendEvent.create_net_events(list(particle.send_store),
-                                                           current_round, particle.send_store, particle, neighbour))
-        if list(particle.fwd_store):
-            fwd_events.append(SendEvent.create_net_events(list(particle.fwd_store),
-                                                          current_round, particle.fwd_store, particle, neighbour))
-    if len(send_events) > 0 or len(fwd_events) > 0:
-        routing_params.add_events([send_events, fwd_events])
+    for msg in list(sender.send_store):
+        for neighbour in nearby:
+            send_message(sender, neighbour, msg)
 
 
 def __create_send_events_manet__(particle, current_round):
@@ -257,7 +243,7 @@ def __create_send_events_manet__(particle, current_round):
 
     if routing_params.manet_role == MANeTRole.Node:
         nearby = [neighbour for neighbour in nearby if RoutingParameters.same_manet_group(particle, neighbour)]
-        __create_send_events__(particle, current_round, nearby)
+        __next_step_epidemic(particle, current_round, nearby)
 
     elif routing_params.manet_role == MANeTRole.Router:
-        __create_send_events__(particle, current_round)
+        __next_step_epidemic(particle, current_round)

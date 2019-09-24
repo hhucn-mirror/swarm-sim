@@ -85,7 +85,7 @@ class Matter():
         #         if key ==
         if key in self._memory:
             tmp_memory = self._memory[key]
-            self.sim.csv_round_writer.update_metrics( memory_read=1)
+            self.sim.csv_round_writer.update_metrics(memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
             return None
         if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:

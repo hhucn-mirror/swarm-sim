@@ -2,6 +2,7 @@ from collections import deque
 from enum import Enum
 
 from lib.oppnet.communication import Message
+from lib.oppnet.meta import process_event, EventType
 
 
 class BufferStrategy(Enum):
@@ -41,6 +42,8 @@ class MessageStore(deque):
 
     def append(self, m: Message):
         # pop the right element if max len reached
+        if self.contains_key(m.key):
+            return
         if self.maxlen == len(self):
             k = list(self)[0].key
             if self.strategy == BufferStrategy.lifo:

@@ -57,9 +57,10 @@ def solution(sim):
         m1 = Message(particles[0], particles[int(len(particles) / 2)], 1, sim.message_ttl)
         delivery_assertions = []
 
-        for m in [m1]:
-            delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hop_count=hops))
+        #for m in [m1]:
+        #    delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
+        #                                                  hop_count=hops))
+        particles[0].send_store.append(m1)
 
     for particle in particles:
         m_model = MobilityModel.get(particle)
