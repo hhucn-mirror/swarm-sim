@@ -34,17 +34,12 @@ def generating_random_spraded_particles (sim, max_size_particle):
             print(" x and y ", (x, y))
     print("Max Size of created Particle", len(sim.particles))
 
-def create_particle_in_line(sim, max_size_particle):
-    max_x = -1000000
-    for tile in sim.tiles:
-        if tile.coords[0] > max_x:
-            max_x = tile.coords[0]
-            coords = tile.coords
-    if coords[0] % 1 != 0:
-        start_i = int(coords[0] - 0.5)
+def create_particle_in_line(sim, max_size_particle, start_coords):
+    if start_coords[0] % 1 != 0:
+        start_i = int(start_coords[0] - 0.5)
         for i in range(start_i, start_i+max_size_particle):
-            sim.add_particle(i + 1.5, coords[1])
+            sim.add_particle(i + 1.5, start_coords[1])
 
     else:
-        for i in range(int(coords[0] + 1), int(coords[0] + 1) + max_size_particle):
-            sim.add_particle(i, coords[1])
+        for i in range(int(start_coords[0] + 1), int(start_coords[0] + 1) + max_size_particle):
+            sim.add_particle(i, start_coords[1])
