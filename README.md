@@ -2,7 +2,7 @@ For Linux:
 
 -unzip the source code:
 
-    unzip swarm-sim.zip
+    unzip swarm-world.zip
 
 
 -install the following python packages:
@@ -21,7 +21,7 @@ For Linux:
 
 - go to the main folder of the SNS-Folder and start it with:
 
-    python3.6 run.py
+    python3.6 swarm-sim.py
 
 
 For development the IDE Pycharm is recommended:
@@ -29,12 +29,12 @@ For development the IDE Pycharm is recommended:
 https://www.jetbrains.com/help/pycharm/install-and-set-up-pycharm.html
 
 
-For Windows:
+For Windows/Linux/MacOs:
 - unzip souce code
 - install python3.6
 - install pycharm
 - run pycharm
-- open swarm-sim as a project
+- open swarm-world as a project
 - Open File->Settings-"Project-Interpreter"
 - Chose python3.6 as an interpreter
 - Chose the plus sign and install:
@@ -43,7 +43,7 @@ For Windows:
     3. pandas
     4. pyglet
 - press Okey
-- wait that everything is installed
-- chose Run->run.py
+- wait until everything is installed
+- chose Run->swarm-sim.py
     - If it gives an error that it cannot find the interpretetor
        Open Run->"Edit Configuration" Chose the python3.6 as an interpretetor

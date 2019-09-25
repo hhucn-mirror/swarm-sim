@@ -1,4 +1,4 @@
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 import math
 
 
@@ -67,7 +67,7 @@ def move_to_fl_dir(particle):
     #Check if particle has a global p_max and it is not equal to its own distance
     if particle.p_max.dist > particle.own_dist:
         #check if the global free location is smaller than the p_max_dist
-        for dir in direction:
+        for dir in direction_list:
             if particle.nh_dist_list[dir] < particle.p_max.dist and not particle.particle_in(dir) and \
                     not particle.tile_in(dir) and particle.prev_dir != dir:
                 return dir

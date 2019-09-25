@@ -1,4 +1,4 @@
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 
 def move_between_tiles(particle):
     for dir in particle.fl_dir_list:

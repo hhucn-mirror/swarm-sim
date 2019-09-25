@@ -1,4 +1,4 @@
-from scenario.scenario_std_lib import *
+from lib.swarm_sim_header import *
 
 max_size_particle = 200
 

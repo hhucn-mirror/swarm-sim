@@ -1,54 +1,25 @@
 """The marker module provides the interface to the markers. A marker is any point on
- the coordinate system of the simulators sim"""
-
-
+ the coordinate system of the simulators world"""
 import uuid
-import logging
 from datetime import datetime
+from lib.swarm_sim_header import *
 
 
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-yellow = 6
-orange = 7
-cyan = 8
-violett = 9
-
-color_map = {
-    black: [0.0, 0.0, 0.0],
-    gray: [0.3, 0.3, 0.3],
-    red: [0.8, 0.0, 0.0],
-    green: [0.0, 0.8, 0.0],
-    blue: [0.0, 0.0, 0.8],
-    yellow: [0.8, 0.8, 0.0],
-    orange: [0.8, 0.3, 0.0],
-    cyan: [0.0, 0.8, 0.8],
-    violett: [0.8, 0.2, 0.6]
-}
-
-
-class Matter():
+class Matter:
     """In the classe marker all the methods for the characterstic of a marker is included"""
-
-    def __init__(self, sim, coords, color=black, alpha=1, type=None, mm_size=100):
+    def __init__(self, world, coords, color=black, alpha=1, type=None, mm_size=100):
         """Initializing the marker constructor"""
         self.coords = coords
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
-        self.memory_delay_time=3
-        self.memory_delay=True
-        self.memory_buffer=[]
-        self._tmp_memory=[]
-        self.sim = sim
+        self.world = world
         self._memory={}
-        self.__modified=False
         self.__alpha=alpha
         self.type = type
-        self.mm_limit = sim.config_data.mm_limitation
+        self.memory_limitation = world.config_data.memory_limitation
         self.mm_size = mm_size
+        self.modified = False
+        self.created = False
 
     def set_alpha(self, alpha):
         """
@@ -64,6 +35,7 @@ class Matter():
         elif alpha > 1:
             self.__alpha = 1
         self.touch()
+
     def get_alpha(self):
         """
         Returns the alpha value of the particle
@@ -80,12 +52,9 @@ class Matter():
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
         tmp_memory = None
-        # if self.memory_delay == True:
-        #     for key in self._tmp_memory:
-        #         if key ==
         if key in self._memory:
             tmp_memory = self._memory[key]
-            self.sim.csv_round_writer.update_metrics( memory_read=1)
+            self.world.csv_round.update_metrics( memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
             return None
         if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:
@@ -100,7 +69,7 @@ class Matter():
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
         if self._memory != None :
-            self.sim.csv_round_writer.update_metrics(memory_read=1)
+            self.world.csv_round.update_metrics(memory_read=1)
             return self._memory
         else:
             return None
@@ -114,14 +83,13 @@ class Matter():
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.memory_limitation == True and len( self._memory) < self.mm_size) or not self.memory_limitation:
             self._memory[key] = data
-            self.sim.csv_round_writer.update_metrics(memory_write=1)
+            self.world.csv_round.update_metrics(memory_write=1)
             return True
         else:
             return False
             #write csv
-
 
     def write_memory(self, data):
         """
@@ -132,21 +100,19 @@ class Matter():
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.memory_limitation == True and len( self._memory) < self.mm_size) or not self.memory_limitation:
                 self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
-                self.sim.csv_round_writer.update_metrics(memory_write=1)
+                self.world.csv_round.update_metrics(memory_write=1)
                 return True
         else:
             return False
             #write csv
-
 
     def delete_memeory_with(self, key):
         del self._memory[key]
 
     def delete_whole_memeory(self):
          self._memory.clear()
-
 
     def get_id(self):
         """
@@ -167,7 +133,6 @@ class Matter():
         else:
             self.color = color
         self.touch()
-
 
     def get_color(self):
         """

@@ -1,6 +1,6 @@
 from copy import deepcopy
 import math
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 
 debug = 1
 
@@ -17,7 +17,7 @@ debug = 1
 def read(memory):
     if memory():
         rcv_buf = deepcopy(memory())
-        memeory().clear()
+        memory().clear()
         return rcv_buf
     return False
 
@@ -25,7 +25,7 @@ def read(memory):
 def send_own_distance(particle):
     if particle.own_dist != math.inf:
         dist_package = OwnInfo(particle.own_dist, particle.number)
-        for dir in direction:
+        for dir in direction_list:
             neighbor_p = particle.get_particle_in(dir)
             if neighbor_p and particle.own_dist <= neighbor_p.own_dist :
                 if debug:

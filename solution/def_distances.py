@@ -1,4 +1,4 @@
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 import math
 
 debug = 1
