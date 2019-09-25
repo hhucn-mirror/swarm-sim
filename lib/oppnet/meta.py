@@ -24,7 +24,7 @@ def process_event(event_type, sender, receiver, message):
     :param receiver: The intended receiver of the message.
     :type receiver: :class:`~particle.Particle`
     :param message: The message to send.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     """
     if event_type == EventType.MessageSent:
         sender.csv_particle_writer.write_particle(messages_sent=1)

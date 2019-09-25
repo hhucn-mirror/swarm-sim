@@ -577,7 +577,7 @@ class CsvMessageData:
         """
         Adds a new message to track.
         :param message: The message to track.
-        :type message: :class:`~comms.Message`
+        :type message: :class:`~communication.Message`
         """
         if message.key not in self.messages.keys():
             self.messages[message.key] = MessageData(message)
@@ -617,7 +617,7 @@ class MessageData:
     def __init__(self, message: Message):
         """
         :param message:
-        :type message: :class:`~comms.Message`
+        :type message: :class:`~communication.Message`
         """
         self.key = message.key
         self.seq_number = message.seq_number

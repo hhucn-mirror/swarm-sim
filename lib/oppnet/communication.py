@@ -155,41 +155,6 @@ def ttl_expired(message, store, sender, receiver):
         process_event(EventType.MessageTTLExpired, sender, receiver, message)
 
 
-def __deliver_message__(message, sender, receiver, current_round):
-    """
-    Delivers :param message: from :param sender: to :param receiver:.
-    Also creates corresponding NetworkEvent in simulator EventQueue.
-    :param message: The message to send.
-    :type message: :class:`~communication.Message`
-    :param sender: The sender of :param message:.
-    :type sender: :class:`~particle.Particle`
-    :param receiver: The receiving particle of :param message:.
-    :type receiver: :class:`~particle.Particle`
-    :param current_round: The current simulator round.
-    :type current_round: int
-    :return: The corresponding NetworkEvent depending on whether the message was delivered directly
-             and/or for the first time.
-    :rtype: :class:`~meta.NetworkEvent`
-    """
-    store = receiver.rcv_store
-
-    message.update_delivery(current_round)
-    message.inc_hops()
-
-    if sender.get_id() == message.original_sender.get_id():
-        if not store.contains_key(message.key):
-            process_event(EventType.MessageDeliveredFirstDirect, sender, receiver, message)
-        else:
-            process_event(EventType.MessageDeliveredDirect, sender, receiver, message)
-    else:
-        if not store.contains_key(message.key):
-            process_event(EventType.MessageDeliveredFirst, sender, receiver, message)
-        else:
-            process_event(EventType.MessageDelivered, sender, receiver, message)
-    if not store.contains_key(message.key):
-        store_message(message, sender, receiver)
-
-
 def store_message(message, sender, receiver):
     """
     Puts the :param message: in the :param receiver:'s :param store: and handles OverflowError by creating
