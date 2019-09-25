@@ -24,7 +24,7 @@ class CsvParticleFile:
         if not file_exists:
             self.csv_file = open(self.file_name, 'w', newline='')
             self.writer = csv.writer(self.csv_file)
-            self.writer.writerow(['Particle ID', 'Particle Number', 'Particle Steps'
+            self.writer.writerow(['Particle ID', 'Particle Number', 'Particle Steps',
                                   'Messages Sent', 'Messages Forwarded', 'Messages Delivered',
                                   'Messages Delivered Directly', 'Messages Received',
                                   'Messages TTL Expired', 'Out of Memory'
@@ -98,7 +98,7 @@ class CsvRoundData:
         self.csv_file = open(self.file_name, 'w', newline='')
         self.writer_round = csv.writer(self.csv_file)
         self.writer_round.writerow(['',
-                                    'Round Number', 'Seed', 'solution', 'Particle Counter'
+                                    'Round Number', 'Seed', 'solution', 'Particle Counter',
                                     'Particle Steps', 'Particle Steps Sum',
                                     'Messages Sent', 'Messages Forwarded',
                                     'Messages Delivered', 'Messages Delivered Directly',
@@ -119,22 +119,30 @@ class CsvRoundData:
 
         self.steps_sum += steps
 
-        self.messages_sent += messages_sent
-        self.messages_forwarded += messages_forwarded
-        self.messages_delivered += messages_delivered
-        self.messages_delivered_directly += messages_delivered_directly
-        self.messages_received += messages_received
-        self.message_ttl_expired += message_ttl_expired
-        self.messages_delivered_unique += messages_delivered_unique
-        self.messages_delivered_directly_unique += messages_delivered_directly_unique
-        self.receiver_out_of_mem += receiver_out_of_mem
-
         if self.actual_round == self.sim.get_actual_round():
-            self.steps = self.steps + steps
+            self.steps += steps
+            self.messages_sent += messages_sent
+            self.messages_forwarded += messages_forwarded
+            self.messages_delivered += messages_delivered
+            self.messages_delivered_directly += messages_delivered_directly
+            self.messages_received += messages_received
+            self.message_ttl_expired += message_ttl_expired
+            self.messages_delivered_unique += messages_delivered_unique
+            self.messages_delivered_directly_unique += messages_delivered_directly_unique
+            self.receiver_out_of_mem += receiver_out_of_mem
 
         elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
             self.steps = steps
+            self.messages_sent = messages_sent
+            self.messages_forwarded = messages_forwarded
+            self.messages_delivered = messages_delivered
+            self.messages_delivered_directly = messages_delivered_directly
+            self.messages_received = messages_received
+            self.message_ttl_expired = message_ttl_expired
+            self.messages_delivered_unique = messages_delivered_unique
+            self.messages_delivered_directly_unique = messages_delivered_directly_unique
+            self.receiver_out_of_mem = receiver_out_of_mem
         logging.debug("CSV: Ending writing_rounds")
 
     def next_line(self, round):
