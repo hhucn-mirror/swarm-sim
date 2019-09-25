@@ -362,5 +362,5 @@ class MessageData:
     def get_delivery_round(self):
         return self.delivery_round
 
-    def get_first_delivery_hop_count(self):
+    def get_first_delivery_hops(self):
         return self.first_hops
