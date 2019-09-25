@@ -1,9 +1,8 @@
 import copy
 import random
-from lib.point import Point
-
 
 from lib.oppnet.meta import EventType, process_event
+from lib.point import Point
 
 
 class Message:
@@ -25,10 +24,6 @@ class Message:
         """
         self.original_sender = sender
         self.sender = sender
-        if is_copy:
-            self.actual_receiver = actual_receiver
-        else:
-            self.actual_receiver = receiver
         self.receiver = receiver
         self.seq_number = Message.seq_number
         self.key = self.__create_msg_key__()
@@ -40,8 +35,13 @@ class Message:
         self.hops = 0
         self.content = content
 
-        Message.seq_number += 1
+        if is_copy:
+            self.actual_receiver = actual_receiver
+        else:
+            self.actual_receiver = receiver
+            self.__append_to_store__()
 
+        Message.seq_number += 1
 
     def get_receiver(self):
         return self.receiver
@@ -64,12 +64,11 @@ class Message:
     def get_sender(self):
         return self.sender
 
-
     def __copy__(self):
         new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True,
                          actual_receiver=self.get_actual_receiver())
         new.key = self.key
-        new.seq_p = self.seq_number
+        new.seq_number = self.seq_number
         new.hops = self.hops
         Message.seq_number -= 1
         return new
@@ -104,33 +103,32 @@ def send_message(sender, receiver, message: Message):
     """
     Puts the :param message: object in the receiver's corresponding MessageStore. Depending on if the message is
     delivered to the sender or forwarded.
-    :param msg_store: The MessageStore of the sender the message originates from.
-    :type msg_store: :class:`~messagestore.MessageStore`
     :param sender: The particle sending the Message.
     :type sender: :class:`~particle.Particle`
     :param receiver: The intended receiver of the message.
     :type receiver: :class:`~particle.Particle`
     :param message: The message to send.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     """
 
     current_round = sender.sim.get_actual_round()
+    msg_store = sender.send_store
+
+    # check if the message ttl has expired after this
+    if message.hops == message.ttl:
+        ttl_expired(message, msg_store, sender, receiver)
+        return
 
     original = message
     message = copy.copy(original)
     message.set_sender(sender)
     message.set_receiver(receiver)
     message.inc_hops()  # TODO : move to coppy function ????
-    msg_store = sender.send_store
 
-    if message.hops == message.ttl:
-        ttl_expired(original, msg_store, sender, receiver)
-        return
     memory = sender.sim.memory
 
-
-    # remove from original store if ttl expired after this send
-    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]), current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
+    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]),
+                                current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
     if receiver.get_id() == message.get_actual_receiver().get_id():
         # remove original upon delivery
         msg_store.remove(original)
@@ -141,7 +139,7 @@ def ttl_expired(message, store, sender, receiver):
     Handle expiry of TTL. Delete the message from :param store: and append a corresponding NetworkEvent in the
     simulator EventQueue.
     :param message: The message that expired.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     :param store: The MessageStore containing the :param message:.
     :type store: :class:`~messagestore.MessageStore`
     :param sender: The sender of the message.
@@ -162,7 +160,7 @@ def __deliver_message__(message, sender, receiver, current_round):
     Delivers :param message: from :param sender: to :param receiver:.
     Also creates corresponding NetworkEvent in simulator EventQueue.
     :param message: The message to send.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     :param sender: The sender of :param message:.
     :type sender: :class:`~particle.Particle`
     :param receiver: The receiving particle of :param message:.
@@ -189,17 +187,15 @@ def __deliver_message__(message, sender, receiver, current_round):
         else:
             process_event(EventType.MessageDelivered, sender, receiver, message)
     if not store.contains_key(message.key):
-        store_message(store, message, sender, receiver)
+        store_message(message, sender, receiver)
 
 
 def store_message(message, sender, receiver):
     """
     Puts the :param message: in the :param receiver:'s :param store: and handles OverflowError by creating
     a ReceiverOutOfMem NetworkEvent. The actual overflow is handled internally in the :param store:
-    :param store: The store :param message: is to be put in.
-    :type store: :class:`~messagestore.MessageStore`
     :param message: The message to store.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     :param sender: The sender of the message.
     :type sender: :class:`~particle.Particle`
     :param receiver: The receiver of the message.
