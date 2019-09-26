@@ -276,77 +276,34 @@ def solution(world):
             print(len(i))
 
 
-
+        #Graph4
         x4 = np.arange(0, world.get_world_x_size() * 4, 1)
         y4 = np.arange(0, world.get_world_y_size() * 4, 1)
-
-        # for x in x4:
-        #     if x%2==0:
-        #         x4.remove(x)
-        #
-        # for y in y4:
-        #     if y%2==0:
-        #         y4.remove(y)
-
-
-
-
         z4=[]
         for x in range(1,len(x4)+1,2):
             for y in range(1,len(y4)+1,2):
                 z4.append(coord_map_calc[x][y])
 
         x4=np.arange(0,world.get_world_x_size()*4,2)
-        #x42=np.arange(0.5, world.get_world_x_size()*4+0.5,2)
-        #x4f=[]
-
-
-
         y4=np.arange(0, world.get_world_y_size()*4,2)
-
-        # y4_f=[]
-        # for i in range(0, int(world.get_world_y_size())*4,2):
-        #     y4_f.append(i)
-        #
-        # g1=0
-        # for i in y4_f:
-        #     if i%2==4:
-        #         x4f.append(x41[g1])
-        #     else:
-        #         x4f.append(x42[g1])
-        #     g1+=1
-
-        # print("x4_f:", x4f)
-
         X, Y = np.meshgrid(x4, y4)
-
-        print("größe X: ", len(X))
-        print("größe Y: ", len(Y))
-
-        print(coord_map_calc)
-        print(z4)
-        print("länge von z4", len(z4))
-
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(111, projection='3d')
 
-        print("first X:", X)
         X= X / 2 - world.get_world_x_size()
-        print("next X:", X)
         g1=0
-
         for i in X:
             if g1%2!=0:
                 X[g1]+=0.5
             g1+=1
-
-        im=ax4.scatter(X, Y/2 -world.get_world_y_size(), z4, marker='o')
+        im=ax4.scatter(X, Y/2 -world.get_world_y_size(), z4 ,c=z4 , cmap='jet', marker='o')
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
         ax4.set_zlabel('Austausche')
-        fig4.colorbar(im, ax=ax4)
-
+        fig4.colorbar(im)
         im.set_clim(0, max(z4))
+
+
 
         if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
             table_calcs+=next_line_table(world.get_particle_list())
