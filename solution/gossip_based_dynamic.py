@@ -3,6 +3,7 @@ import numpy
 import numpy as np
 import matplotlib.pylab as plt
 import itertools
+from mpl_toolkits import mplot3d
 
 
 from lib.particle import Particle
@@ -22,27 +23,37 @@ filler_actual_count=[]
 filler_actual_count.append(0)
 calc_count=0
 table_calcs= ""
-aging_factor=0.05
+aging_factor=0.10
 initial_size=0
-
+coord_map_calc=[]
 
 def solution(world):
     global calc_count
     global table_calcs
     global initial_size
+    global coord_map_calc
+    table_size_max = 16
+
     if world.get_actual_round()==1:
         initial_size=len(world.get_particle_list())
-    #max count for plots and table size
-    table_size_max=10
-    # configurations for Gossip
-    #config protocol : remember last x particles
-    remember_count=10
-    #max deviation in % from local(particles) average
-    deviation=0.01
 
-    #initializes particles with attributes sum =0, particle_count=0 and check_term=0
-    #besides one particle which gets a sum value =1
-    if world.get_actual_round()==1:
+
+        for x in range(0, int(world.get_world_x_size())*4):
+            coord_map_calc.append([0])
+
+        for x in range(0, int(world.get_world_x_size()) * 4):
+            for y in range (0, int(world.get_world_y_size())*4-1):
+                coord_map_calc[x].append(0)
+
+        #for a in range(-3, 3):
+         #   for b in range(-3, 3):
+         #       if b % 2 == 0:
+         #           sim.add_particle(a, b)
+         #       else:
+         #           sim.add_particle(a + 0.5, b)
+
+
+
         for rnd_particle in world.get_particle_list():
             setattr(rnd_particle, "sum", 0)
             setattr(rnd_particle, "particle_count",0)
@@ -143,6 +154,8 @@ def solution(world):
                 table_calcs += "  " + str(rnd_particle.number - 1) + "-->" + str(rnd_particle.get_particle_in(neighbour_found_in_dir).number - 1)
             #Amount of calculations between particles increased by 1
             calc_count+=1
+            coord_map_calc[int(rnd_particle.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle.coords[1]+world.get_world_y_size())*2-1]+=1
+            coord_map_calc[int(rnd_particle_neighbour.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle_neighbour.coords[1]+world.get_world_y_size())*2-1]+=1
             #
             rnd_particle.actual_round+=1
         #print(checklist_for_threshold)
@@ -242,7 +255,7 @@ def solution(world):
                 all_particle+=(info_plot[particle.number][i]-average_plotter[i])*(info_plot[particle.number][i]-average_plotter[i])
             standard_deviation_per_round.append(np.sqrt(all_particle) / len(world.get_particle_list()))
 
-
+        #Graph 1
         x2 = np.arange(0, world.get_actual_round() + 1, 1)
         fig2,ax2=plt.subplots()
         ax2.plot(x2,average_plotter)
@@ -251,9 +264,79 @@ def solution(world):
         ax2.plot(x2,max_all_per_round)
         ax2.set(xlabel='rounds', ylabel='Average', title='Rot:Max | Blau:Durchschnitt | Grün:Min | Orange:Echter Wert')
 
+        #Graph 2
         fig3, ax3 = plt.subplots()
         ax3.plot(x2,standard_deviation_per_round)
         ax3.set(xlabel='rounds', ylabel='standard deviation', title='Standard deviation')
+
+        #Graph 3
+        print(coord_map_calc)
+        print(len(coord_map_calc))
+        for i in coord_map_calc:
+            print(len(i))
+
+
+
+        x4 = np.arange(0, world.get_world_x_size() * 4, 1)
+        y4 = np.arange(0, world.get_world_y_size() * 4, 1)
+
+        # for x in x4:
+        #     if x%2==0:
+        #         x4.remove(x)
+        #
+        # for y in y4:
+        #     if y%2==0:
+        #         y4.remove(y)
+
+
+
+
+        z4=[]
+        for x in range(1,len(x4)+1,2):
+            for y in range(1,len(y4)+1,2):
+                z4.append(coord_map_calc[x][y])
+
+        x41=np.arange(0,world.get_world_x_size()*4,2)
+        x42=np.arange(0.5, world.get_world_x_size()*4+0.5,2)
+        x4f=[]
+
+
+
+        y4=np.arange(0, world.get_world_y_size()*4,2)
+
+        # y4_f=[]
+        # for i in range(0, int(world.get_world_y_size())*4,2):
+        #     y4_f.append(i)
+        #
+        # g1=0
+        # for i in y4_f:
+        #     if i%2==4:
+        #         x4f.append(x41[g1])
+        #     else:
+        #         x4f.append(x42[g1])
+        #     g1+=1
+
+        print("x4_f:", x4f)
+
+        X, Y = np.meshgrid(x4f, y4)
+
+        print("größe X: ", len(X))
+        print("größe Y: ", len(Y))
+
+        print(coord_map_calc)
+        print(z4)
+        print("länge von z4", len(z4))
+
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(111, projection='3d')
+
+        im=ax4.scatter(X/2 - world.get_world_x_size(), Y/2 -world.get_world_y_size(), z4, marker='o')
+        ax4.set_xlabel('X coord')
+        ax4.set_ylabel('Y coord')
+        ax4.set_zlabel('Austausche')
+        fig4.colorbar(im, ax=ax4)
+
+        im.set_clim(0, max(z4))
 
         if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
             table_calcs+=next_line_table(world.get_particle_list())

@@ -13,3 +13,6 @@ def scenario(sim):
                 sim.add_particle(a+0.5, b)
 
     print("Particle amount", len(sim.get_particle_list()))
+    for particle in sim.get_particle_list():
+        print("x: ", particle.coords[0])
+        print("y: ", particle.coords[1])
