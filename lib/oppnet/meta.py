@@ -15,7 +15,7 @@ class EventType(Enum):
     ReceiverOutOfMem = 10
 
 
-def process_event(event_type, sender, receiver, message):
+def process_event(event_type, message):
     """
     :param event_type: The type of event
     :type event_type: :class:`~meta.EventType`
@@ -26,6 +26,8 @@ def process_event(event_type, sender, receiver, message):
     :param message: The message to send.
     :type message: :class:`~communication.Message`
     """
+    sender = message.sender
+    receiver = message.receiver
     if event_type == EventType.MessageSent:
         sender.csv_particle_writer.write_particle(messages_sent=1)
         sender.sim.csv_round_writer.update_metrics(messages_sent=1)

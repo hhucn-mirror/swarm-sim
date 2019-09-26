@@ -2,7 +2,6 @@ from collections import deque
 from enum import Enum
 
 from lib.oppnet.communication import Message
-from lib.oppnet.meta import process_event, EventType
 
 
 class BufferStrategy(Enum):

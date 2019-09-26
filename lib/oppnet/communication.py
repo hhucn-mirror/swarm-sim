@@ -59,7 +59,7 @@ class Message:
         try:
             self.sender.send_store.append(self)
         except OverflowError:
-            process_event(EventType.ReceiverOutOfMem, self.sender, self.receiver, self)
+            process_event(EventType.ReceiverOutOfMem, self)
 
     def get_sender(self):
         return self.sender
@@ -125,13 +125,8 @@ def send_message(sender, receiver, message: Message):
     message.set_receiver(receiver)
 
     memory = sender.sim.memory
-
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]),
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
-    if receiver.get_id() == message.get_actual_receiver().get_id():
-        # remove original upon delivery
-        msg_store.remove(original)
-
 
 def ttl_expired(message, store, sender, receiver):
     """
@@ -151,7 +146,7 @@ def ttl_expired(message, store, sender, receiver):
     except ValueError:
         pass
     finally:
-        process_event(EventType.MessageTTLExpired, sender, receiver, message)
+        process_event(EventType.MessageTTLExpired, message)
 
 
 def store_message(message, sender, receiver):
@@ -165,20 +160,21 @@ def store_message(message, sender, receiver):
     :param receiver: The receiver of the message.
     :type receiver: :class:`~particle.Particle`
     """
-    if message.get_actual_receiver().number == message.get_receiver().number:  # TODO: ???
-        print("{} :: {}".format(message.actual_receiver.number, message.receiver.number))
-        store = receiver.rcv_store
-        process_event(EventType.MessageDelivered, message.sender, message.receiver, message)
+
+    if message.get_actual_receiver().number == message.get_receiver().number:
+        sender.send_store.remove(message)  # remove message in sender on delivery
+        store = receiver.rcv_store  # chose receive-store
+        process_event(EventType.MessageDelivered, message)  # process csv event
         if message.original_sender == message.sender:
-            process_event(EventType.MessageDeliveredDirect, message.sender, message.receiver, message)
+            process_event(EventType.MessageDeliveredDirect, message)
     else:
         store = receiver.send_store
         if not(store.contains_key(message.key)):
-            process_event(EventType.MessageForwarded, message.sender, message.receiver, message)  # TODO: remove receiver sender
+            process_event(EventType.MessageForwarded, message)  # TODO: remove receiver sender
     try:
         store.append(message)
     except OverflowError:
-        process_event(EventType.ReceiverOutOfMem, sender, receiver, message)
+        process_event(EventType.ReceiverOutOfMem, message)
 
 
 def generate_random_messages(particle_list, amount, sim, ttl_range=None):

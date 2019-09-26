@@ -39,7 +39,7 @@ class Memory:
 
     def add_delta_message_on(self, target_id, msg, position, start_round, delta, expirerate):
         if self.mode == MemoryMode.Delta:
-            process_event(EventType.MessageSent, msg.sender, msg.receiver, msg)  # TODO rethink section
+            process_event(EventType.MessageSent, msg)  # TODO rethink section
             if target_id in self.memory.keys():
                 self.memory.get(target_id).append((msg, position, start_round, delta, expirerate))
             else:
