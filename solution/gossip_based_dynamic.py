@@ -296,9 +296,9 @@ def solution(world):
             for y in range(1,len(y4)+1,2):
                 z4.append(coord_map_calc[x][y])
 
-        x41=np.arange(0,world.get_world_x_size()*4,2)
-        x42=np.arange(0.5, world.get_world_x_size()*4+0.5,2)
-        x4f=[]
+        x4=np.arange(0,world.get_world_x_size()*4,2)
+        #x42=np.arange(0.5, world.get_world_x_size()*4+0.5,2)
+        #x4f=[]
 
 
 
@@ -316,9 +316,9 @@ def solution(world):
         #         x4f.append(x42[g1])
         #     g1+=1
 
-        print("x4_f:", x4f)
+        # print("x4_f:", x4f)
 
-        X, Y = np.meshgrid(x4f, y4)
+        X, Y = np.meshgrid(x4, y4)
 
         print("größe X: ", len(X))
         print("größe Y: ", len(Y))
@@ -330,7 +330,17 @@ def solution(world):
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(111, projection='3d')
 
-        im=ax4.scatter(X/2 - world.get_world_x_size(), Y/2 -world.get_world_y_size(), z4, marker='o')
+        print("first X:", X)
+        X= X / 2 - world.get_world_x_size()
+        print("next X:", X)
+        g1=0
+
+        for i in X:
+            if g1%2!=0:
+                X[g1]+=0.5
+            g1+=1
+
+        im=ax4.scatter(X, Y/2 -world.get_world_y_size(), z4, marker='o')
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
         ax4.set_zlabel('Austausche')
