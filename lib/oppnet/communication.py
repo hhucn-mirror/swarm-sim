@@ -69,7 +69,7 @@ class Message:
                          actual_receiver=self.get_actual_receiver())
         new.key = self.key
         new.seq_number = self.seq_number
-        new.hops = self.hops
+        new.hops = self.hops + 1
         Message.seq_number -= 1
         return new
 
@@ -123,7 +123,6 @@ def send_message(sender, receiver, message: Message):
     message = copy.copy(original)
     message.set_sender(sender)
     message.set_receiver(receiver)
-    message.inc_hops()  # TODO : move to coppy function ????
 
     memory = sender.sim.memory
 
