@@ -300,6 +300,7 @@ def solution(world):
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
         ax4.set_zlabel('Austausche')
+        ax4.legend(['Austausche zwischen Partikel pro Koordinatenpunkt'])
         fig4.colorbar(im)
         im.set_clim(0, max(z4))
 
