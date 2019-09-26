@@ -20,11 +20,13 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 info_plot=[[]]
+info_plot_average=[[]]
+info_plot_broud_cast_master_estimate=[[]]
 filler_actual_count=[]
 filler_actual_count.append(0)
 calc_count=0
 table_calcs= ""
-aging_factor=0.10
+aging_factor=0.1
 initial_size=0
 coord_map_calc=[]
 
@@ -33,25 +35,20 @@ def solution(world):
     global table_calcs
     global initial_size
     global coord_map_calc
+    global info_plot_average
+    global  info_plot_broud_cast_master_estimate
     table_size_max = 16
 
     if world.get_actual_round()==1:
         initial_size=len(world.get_particle_list())
 
-
+        #map for calculation count between junctions
         for x in range(0, int(world.get_world_x_size())*4):
             coord_map_calc.append([0])
 
         for x in range(0, int(world.get_world_x_size()) * 4):
             for y in range (0, int(world.get_world_y_size())*4-1):
                 coord_map_calc[x].append(0)
-
-        #for a in range(-3, 3):
-         #   for b in range(-3, 3):
-         #       if b % 2 == 0:
-         #           sim.add_particle(a, b)
-         #       else:
-         #           sim.add_particle(a + 0.5, b)
 
 
 
@@ -62,7 +59,7 @@ def solution(world):
             setattr(rnd_particle, "current_min", 0)
             setattr(rnd_particle, "current_max", 1)
             setattr(rnd_particle, "current_average", 1)
-            setattr(rnd_particle, "min_rounds", 70)
+            setattr(rnd_particle, "min_rounds", 100)
             setattr(rnd_particle, "actual_round", 0)
             # for average|min|max calc | global
             setattr(rnd_particle, "min", 0)
@@ -70,6 +67,7 @@ def solution(world):
             setattr(rnd_particle, "average", 1)
             # version number
             setattr(rnd_particle, "version_number", 1)
+            setattr(rnd_particle, "broud_cast_master_estimate", 1)
 
 
         #Graph
@@ -78,6 +76,12 @@ def solution(world):
         master.version_number=2
         for i in range(len(world.get_particle_list())):
             info_plot.append([0])
+
+        for particle in world.get_particle_list():
+            info_plot_average.append([1])
+
+        for particle in world.get_particle_list():
+            info_plot_broud_cast_master_estimate.append([1])
 
     #Table
     if world.get_actual_round() == 1 and len(world.get_particle_list()) <= table_size_max:
@@ -101,9 +105,12 @@ def solution(world):
         table_calcs+="\n|round:" +'{:_>2d}'.format(world.get_actual_round()) + "|"
 
 
-    # helper variable
-    helper_particle_list = world.get_particle_list().copy()
+
+    ###################################################################################################################
     #Main Loop
+    #
+    #helper variable
+    helper_particle_list = world.get_particle_list().copy()
     while(len(helper_particle_list)!=0):
         #choose a random particle
         rnd_particle=random.choice(helper_particle_list)
@@ -119,6 +126,8 @@ def solution(world):
 
             if abs((rnd_particle.current_max-rnd_particle.average))<np.ceil(rnd_particle.average*aging_factor) and \
                     abs(rnd_particle.current_min-rnd_particle.average)<np.ceil(rnd_particle.average*aging_factor) and \
+                    abs((rnd_particle.current_max-rnd_particle.particle_count))<np.ceil(rnd_particle.particle_count*aging_factor) and\
+                    abs((rnd_particle.current_min-rnd_particle.particle_count))<np.ceil(rnd_particle.particle_count*aging_factor) and \
                     rnd_particle.actual_round>=rnd_particle.min_rounds :
                 reset_to_master(rnd_particle)
 
@@ -127,10 +136,11 @@ def solution(world):
             if rnd_particle.version_number < rnd_particle_neighbour.version_number:
                 reset_particle(rnd_particle,rnd_particle_neighbour)
 
-            #if rnd_particle.version_number > rnd_particle_neighbour.version_number:
-            #    reset_particle(rnd_particle_neighbour,rnd_particle)
+            if rnd_particle.version_number > rnd_particle_neighbour.version_number:
+                reset_particle(rnd_particle_neighbour,rnd_particle)
 
-        if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0 and rnd_particle.version_number==rnd_particle_neighbour.version_number):
+        if (neighbour_found_in_dir) != -1 and rnd_particle.version_number==rnd_particle_neighbour.version_number\
+                and not (rnd_particle.sum==0 and rnd_particle.get_particle_in(neighbour_found_in_dir).sum==0):
 
             #aging information from last round
             consider_measurement(rnd_particle)
@@ -146,20 +156,20 @@ def solution(world):
             #min|max|average exchange
             exchange_information(rnd_particle, rnd_particle_neighbour)
             #prints
-            #print_information(rnd_particle,neighbour_found_in_dir, current_sum, current_sum_neighbour)
+            print_information(rnd_particle,neighbour_found_in_dir, current_sum, current_sum_neighbour)
             print("berechneten average:",rnd_particle.average)
             print("current max", rnd_particle.current_max)
             #Table
             if(initial_size<=table_size_max):
                 table_calcs+=next_line_table(world.get_particle_list())
                 table_calcs += "  " + str(rnd_particle.number - 1) + "-->" + str(rnd_particle.get_particle_in(neighbour_found_in_dir).number - 1)
+
             #Amount of calculations between particles increased by 1
             calc_count+=1
             coord_map_calc[int(rnd_particle.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle.coords[1]+world.get_world_y_size())*2-1]+=1
             coord_map_calc[int(rnd_particle_neighbour.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle_neighbour.coords[1]+world.get_world_y_size())*2-1]+=1
-            #
-            rnd_particle.actual_round+=1
-        #print(checklist_for_threshold)
+            rnd_particle.actual_round += 1
+
         helper_particle_list.remove(rnd_particle)
 
 
@@ -167,6 +177,12 @@ def solution(world):
     #Graph
     for particle in world.get_particle_list():
         info_plot[particle.number].append(particle.particle_count)
+
+    for particle in world.get_particle_list():
+        info_plot_average[particle.number].append(particle.average)
+
+    for particle in world.get_particle_list():
+        info_plot_broud_cast_master_estimate[particle.number].append(particle.broud_cast_master_estimate)
 
     #Color
     for particle in world.get_particle_list():
@@ -180,25 +196,23 @@ def solution(world):
 
 ###########################################
 #REMOVING PARTICLES
-
+    #
     if world.get_actual_round()==101:
-        for i in range(0,10):
-            rnd_particle=random.choice(world.get_particle_list())
-            world.remove_particle(rnd_particle.get_id())
-            print("removed and its now:", len(world.get_particle_list()))
+         for i in range(0,50):
+             rnd_particle=random.choice(world.get_particle_list())
+             world.remove_particle(rnd_particle.get_id())
+             print("removed and its now:", len(world.get_particle_list()))
 
-    if world.get_actual_round()==200:
-        for i in range(0,10):
-            rnd_particle=random.choice(world.get_particle_list())
-            world.remove_particle(rnd_particle.get_id())
-            print("removed and its now:", len(world.get_particle_list()))
+    # if world.get_actual_round()==200:
+    #     for i in range(0,10):
+    #         rnd_particle=random.choice(world.get_particle_list())
+    #         world.remove_particle(rnd_particle.get_id())
+    #         print("removed and its now:", len(world.get_particle_list()))
 
 ##########################################
 
 
     filler_actual_count.append(len(world.get_particle_list()))
-
-
 
     if world.get_actual_round()== world.get_max_round():
         print("Terminated in round : ", world.get_actual_round())
@@ -208,9 +222,10 @@ def solution(world):
             print("schätzt partikelanzahl im system auf:",particle.particle_count)
             print("partikel_version_number",particle.version_number )
 
-        #for i in range(0, world.get_actual_round() + 1):
-        #    filler_actual_count.append(len(world.get_particle_list()))
 
+        ######################################################################################################
+        ######################################################################################################
+        #GRAPHS
         if len(world.get_particle_list()) <= table_size_max:
             for particle in world.get_particle_list():
                 x = np.arange(1, world.get_actual_round() + 1, 1)
@@ -231,6 +246,22 @@ def solution(world):
             for particle in world.get_particle_list():
                 sum_avg+=info_plot[particle.number][i]
             average_plotter.append(sum_avg / len(world.get_particle_list()))
+        #average_average_plotter
+        average_average_plotter=[]
+        for i in range(0,world.get_actual_round()+1):
+            sum_avg_avg=0
+            for particle in world.get_particle_list():
+                sum_avg_avg+=info_plot_average[particle.number][i]
+            average_average_plotter.append(sum_avg_avg/len(world.get_particle_list()))
+
+        #average_broud_cast_master_estimate
+        average_bcme_plotter=[]
+        for i in range(0,world.get_actual_round()+1):
+            sum_avg_m=0
+            for particle in world.get_particle_list():
+                sum_avg_m+=info_plot_broud_cast_master_estimate[particle.number][i]
+            average_bcme_plotter.append(sum_avg_m/len(world.get_particle_list()))
+
         #min
         min_all_per_round=[]
         for i in range(0, world.get_actual_round() + 1):
@@ -254,7 +285,8 @@ def solution(world):
             all_particle = 0
             for particle in world.get_particle_list():
                 all_particle+=(info_plot[particle.number][i]-average_plotter[i])*(info_plot[particle.number][i]-average_plotter[i])
-            standard_deviation_per_round.append(np.sqrt(all_particle) / len(world.get_particle_list()))
+            s=(np.sqrt(all_particle) / len(world.get_particle_list()))/np.ceil(average_plotter[i])
+            standard_deviation_per_round.append(s)
 
         #Graph 1
         x2 = np.arange(0, world.get_actual_round() + 1, 1)
@@ -263,12 +295,15 @@ def solution(world):
         ax2.plot(x2,filler_actual_count)
         ax2.plot(x2,min_all_per_round)
         ax2.plot(x2,max_all_per_round)
+        ax2.set_yscale('log')
+        ax2.set_ylim(ymin=1)
         ax2.set(xlabel='rounds', ylabel='Average', title='Rot:Max | Blau:Durchschnitt | Grün:Min | Orange:Echter Wert')
 
         #Graph 2
         fig3, ax3 = plt.subplots()
         ax3.plot(x2,standard_deviation_per_round)
         ax3.set(xlabel='rounds', ylabel='standard deviation', title='Standard deviation')
+        #ax3.set_yscale('log')
 
         #Graph 3
         print(coord_map_calc)
@@ -307,19 +342,36 @@ def solution(world):
         z4=np.split(z4, world.get_world_y_size()*2)
         z4 = np.array(z4)
         im=ax4.plot_surface(X, Y, z4 , cmap='jet')
-        #ax4.scatter(X, Y, z4, marker='.', s=10, c="black", alpha=0.5)
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
         ax4.set_zlabel('Austausche')
-        #ax4.legend(['Austausche zwischen Partikel pro Koordinatenpunkt'])
         fig4.colorbar(im)
-#        im.set_clim(0, max(z4))
+
+
+        #Graph 5
         fig5, ax5 = plt.subplots()
         ax5.scatter(X, Y, c=z4, cmap='jet')
 
-        for particle in world.get_particle_list():
-            print(particle.coords)
 
+        #Graph 6
+        x6 = np.arange(0, world.get_actual_round() + 1, 1)
+        fig6, ax6 = plt.subplots()
+        l1=ax6.plot(x2, average_plotter, label='Average of current estimations')
+        l2=ax6.plot(x2, filler_actual_count, label='Actual particle count in the system')
+        l3=ax6.plot(x2, average_average_plotter, label='Average of average estimations')
+        ax6.plot(x2, average_bcme_plotter, label='broadcasted estimates')
+        ax6.set(xlabel='rounds', ylabel='Average', title='Estimation comparisons')
+        ax6.legend(loc='upper left')
+        ax6.set_yscale('log')
+        ax6.set_ylim(ymin=1)
+
+
+
+        #Graphs
+        ####################################################################################################
+
+        ####################################################################################################
+        #Print Information
         if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
             table_calcs+=next_line_table(world.get_particle_list())
             print(table_calcs)
@@ -356,7 +408,8 @@ def solution(world):
         plt.show()
         world.set_end()
 
-
+#######################################################################################################################
+#Moving
     #every particle moves after exchanging information
     if world.get_actual_round() > 0:
         for particle in world.get_particle_list():
@@ -364,9 +417,12 @@ def solution(world):
             if free_space_in_dir != -1:
                 particle.move_to(free_space_in_dir)
 
-
+#######################################################################################################################
+# Methods
 def reset_to_master(particle):
     particle.sum=1
+    particle.broud_cast_master_estimate=particle.particle_count
+    particle.particle_count = 1
     particle.current_min = 1
     particle.current_max = 1
     particle.current_average = 1
@@ -376,13 +432,14 @@ def reset_to_master(particle):
 
 def reset_particle(rnd_particle, rnd_particle_neighbour):
     rnd_particle.sum = 0
+    rnd_particle.particle_count= 0
     rnd_particle.current_min = 0
-    rnd_particle.current_max = 0
-    rnd_particle.current_average = 0
+    rnd_particle.current_max = 1
+    rnd_particle.current_average = 1
     rnd_particle.version_number= rnd_particle_neighbour.version_number
     rnd_particle.actual_round=0
-
-
+    rnd_particle.broud_cast_master_estimate=rnd_particle_neighbour.broud_cast_master_estimate
+    rnd_particle.min_rounds=rnd_particle_neighbour.min_rounds
 
 def exchange_information(rnd_particle,rnd_particle_neighbour):
     #min
@@ -394,6 +451,8 @@ def exchange_information(rnd_particle,rnd_particle_neighbour):
     # average
     rnd_particle.current_average = (rnd_particle.particle_count + rnd_particle_neighbour.particle_count) / 2
     rnd_particle_neighbour.current_average = (rnd_particle.particle_count + rnd_particle_neighbour.particle_count) / 2
+
+
 
 
 #aging function
