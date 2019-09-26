@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pylab as plt
 import itertools
 from mpl_toolkits import mplot3d
-
+import matplotlib.tri as mtri
+from mpl_toolkits.mplot3d import Axes3D
 
 from lib.particle import Particle
 
@@ -180,7 +181,7 @@ def solution(world):
 ###########################################
 #REMOVING PARTICLES
 
-    if world.get_actual_round()==100:
+    if world.get_actual_round()==101:
         for i in range(0,10):
             rnd_particle=random.choice(world.get_particle_list())
             world.remove_particle(rnd_particle.get_id())
@@ -291,20 +292,33 @@ def solution(world):
         ax4 = fig4.add_subplot(111, projection='3d')
 
         X= X / 2 - world.get_world_x_size()
+        Y= Y/2 -world.get_world_y_size()
+
+        print(X)
+        print(Y)
         g1=0
         for i in X:
-            if g1%2!=0:
+            if g1%2==0:
                 X[g1]+=0.5
             g1+=1
-        im=ax4.scatter(X, Y/2 -world.get_world_y_size(), z4 ,c=z4 , cmap='jet', marker='o')
+
+
+        z4=np.array(z4)
+        z4=np.split(z4, world.get_world_y_size()*2)
+        z4 = np.array(z4)
+        im=ax4.plot_surface(X, Y, z4 , cmap='jet')
+        #ax4.scatter(X, Y, z4, marker='.', s=10, c="black", alpha=0.5)
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
         ax4.set_zlabel('Austausche')
-        ax4.legend(['Austausche zwischen Partikel pro Koordinatenpunkt'])
+        #ax4.legend(['Austausche zwischen Partikel pro Koordinatenpunkt'])
         fig4.colorbar(im)
-        im.set_clim(0, max(z4))
+#        im.set_clim(0, max(z4))
+        fig5, ax5 = plt.subplots()
+        ax5.scatter(X, Y, c=z4, cmap='jet')
 
-
+        for particle in world.get_particle_list():
+            print(particle.coords)
 
         if world.get_actual_round() > 1 and len(world.get_particle_list()) <= table_size_max:
             table_calcs+=next_line_table(world.get_particle_list())
