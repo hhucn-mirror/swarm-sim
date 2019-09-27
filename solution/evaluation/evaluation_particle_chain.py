@@ -26,55 +26,42 @@ def solution(sim):
     next_step(particles)
 
     # check the assertions
-    if check_message_assertions(sim):
-        print("All the assertions for both message statistics passed in round: {}. Expected round: {}"
-              .format(current_round, len(particles)))
-        sim.set_end()
+    check_round_message_assertions(sim, 2)
 
 
-def check_message_assertions(sim):
-    for message in [message_left_right, message_right_left]:
-        # check if the formulas for message statistics are correct
-        csv_message_data = sim.csv_round_writer.csv_msg_writer.get_csv_message_data(message)
-        try:
-            assert_message_statistics(csv_message_data, sim.get_actual_round(), len(sim.get_particle_list()))
-        except AssertionError:
-            return False
-        return True
+def check_round_message_assertions(sim, message_amount):
+    expected_delivery_round = len(sim.get_particle_list())
+    current_round = sim.get_actual_round()
+    try:
+        assert_sent_count(sim.csv_round_writer.get_messages_sent(), current_round, message_amount)
+    except AssertionError:
+        print("Sent Count assertion failed in round {}"
+              .format(current_round))
+
+    try:
+        assert_forwarding_count(sim.csv_round_writer.get_messages_forwarded(), current_round, message_amount)
+    except AssertionError:
+        print("Forwarding Count assertion failed in round {}"
+              .format(current_round))
+
+    try:
+        assert_delivery_count(sim.csv_round_writer.get_messages_delivered(), current_round, expected_delivery_round,
+                              message_amount)
+    except AssertionError:
+        print("Delivery Count assertion failed in round {}"
+              .format(current_round))
 
 
-def assert_message_statistics(message_data, current_round, particle_count):
-    assert message_data.get_sent_count() == __total_sent_count__(particle_count)
-    assert message_data.get_forwarding_count() == __total_forwarding_count__(particle_count)
-    assert message_data.get_delivery_count() == __total_delivery_count__()
-    assert message_data.get_delivery_round() == __delivery_round__(particle_count)
-    assert message_data.get_first_delivery_hops() == __first_delivery_hops(particle_count)
+def assert_sent_count(sent_count, current_round, message_amount):
+    expected = 1 + (current_round - 1) * 2 * message_amount
+    assert sent_count == expected
 
 
-def __total_sent_count__(particle_count):
-    total = 0
-    for i in range(2, particle_count + 1):
-        total += __max_sent_count(i)
-    total += __max_sent_count(particle_count)
-
-    return total
+def assert_forwarding_count(forwarding_count, current_round, message_amount):
+    expected = message_amount if current_round > 1 else 0
+    assert forwarding_count == expected
 
 
-def __max_sent_count(particle_count):
-    return 1 + (particle_count - 2) * 2
-
-
-def __total_forwarding_count__(particle_count):
-    return particle_count - 1
-
-
-def __total_delivery_count__():
-    return 1
-
-
-def __delivery_round__(particle_count):
-    return particle_count
-
-
-def __first_delivery_hops(particle_count):
-    return particle_count - 1
+def assert_delivery_count(delivery_round, current_round, expected_delivery_round, message_amount):
+    expected = message_amount if expected_delivery_round == current_round else 0
+    assert delivery_round == expected
