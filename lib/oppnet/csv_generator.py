@@ -107,6 +107,21 @@ class CsvRoundData:
                                     'Receiver Out Of Mem'
                                     ])
 
+    def get_messages_sent(self):
+        return self.messages_sent
+
+    def get_messages_forwarded(self):
+        return self.messages_forwarded
+
+    def get_messages_delivered(self):
+        return self.messages_delivered
+
+    def get_messages_delivered_directly(self):
+        return self.messages_delivered_directly
+
+    def get_messages_received(self):
+        return self.messages_received
+
     def update_particle_num(self, particle):
         self.particle_num = particle
 
