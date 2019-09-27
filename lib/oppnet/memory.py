@@ -2,6 +2,7 @@ import math
 from enum import Enum
 from lib.oppnet.communication import store_message
 from lib.oppnet.meta import process_event, EventType
+from lib.point import Point
 
 
 class MemoryMode(Enum):
@@ -63,9 +64,8 @@ class Memory:
                 expirerate = m[4]
                 past_rounds = actual_round - start_round
                 distance = delta * past_rounds
-                x = abs(position.getx()-sim.get_particle_map_id()[target].coords[0])
-                y = abs(position.gety()-sim.get_particle_map_id()[target].coords[1])
-                distance_start_target = round(math.sqrt(x**2 + y**2))
+                particle_point = self.get_point_from_vector(sim.get_particle_map_id()[target].coords) #TODO check existing particle
+                distance_start_target = self.get_distance(position, particle_point)
                 if distance < expirerate:
                     if distance >= distance_start_target:
                         store_message(msg, msg.get_sender(), msg.get_receiver())
@@ -74,6 +74,19 @@ class Memory:
             if len(new_msgs) > 0:
                 new_memory[target] = new_msgs
         self.memory = new_memory
+
+    @staticmethod
+    def get_point_from_vector(vector):
+        return Point(vector[0], vector[1])
+
+    @staticmethod
+    def get_distance(position1, position2):
+        x = abs(position1.getx() - position2.getx())
+        y = abs(position1.gety() - position2.gety())
+        distance = x + y
+        if x != 0 and y != 0:
+            distance /= 1.5
+        return distance
 
     def try_deliver_messages(self, sim):
             self.option[self.mode](self, sim)
