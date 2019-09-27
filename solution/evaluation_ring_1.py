@@ -1,6 +1,5 @@
-import lib.oppnet.routing
 from lib.oppnet.communication import Message
-from lib.oppnet.mobility_model import MobilityModel
+from lib.oppnet.routing import RoutingParameters, next_step
 
 """
 Made for scenario:
@@ -24,63 +23,25 @@ As the starting round for all six messages is 1, we can for example expect messa
 """
 
 
-
-class DeliveryAssertions:
-    def __init__(self, message, delivery_round, hop_count):
-        self.message = message
-        self.delivery_round = delivery_round
-        self.hop_count = hop_count
-
-    def execute(self, message):
-        assert message.delivery_round == self.delivery_round
-        assert message.hop_count == self.hop_count
-
-
 def solution(sim):
     particles = sim.get_particle_list()
-    global delivery_assertions
 
     if sim.get_actual_round() == 1:
         # initialize the particle mobility models
         for particle in particles:
-            m_model = MobilityModel(particle.coords[0], particle.coords[1], sim.mobility_model_mode)
-            m_model.set(particle)
-            r_params = lib.oppnet.routing.RoutingParameters(algorithm=sim.routing_algorithm,
-                                                            scan_radius=sim.scan_radius,
-                                                            delivery_delay=sim.delivery_delay)
+            r_params = RoutingParameters(algorithm=sim.routing_algorithm, scan_radius=sim.scan_radius,
+                                         delivery_delay=sim.delivery_delay)
             r_params.set(particle)
 
-        # expected hop count 1
-        # expected delivery round 2
-        start_round = 1
-        hops = 1
-        # left to middle
         m1 = Message(particles[-1], particles[int(len(particles)/2)], 1, sim.message_ttl)
         # middle to left
         m2 = Message(particles[int(len(particles)/2)], particles[-1], 1, sim.message_ttl)
 
-        delivery_assertions = []
+        print("Round: {} [] SentCounter: {}".format(sim.get_actual_round(),
+                                                    calculate_send_count_round(sim.get_actual_round(), len(particles))
+                                                    ))
+        next_step(particles)
 
-        for m in [m1, m2]:
-            delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
-                                                          hop_count=hops))
 
-    for particle in particles:
-        m_model = MobilityModel.get(particle)
-        next_direction = m_model.next_direction(current_x_y=particle.coords)
-        if next_direction is not False:
-            particle.move_to_in_bounds(next_direction)
-
-    lib.oppnet.routing.next_step(particles, sim.get_actual_round())
-
-    # check the assertions
-    if sim.get_actual_round() == sim.get_max_round():
-        for assertion in delivery_assertions:
-            m = assertion.message
-            rcv_store = m.receiver.rcv_store
-            try:
-                assertion.execute(rcv_store.get_by_key(m.key))
-            except AssertionError:
-                print("Assertion for message {} failed".format(m.seq_number))
-            except KeyError:
-                print("Message {} not delivered".format(m.seq_number))
+def calculate_send_count_round(round_count, particle_count):
+    return particle_count * (2 + (round_count - 1) * 4)
