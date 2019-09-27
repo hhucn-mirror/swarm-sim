@@ -65,7 +65,7 @@ class Memory:
                 distance = delta * past_rounds
                 x = abs(position.getx()-sim.get_particle_map_id()[target].coords[0])
                 y = abs(position.gety()-sim.get_particle_map_id()[target].coords[1])
-                distance_start_target = math.sqrt(x**2 + y**2)
+                distance_start_target = round(math.sqrt(x**2 + y**2))
                 if distance < expirerate:
                     if distance >= distance_start_target:
                         store_message(msg, msg.get_sender(), msg.get_receiver())
