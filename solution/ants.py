@@ -12,14 +12,12 @@ marker color = status
 black (1) = base
 green (4) = track
 """
-
 NE = 0
 E = 1
 SE = 2
 SW = 3
 W = 4
 NW = 5
-
 direction = [NE, E, SE, SW, W, NW]
 
 search_mode = 1
@@ -29,156 +27,21 @@ base = 1
 track = 4
 
 global home
-home = [0, 0]
+home = (0.0, 0.0)
 
-# Walk towards target coordinates
-def walk(target_co, particle):
-    if (particle.coords[0] < target_co[0] and particle.coords[1] < target_co[1]):
-        go_to = 0  # [NE]
-    elif (particle.coords[0] < target_co[0] and particle.coords[1] > target_co[1]):
-        go_to = 2  # [SE]
-    elif (particle.coords[0] < target_co[0] and particle.coords[1] == target_co[1]):
-        go_to = 1  # [E]
-    elif (particle.coords[0] > target_co[0] and particle.coords[1] < target_co[1]):
-        go_to = 5  # [NW]
-    elif (particle.coords[0] > target_co[0] and particle.coords[1] > target_co[1]):
-        go_to = 3  # [SW]
-    else:  # (particle.coords[0] > target_co[0] and particle.coords[1] == target_co[1])
-        go_to = 4  # [W]
-    return go_to
-"""
-# Get dir for way home
-def way_home(last_pos, particle):
-    if (particle.coords[0] < last_pos[0] and particle.coords[1] < last_pos[1]):
-        go_to = 0  # [NE]
-    elif (particle.coords[0] < last_pos[0] and particle.coords[1] > last_pos[1]):
-        go_to = 2  # [SE]
-    elif (particle.coords[0] < last_pos[0] and particle.coords[1] == last_pos[1]):
-        go_to = 1  # [E]
-    elif (particle.coords[0] > last_pos[0] and particle.coords[1] < last_pos[1]):
-        go_to = 5  # [NW]
-    elif (particle.coords[0] > last_pos[0] and particle.coords[1] > last_pos[1]):
-        go_to = 3  # [SW]
-    else:  # (particle.coords[0] > target_co[0] and particle.coords[1] == target_co[1])
-        go_to = 4  # [W]
-    particle.list.append(go_to)
-"""
-# Follow track
-def follow(next_step, particle):
-    if (next_step != None):
-        if (len(next_step) == 2):
-            if (next_step[0].get_alpha() < next_step[1].get_alpha()):
-                return next_step[0].coords
-            elif (next_step[1].get_alpha() < next_step[0].get_alpha()):
-                return next_step[1].coords
-            else:
-                particle.move_to(random.choice(direction))
-                return particle.coords
-        elif (len(next_step) == 3):
-            if (next_step[0].get_alpha() < next_step[1].get_alpha() and
-                next_step[0].get_alpha() < next_step[2].get_alpha()):
-                return next_step[0].coords
-            elif (next_step[1].get_alpha() < next_step[0].get_alpha() and
-                  next_step[1].get_alpha() < next_step[2].get_alpha()):
-                return next_step[1].coords
-            elif (next_step[2].get_alpha() < next_step[0].get_alpha() and
-                  next_step[2].get_alpha() < next_step[1].get_alpha()):
-                return next_step[2].coords
-            else:
-                particle.move_to(random.choice(direction))
-                return particle.coords
-        elif (len(next_step) == 4):
-            if (next_step[0].get_alpha() < next_step[1].get_alpha() and
-                next_step[0].get_alpha() < next_step[2].get_alpha() and
-                next_step[0].get_alpha() < next_step[3].get_alpha()):
-                return next_step[0].coords
-            elif (next_step[1].get_alpha() < next_step[0].get_alpha() and
-                  next_step[1].get_alpha() < next_step[2].get_alpha() and
-                  next_step[1].get_alpha() < next_step[3].get_alpha()):
-                return next_step[1].coords
-            elif (next_step[2].get_alpha() < next_step[0].get_alpha() and
-                  next_step[2].get_alpha() < next_step[1].get_alpha() and
-                  next_step[2].get_alpha() < next_step[3].get_alpha()):
-                return next_step[2].coords
-            elif (next_step[3].get_alpha() < next_step[0].get_alpha() and
-                  next_step[3].get_alpha() < next_step[1].get_alpha() and
-                  next_step[3].get_alpha() < next_step[2].get_alpha()):
-                return next_step[3].coords
-            else:
-                particle.move_to(random.choice(direction))
-                return particle.coords
-        elif (len(next_step) == 5):
-            if (next_step[0].get_alpha() < next_step[1].get_alpha() and
-                next_step[0].get_alpha() < next_step[2].get_alpha() and
-                next_step[0].get_alpha() < next_step[3].get_alpha() and
-                next_step[0].get_alpha() < next_step[4].get_alpha()):
-                return next_step[0].coords
-            elif (next_step[1].get_alpha() < next_step[0].get_alpha() and
-                  next_step[1].get_alpha() < next_step[2].get_alpha() and
-                  next_step[1].get_alpha() < next_step[3].get_alpha() and
-                  next_step[1].get_alpha() < next_step[4].get_alpha()):
-                return next_step[1].coords
-            elif (next_step[2].get_alpha() < next_step[0].get_alpha() and
-                  next_step[2].get_alpha() < next_step[1].get_alpha() and
-                  next_step[2].get_alpha() < next_step[3].get_alpha() and
-                  next_step[2].get_alpha() < next_step[4].get_alpha()):
-                return next_step[2].coords
-            elif (next_step[3].get_alpha() < next_step[0].get_alpha() and
-                  next_step[3].get_alpha() < next_step[1].get_alpha() and
-                  next_step[3].get_alpha() < next_step[2].get_alpha() and
-                  next_step[3].get_alpha() < next_step[4].get_alpha()):
-                return next_step[3].coords
-            elif (next_step[4].get_alpha() < next_step[0].get_alpha() and
-                  next_step[4].get_alpha() < next_step[1].get_alpha() and
-                  next_step[4].get_alpha() < next_step[2].get_alpha() and
-                  next_step[4].get_alpha() < next_step[3].get_alpha()):
-                return next_step[4].coords
-            else:
-                particle.move_to(random.choice(direction))
-                return particle.coords
-        elif (len(next_step) == 6):
-            if (next_step[0].get_alpha() < next_step[1].get_alpha() and
-                next_step[0].get_alpha() < next_step[2].get_alpha() and
-                next_step[0].get_alpha() < next_step[3].get_alpha() and
-                next_step[0].get_alpha() < next_step[4].get_alpha() and
-                next_step[0].get_alpha() < next_step[5].get_alpha()):
-                return next_step[0].coords
-            elif (next_step[1].get_alpha() < next_step[0].get_alpha() and
-                  next_step[1].get_alpha() < next_step[2].get_alpha() and
-                  next_step[1].get_alpha() < next_step[3].get_alpha() and
-                  next_step[1].get_alpha() < next_step[4].get_alpha() and
-                  next_step[1].get_alpha() < next_step[5].get_alpha()):
-                return next_step[1].coords
-            elif (next_step[2].get_alpha() < next_step[0].get_alpha() and
-                  next_step[2].get_alpha() < next_step[1].get_alpha() and
-                  next_step[2].get_alpha() < next_step[3].get_alpha() and
-                  next_step[2].get_alpha() < next_step[4].get_alpha() and
-                  next_step[2].get_alpha() < next_step[5].get_alpha()):
-                return next_step[2].coords
-            elif (next_step[3].get_alpha() < next_step[0].get_alpha() and
-                  next_step[3].get_alpha() < next_step[1].get_alpha() and
-                  next_step[3].get_alpha() < next_step[2].get_alpha() and
-                  next_step[3].get_alpha() < next_step[4].get_alpha() and
-                  next_step[3].get_alpha() < next_step[5].get_alpha()):
-                return next_step[3].coords
-            elif (next_step[4].get_alpha() < next_step[0].get_alpha() and
-                  next_step[4].get_alpha() < next_step[1].get_alpha() and
-                  next_step[4].get_alpha() < next_step[2].get_alpha() and
-                  next_step[4].get_alpha() < next_step[3].get_alpha() and
-                  next_step[4].get_alpha() < next_step[5].get_alpha()):
-                return next_step[4].coords
-            elif (next_step[5].get_alpha() < next_step[0].get_alpha() and
-                  next_step[5].get_alpha() < next_step[1].get_alpha() and
-                  next_step[5].get_alpha() < next_step[2].get_alpha() and
-                  next_step[5].get_alpha() < next_step[3].get_alpha() and
-                  next_step[5].get_alpha() < next_step[4].get_alpha()):
-                return next_step[5].coords
-            else:
-                particle.move_to(random.choice(direction))
-                return particle.coords
-        else:
-            particle.move_to(random.choice(direction))
-            return particle.coords
+# get all surrounding pheromones
+def get_track(particle):
+    pheromone_dict = {}
+    for dir in direction:
+        if (particle.marker_in(dir) == True):
+            pheromone_dict.update({dir:particle.get_marker_in(dir).get_alpha()})
+    return pheromone_dict
+
+def compare_pheromones(pheromones):
+    if (len(pheromones) != 0):
+        return min(pheromones, key = pheromones.get)
+    else:
+        return random.choice(direction)
 
 # Go home the way you came
 def go_home(particle):
@@ -189,7 +52,6 @@ def go_home(particle):
 def evaporation(marker):
     if (marker.get_color() == track):
         marker.set_alpha(marker.get_alpha() - 0.01)
-
 
 # Decrease particle lifespan
 def life_span(particle):
@@ -208,7 +70,7 @@ def marker_color(world, particle):
 
 # Particle respawn
 def respawn(world):
-    while len(world.get_particle_list()) < 31:
+    while len(world.get_particle_list()) <= 30:
         ant = world.add_particle(0, 0)
         setattr(ant, "list", [])
 
@@ -265,43 +127,34 @@ def solution(world):
 
         # Search for food
         if (particle.get_color() == search_mode):
-            #last_pos = particle.coords
-            next_pos = random.choice(direction)
-            particle.move_to(next_pos)
-            particle.list.append(invert_dir(next_pos))
-            #way_home(last_pos, particle)
+            next_step = random.choice(direction)
+            particle.move_to(next_step)
+            particle.list.append(invert_dir(next_step))
 
         # If found food, go in home-mode
         if (particle.check_on_tile() == True):
             particle.set_color(home_mode)
-
+            # Reduce food stack, when take food
             for food in world.get_tiles_list():
                 food_stack(food, particle)
                 # Delete food when gone
                 if (food.get_alpha() == 0):
                     world.remove_tile_on(food.coords)
+            # Restore life span
+            particle.set_alpha(1)
 
         # If in home-mode, go home and lay track
         if (particle.get_color() == home_mode):
             particle.create_marker(track)
             if (particle.list != []):
                 go_home(particle)
-            #walk(home_co, particle)
-            # Restore life span
-            particle.set_alpha(1)
 
         # If found track, follow
         if (marker_color(world, particle) == track and particle.get_color() != home_mode):
             particle.set_color(track_follow_mode)
-            next_step = particle.scan_for_marker_within(1)
-            #last_pos = particle.coords
-            next_pos = follow(next_step, particle)
-            #print("next_pos: ", next_pos)
-            go_to = walk(next_pos, particle)
-            particle.move_to(go_to)
-            #follow(next_step, particle)
-            particle.list.append(invert_dir(go_to))
-            #way_home(last_pos, particle)
+            pheromone_to_follow = compare_pheromones(get_track(particle))
+            particle.move_to(pheromone_to_follow)
+            particle.list.append(invert_dir(pheromone_to_follow))
 
         # If home, go back in search-mode
         if (particle.coords == home):
