@@ -116,7 +116,7 @@ def send_message(sender, receiver, message: Message):
 
     # check if the message ttl has expired after this
     if message.hops == message.ttl:
-        ttl_expired(message, msg_store, sender, receiver)
+        ttl_expired(message, msg_store)
         return
 
     original = message
@@ -128,7 +128,8 @@ def send_message(sender, receiver, message: Message):
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]),
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
 
-def ttl_expired(message, store, sender, receiver):
+
+def ttl_expired(message, store):
     """
     Handle expiry of TTL. Delete the message from :param store: and append a corresponding NetworkEvent in the
     simulator EventQueue.
@@ -136,10 +137,6 @@ def ttl_expired(message, store, sender, receiver):
     :type message: :class:`~communication.Message`
     :param store: The MessageStore containing the :param message:.
     :type store: :class:`~messagestore.MessageStore`
-    :param sender: The sender of the message.
-    :type sender: :class:`~particle.Particle`
-    :param receiver: The intended receiver of the message.
-    :type receiver: :class:`~particle.Particle`
     """
     try:
         store.remove(message)
