@@ -8,12 +8,11 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 import importlib
 import logging
-from lib.oppnet.memory import Memory, MemoryMode
 import math
 import random
-import matplotlib.pyplot as plt
 
 from lib import tile, marker, vis
+from lib.oppnet.memory import Memory, MemoryMode
 
 x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
 y_offset = [1, 0, -1, -1, 0, 1, 0]
@@ -105,10 +104,10 @@ class Sim:
         self.mobility_model_mode = config_data.mobility_model_mode
         self.border = config_data.border
         self.config_data = config_data
-        self.csv_round_writer = self.csv_mod.CsvRoundData(self, solution=config_data.solution.rsplit('.', 1)[0],
-                                                           seed=config_data.seed,
-                                                           tiles_num=0, particle_num=0,
-                                                           steps=0, directory=config_data.dir_name)
+        self.csv_round_writer = self.csv_mod.CsvRoundData(self, solution=config_data.solution,
+                                                          seed=config_data.seed,
+                                                          tiles_num=0, particle_num=0,
+                                                          steps=0, directory=config_data.dir_name)
 
         self.memory = Memory(MemoryMode.Delta)
         self.plotdata_x = []
@@ -134,12 +133,12 @@ class Sim:
                 # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
-                if len(self.memory.memory) > 0:
-                    self.plotdata_x.append(self.get_actual_round())
-                    self.plotdata_y.append(len(self.memory.memory[0]))
-                else:
-                    self.plotdata_x.append(self.get_actual_round())
-                    self.plotdata_y.append(0)
+        #                if len(self.memory.memory) > 0:
+        #                    self.plotdata_x.append(self.get_actual_round())
+        #                    self.plotdata_y.append(len(self.memory.memory[0]))
+        #                else:
+        #                    self.plotdata_x.append(self.get_actual_round())
+        #                    self.plotdata_y.append(0)
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
@@ -149,8 +148,8 @@ class Sim:
         particle_csv.csv_file.close()
 #        generate_gnuplot(self.directory)
 
-        plt.plot(self.plotdata_x, self.plotdata_y)
-        plt.show()
+        # plt.plot(self.plotdata_x, self.plotdata_y)
+        # plt.show()
         return
 
     def success_termination(self):
