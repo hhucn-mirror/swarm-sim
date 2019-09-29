@@ -29,6 +29,21 @@ track = 4
 global home
 home = (0.0, 0.0)
 
+# Particle respawn
+def respawn(world):
+    while len(world.get_particle_list()) <= 30:
+        ant = world.add_particle(0, 0)
+        setattr(ant, "list", [])
+
+# Decrease lifespan of a track
+def evaporation(marker):
+    if (marker.get_color() == track):
+        marker.set_alpha(marker.get_alpha() - 0.02)
+
+# Decrease particle lifespan
+def life_span(particle):
+    particle.set_alpha(particle.get_alpha() - 0.02)
+
 # get all surrounding pheromones
 def get_track(particle):
     pheromone_dict = {}
@@ -48,15 +63,6 @@ def go_home(particle):
     particle.move_to(particle.list[-1])
     del (particle.list[-1])
 
-# Decrease lifespan of a track
-def evaporation(marker):
-    if (marker.get_color() == track):
-        marker.set_alpha(marker.get_alpha() - 0.01)
-
-# Decrease particle lifespan
-def life_span(particle):
-    particle.set_alpha(particle.get_alpha() - 0.02)
-
 # Decrease stack of food
 def food_stack(food, particle):
     if (particle.coords == food.coords):
@@ -67,12 +73,6 @@ def marker_color(world, particle):
     for marker in world.get_marker_list():
         if (particle.coords == marker.coords and marker.get_color() == track):
             return track
-
-# Particle respawn
-def respawn(world):
-    while len(world.get_particle_list()) <= 30:
-        ant = world.add_particle(0, 0)
-        setattr(ant, "list", [])
 
 # Invert dir
 def invert_dir(dir):
@@ -172,4 +172,3 @@ def solution(world):
         print("Rounds:", rounds[-1])
         print("Deads:", deads[-1])
         plot(rounds, deads)
-
