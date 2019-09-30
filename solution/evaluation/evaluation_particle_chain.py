@@ -73,7 +73,7 @@ def check_message_assertions(csv_msg_writer, current_round):
 
 def assert_message_sent_count(sent_count, current_round):
     if current_round == expected_delivery_round:
-        expected = -2
+        expected = -4
     else:
         expected = 0
     for sim_round in range(1, current_round + 1):
@@ -130,7 +130,7 @@ def check_round_message_assertions(csv_round_writer, current_round, message_amou
 
 def assert_round_sent_count(sent_count, current_round, message_amount):
     if current_round == expected_delivery_round:
-        current_round -= 1
+        current_round -= 2
     expected = message_amount + (current_round - 1) * 2 * message_amount
     assert sent_count == expected
 
