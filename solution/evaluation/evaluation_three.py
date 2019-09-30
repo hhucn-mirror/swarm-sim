@@ -88,7 +88,7 @@ def solution(sim):
         if next_direction is not False:
             particle.move_to_in_bounds(next_direction)
 
-    lib.oppnet.routing.next_step(particles, sim.get_actual_round())
+    lib.oppnet.routing.next_step(particles)
 
     # check the assertions
     if sim.get_actual_round() == sim.get_max_round():
