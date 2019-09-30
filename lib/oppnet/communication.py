@@ -43,6 +43,9 @@ class Message:
 
         Message.seq_number += 1
 
+    def __eq__(self, other):
+        return self.key == other.key
+
     def get_receiver(self):
         return self.receiver
 
@@ -93,7 +96,8 @@ class Message:
         """
         self.sender = sender
 
-    def update_delivery(self, delivery_round):
+    def update_delivery(self):
+        delivery_round = self.sender.sim.get_actual_round()
         if self.delivery_round == 0:
             self.delivery_round = delivery_round
         self.delivered += 1
@@ -159,6 +163,7 @@ def store_message(message, sender, receiver):
     """
 
     if message.get_actual_receiver().number == message.get_receiver().number:
+        message.update_delivery()
         sender.send_store.remove(message)  # remove message in sender on delivery
         store = receiver.rcv_store  # chose receive-store
         process_event(EventType.MessageDelivered, message)  # process csv event
