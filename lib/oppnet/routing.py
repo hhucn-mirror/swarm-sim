@@ -83,14 +83,14 @@ def next_step(particles, scan_radius=None):
             routing_params.scan_radius = scan_radius
 
         if routing_params.algorithm == Algorithm.Epidemic_MANeT:
-            __create_send_events_manet__(particle)
+            __next_step_manet_epidemic__(particle)
         elif routing_params.algorithm == Algorithm.Epidemic:
-            __next_step_epidemic(particle)
+            __next_step_epidemic__(particle)
 
 
-def __next_step_epidemic(sender, nearby=None):
+def __next_step_epidemic__(sender, nearby=None):
     """
-    Creates SendEvents for a :param particle:.
+    Executes the next epidemic routing steps for a :param particle:.
     :param sender: The particle which creates .
     :type sender: :class:`~particle.Particle`
     :param nearby: Nearby particles to interact with.
@@ -108,9 +108,9 @@ def __next_step_epidemic(sender, nearby=None):
             send_message(sender, neighbour, msg)
 
 
-def __create_send_events_manet__(particle):
+def __next_step_manet_epidemic__(particle):
     """
-    Creates SendEvents for a :param particle: depending on MANeT role.
+    Executes the next manet epidemic for a :param particle: depending on MANeT role.
     :param particle: The particle which routing model should be executed.
     :type particle: :class:`~particle.Particle`
     """
@@ -121,7 +121,7 @@ def __create_send_events_manet__(particle):
 
     if routing_params.manet_role == MANeTRole.Node:
         nearby = [neighbour for neighbour in nearby if RoutingParameters.same_manet_group(particle, neighbour)]
-        __next_step_epidemic(particle, nearby)
+        __next_step_epidemic__(particle, nearby)
 
     elif routing_params.manet_role == MANeTRole.Router:
-        __next_step_epidemic(particle)
+        __next_step_epidemic__(particle)
