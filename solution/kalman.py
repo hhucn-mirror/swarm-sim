@@ -19,10 +19,10 @@ def initialize_particle(particle):
     setattr(particle, "dest_t", None)
 
     # fl: free location
-    # setattr(particle, "fl_min", TypeInfo())
+    # setattr(particle, "fl_min", PMaxInfo())
 
     # p: particle
-    setattr(particle, "p_max", TypeInfo())
+    setattr(particle, "p_max", PMaxInfo())
 
     setattr(particle, "wait", False)
 

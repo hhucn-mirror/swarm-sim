@@ -18,7 +18,7 @@ class Neighbor:
         return str(self.type) + " | " + str(self.dist)
 
 
-class TypeInfo:
+class PMaxInfo:
     def __init__(self):
         self.id = 0
         self.dist = -math.inf
@@ -29,11 +29,8 @@ class TypeInfo:
         return "id: " + str(self.id) + "|" + "dist: " + str(self.dist) + "|" + "dir: " + str(self.dir) \
                + "|" + "Blacklist: " + str(self.black_list)[1:-1]
 
-    def __eq__(self, id, dist, dir, hop):
-        self.id = id
-        self.dist = dist
-        self.dir = dir
-        self.black_list = []
+    def __eq__(self, other):
+        return self.id == other.id
 
     def reset(self):
         self.id = 0
