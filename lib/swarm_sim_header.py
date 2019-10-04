@@ -2,6 +2,45 @@ import math
 import random
 from enum import Enum
 
+debug = 0
+debug_write = 1
+debug_read = 1
+debug_p_max_calculation = 0
+debug_distance_calculation = 0
+
+
+class Neighbor:
+    def __init__(self, type, dist):
+        self.type = type
+        self.dist = dist
+
+    def __str__(self):
+        return str(self.type) + " | " + str(self.dist)
+
+
+class TypeInfo:
+    def __init__(self):
+        self.id = 0
+        self.dist = -math.inf
+        self.dir = []
+        self.black_list = []
+
+    def __str__(self):
+        return "id: " + str(self.id) + "|" + "dist: " + str(self.dist) + "|" + "dir: " + str(self.dir) \
+               + "|" + "Blacklist: " + str(self.black_list)[1:-1]
+
+    def __eq__(self, id, dist, dir, hop):
+        self.id = id
+        self.dist = dist
+        self.dir = dir
+        self.black_list = []
+
+    def reset(self):
+        self.id = 0
+        self.dist = -math.inf
+        self.dir = []
+        self.black_list.clear()
+
 
 class Colors(Enum):
     black = 1
@@ -42,7 +81,7 @@ color_map = {
 }
 
 
-NE=0
+NE = 0
 E = 1
 SE = 2
 SW = 3
@@ -61,17 +100,17 @@ def direction_number_to_string(direction):
     :param direction: the direction that should get converted to a string
     :return: the string of the direction
     """
-    if direction == 0:
+    if direction == NE:
         return "NE"
-    elif direction == 1:
+    elif direction == E:
         return "E"
-    elif direction == 2:
+    elif direction == SE:
         return "SE"
-    elif direction == 3:
+    elif direction == SW:
         return "SW"
-    elif direction == 4:
+    elif direction == W:
         return "W"
-    elif direction == 5:
+    elif direction == NW:
         return "NW"
     else:
         return "Error"
@@ -285,7 +324,7 @@ def move_to_dest_in_one_rnd(particle, destiny):
     move_to_dest_in_one_rnd(particle, destiny)
 
 
-def move_to_dest_step_by_step(particle, destiny):
+def move_to_dest_step_by_step(particle, destiny, prev_dir = None):
     """
 
     :param particle:
@@ -293,7 +332,9 @@ def move_to_dest_step_by_step(particle, destiny):
     :return: True if movement occured, False if not movment and a Matter if the next direction point has a matter on it
     """
     next_dir = get_next_direction_to(particle.coords[0], particle.coords[1], destiny.coords[0], destiny.coords[1])
-    if particle.matter_in(next_dir):
+    if prev_dir is not None and prev_dir == next_dir:
+        return None
+    if particle.tile_in(next_dir) or particle.particle_in(next_dir):
         particle.get_matter_in(next_dir)
         return particle.get_matter_in(next_dir)
     particle.move_to(next_dir)
@@ -323,3 +364,14 @@ def get_next_direction_to(src_x, src_y, dest_x, dest_y):
     elif src_y == dest_y and src_x < dest_x:
         next_dir = E
     return next_dir
+
+
+def find_lowest_distance_neighbor_direction(nh_list, own_dist):
+    for dir in direction_list:
+        if nh_list[dir].dist < own_dist:
+            return dir
+    return 0
+
+
+def rotate_list(list, rotate_by):
+    return list[rotate_by:] + list[:rotate_by]

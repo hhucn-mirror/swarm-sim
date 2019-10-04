@@ -3,6 +3,7 @@ from lib.swarm_sim_header import *
 from solution.def_distances import *
 from solution.read_write import *
 from solution.kalman import *
+from solution.def_p_max import *
 
 import random
 
@@ -16,11 +17,6 @@ def solution(sim):
             initialize_particle(particle)
             particle.dest_t=random.choice(sim.get_tiles_list())
 
-        hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t)
-        if hit_a_matter:
-            particle.own_dist = calc_own_dist_t(hit_a_matter)
-            if particle.own_dist == 1:
-                print ("got a distance from a tile")
 
 
         if particle.wait:
@@ -29,32 +25,50 @@ def solution(sim):
             else:
                 #particle.delete_whole_memeory()
                 continue
+        if sim.get_actual_round() % (cycle_no * 10) == 1:
+            particle.prev_dir = None
         if sim.get_actual_round() % cycle_no == 1:
-            if particle.next_dir is not False and not particle.particle_in(particle.next_dir)\
+            if particle.next_dir is False and particle.own_dist > 1:
+                if debug:
+                    print("moving closer to target tile")
+                hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_dir)
+                if hit_a_matter or hit_a_matter is None:
+                    #reset_attributes(particle)
+                    if hit_a_matter is not None:
+                        if particle.own_dist > calc_own_dist_t(hit_a_matter):
+                            particle.own_dist = calc_own_dist_t(hit_a_matter)
+                        if hit_a_matter.type == "tile" and debug:
+                            print("got a distance from a tile")
+                else:
+                    reset_attributes(particle)
+                    reset_p_max(particle)
+            elif particle.next_dir is not False and not particle.particle_in(particle.next_dir)\
                     and not particle.tile_in(particle.next_dir):
                 particle.prev_dir = get_the_invert(particle.next_dir)
                 particle.move_to(particle.next_dir)
-                print ("dist list bevore moving", str(particle.nh_dist_list)[1:-1] )
-                print("\n P", particle.number, " coates to", dir_to_str(particle.next_dir))
+                if debug:
+                    print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_dist_list])
+                    print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_dir))
                 reset_attributes(particle)
-            elif move_to_dest_step_by_step(particle, particle.dest_t):
-                reset_attributes(particle)
-
+                reset_p_max(particle)
+            # elif move_to_dest_step_by_step(particle, particle.dest_t):
+                # reset_attributes(particle)
+            reset_p_max(particle)
         elif sim.get_actual_round() % cycle_no == 2:
-            read_data(particle)
+            if debug and debug_read:
+                print("reading memory of particle", particle.number)
+            particle.rcv_buf = read(particle.read_whole_memory())
             particle.nh_dist_list = def_distances(particle)
-
+            def_p_max(particle)
             particle.rcv_buf.clear()
 
         elif sim.get_actual_round() % cycle_no == 0:
             particle.next_dir = coating_alg(particle)
-            if particle.next_dir is False:
-                if particle.number is not particle.p_max.id and particle.p_max.id is not None:
-                    particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-                    if send_data(particle):
-                        continue
-
-            send_own_distance(particle)
+            if particle.p_max.id is not None and particle.p_max.dist > 0 and particle.next_dir is False:
+                particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
+                send_p_max(particle)
+            else:
+                send_own_distance(particle)
 
 
             #     #reset_attributes(particle)

@@ -1,5 +1,6 @@
-from solution.std_lib import direction, dir_in_range, dir_to_str
+from lib.swarm_sim_header import *
 import math
+
 
 class Neighbors:
     def __init__(self, type, dist):
@@ -11,21 +12,18 @@ class Neighbors:
 
 
 def scan_nh(particle):
-    for dir in direction:
+    for dir in direction_list:
         if particle.particle_in(dir):
-            particle.nh_dict[dir] = Neighbors("p", math.inf)
+            particle.nh_dict[dir] = Neighbor("p", math.inf)
             particle.p_dir_list.append(dir)
         elif particle.tile_in(dir):
-            particle.nh_dict[dir] = Neighbors("t", 0)
+            particle.nh_dict[dir] = Neighbor("t", 0)
             particle.t_dir_list.append(dir)
             particle.dest_t = particle.get_tile_in(dir)
         else:
-            particle.nh_dict[dir] = Neighbors("fl", math.inf)
+            particle.nh_dict[dir] = Neighbor("fl", math.inf)
             particle.fl_dir_list.append(dir)
     return True
-
-
-debug = 1
 
 
 def def_distances(particle):
@@ -37,7 +35,7 @@ def def_distances(particle):
         if debug :
             print("Direction | Type | Distance")
             for dir in particle.nh_dict:
-                print(dir_to_str(dir), "|", particle.nh_dict[dir].type, "|", particle.nh_dict[dir].dist)
+                print(direction_number_to_string(dir), "|", particle.nh_dict[dir].type, "|", particle.nh_dict[dir].dist)
 
         def_nh_dist(particle)
 
@@ -47,14 +45,14 @@ def def_distances(particle):
         print("\n After P", particle.number, "own distance", particle.own_dist)
         print("Direction | Type | Distance")
         for dir in particle.nh_dict:
-            print(dir_to_str(dir),"|",particle.nh_dict[dir].type, "|", particle.nh_dict[dir].dist )
+            print(direction_number_to_string(dir),"|",particle.nh_dict[dir].type, "|", particle.nh_dict[dir].dist )
         print ("local fl_min_dist", particle.loc_fl_min_dist)
         print("local fl_min_dir:")
         for dir in particle.loc_fl_min_dir:
-            print (dir_to_str(dir))
-        print ("global fl_min_dist", particle.gl_fl_min_dist, " global fl_min_dir", dir_to_str(particle.gl_fl_min_dir))
-        print ("local p_max_dist", particle.loc_p_max_dist, " local p_max_dir", dir_to_str(particle.loc_p_max_dir))
-        print ("global p_max_dist", particle.gl_p_max_dist, "global p_max_dir", dir_to_str(particle.gl_p_max_dir))
+            print (direction_number_to_string(dir))
+        print ("global fl_min_dist", particle.gl_fl_min_dist, " global fl_min_dir", direction_number_to_string(particle.gl_fl_min_dir))
+        print ("local p_max_dist", particle.loc_p_max_dist, " local p_max_dir", direction_number_to_string(particle.loc_p_max_dir))
+        print ("global p_max_dist", particle.gl_p_max_dist, "global p_max_dir", direction_number_to_string(particle.gl_p_max_dir))
 
 
 def def_own_dist(particle):
@@ -77,11 +75,11 @@ def def_own_dist(particle):
 def def_nh_dist(particle):
     for dir in particle.nh_dict:
         if particle.nh_dict[dir].dist == math.inf:
-            if particle.own_dist != math.inf or particle.nh_dict[dir_in_range(dir + 1)].dist != math.inf or \
-                 particle.nh_dict[dir_in_range(dir - 1)].dist != math.inf:
+            if particle.own_dist != math.inf or particle.nh_dict[direction_in_range(dir + 1)].dist != math.inf or \
+                 particle.nh_dict[direction_in_range(dir - 1)].dist != math.inf:
                 particle.nh_dict[dir].dist = 1 + min(particle.own_dist,
-                                                     particle.nh_dict[dir_in_range(dir + 1)].dist,
-                                                     particle.nh_dict[dir_in_range(dir - 1)].dist)
+                                                     particle.nh_dict[direction_in_range(dir + 1)].dist,
+                                                     particle.nh_dict[direction_in_range(dir - 1)].dist)
             else:
                 particle.nh_dict[dir].dist = math.inf
 
