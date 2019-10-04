@@ -74,7 +74,7 @@ def create_dir_for_data(config_data):
                                "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                                str(config_data.seed_value)
 
-        config_data.dir_name = "./outputs/mulitple/" + config_data.dir_name
+        config_data.dir_name = "./outputs/multiple/" + config_data.dir_name
 
     else:
         config_data.dir_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \

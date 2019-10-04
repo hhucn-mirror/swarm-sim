@@ -50,6 +50,10 @@ def solution(world):
             for y in range (0, int(world.get_world_y_size())*4+1):
                 coord_map_calc[x].append(0)
 
+        rows, cols = (1+2*world.get_world_y_size(), 1+4*world.get_world_x_size())
+        arr = [[0 for i in range(cols)] for j in range(rows)]
+        print(arr)
+
 
 
         for rnd_particle in world.get_particle_list():

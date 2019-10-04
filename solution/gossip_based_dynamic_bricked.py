@@ -28,7 +28,7 @@ calc_count=0
 table_calcs= ""
 aging_factor=0.1
 initial_size=0
-coord_map_calc=[]
+coord_map_calc=[[]]
 
 def solution(world):
     global calc_count
@@ -37,20 +37,28 @@ def solution(world):
     global coord_map_calc
     global info_plot_average
     global  info_plot_broud_cast_master_estimate
-    table_size_max = 2
+    table_size_max = 16
 
     if world.get_actual_round()==1:
         initial_size=len(world.get_particle_list())
 
+        #rows, cols = (int(world.get_world_x_size())*4, int(world.get_world_y_size())*4)
+        #coord_map_calc = [[0] * cols] * rows
+
+        #print(coord_map_calc)
+
+        coord_map_calc=np.zeros((int(world.get_world_x_size())*4,int(world.get_world_y_size())*4 ), dtype=int)
+        #print(test)
+
         #map for calculation count between junctions
-        for x in range(0, int(world.get_world_x_size())*4):
-            coord_map_calc.append([0])
+        #for x in range(0, int(world.get_world_x_size())*4):
+        #    coord_map_calc.append([0])
 
-        for x in range(0, int(world.get_world_x_size()) * 4):
-            for y in range (0, int(world.get_world_y_size())*4+1):
-                coord_map_calc[x].append(0)
+        #for x in range(1, int(world.get_world_x_size()) * 4):
+        #    for y in range (0, int(world.get_world_y_size())*4-1):
+        #        coord_map_calc[x].append(0)
 
-
+        #coord_map_calc[int(world.get_world_x_size()*4-1)][int(world.get_world_y_size()*4-1)]=300
 
         for rnd_particle in world.get_particle_list():
             setattr(rnd_particle, "sum", 0)
@@ -166,11 +174,15 @@ def solution(world):
 
             #Amount of calculations between particles increased by 1
             calc_count+=1
-            coord_map_calc[int(rnd_particle.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle.coords[1]+world.get_world_y_size())*2-1]+=1
-            coord_map_calc[int(rnd_particle_neighbour.coords[0]+world.get_world_x_size())*2-1][int(rnd_particle_neighbour.coords[1]+world.get_world_y_size())*2-1]+=1
+            print("x: ", int(rnd_particle.coords[0]+world.get_world_x_size())*2)
+            print("y: ", int(rnd_particle.coords[1]+world.get_world_y_size())*2)
+
+            #print(coord_map_calc)
+
+            coord_map_calc[int((rnd_particle.coords[0]+world.get_world_x_size())*2)-1][int((rnd_particle.coords[1]+world.get_world_y_size()*2)-1)]+=1
+            coord_map_calc[int((rnd_particle_neighbour.coords[0]+world.get_world_x_size()*2)-1)][int((rnd_particle_neighbour.coords[1]+world.get_world_y_size()*2)-1)]+=1
             rnd_particle.actual_round += 1
-            print("coords1: ",rnd_particle.coords)
-            print("coords2: ", rnd_particle_neighbour.coords)
+
         helper_particle_list.remove(rnd_particle)
 
 
@@ -317,16 +329,19 @@ def solution(world):
         #Graph 3
         print(coord_map_calc)
         print(len(coord_map_calc))
-        for i in coord_map_calc:
-            print(len(i))
+        for i in coord_map_calc[0]:
+            #print(len(i))
+            print("zeile :",coord_map_calc[i])
 
 
         #Graph4
+        print(coord_map_calc)
+
         x4 = np.arange(0, world.get_world_x_size() * 4, 1)
         y4 = np.arange(0, world.get_world_y_size() * 4, 1)
         z4=[]
-        for x in range(1,len(x4)+1,2):
-            for y in range(1,len(y4)+1,2):
+        for x in range(0,len(x4),2):
+            for y in range(0,len(y4),2):
                 z4.append(coord_map_calc[x][y])
 
         x4=np.arange(0, world.get_world_x_size()*4,2)
@@ -583,3 +598,4 @@ def set_color_g(particle):
         return 2
     else:
         return 1
+

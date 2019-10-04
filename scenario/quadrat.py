@@ -5,8 +5,8 @@ def scenario(sim):
     a=6
     b=6
 
-    for a in range(-7,7):
-        for b in range(-7,7):
+    for a in range(-1,1):
+        for b in range(-1,1):
             if b%2==0:
                 sim.add_particle(a, b)
             else:
