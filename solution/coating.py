@@ -26,12 +26,12 @@ def solution(sim):
                 #particle.delete_whole_memeory()
                 continue
         if sim.get_actual_round() % (cycle_no * 10) == 1:
-            particle.prev_dir = None
+            particle.prev_direction = None
         if sim.get_actual_round() % cycle_no == 1:
-            if particle.next_dir is False and particle.own_dist > 1:
+            if particle.next_direction is False and particle.own_dist > 1:
                 if debug:
                     print("moving closer to target tile")
-                hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_dir)
+                hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
                 if hit_a_matter or hit_a_matter is None:
                     #reset_attributes(particle)
                     if hit_a_matter is not None:
@@ -42,13 +42,13 @@ def solution(sim):
                 else:
                     reset_attributes(particle)
                     reset_p_max(particle)
-            elif particle.next_dir is not False and not particle.particle_in(particle.next_dir)\
-                    and not particle.tile_in(particle.next_dir):
-                particle.prev_dir = get_the_invert(particle.next_dir)
-                particle.move_to(particle.next_dir)
+            elif particle.next_direction is not False and not particle.particle_in(particle.next_direction)\
+                    and not particle.tile_in(particle.next_direction):
+                particle.prev_direction = get_the_invert(particle.next_direction)
+                particle.move_to(particle.next_direction)
                 if debug:
                     print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_dist_list])
-                    print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_dir))
+                    print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
                 reset_attributes(particle)
                 reset_p_max(particle)
             # elif move_to_dest_step_by_step(particle, particle.dest_t):
@@ -63,8 +63,8 @@ def solution(sim):
             particle.rcv_buf.clear()
 
         elif sim.get_actual_round() % cycle_no == 0:
-            particle.next_dir = coating_alg(particle)
-            if particle.p_max.id is not None and particle.p_max.dist > 0 and particle.next_dir is False:
+            particle.next_direction = coating_alg(particle)
+            if particle.p_max.id is not None and particle.p_max.dist > 0 and particle.next_direction is False:
                 particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
                 send_p_max(particle)
             else:

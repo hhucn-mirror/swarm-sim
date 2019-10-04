@@ -22,11 +22,11 @@ class PMaxInfo:
     def __init__(self):
         self.id = 0
         self.dist = -math.inf
-        self.dir = []
+        self.directions = []
         self.black_list = []
 
     def __str__(self):
-        return "id: " + str(self.id) + "|" + "dist: " + str(self.dist) + "|" + "dir: " + str(self.dir) \
+        return "id: " + str(self.id) + "|" + "dist: " + str(self.dist) + "|" + "direction: " + str(self.directions) \
                + "|" + "Blacklist: " + str(self.black_list)[1:-1]
 
     def __eq__(self, other):
@@ -35,7 +35,7 @@ class PMaxInfo:
     def reset(self):
         self.id = 0
         self.dist = -math.inf
-        self.dir = []
+        self.directions = []
         self.black_list.clear()
 
 
