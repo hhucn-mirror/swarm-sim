@@ -94,8 +94,10 @@ class Memory:
             return y_diff
         elif x_diff == 0.5:
             return y_diff
-        else:
+        elif (x_diff - y_diff * 0.5) > 0:
             return y_diff + (x_diff - y_diff * 0.5)
+        else:
+            return y_diff
 
     def try_deliver_messages(self, sim):
             self.option[self.mode](self, sim)

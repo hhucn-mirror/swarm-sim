@@ -1,10 +1,13 @@
-import datetime, math, os, time
+import datetime
+import importlib
+import math
+import os
+import time
+
+import pyglet
+import pyglet.window.key as key
 from pyglet.gl import *
 from pyglet.window import mouse
-import pyglet.window.key as key
-import importlib
-import subprocess
-import pandas as pd
 
 # screenshot manager parameters
 screenshot_directory = 'screenshots/'
@@ -171,11 +174,31 @@ class VisWindow(pyglet.window.Window):
                    # self.tile_vertex_list.indices = list(range(0, 8 * len(self.sim.tiles)))
                    # self.update_tile(len(self.sim.tiles) - 1, tile)
                     self.update_tiles(True)
+                    print("Distance (0, 0) - ({}, {}): {}".format(rounded_coords, coords_coords[1],
+                                                                  self.get_distance(rounded_coords, coords_coords[1])))
             else:
                 # delete tile
                 self.sim.remove_tile_on((rounded_coords,coords_coords[1]))
                 self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                 self.update_tiles(True)
+
+    @staticmethod
+    def get_distance(x2, y2, x1=0, y1=0):
+        x_diff = abs(x2 - x1)
+        y_diff = abs(y2 - y1)
+
+        if x_diff * 2 == y_diff:
+            return y_diff
+        elif y1 == y2 and x1 != x2:
+            return x_diff
+        elif x1 == x2 and y1 != y2:
+            return y_diff
+        elif x_diff == 0.5:
+            return y_diff
+        elif (x_diff - y_diff * 0.5) > 0:
+            return y_diff + (x_diff - y_diff * 0.5)
+        else:
+            return y_diff
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
