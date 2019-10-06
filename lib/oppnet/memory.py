@@ -2,7 +2,7 @@ from enum import Enum
 
 from lib.oppnet.communication import store_message
 from lib.oppnet.meta import process_event, EventType
-from lib.point import Point
+from lib.oppnet.point import Point
 
 
 class MemoryMode(Enum):

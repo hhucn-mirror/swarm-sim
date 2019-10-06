@@ -19,10 +19,6 @@ def process_event(event_type, message):
     """
     :param event_type: The type of event
     :type event_type: :class:`~meta.EventType`
-    :param sender: The particle sending the Message.
-    :type sender: :class:`~particle.Particle`
-    :param receiver: The intended receiver of the message.
-    :type receiver: :class:`~particle.Particle`
     :param message: The message to send.
     :type message: :class:`~communication.Message`
     """

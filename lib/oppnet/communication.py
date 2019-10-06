@@ -2,7 +2,7 @@ import copy
 import random
 
 from lib.oppnet.meta import EventType, process_event
-from lib.point import Point
+from lib.oppnet.point import Point
 
 
 class Message:
