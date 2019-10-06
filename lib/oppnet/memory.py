@@ -1,5 +1,5 @@
-import math
 from enum import Enum
+
 from lib.oppnet.communication import store_message
 from lib.oppnet.meta import process_event, EventType
 from lib.point import Point
@@ -81,12 +81,21 @@ class Memory:
 
     @staticmethod
     def get_distance(position1, position2):
-        x = abs(position1.getx() - position2.getx())
-        y = abs(position1.gety() - position2.gety())
-        distance = x + y
-        if x != 0 and y != 0:
-            distance /= 1.5
-        return distance
+        x1, y1 = position1.getx(), position1.gety()
+        x2, y2 = position2.getx(), position2.gety()
+        x_diff = abs(x2 - x1)
+        y_diff = abs(y2 - y1)
+
+        if x_diff * 2 == y_diff:
+            return y_diff
+        elif y1 == y2 and x1 != x2:
+            return x_diff
+        elif x1 == x2 and y1 != y2:
+            return y_diff
+        elif x_diff == 0.5:
+            return y_diff
+        else:
+            return y_diff + (x_diff - y_diff * 0.5)
 
     def try_deliver_messages(self, sim):
             self.option[self.mode](self, sim)
