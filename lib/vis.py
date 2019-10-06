@@ -187,14 +187,8 @@ class VisWindow(pyglet.window.Window):
         x_diff = abs(x2 - x1)
         y_diff = abs(y2 - y1)
 
-        if x_diff * 2 == y_diff:
-            return y_diff
-        elif y1 == y2 and x1 != x2:
+        if y1 == y2 and x1 != x2:
             return x_diff
-        elif x1 == x2 and y1 != y2:
-            return y_diff
-        elif x_diff == 0.5:
-            return y_diff
         elif (x_diff - y_diff * 0.5) > 0:
             return y_diff + (x_diff - y_diff * 0.5)
         else:
