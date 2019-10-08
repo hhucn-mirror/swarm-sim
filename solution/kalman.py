@@ -28,7 +28,8 @@ def initialize_particle(particle):
 
 
 def reset_attributes(particle):
-    print("resetting particle", particle.number)
+    if debug:
+        print("resetting particle", particle.number)
     particle.own_dist = math.inf
     # particle.nh_dist_list.clear()
     particle.nh_dist_list = [Neighbor("fl", math.inf)] * 6

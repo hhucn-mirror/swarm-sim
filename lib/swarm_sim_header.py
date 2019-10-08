@@ -7,6 +7,7 @@ debug_write = 1
 debug_read = 0
 debug_p_max_calculation = 0
 debug_distance_calculation = 0
+debug_movement = 0
 
 
 class Neighbor:
@@ -335,7 +336,8 @@ def move_to_dest_step_by_step(particle, destiny, prev_dir = None):
         particle.get_matter_in(next_dir)
         return particle.get_matter_in(next_dir)
     particle.move_to(next_dir)
-    print("\n P", particle.number, " moves to", direction_number_to_string(next_dir))
+    if debug and debug_movement:
+        print("\n P", particle.number, " moves to", direction_number_to_string(next_dir))
     return False
 
 

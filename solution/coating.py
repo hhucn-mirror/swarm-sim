@@ -29,7 +29,7 @@ def solution(sim):
             particle.prev_direction = None
         if sim.get_actual_round() % cycle_no == 1:
             if particle.next_direction is False and particle.own_dist > 1:
-                if debug:
+                if debug and debug_movement:
                     print("moving closer to target tile")
                 hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
                 if hit_a_matter or hit_a_matter is None:
