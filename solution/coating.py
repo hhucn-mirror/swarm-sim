@@ -66,9 +66,9 @@ def solution(sim):
             particle.next_direction = coating_alg(particle)
             if particle.p_max.id is not None and particle.p_max.dist > 0 and particle.next_direction is False:
                 particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-                send_p_max(particle)
+                send_pmax_to_neighbors(particle)
             else:
-                send_own_distance(particle)
+                send_own_dist_to_neighbors(particle)
 
 
             #     #reset_attributes(particle)

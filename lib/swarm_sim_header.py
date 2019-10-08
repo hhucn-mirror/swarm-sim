@@ -2,9 +2,9 @@ import math
 import random
 from enum import Enum
 
-debug = 0
+debug = 1
 debug_write = 1
-debug_read = 1
+debug_read = 0
 debug_p_max_calculation = 0
 debug_distance_calculation = 0
 
@@ -363,11 +363,15 @@ def get_next_direction_to(src_x, src_y, dest_x, dest_y):
     return next_dir
 
 
-def find_lowest_distance_neighbor_direction(nh_list, own_dist):
-    for dir in direction_list:
-        if nh_list[dir].dist < own_dist:
-            return dir
-    return 0
+def find_lowest_distance_neighbor_direction(nh_list):
+    minimum_direction = min(enumerate(nh_list), key=lambda x: x[1].dist)[0]
+    counter = 0  # prevent never terminating if all neighbors have the same distance
+    while nh_list[direction_in_range(minimum_direction - 1)].dist == \
+            nh_list[direction_in_range(
+                minimum_direction)].dist and counter < 6:  # find the leftmost neighbor with the lowest distance
+        minimum_direction = direction_in_range(minimum_direction - 1)
+        counter += 1
+    return minimum_direction
 
 
 def rotate_list(list, rotate_by):
