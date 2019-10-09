@@ -13,7 +13,7 @@ class OwnDistance:
 class PMax(OwnDistance):
     def __init__(self, particle_distance, particle_id, p_max, p_max_table):
         OwnDistance.__init__(self, particle_distance, particle_id)
-        self.p_max_id = p_max.id
+        self.p_max_ids = p_max.ids
         self.p_max_dist = p_max.dist
         self.p_max_dir = 0
         self.p_max_table = deepcopy(p_max_table)

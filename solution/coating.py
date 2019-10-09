@@ -47,7 +47,7 @@ def solution(sim):
                 particle.prev_direction = get_the_invert(particle.next_direction)
                 particle.move_to(particle.next_direction)
                 if debug:
-                    print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_dist_list])
+                    print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_list])
                     print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
                 reset_attributes(particle)
                 reset_p_max(particle)
@@ -58,14 +58,14 @@ def solution(sim):
             if debug and debug_read:
                 print("reading memory of particle", particle.number)
             particle.rcv_buf = read(particle.read_whole_memory())
-            particle.nh_dist_list = def_distances(particle)
+            particle.nh_list = def_distances(particle)
             def_p_max(particle)
             particle.rcv_buf.clear()
 
         elif sim.get_actual_round() % cycle_no == 0:
             particle.next_direction = coating_alg(particle)
-            if particle.p_max.id is not None and particle.p_max.dist > 0 and particle.next_direction is False:
-                particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
+            if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
+                # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
                 send_pmax_to_neighbors(particle)
             else:
                 send_own_dist_to_neighbors(particle)

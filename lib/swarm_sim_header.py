@@ -21,20 +21,20 @@ class Neighbor:
 
 class PMaxInfo:
     def __init__(self):
-        self.id = 0
+        self.ids = set()
         self.dist = -math.inf
         self.directions = []
         self.black_list = []
 
     def __str__(self):
-        return "id: " + str(self.id) + "|" + "dist: " + str(self.dist) + "|" + "direction: " + str(self.directions) \
+        return "id: " + str(self.ids) + "|" + "dist: " + str(self.dist) + "|" + "direction: " + str(self.directions) \
                + "|" + "Blacklist: " + str(self.black_list)[1:-1]
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.dist == other.dist and any(self_id in other.ids for self_id in self.ids)
 
     def reset(self):
-        self.id = 0
+        self.ids = set()
         self.dist = -math.inf
         self.directions = []
         self.black_list.clear()

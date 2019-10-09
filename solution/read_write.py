@@ -47,8 +47,8 @@ def send_p_max(particle, targets):
 
 def send_distance_of_free_locations(particle, target_direction, target_particle):
     for free_location_direction in [direction_in_range(target_direction - 1), direction_in_range(target_direction + 1)]:
-        if particle.nh_dist_list[free_location_direction].type == "fl":
-            free_location_package = message.OwnDistance(particle.nh_dist_list[free_location_direction].dist, None)
+        if particle.nh_list[free_location_direction].type == "fl":
+            free_location_package = message.OwnDistance(particle.nh_list[free_location_direction].dist, None)
             particle.write_to_with(target_particle, key=get_the_invert(free_location_direction),
                                    data=deepcopy(free_location_package))
 
@@ -65,29 +65,40 @@ def divide_neighbors(particle, directions_with_particles):
     send_p_max_counter = len(particle.p_max.directions) if len(particle.p_max.directions) > 0 else 1
     direction_rotation = 0
     if len(particle.p_max.directions) == 0:
-        direction_rotation = find_lowest_distance_neighbor_direction(particle.nh_dist_list)
+        direction_rotation = find_lowest_distance_neighbor_direction(particle.nh_list)
     rotated_direction_list = rotate_list(direction_list, direction_rotation)
     targets_for_own_dist_package = directions_with_particles
     targets_for_pmax_package = []
     for direction in rotated_direction_list:
         if direction in directions_with_particles:
-            if particle.own_dist == particle.nh_dist_list[direction].dist and send_p_max_counter > 0 and \
+            if particle.own_dist == particle.nh_list[direction].dist and send_p_max_counter > 0 and \
                     direction not in particle.p_max.directions:
                 targets_for_own_dist_package.remove(direction)
                 targets_for_pmax_package.append(direction)
                 send_p_max_counter -= 1
-            elif particle.own_dist < particle.nh_dist_list[direction].dist and direction not in particle.p_max.directions:
+            elif particle.own_dist > particle.nh_list[direction].dist and direction not in particle.p_max.directions:
                 targets_for_own_dist_package.remove(direction)
                 targets_for_pmax_package.append(direction)
+    for direction in particle.p_max.directions:
+        if send_p_max_counter > 0:
+            if direction in targets_for_own_dist_package:
+                targets_for_own_dist_package.remove(direction)
+                targets_for_pmax_package.append(direction)
+                send_p_max_counter -= 1
     return targets_for_pmax_package, targets_for_own_dist_package
 
 
 def send_pmax_to_neighbors(particle):
     if particle.own_dist != math.inf:
         directions_with_particles = find_neighbor_particles(particle)
-        pmax_targets, own_dist_targets = divide_neighbors(particle, directions_with_particles)
-        send_p_max(particle, pmax_targets)
-        send_own_distance(particle, own_dist_targets)
+        if particle.broadcast_pmax:
+            send_p_max(particle, directions_with_particles)
+            particle.broadcast_pmax = False
+        else:
+            pmax_targets, own_dist_targets = divide_neighbors(particle, directions_with_particles)
+            send_p_max(particle, pmax_targets)
+            send_own_distance(particle, own_dist_targets)
+
 
 def send_own_dist_to_neighbors(particle):
     if particle.own_dist != math.inf:

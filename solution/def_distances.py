@@ -61,7 +61,7 @@ def calc_own_dist(nh_list):
     :param nh_list: A dictionary formed as  {direction_1: "dist_1", ..., direction_6: "dist_6"}
     :return: The own distance of the the particle
     """
-    nh_dist_list = list() # nh_dist_list = [neighbor.dist for neightbor in nh_list]
+    nh_dist_list = list() # nh_list = [neighbor.dist for neightbor in nh_list]
     for direction in direction_list:
         nh_dist_list.append(nh_list[direction].dist)
     min_nh_dist = min(nh_dist_list)
