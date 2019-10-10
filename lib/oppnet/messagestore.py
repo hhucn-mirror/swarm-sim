@@ -41,6 +41,8 @@ class MessageStore(deque):
 
     def append(self, m: Message):
         # pop the right element if max len reached
+        if self.contains_key(m.key):
+            return
         if self.maxlen == len(self):
             k = list(self)[0].key
             if self.strategy == BufferStrategy.lifo:
@@ -52,10 +54,11 @@ class MessageStore(deque):
                 pass
 
         super().append(m)
+        self.__append_key__(m.key, self.index(m))
+
         if self.maxlen == len(self):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
-        self.__append_key__(m.key, self.index(m))
 
     def remove(self, message):
         try:

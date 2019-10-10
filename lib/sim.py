@@ -12,6 +12,7 @@ import math
 import random
 
 from lib import tile, marker, vis
+from lib.oppnet.memory import Memory, MemoryMode
 
 x_offset = [0.5, 1, 0.5, -0.5, -1, -0.5, 0]
 y_offset = [1, 0, -1, -1, 0, 1, 0]
@@ -103,11 +104,14 @@ class Sim:
         self.mobility_model_mode = config_data.mobility_model_mode
         self.border = config_data.border
         self.config_data = config_data
-        self.csv_round_writer = self.csv_mod.CsvRoundData(self, solution=config_data.solution.rsplit('.', 1)[0],
-                                                           seed=config_data.seed,
-                                                           tiles_num=0, particle_num=0,
-                                                           steps=0, directory=config_data.dir_name)
+        self.csv_round_writer = self.csv_mod.CsvRoundData(self, solution=config_data.solution,
+                                                          seed=config_data.seed,
+                                                          tiles_num=0, particle_num=0,
+                                                          steps=0, directory=config_data.dir_name)
 
+        self.memory = Memory(MemoryMode.Delta)
+        self.plotdata_x = []
+        self.plotdata_y = []
         mod = importlib.import_module('scenario.' + config_data.scenario.rsplit('.', 1)[0])
         mod.scenario(self)
         if config_data.random_order:
@@ -124,17 +128,28 @@ class Sim:
             window.run()
         else:
             while self.get_actual_round() <= self.get_max_round() and self.__end is False:
+                self.memory.try_deliver_messages(self)
                 self.solution_mod.solution(self)
                 # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
-        # creating gnu plots
+        #                if len(self.memory.memory) > 0:
+        #                    self.plotdata_x.append(self.get_actual_round())
+        #                    self.plotdata_y.append(len(self.memory.memory[0]))
+        #                else:
+        #                    self.plotdata_x.append(self.get_actual_round())
+        #                    self.plotdata_y.append(0)
+
+        #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
         particle_csv = self.csv_mod.CsvParticleFile(self.directory)
         for particle in self.init_particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
 #        generate_gnuplot(self.directory)
+
+        # plt.plot(self.plotdata_x, self.plotdata_y)
+        # plt.show()
         return
 
     def success_termination(self):
