@@ -13,12 +13,12 @@ x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
 y_offset = [ 1, 0, -1,   -1,    0,  1]
 
 def solution(world):
-    global arr
-
+    global map_exchange
+#################################################################
     if world.get_actual_round()==1:
         rows, cols = (1 + 2 * int(world.get_world_y_size()), 1 + 4 * int(world.get_world_x_size()))
-        arr = [[int(0) for i in range(cols)] for j in range(rows)]
-        print(arr)
+        map_exchange = [[int(0) for i in range(cols)] for j in range(rows)]
+        print(map_exchange)
 
     if world.get_actual_round()%1==0:
         for particle in world.get_particle_list():
@@ -28,8 +28,8 @@ def solution(world):
             print(particle.coords)
 
             #if (abs(particle.coords[0]) <= world.get_world_x_size() and abs(particle.coords[1]) <= world.get_world_y_size()):
-            arr[abs(int(particle.coords[1])-int(world.get_world_y_size()))][int(2*particle.coords[0])+2*int(world.get_world_x_size())]+=1
-            print(arr)
+            map_exchange[abs(int(particle.coords[1]) - int(world.get_world_y_size()))][int(2 * particle.coords[0]) + 2 * int(world.get_world_x_size())]+=1
+            print(map_exchange)
 
 
     if world.get_actual_round()==world.get_max_round():
@@ -41,16 +41,16 @@ def solution(world):
         print(Y)
         print(X)
 
-        arr2 = np.copy(arr)
+        map_exchange_2 = np.copy(map_exchange)
 
-        for i in range(0,len(arr)):
-            for j in range(0,len(arr[i])):
-                if arr[i][j]==0:
-                    arr[i][j]=None
-        arr=np.array(arr)
-        print(arr)
+        for i in range(0, len(map_exchange)):
+            for j in range(0, len(map_exchange[i])):
+                if map_exchange[i][j]==0:
+                    map_exchange[i][j]=None
+        map_exchange=np.array(map_exchange)
+        print(map_exchange)
         fig5, ax5 = plt.subplots()
-        a5 = ax5.scatter(Y, X, c=arr2,  cmap='gray_r')
+        a5 = ax5.scatter(Y, X, c=map_exchange_2, cmap='gray_r')
         fig5.colorbar(a5)
 
         ax5.set_xlabel('X coord')
@@ -64,26 +64,26 @@ def solution(world):
         dz=[]
         for i in range(0, len(Y)):
             for j in range(0, len(Y[i])):
-                if arr2[i][j]>0:
+                if map_exchange_2[i][j]>0:
                     x.append(Y[i][j])
                     dx.append(0.2)
         for i in range(0,len(X)):
             for j in range(0,len(X[i])):
-                if arr2[i][j]>0:
+                if map_exchange_2[i][j]>0:
                     y.append(X[i][j])
                     dy.append(0.2)
-        for i in range(0, len(arr)):
-            for j in range(0,len(arr[i])):
-                if arr2[i][j]>0:
+        for i in range(0, len(map_exchange)):
+            for j in range(0, len(map_exchange[i])):
+                if map_exchange_2[i][j]>0:
                     z.append(0)
-                    dz.append(arr2[i][j])
+                    dz.append(map_exchange_2[i][j])
 
 
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(111, projection='3d')
 
         dzc=np.array(dz)
-        colors = plt.cm.Greys(dzc / float(arr2.max()))
+        colors = plt.cm.Greys(dzc / float(map_exchange_2.max()))
 
         ax4.bar3d(x, y, z, dx, dy, dz, color=colors)
         ax4.set_xlabel('X coord')

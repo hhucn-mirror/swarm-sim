@@ -17,7 +17,8 @@ W = 4
 NW = 5
 
 
-
+x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
+y_offset = [ 1, 0, -1,   -1,    0,  1]
 direction = [NE, E, SE, SW, W, NW]
 info_plot=[[]]
 info_plot_average=[[]]
@@ -28,38 +29,30 @@ calc_count=0
 table_calcs= ""
 aging_factor=0.1
 initial_size=0
-coord_map_calc=[[]]
+
 
 def solution(world):
     global calc_count
     global table_calcs
     global initial_size
-    global coord_map_calc
     global info_plot_average
-    global  info_plot_broud_cast_master_estimate
-    table_size_max = 16
+    global info_plot_broud_cast_master_estimate
+    global map_exchange
+    global map_exchange_u
+    table_size_max = 2
 
     if world.get_actual_round()==1:
         initial_size=len(world.get_particle_list())
 
-        #rows, cols = (int(world.get_world_x_size())*4, int(world.get_world_y_size())*4)
-        #coord_map_calc = [[0] * cols] * rows
-
-        #print(coord_map_calc)
-
-        coord_map_calc=np.zeros((int(world.get_world_x_size())*4,int(world.get_world_y_size())*4 ), dtype=int)
-        #print(test)
-
         #map for calculation count between junctions
-        #for x in range(0, int(world.get_world_x_size())*4):
-        #    coord_map_calc.append([0])
+        rows, cols = (1 + 2 * int(world.get_world_y_size()), 1 + 4 * int(world.get_world_x_size()))
+        map_exchange = [[int(0) for i in range(cols)] for j in range(rows)]
+        map_exchange_u = [[int(0) for i in range(cols)] for j in range(rows)]
+        print(map_exchange)
 
-        #for x in range(1, int(world.get_world_x_size()) * 4):
-        #    for y in range (0, int(world.get_world_y_size())*4-1):
-        #        coord_map_calc[x].append(0)
 
-        #coord_map_calc[int(world.get_world_x_size()*4-1)][int(world.get_world_y_size()*4-1)]=300
 
+        #Set attributes for the solution
         for rnd_particle in world.get_particle_list():
             setattr(rnd_particle, "sum", 0)
             setattr(rnd_particle, "particle_count",0)
@@ -158,31 +151,34 @@ def solution(world):
             #both particle get the new_sum
             rnd_particle.sum = new_sum
             rnd_particle_neighbour.sum= new_sum
-            #particle_count
+            #particle_count_old
+            r_p_old_count= rnd_particle.particle_count
+            r_p_n_old_count=rnd_particle_neighbour.particle_count
+            #particle_count_new
             rnd_particle.particle_count=calculate_particle_count(rnd_particle)
             rnd_particle_neighbour.particle_count=calculate_particle_count(rnd_particle_neighbour)
+            #map for unnessasary information exchange
+            if (r_p_old_count==rnd_particle.particle_count):
+                map_exchange_u[abs(int(rnd_particle.coords[1]) - int(world.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(world.get_world_x_size())] += 1
+            if (r_p_n_old_count==rnd_particle_neighbour.particle_count):
+                map_exchange_u[abs(int(rnd_particle.coords[1]) - int(world.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(world.get_world_x_size())] += 1
+
             #min|max|average exchange
             exchange_information(rnd_particle, rnd_particle_neighbour)
-            #prints
-            #print_information(rnd_particle,neighbour_found_in_dir, current_sum, current_sum_neighbour)
-            #print("berechneten average:",rnd_particle.average)
-            #print("current max", rnd_particle.current_max)
             #Table
             if(initial_size<=table_size_max):
                 table_calcs+=next_line_table(world.get_particle_list())
                 table_calcs += "  " + str(rnd_particle.number - 1) + "-->" + str(rnd_particle.get_particle_in(neighbour_found_in_dir).number - 1)
-
             #Amount of calculations between particles increased by 1
             calc_count+=1
-            print("x: ", int(rnd_particle.coords[0]+world.get_world_x_size())*2)
-            print("y: ", int(rnd_particle.coords[1]+world.get_world_y_size())*2)
+            map_exchange[abs(int(rnd_particle.coords[1]) - int(world.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(world.get_world_x_size())] += 1
+            map_exchange[abs(int(rnd_particle_neighbour.coords[1]) - int(world.get_world_y_size()))][int(2 * rnd_particle_neighbour.coords[0]) + 2 * int(world.get_world_x_size())] += 1
 
-            #print(coord_map_calc)
-
-            coord_map_calc[int((rnd_particle.coords[0]+world.get_world_x_size())*2)-1][int((rnd_particle.coords[1]+world.get_world_y_size()*2)-1)]+=1
-            coord_map_calc[int((rnd_particle_neighbour.coords[0]+world.get_world_x_size()*2)-1)][int((rnd_particle_neighbour.coords[1]+world.get_world_y_size()*2)-1)]+=1
             rnd_particle.actual_round += 1
+            rnd_particle_neighbour.actual_round+=1
 
+            print("coords1: ",rnd_particle.coords)
+            print("coords2: ", rnd_particle_neighbour.coords)
         helper_particle_list.remove(rnd_particle)
 
 
@@ -326,86 +322,68 @@ def solution(world):
         #ax3.set_yscale('log')
         ax3.legend(loc='upper left')
 
-        #Graph 3
-        print(coord_map_calc)
-        print(len(coord_map_calc))
-        for i in coord_map_calc[0]:
-            #print(len(i))
-            print("zeile :",coord_map_calc[i])
+        #Graph3
+        y = np.arange(world.get_world_y_size(), -world.get_world_y_size() - 1, -1)
+        x = np.arange(-world.get_world_x_size(), world.get_world_x_size() + 0.5, 0.5)
 
-
-        #Graph4
-        print(coord_map_calc)
-
-        x4 = np.arange(0, world.get_world_x_size() * 4, 1)
-        y4 = np.arange(0, world.get_world_y_size() * 4, 1)
-        z4=[]
-        for x in range(0,len(x4),2):
-            for y in range(0,len(y4),2):
-                z4.append(coord_map_calc[x][y])
-
-        x4=np.arange(0, world.get_world_x_size()*4,2)
-        y4=np.arange(0, world.get_world_y_size()*4,2)
-        X, Y = np.meshgrid(x4, y4)
-        fig4 = plt.figure()
-        ax4 = fig4.add_subplot(111, projection='3d')
-
-        X= X / 2 - world.get_world_x_size()
-        Y= Y / 2 - world.get_world_y_size()
-
-        print(X)
+        Y, X = np.meshgrid(x, y)
         print(Y)
-        g1=0
-        for i in X:
-            if g1%2==0:
-                X[g1]+=0.5
-            g1+=1
+        print(X)
 
+        map_exchange_2 = np.copy(map_exchange)
 
-        z4=np.array(z4)
-        zz=np.copy(z4)
-        z4=np.split(z4, world.get_world_y_size()*2)
-        z4 = np.array(z4)
+        for i in range(0, len(map_exchange)):
+            for j in range(0, len(map_exchange[i])):
+                if map_exchange[i][j] == 0:
+                    map_exchange[i][j] = None
+        map_exchange = np.array(map_exchange)
+        print(map_exchange)
+        fig4, ax4 = plt.subplots()
+        a5 = ax4.scatter(Y, X, c=map_exchange_2, cmap='gray_r')
+        fig4.colorbar(a5)
 
-        avg_p=0
-        c1=0
-        for i in zz:
-            avg_p+=zz[c1]
-            c1+=1
-        avg_p=avg_p/len(zz)
-
-        print("ZZ:", zz)
-        print(avg_p)
-
-        standard_dev_p=0
-        c1=0
-        for i in zz:
-            standard_dev_p+=(avg_p-zz[c1])*(avg_p-zz[c1])
-            c1+=1
-
-        standard_dev_p=np.sqrt(standard_dev_p/avg_p)
-        print("zz standarddev: ", standard_dev_p)
-
-        standard_dev_p_relativ= (standard_dev_p/avg_p)*100
-
-
-
-        im=ax4.plot_surface(X, Y, z4 , cmap='jet')
         ax4.set_xlabel('X coord')
         ax4.set_ylabel('Y coord')
-        ax4.set_zlabel('Austausche')
-        fig4.colorbar(im)
+
+        # Graph 4
+
+        x = []
+        y = []
+        z = []
+        dx = []
+        dy = []
+        dz = []
+        for i in range(0, len(Y)):
+            for j in range(0, len(Y[i])):
+                if map_exchange_2[i][j] > 0:
+                    x.append(Y[i][j])
+                    dx.append(0.2)
+        for i in range(0, len(X)):
+            for j in range(0, len(X[i])):
+                if map_exchange_2[i][j] > 0:
+                    y.append(X[i][j])
+                    dy.append(0.2)
+        for i in range(0, len(map_exchange)):
+            for j in range(0, len(map_exchange[i])):
+                if map_exchange_2[i][j] > 0:
+                    z.append(0)
+                    dz.append(map_exchange_2[i][j])
+
+        fig5 = plt.figure()
+        ax5 = fig5.add_subplot(111, projection='3d')
+
+        dzc = np.array(dz)
+        colors = plt.cm.Greys(dzc / float(map_exchange_2.max()))
+
+        ax5.bar3d(x, y, z, dx, dy, dz, color=colors)
+        ax5.set_xlabel('X coord')
+        ax5.set_ylabel('Y coord')
+        ax5.set_zlabel('Austausche')
+
+
 
 
         #Graph 5
-
-        titel="Standardabweichung in Prozent: "+str(standard_dev_p_relativ)+"%"
-        fig5, ax5 = plt.subplots()
-        a5=ax5.scatter(X, Y, c=z4, cmap='jet')
-        ax5.set(title=titel)
-        fig5.colorbar(a5)
-
-        #Graph 6
         x6 = np.arange(0, world.get_actual_round() + 1, 1)
         fig6, ax6 = plt.subplots()
         l1=ax6.plot(x2, average_plotter, label='Average of current estimations')
@@ -418,6 +396,63 @@ def solution(world):
             ax6.set_yscale('log')
         ax6.set_ylim(ymin=1)
 
+        #Graph 6
+        y = np.arange(world.get_world_y_size(), -world.get_world_y_size() - 1, -1)
+        x = np.arange(-world.get_world_x_size(), world.get_world_x_size() + 0.5, 0.5)
+
+        Y, X = np.meshgrid(x, y)
+        print(Y)
+        print(X)
+
+        map_exchange_u_2 = np.copy(map_exchange_u)
+
+        for i in range(0, len(map_exchange_u)):
+            for j in range(0, len(map_exchange_u[i])):
+                if map_exchange_u[i][j] == 0:
+                    map_exchange_u[i][j] = None
+        map_exchange_u = np.array(map_exchange_u)
+        print(map_exchange_u)
+        fig7, ax7 = plt.subplots()
+        a7 = ax7.scatter(Y, X, c=map_exchange_u_2, cmap='gray_r')
+        fig7.colorbar(a7)
+
+        ax7.set_xlabel('X coord')
+        ax7.set_ylabel('Y coord')
+
+
+        #Graph 7
+        x = []
+        y = []
+        z = []
+        dx = []
+        dy = []
+        dz = []
+        for i in range(0, len(Y)):
+            for j in range(0, len(Y[i])):
+                if map_exchange_u_2[i][j] > 0:
+                    x.append(Y[i][j])
+                    dx.append(0.2)
+        for i in range(0, len(X)):
+            for j in range(0, len(X[i])):
+                if map_exchange_u_2[i][j] > 0:
+                    y.append(X[i][j])
+                    dy.append(0.2)
+        for i in range(0, len(map_exchange_u)):
+            for j in range(0, len(map_exchange_u[i])):
+                if map_exchange_u_2[i][j] > 0:
+                    z.append(0)
+                    dz.append(map_exchange_u_2[i][j])
+
+        fig8 = plt.figure()
+        ax8 = fig8.add_subplot(111, projection='3d')
+
+        dzc = np.array(dz)
+        colors = plt.cm.Greys(dzc / float(map_exchange_u_2.max()))
+
+        ax8.bar3d(x, y, z, dx, dy, dz, color=colors)
+        ax8.set_xlabel('X coord')
+        ax8.set_ylabel('Y coord')
+        ax8.set_zlabel('unnecessary exchange')
 
 
         #Graphs
@@ -466,7 +501,7 @@ def solution(world):
     #every particle moves after exchanging information
     if world.get_actual_round() > 0:
         for particle in world.get_particle_list():
-            free_space_in_dir=search_personal_space(particle)
+            free_space_in_dir=search_personal_space(particle, world)
             if free_space_in_dir != -1:
                 particle.move_to(free_space_in_dir)
 
@@ -539,17 +574,6 @@ def next_line_table(p_list):
     return next_line
 
 
-def search_personal_space(particle):
-    dir = [0, 1, 2, 3, 4, 5]
-    while len(dir) != 0:
-        rnd_dir = random.choice(dir)
-        if particle.particle_in(rnd_dir):
-            dir.remove(rnd_dir)
-        else:
-            return rnd_dir
-    return -1
-
-
 def search_any_neighbour(particle: Particle) -> int:
     #searches for any neighbour to transfer sum afterwards
     dir = [0,1,2,3,4,5]
@@ -559,6 +583,19 @@ def search_any_neighbour(particle: Particle) -> int:
             return rnd_dir
         else:
             dir.remove(rnd_dir)
+    return -1
+
+
+def search_personal_space(particle, world):
+    dir = [0, 1, 2, 3, 4, 5]
+    while len(dir) != 0:
+        rnd_dir = random.choice(dir)
+        if particle.particle_in(rnd_dir) or\
+                abs(particle.coords[0]+x_offset[rnd_dir])>world.get_world_x_size() or\
+                abs(particle.coords[1]+y_offset[rnd_dir])>world.get_world_y_size():
+            dir.remove(rnd_dir)
+        else:
+            return rnd_dir
     return -1
 
 
@@ -598,4 +635,3 @@ def set_color_g(particle):
         return 2
     else:
         return 1
-
