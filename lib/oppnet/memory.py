@@ -13,7 +13,6 @@ class MemoryMode(Enum):
 class Memory:
     def __init__(self, mode):
         self.memory = {}
-        self.delta = {}
         self.mode = mode
 
     def add_scheduled_message_on(self, target_id, round_number, msg):
@@ -23,9 +22,8 @@ class Memory:
             else:
                 self.memory[round_number] = [(target_id, msg)]
         else:
-            #TODO: throw error
+            # TODO: throw error
             print("wrong mode")
-
 
     def try_deliver_scheduled_messages(self, sim):
         if sim.get_actual_round() in self.memory.keys():
@@ -47,7 +45,7 @@ class Memory:
                 self.memory[target_id] = [(msg, position, start_round, delta, expirerate)]
 
         else:
-            #TODO: throw error
+            # TODO: throw error
             print("wrong mode")
 
     def try_deliver_delta_messages(self, sim):
@@ -64,7 +62,8 @@ class Memory:
                 expirerate = m[4]
                 past_rounds = actual_round - start_round
                 distance = delta * past_rounds
-                particle_point = self.get_point_from_vector(sim.get_particle_map_id()[target].coords) #TODO check existing particle
+                particle_point = self.get_point_from_vector(
+                    sim.get_particle_map_id()[target].coords)  # TODO check existing particle
                 distance_start_target = self.get_distance(position, particle_point)
                 if distance < expirerate:
                     if distance >= distance_start_target:
@@ -94,7 +93,7 @@ class Memory:
             return y_diff
 
     def try_deliver_messages(self, sim):
-            self.option[self.mode](self, sim)
+        self.option[self.mode](self, sim)
 
     option = {MemoryMode.Schedule: try_deliver_scheduled_messages,
               MemoryMode.Delta: try_deliver_delta_messages}

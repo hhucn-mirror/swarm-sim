@@ -4,11 +4,17 @@ from lib.oppnet.communication import send_message
 
 
 class Algorithm(Enum):
+    """
+    Used to distinguish routing algorithms.
+    """
     Epidemic = 0
     Epidemic_MANeT = 1
 
 
 class MANeTRole(Enum):
+    """
+    Used to distinguish roles of particles in a MANeT.
+    """
     Router = 0
     Node = 1
 
@@ -17,6 +23,7 @@ class RoutingParameters:
 
     def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0, delivery_delay=2):
         """
+        Constructor
         :param algorithm: The routing algorithm to be used.
         :type algorithm: :class:`~routing.Algorithm`
         :param scan_radius: Scan radius for particle scanning.
@@ -40,6 +47,10 @@ class RoutingParameters:
         self.delivery_delay = delivery_delay
 
     def set(self, particle):
+        """
+        Sets attribute routing_params of :param particle:.
+        :param particle: the particle whose attribute is set
+        """
         setattr(particle, "routing_params", self)
 
     @staticmethod

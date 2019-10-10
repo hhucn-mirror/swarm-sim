@@ -73,6 +73,7 @@ class CsvRoundData:
     def __init__(self, sim, task=0, solution=0, seed=20,
                  steps=0, tiles_num=0, particle_num=0, directory='outputs/'):
         self.sim = sim
+        self.tiles_num = tiles_num
 
         self.csv_msg_writer = CsvMessageData(directory)
         self.task = task
@@ -121,6 +122,9 @@ class CsvRoundData:
 
     def get_messages_received(self):
         return self.messages_received
+
+    def update_tiles_num(self, tiles_num):
+        self.tiles_num = tiles_num
 
     def update_particle_num(self, particle):
         self.particle_num = particle
@@ -223,11 +227,14 @@ class CsvMessageData:
     Contains :class:`~csv_generatore.MessageData` objects.
     """
 
-    def __init__(self, directory="outputs/"):
+    def __init__(self, directory="outputs/", solution=""):
         """
+        :param solution: The simulator solution used
+        :type: solution: str
         :param directory: The directory for the csv to be put in.
         :type directory: str
         """
+        self.solution = solution
         self.messages = {}
         self.directory = directory
         self.file_name = directory + '/messages.csv'
@@ -244,6 +251,9 @@ class CsvMessageData:
                               ])
 
     def __del__(self):
+        """
+        Destructor that writes the csv rows.
+        """
         # write message data rows
         self.write_rows()
 
@@ -307,12 +317,6 @@ class CsvMessageData:
         m_data.update_metric(sent, forwarded, delivered, delivered_direct, delivery_round, hops)
         self.messages[message.key] = m_data
 
-    def get_csv_message_data(self, message):
-        if message.key in self.messages:
-            return self.messages[message.key]
-        else:
-            return False
-
 
 class MessageData:
     """
@@ -366,16 +370,36 @@ class MessageData:
                 self.min_hops = hops
 
     def get_sent_count(self):
+        """
+        Returns the sent count.
+        :return: sent count
+        """
         return self.sent
 
     def get_forwarding_count(self):
+        """
+        Returns the forwarding count.
+        :return: forwarding count
+        """
         return self.forwarded
 
     def get_delivery_count(self):
+        """
+        Returns the delivery count.
+        :return: delivery count
+        """
         return self.delivered
 
     def get_delivery_round(self):
+        """
+        Returns the delivery round. Might be None.
+        :return: delivery round
+        """
         return self.delivery_round
 
     def get_first_delivery_hops(self):
+        """
+        Returns the hops of the first delivery. Might be None.
+        :return: hops of the first delivery
+        """
         return self.first_hops

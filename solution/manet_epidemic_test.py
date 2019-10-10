@@ -25,7 +25,7 @@ def solution(sim):
         if sim.get_actual_round() % 5 == 0:
             generate_random_messages(particles, len(particles), sim)
         for particle in particles:
-            lib.oppnet.routing.next_step(particle, sim.get_actual_round())
+            lib.oppnet.routing.next_step(particle)
             # move the particle to the next location
             m_model = MobilityModel.get(particle)
             direction = m_model.next_direction(current_x_y=particle.coords)

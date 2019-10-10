@@ -6,15 +6,15 @@ import getopt
 import logging
 import os
 import sys
-import matplotlib.pyplot as plt
-from lib.oppnet.messagestore import BufferStrategy
 from datetime import datetime
+
+import matplotlib.pyplot as plt
+
+from lib import sim
+from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import Mode
 from lib.oppnet.routing import Algorithm
 
-
-
-from lib import  sim
 
 class ConfigData():
 
@@ -122,8 +122,8 @@ def swarm_sim( argv ):
     logging.info('Started')
     simulator = sim.Sim( config_data )
     simulator.run()
-    #plt.plot([1, 2, 3, 4])
-    #plt.ylabel('some numbers')
+    # plt.plot([1, 2, 3, 4])
+    # plt.ylabel('some numbers')
     plt.show()
     logging.info('Finished')
 

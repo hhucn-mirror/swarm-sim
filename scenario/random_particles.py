@@ -5,9 +5,8 @@ from lib.std_lib import red, blue, black
 
 
 def scenario(sim):
-
-    x_min, x_max = -sim.get_sim_x_size(), sim.get_sim_x_size()
-    y_min, y_max = -sim.get_sim_y_size(), sim.get_sim_y_size()
+    x_min, x_max = int(-sim.get_sim_x_size()), int(sim.get_sim_x_size())
+    y_min, y_max = int(-sim.get_sim_y_size()), int(sim.get_sim_y_size())
 
     particle_count = 400
 

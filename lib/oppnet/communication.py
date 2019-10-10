@@ -12,9 +12,9 @@ class Message:
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
-        :type sender: :class:`~particle.Particle`
+        :type sender: :class:`~opp_particle.Particle`
         :param receiver: The intended receiving particle of the message.
-        :type receiver: :class:`~particle.Particle`
+        :type receiver: :class:`~opp_particle.Particle`
         :param start_round: The round when the message was created.
         :type start_round: int
         :param ttl: Time-to-live value of the message.
@@ -39,35 +39,61 @@ class Message:
             self.actual_receiver = actual_receiver
         else:
             self.actual_receiver = receiver
-            self.__append_to_store__()
+            try:
+                self.sender.send_store.append(self)
+            except OverflowError:
+                process_event(EventType.ReceiverOutOfMem, self)
 
         Message.seq_number += 1
 
     def __eq__(self, other):
+        """
+        Checks if :param other: is equal to :param self: by comparing their keys.
+        :param other: Other message object.
+        :return: if self equals other as boolean
+        """
         return self.key == other.key
 
     def get_receiver(self):
+        """
+        Returns the current receiver.
+        :return: receiving :class:`~opp_particle.Particle`
+        """
         return self.receiver
 
     def set_receiver(self, receiver):
+        """
+        Updates the current receiver to :param receiver:.
+        :param receiver: the receiver to update to
+        """
         self.receiver = receiver
 
     def get_actual_receiver(self):
+        """
+        Returns the actual receiver.
+        :return: actual receiving :class:`~opp_particle.Particle`
+        """
         return self.actual_receiver
 
     def set_actual_receiver(self, receiver):
+        """
+        Updates the actual receiver to :param receiver:.
+        :param receiver: the new actual receiver
+        """
         self.actual_receiver = receiver
 
-    def __append_to_store__(self):
-        try:
-            self.sender.send_store.append(self)
-        except OverflowError:
-            process_event(EventType.ReceiverOutOfMem, self)
-
     def get_sender(self):
+        """
+        Returns the current sender.
+        :return: the current sender
+        """
         return self.sender
 
     def __copy__(self):
+        """
+        Creates a copy of the message object by reusing the same key and sequence number.
+        :return: the message copy
+        """
         new = type(self)(self.sender, self.receiver, self.start_round, self.ttl, self.content, is_copy=True,
                          actual_receiver=self.get_actual_receiver())
         new.key = self.key
@@ -78,6 +104,7 @@ class Message:
 
     def __create_msg_key__(self):
         """
+        Returns the key for a message object
         :return: the builtin identity of message.
         """
         return id(self)
@@ -92,7 +119,7 @@ class Message:
         """
         Updates the sender.
         :param sender: The new sender
-        :type sender: :class:`~particle.Particle`
+        :type sender: :class:`~opp_particle.Particle`
         """
         self.sender = sender
 
@@ -105,12 +132,12 @@ class Message:
 
 def send_message(sender, receiver, message: Message):
     """
-    Puts the :param message: object in the receiver's corresponding MessageStore. Depending on if the message is
-    delivered to the sender or forwarded.
+    Sends :param message: from :param sender: to :param receiver: by giving it to the memory module.
+    Checks beforehand if ttl has expired and in such case does not send it.
     :param sender: The particle sending the Message.
-    :type sender: :class:`~particle.Particle`
+    :type sender: :class:`~opp_particle.Particle`
     :param receiver: The intended receiver of the message.
-    :type receiver: :class:`~particle.Particle`
+    :type receiver: :class:`~opp_particle.Particle`
     :param message: The message to send.
     :type message: :class:`~communication.Message`
     """
@@ -135,8 +162,8 @@ def send_message(sender, receiver, message: Message):
 
 def ttl_expired(message, store):
     """
-    Handle expiry of TTL. Delete the message from :param store: and append a corresponding NetworkEvent in the
-    simulator EventQueue.
+    Handle expiry of TTL. Delete the message from :param store: and calls the process_event function
+    for an expired ttl.
     :param message: The message that expired.
     :type message: :class:`~communication.Message`
     :param store: The MessageStore containing the :param message:.
@@ -157,9 +184,9 @@ def store_message(message, sender, receiver):
     :param message: The message to store.
     :type message: :class:`~communication.Message`
     :param sender: The sender of the message.
-    :type sender: :class:`~particle.Particle`
+    :type sender: :class:`~opp_particle.Particle`
     :param receiver: The receiver of the message.
-    :type receiver: :class:`~particle.Particle`
+    :type receiver: :class:`~opp_particle.Particle`
     """
 
     if message.get_actual_receiver().number == message.get_receiver().number:
@@ -171,7 +198,7 @@ def store_message(message, sender, receiver):
             process_event(EventType.MessageDeliveredDirect, message)
     else:
         store = receiver.send_store
-        if not(store.contains_key(message.key)):
+        if not (store.contains_key(message.key)):
             process_event(EventType.MessageForwarded, message)  # TODO: remove receiver sender
     try:
         store.append(message)

@@ -4,6 +4,9 @@ from lib.std_lib import green, blue, orange, yellow, red
 
 
 class EventType(Enum):
+    """
+    Made to easily distinguish to events in the network.
+    """
     MessageSent = 0
     MessageDelivered = 1
     MessageDeliveredDirect = 2
@@ -17,6 +20,7 @@ class EventType(Enum):
 
 def process_event(event_type, message):
     """
+    Updates the values in csv_generator corresponding to each event and message.
     :param event_type: The type of event
     :type event_type: :class:`~meta.EventType`
     :param message: The message to send.

@@ -140,7 +140,7 @@ class Sim:
         #                    self.plotdata_x.append(self.get_actual_round())
         #                    self.plotdata_y.append(0)
 
-        #creating gnu plots
+        # creating gnu plots
         self.csv_round_writer.aggregate_metrics()
         particle_csv = self.csv_mod.CsvParticleFile(self.directory)
         for particle in self.init_particles:
