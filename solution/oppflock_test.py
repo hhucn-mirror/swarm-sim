@@ -1,7 +1,6 @@
 import collections
 import operator
 import random
-from math import sqrt
 
 from lib.oppnet.mobility_model import MobilityModel, Mode
 from lib.std_lib import NE, SE, E, NW, SW, W
@@ -14,7 +13,7 @@ def solution(sim):
         # mobility model for the moving particle
         # make it move back and forth between the two borders
         # head east first
-        m_model = MobilityModel(particles[0].coords[0], particles[0].coords[1], mode=Mode.Circle,
+        m_model = MobilityModel(particles[0].coords[0], particles[0].coords[1], mode=Mode.Random,
                                 length=(10, 10), starting_dir=E)
         m_model.set(particles[0])
 
@@ -186,4 +185,14 @@ def calculate_surrounding_one_hop_coordinates(coordinates):
 
 
 def calculate_distance(coordinates_1, coordinates_2):
-    return sqrt((coordinates_1[0] - coordinates_2[0]) ** 2 + (coordinates_1[1] - coordinates_2[1]) ** 2)
+    x1, y1 = coordinates_1[0], coordinates_1[1]
+    x2, y2 = coordinates_2[0], coordinates_2[1]
+    x_diff = abs(x2 - x1)
+    y_diff = abs(y2 - y1)
+
+    if y1 == y2 and x1 != x2:
+        return x_diff
+    elif (x_diff - y_diff * 0.5) > 0:
+        return y_diff + (x_diff - y_diff * 0.5)
+    else:
+        return y_diff
