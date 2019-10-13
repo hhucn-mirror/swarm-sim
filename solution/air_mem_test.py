@@ -1,4 +1,4 @@
-from lib.point import Point
+from lib.oppnet.point import Point
 
 
 
