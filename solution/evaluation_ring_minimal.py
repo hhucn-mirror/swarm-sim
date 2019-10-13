@@ -24,7 +24,7 @@ def solution(sim):
         messages.append(Message(sender=sender, receiver=receiver, start_round=current_round,
                                 ttl=sim.message_ttl))
 
-        expected_delivery_round = len(sim.get_particle_list())/2
+        expected_delivery_round = len(sim.get_particle_list())/2 + 1
 
     # execute the next routing step
     next_step(particles)
