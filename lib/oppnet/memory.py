@@ -52,7 +52,6 @@ class Memory:
 
     def try_deliver_delta_messages(self, sim):
         actual_round = sim.get_actual_round()
-        print(actual_round)
         new_memory = {}
         for target in self.memory.keys():
             new_msgs = []
@@ -64,7 +63,7 @@ class Memory:
                 expirerate = m[4]
                 past_rounds = actual_round - start_round
                 distance = delta * past_rounds
-                particle_point = self.get_point_from_vector(sim.get_particle_map_id()[target].coords) #TODO check existing particle
+                particle_point = self.get_point_from_vector(msg.get_receiver().coords) #TODO check existing particle
                 distance_start_target = self.get_distance(position, particle_point)
                 if distance < expirerate:
                     if distance >= distance_start_target:

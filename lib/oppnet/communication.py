@@ -129,7 +129,7 @@ def send_message(sender, receiver, message: Message):
     message.set_receiver(receiver)
 
     memory = sender.sim.memory
-    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]),
+    memory.add_delta_message_on(receiver.number, message, Point(sender.coords[0], sender.coords[1]),
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
 
 
