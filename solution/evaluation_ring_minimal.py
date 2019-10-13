@@ -82,16 +82,20 @@ def assert_message_sent_count(sent_count, current_round):
     expected = 0
     for i in particle_with_msg:
         expected += i * 2
+    if current_round == expected_delivery_round:
+        expected -= 3*2
     assert expected == sent_count
 
 
 def assert_message_forwarding_count(forwarding_count, current_round):
     expected = (current_round - 1) * 2
+    if current_round == expected_delivery_round:
+        expected -= 1
     assert expected == forwarding_count
 
 
 def assert_message_delivery_count(delivery_count, current_round):
-    expected = 1 if current_round == expected_delivery_round else 0
+    expected = 2 if current_round == expected_delivery_round else 0
     assert expected == delivery_count
 
 
@@ -130,9 +134,9 @@ def check_round_message_assertions(csv_round_writer, current_round, message_amou
 
 
 def assert_round_sent_count(sent_count, current_round, message_amount):
+    expected = calculate_send_count_round(current_round, message_amount)
     if current_round == expected_delivery_round:
-        current_round -= 2
-    expected = message_amount + (current_round - 1) * 2 * message_amount
+        expected -= (3 * 2)
     assert sent_count == expected
 
 
@@ -142,11 +146,12 @@ def assert_round_forwarding_count(forwarding_count, current_round, message_amoun
 
 
 def assert_round_delivery_count(delivery_round, current_round, message_amount):
-    expected = message_amount if expected_delivery_round == current_round else 0
+
+    expected = message_amount * 2 if expected_delivery_round == current_round else 0
     assert delivery_round == expected
 
 
 def assert_round_received_count(received_count, current_round, message_amount):
-    expected = message_amount if current_round > 1 else 0
+    expected = message_amount * 2 if expected_delivery_round == current_round else 0
     assert received_count == expected
 
