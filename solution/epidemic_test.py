@@ -6,7 +6,6 @@ message_amount = 50
 
 
 def solution(sim):
-
     particles = sim.get_particle_list()
 
     if sim.get_actual_round() == 1:
@@ -29,7 +28,7 @@ def solution(sim):
         for particle in particles:
             m_model = MobilityModel.get(particle)
             next_direction = m_model.next_direction(current_x_y=particle.coords)
-            if next_direction:
+            if next_direction is not False:
                 particle.move_to_in_bounds(next_direction)
 
-        lib.oppnet.routing.next_step(particles, sim.get_actual_round())
+        lib.oppnet.routing.next_step(particles)

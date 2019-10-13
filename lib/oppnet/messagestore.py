@@ -37,10 +37,20 @@ class MessageStore(deque):
             super().__init__(init, maxlen=maxlen)
 
     def __len__(self):
+        """
+        Returns the length of the deque.
+        :return: length of deque
+        """
         return super().__len__()
 
     def append(self, m: Message):
+        """
+        Appends :param m: to deque and adds its key. Handles a full deque by popping messages at the ends of the deque.
+        :param m: the message to add
+        """
         # pop the right element if max len reached
+        if self.contains_key(m.key):
+            return
         if self.maxlen == len(self):
             k = list(self)[0].key
             if self.strategy == BufferStrategy.lifo:
@@ -52,12 +62,17 @@ class MessageStore(deque):
                 pass
 
         super().append(m)
+        self.__append_key__(m.key, m)
+
         if self.maxlen == len(self):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
-        self.__append_key__(m.key, self.index(m))
 
     def remove(self, message):
+        """
+        Removes a :param message: if it exists in the deque.
+        :param message: the message to remove
+        """
         try:
             super().remove(message)
             self.keys.pop(message.key)
@@ -67,11 +82,26 @@ class MessageStore(deque):
             pass
 
     def contains_key(self, key):
+        """
+        Check if a message key exists in the deque
+        :param key: key of a message to be checked
+        :return: if a key exists in the deque
+        """
         return key in self.keys
 
     def get_by_key(self, key):
-        return list(self)[self.keys[key]]
+        """
+        Returns a message by it's key.
+        :param key: The key of the message to be retrieved
+        :return: the message correspoding to key
+        """
+        return self.keys[key]
 
     def __append_key__(self, key, m_index):
+        """
+        Adds :param key:, :param m_index: pair as key, value pair to keys.
+        :param key: the key to use
+        :param m_index: the object to use as value
+        """
         if key not in self.keys:
             self.keys[key] = m_index

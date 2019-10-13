@@ -4,6 +4,9 @@ from lib.std_lib import green, blue, orange, yellow, red
 
 
 class EventType(Enum):
+    """
+    Made to easily distinguish to events in the network.
+    """
     MessageSent = 0
     MessageDelivered = 1
     MessageDeliveredDirect = 2
@@ -15,26 +18,26 @@ class EventType(Enum):
     ReceiverOutOfMem = 10
 
 
-def process_event(event_type, sender, receiver, message):
+def process_event(event_type, message):
     """
+    Updates the values in csv_generator corresponding to each event and message.
     :param event_type: The type of event
     :type event_type: :class:`~meta.EventType`
-    :param sender: The particle sending the Message.
-    :type sender: :class:`~particle.Particle`
-    :param receiver: The intended receiver of the message.
-    :type receiver: :class:`~particle.Particle`
     :param message: The message to send.
-    :type message: :class:`~comms.Message`
+    :type message: :class:`~communication.Message`
     """
+    sender = message.sender
+    receiver = message.receiver
     if event_type == EventType.MessageSent:
         sender.csv_particle_writer.write_particle(messages_sent=1)
+        sender.sim.csv_round_writer.update_metrics(messages_sent=1)
         # add to message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, sent=1)
     elif event_type == EventType.MessageDeliveredFirst:
         # update round metrics
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_unique=1, messages_received=1)
+        sender.sim.csv_round_writer.update_metrics(messages_delivered_unique=1, messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
+        sender.csv_particle_writer.write_particle(messages_delivered=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, delivered=1,
@@ -44,10 +47,10 @@ def process_event(event_type, sender, receiver, message):
         sender.set_color(blue)
     elif event_type == EventType.MessageDeliveredFirstDirect:
         # update round metrics
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly_unique=1,
+        sender.sim.csv_round_writer.update_metrics(messages_delivered_directly_unique=1,
                                                    messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
+        sender.csv_particle_writer.write_particle(messages_delivered=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, delivered_direct=1, delivered=1,
@@ -57,10 +60,10 @@ def process_event(event_type, sender, receiver, message):
         sender.set_color(blue)
     elif event_type == EventType.MessageDeliveredDirect:
         # update round metrics
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered_directly=1,
+        sender.sim.csv_round_writer.update_metrics(messages_delivered_directly=1,
                                                    messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered_directly=1)
+        sender.csv_particle_writer.write_particle(messages_delivered_directly=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, delivered_direct=1,
@@ -70,9 +73,9 @@ def process_event(event_type, sender, receiver, message):
         sender.set_color(blue)
     elif event_type == EventType.MessageDelivered:
         # update round metrics
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_delivered=1, messages_received=1)
+        sender.sim.csv_round_writer.update_metrics(messages_delivered=1, messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_delivered=1)
+        sender.csv_particle_writer.write_particle(messages_delivered=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, delivered=1,
@@ -82,9 +85,10 @@ def process_event(event_type, sender, receiver, message):
         sender.set_color(blue)
     elif event_type == EventType.MessageForwarded:
         # update round metrics
-        sender.sim.csv_round_writer.update_metrics(messages_sent=1, messages_forwarded=1)
+        sender.sim.csv_round_writer.update_metrics(messages_forwarded=1, messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_sent=1, messages_forwarded=1)
+        sender.csv_particle_writer.write_particle(messages_forwarded=1)
+        receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
         sender.sim.csv_round_writer.csv_msg_writer.update_metrics(message, forwarded=1)
         # color receiver
