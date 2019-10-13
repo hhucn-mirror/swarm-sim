@@ -141,7 +141,11 @@ def assert_round_sent_count(sent_count, current_round, message_amount):
 
 
 def assert_round_forwarding_count(forwarding_count, current_round, message_amount):
-    expected = message_amount if current_round > 1 and current_round != expected_delivery_round else 0
+    expected = 0
+    if current_round != expected_delivery_round and current_round != 1:
+        expected = message_amount * 2
+    elif current_round == expected_delivery_round:
+        expected = 1
     assert forwarding_count == expected
 
 
