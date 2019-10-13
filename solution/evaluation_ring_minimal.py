@@ -1,5 +1,4 @@
 from lib.oppnet.communication import Message
-from lib.oppnet.memory import Memory
 from lib.oppnet.routing import RoutingParameters, next_step
 
 
@@ -10,7 +9,7 @@ def solution(sim):
     global messages
 
     if current_round == 1:
-        from lib.point import Point
+
         # initialize the routing parameters
         particles = sim.get_particle_list()
         messages = []
@@ -87,10 +86,7 @@ def assert_message_sent_count(sent_count, current_round):
 
 
 def assert_message_forwarding_count(forwarding_count, current_round):
-    if current_round == expected_delivery_round:
-        expected = current_round - 2
-    else:
-        expected = current_round - 1
+    expected = (current_round - 1) * 2
     assert expected == forwarding_count
 
 
