@@ -98,6 +98,7 @@ class Sim:
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
         self.scan_radius = config_data.scan_radius
+        self.signal_distance = config_data.signal_distance
         self.message_ttl = config_data.message_ttl
         self.delivery_delay = config_data.delivery_delay
         self.routing_algorithm = config_data.routing_algorithm

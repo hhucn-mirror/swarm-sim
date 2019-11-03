@@ -128,9 +128,11 @@ def send_message(sender, receiver, message: Message):
     message.set_sender(sender)
     message.set_receiver(receiver)
 
+    max_distance = message.get_sender().sim.signal_distance # TODO: add as attribute to particle
+
     memory = sender.sim.memory
     memory.add_delta_message_on(receiver.number, message, Point(sender.coords[0], sender.coords[1]),
-                                current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
+                                current_round, sender.signal_velocity, max_distance)
 
 
 def ttl_expired(message, store):

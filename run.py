@@ -66,6 +66,7 @@ class ConfigData():
         self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
         self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
         self.message_ttl = config.getint("Routing", "message_ttl")
+        self.signal_distance = config.getint("Routing", "signal_distance")
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
