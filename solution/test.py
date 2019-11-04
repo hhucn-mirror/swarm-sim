@@ -43,14 +43,21 @@ def solution(world):
 
         map_exchange_2 = np.copy(map_exchange)
 
+
         for i in range(0, len(map_exchange)):
             for j in range(0, len(map_exchange[i])):
                 if map_exchange[i][j]==0:
                     map_exchange[i][j]=None
+
+        for i in range(0, len(map_exchange)):
+            for j in range(0, len(map_exchange[i])):
+                if map_exchange[i][j]!=None:
+                    map_exchange[i][j]=1
+
         map_exchange=np.array(map_exchange)
         print(map_exchange)
         fig5, ax5 = plt.subplots()
-        a5 = ax5.scatter(Y, X, c=map_exchange_2, cmap='gray_r')
+        a5 = ax5.scatter(Y, X, c=map_exchange, cmap='gray_r')
         fig5.colorbar(a5)
 
         ax5.set_xlabel('X coord')

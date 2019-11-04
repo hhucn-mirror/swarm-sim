@@ -29,7 +29,8 @@ calc_count=0
 table_calcs= ""
 aging_factor=0.1
 initial_size=0
-
+monitoring_results=[]
+counter_master_reset=0
 
 def solution(world):
     global calc_count
@@ -39,11 +40,16 @@ def solution(world):
     global info_plot_broud_cast_master_estimate
     global map_exchange
     global map_exchange_u
+    global counter_master_reset
+    global monitoring_results
     table_size_max = 2
+
+
+
 
     if world.get_actual_round()==1:
         initial_size=len(world.get_particle_list())
-
+        counter_master_reset=0
         #map for calculation count between junctions
         rows, cols = (1 + 2 * int(world.get_world_y_size()), 1 + 4 * int(world.get_world_x_size()))
         map_exchange = [[int(0) for i in range(cols)] for j in range(rows)]
@@ -60,7 +66,7 @@ def solution(world):
             setattr(rnd_particle, "current_min", 0)
             setattr(rnd_particle, "current_max", 1)
             setattr(rnd_particle, "current_average", 1)
-            setattr(rnd_particle, "min_rounds", 140)
+            setattr(rnd_particle, "min_rounds", 100)
             setattr(rnd_particle, "actual_round", 0)
             # for average|min|max calc | global
             setattr(rnd_particle, "min", 0)
@@ -83,6 +89,8 @@ def solution(world):
 
         for particle in world.get_particle_list():
             info_plot_broud_cast_master_estimate.append([1])
+
+    print("counter_master_reset", counter_master_reset)
 
     #Table
     if world.get_actual_round() == 1 and len(world.get_particle_list()) <= table_size_max:
@@ -115,6 +123,7 @@ def solution(world):
     while(len(helper_particle_list)!=0):
         #choose a random particle
         rnd_particle=random.choice(helper_particle_list)
+        print("coords1: ", rnd_particle.coords)
         current_sum = rnd_particle.sum
         #the random chosen particle searches for a neighbour
         neighbour_found_in_dir=search_any_neighbour(rnd_particle)
@@ -131,6 +140,11 @@ def solution(world):
                     abs((rnd_particle.current_min-rnd_particle.particle_count))<np.ceil(rnd_particle.particle_count*aging_factor/2) and \
                     rnd_particle.actual_round>=rnd_particle.min_rounds :
                 reset_to_master(rnd_particle)
+                if counter_master_reset>=rnd_particle.min_rounds:
+                    counter_master_reset=0
+                    monitoring_results.append(world.get_actual_round())
+                    print("monitoring results:",monitoring_results)
+
 
             print("version nr:", rnd_particle.version_number)
 
@@ -175,12 +189,13 @@ def solution(world):
             map_exchange[abs(int(rnd_particle_neighbour.coords[1]) - int(world.get_world_y_size()))][int(2 * rnd_particle_neighbour.coords[0]) + 2 * int(world.get_world_x_size())] += 1
 
             rnd_particle.actual_round += 1
-            rnd_particle_neighbour.actual_round+=1
+            #rnd_particle_neighbour.actual_round+=1
 
             print("coords1: ",rnd_particle.coords)
             print("coords2: ", rnd_particle_neighbour.coords)
         helper_particle_list.remove(rnd_particle)
 
+    counter_master_reset+=1
 
 
     #Graph
@@ -192,6 +207,9 @@ def solution(world):
 
     for particle in world.get_particle_list():
         info_plot_broud_cast_master_estimate[particle.number].append(particle.broud_cast_master_estimate)
+
+    #Graph
+
 
     #Color
     for particle in world.get_particle_list():
@@ -305,19 +323,31 @@ def solution(world):
         ax2.plot(x2,min_all_per_round)
         ax2.plot(x2,max_all_per_round)
 
+        y_counter_master_reset=[]
+        for i in monitoring_results:
+            y_counter_master_reset.append(filler_actual_count[i])
+
+        print(y_counter_master_reset)
+        print(monitoring_results)
+        ax2.scatter(monitoring_results, y_counter_master_reset, marker='o', color='black')
         if max(max_all_per_round)>50*len(world.get_particle_list()):
             ax2.set_yscale('log')
         ax2.set_ylim(ymin=1)
-        ax2.set(xlabel='rounds', ylabel='Average', title='Rot:Max | Blau:Durchschnitt | Grün:Min | Orange:Echter Wert')
+        ax2.set(xlabel='rounds', ylabel='Average', title='Rot:Max | Blau:Durchschnitt | Grün:Min ')
 
         #Graph 2
         y3=[]
         for i in x2:
             y3.append(5)
 
+        y_counter_master_reset_s = []
+        for i in monitoring_results:
+            y_counter_master_reset_s.append(standard_deviation_per_round[i-1])
+
         fig3, ax3 = plt.subplots()
         ax3.plot(x2,standard_deviation_per_round, label='Prozentuale Standardabweichung')
         ax3.plot(x2, y3)
+        ax3.scatter(monitoring_results, y_counter_master_reset_s, marker='o', color='black')
         ax3.set(xlabel='rounds', ylabel='standard deviation', title='Standard deviation')
         #ax3.set_yscale('log')
         ax3.legend(loc='upper left')
@@ -516,6 +546,7 @@ def reset_to_master(particle):
     particle.current_average = 1
     particle.version_number=int(particle.version_number+random.randint(1,round(particle.average)))
     particle.actual_round=0
+
 
 
 def reset_particle(rnd_particle, rnd_particle_neighbour):

@@ -1,8 +1,11 @@
+import csv
+import datetime
 import random
 import numpy
 import numpy as np
 import matplotlib.pylab as plt
 import itertools
+import os
 
 from lib.particle import Particle
 
@@ -16,20 +19,21 @@ NW = 5
 
 
 direction = [NE, E, SE, SW, W, NW]
-#choose leader_count which will have a start value
-#leader_count=2
 info_plot=[[]]
 filler_actual_count=[]
-calc_count=0
-table_calcs= ""
+calc_count = 0
+info_plot_dir = './outputs/gossip_based_standard/' + datetime.datetime.now().strftime('%Y_%m_%d_%H') + '/'
+# configurations for Gossip
+
 def solution(sim):
+
+    global info_plot_dir
     global calc_count
     global table_calcs
-    #max count for plots and table size
-    table_size_max=16
-    # configurations for Gossip
-    threshold_limit = 0.001
-
+    threshold_limit = 0.002
+    table_calcs = ""
+    # max count for plots and table size
+    table_size_max = 1
     #initializes particles with attributes sum =0, weight=1, particle_count=0 and check_term=0
     #besides one particle which gets a sum value =1
     if sim.get_actual_round()==1:
@@ -38,7 +42,9 @@ def solution(sim):
             setattr(rnd_particle, "weight", 1)
             setattr(rnd_particle, "particle_count",0)
             setattr(rnd_particle, "check_term" , 0)
-        random.choice(sim.get_particle_list()).sum =1
+        rnd_particle=random.choice(sim.get_particle_list())
+        rnd_particle.sum =1
+        rnd_particle.set_color(3)
         for i in range(len(sim.get_particle_list())):
             info_plot.append([0])
 
@@ -120,63 +126,96 @@ def solution(sim):
     for particle in sim.get_particle_list():
         info_plot[particle.number].append(particle.particle_count)
 
-    for particle in sim.get_particle_list():
-        farbe=set_color_g(particle)
-        particle.set_color(farbe)
+    #for particle in sim.get_particle_list():
+    #    farbe=set_color_g(particle)
+    #    particle.set_color(farbe)
 
 
     #terminates when all particles had a new_sum with a difference belove the threshold in compersion to the round before
     if 0 not in checklist_for_threshold or sim.get_actual_round()== sim.get_max_round():
-        print("Terminated in round : ", sim.get_actual_round())
-        i=0
+        print("Terminiert in Runde: ", sim.get_actual_round())
+        i = 0
         for particle in sim.get_particle_list():
-            print("partikel_nr:",i)
-            print("schätzt partikelanzahl im system auf:",particle.particle_count)
-            i+=1
+            print("Partikel_nr:", i)
+            print("Schätzt Partikelanzahl im System auf:", particle.particle_count)
+            i += 1
 
-        for i in range(0,sim.get_actual_round()+1):
+        for i in range(0, sim.get_actual_round() + 1):
             filler_actual_count.append(len(sim.get_particle_list()))
 
         if len(sim.get_particle_list()) <= table_size_max:
             for particle in sim.get_particle_list():
-                x = np.arange(0,sim.get_actual_round()+1,1)
-                #print(x)
+                x = np.arange(0, sim.get_actual_round() + 1, 1)
+                # print(x)
                 y = info_plot[particle.number]
-                #print(y)
-                #plt.figure(1)
-                fig1,ax1 = plt.subplots()
-                ax1.plot(x, y)
-                ax1.plot(x, filler_actual_count)
-                particle_number='Particle Number : '+ str(particle.number)
-                ax1.set(xlabel='rounds',ylabel='Estimation of particles', title=particle_number)
+                # print(y)
+                # plt.figure(1)
+                fig1, ax1 = plt.subplots()
+                ax1.plot(x, y, label='Einschätzung')
+                ax1.plot(x, filler_actual_count, label='Tatsächliche Anzahl im System')
+                particle_number = 'Einschätzung der Anzahl der Partikel im System von Partikel_Nr: ' + str(
+                    particle.number)
+                ax1.set(xlabel='Runde', ylabel='Partikel', title=particle_number)
+                ax1.legend(loc='best')
 
-        #average estimation per round
-        average_plotter=[]
+        # average estimation per round
+        average_plotter = []
 
-        for i in range(0,sim.get_actual_round()+1):
+        for i in range(0, sim.get_actual_round() + 1):
             average = 0
             for particle in sim.get_particle_list():
-                average+=info_plot[particle.number][i]
-            average_plotter.append(average/len(sim.get_particle_list()))
+                average += info_plot[particle.number][i]
+            average_plotter.append(average / len(sim.get_particle_list()))
         x2 = np.arange(0, sim.get_actual_round() + 1, 1)
-        #print(x2)
+        # print(x2)
         y2 = average_plotter
-        #print(y2)
-        fig2,ax2=plt.subplots()
-        ax2.plot(x2,y2)
-        ax2.plot(x2,filler_actual_count)
-        ax2.set(xlabel='rounds', ylabel='Average', title='Average estimation of all particles ')
+        # print(y2)
+        fig2, ax2 = plt.subplots()
+        ax2.plot(x2, y2, label='Durchschnittliche Einschätzung')
+        ax2.plot(x2, filler_actual_count, label='Tatsächliche Anzahl im System')
+        ax2.set(xlabel='Runde', ylabel='Partikel', title='Durchschnittliche Einschätzung aller Partikel')
+        ax2.legend(loc='best')
 
+        standard_deviation_per_round = []
+        for i in range(0, sim.get_actual_round() + 1):
+            all_particle = 0
+            for particle in sim.get_particle_list():
+                all_particle += (info_plot[particle.number][i] - average_plotter[i]) * (
+                        info_plot[particle.number][i] - average_plotter[i])
+
+            standard_deviation_per_round.append(
+                (np.sqrt(all_particle) / len(sim.get_particle_list())) / average_plotter[i] * 100)
+
+
+        y3 = []
+        for i in x2:
+            y3.append(5)
+
+        fig3, ax3 = plt.subplots()
+        ax3.plot(x2, standard_deviation_per_round, label='relative Standardabweichung')
+        ax3.plot(x2, y3, label='5% - Linie')
+        ax3.set(xlabel='Runde', ylabel='relative Standardabweichung in %',
+                title='Standardabweichung der Einschätzungen der Partikel')
+        ax3.legend(loc='best')
 
         if sim.get_actual_round() > 1 and len(sim.get_particle_list()) <= table_size_max:
-            table_calcs+=next_line_table(sim.get_particle_list())
+            table_calcs += next_line_table(sim.get_particle_list())
             print(table_calcs)
-        print("Calculation count between particles", calc_count)
-        print("Average estimation:", average / len(sim.get_particle_list()))
-        plt.show()
+        print("Austausche zwischen Partikel: ", calc_count)
+        print("Durchschnittliche Einschätzung aller Partikel: ", average / len(sim.get_particle_list()))
+
+        csv_information=[average_plotter[len(average_plotter)-1], standard_deviation_per_round[len(standard_deviation_per_round)-1], calc_count, sim.get_actual_round() ]
+        print(csv_information)
+
+        if not os.path.exists(info_plot_dir):
+            os.makedirs(info_plot_dir)
+        csv_name = get_free_csv_name()
+
+        with open(csv_name, 'w') as f:
+            csvwriter = csv.writer(f)
+            csvwriter.writerow(csv_information)
+        #plt.show()
         sim.set_end()
-
-
 
     if sim.get_actual_round() > 0:
         for particle in sim.get_particle_list():
@@ -184,6 +223,12 @@ def solution(sim):
             if free_space_in_dir != -1:
                 particle.move_to(free_space_in_dir)
 
+
+def get_free_csv_name() -> str:
+    i = 0
+    while(os.path.isfile(info_plot_dir+'info_plot_'+str(i)+'.csv')):
+        i+=1
+    return info_plot_dir+'info_plot_'+str(i)+'.csv'
 
 def next_line_table(p_list):
     helper_sum_list=[]

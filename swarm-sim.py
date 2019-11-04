@@ -88,6 +88,7 @@ def create_dir_for_data(config_data):
 def run_solution(swarm_sim_world):
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
+
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
     swarm_sim_world.inc_round_cnter()
 
