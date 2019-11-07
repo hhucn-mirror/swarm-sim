@@ -10,36 +10,6 @@ debug_distance_calculation = 0
 debug_movement = 0
 
 
-class Neighbor:
-    def __init__(self, type, dist):
-        self.type = type
-        self.dist = dist
-
-    def __str__(self):
-        return str(self.type) + " | " + str(self.dist)
-
-
-class PMaxInfo:
-    def __init__(self):
-        self.ids = set()
-        self.dist = -math.inf
-        self.directions = []
-        self.black_list = []
-
-    def __str__(self):
-        return "id: " + str(self.ids) + "|" + "dist: " + str(self.dist) + "|" + "direction: " + str(self.directions) \
-               + "|" + "Blacklist: " + str(self.black_list)[1:-1]
-
-    def __eq__(self, other):
-        return self.dist == other.dist and any(self_id in other.ids for self_id in self.ids)
-
-    def reset(self):
-        self.ids = set()
-        self.dist = -math.inf
-        self.directions = []
-        self.black_list.clear()
-
-
 class Colors(Enum):
     black = 1
     gray = 2

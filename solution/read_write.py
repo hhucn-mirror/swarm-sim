@@ -1,6 +1,6 @@
 from copy import deepcopy
 from lib.swarm_sim_header import *
-import solution.message as message
+from solution import solution_header
 
 
 # def __init__(self, own_dist, fl_min_dist, fl_hop, p_max_id, p_max_dist, p_hop):
@@ -23,7 +23,7 @@ def read(memory):
 
 
 def send_own_distance(particle, targets):
-    dist_package = message.OwnDistance(particle.own_dist, particle.number)
+    dist_package = solution_header.OwnDistance(particle.own_dist, particle.number)
     for target_direction in targets:
         target_particle = particle.get_particle_in(target_direction)
         if debug and debug_write:
@@ -35,7 +35,7 @@ def send_own_distance(particle, targets):
 
 
 def send_p_max(particle, targets):
-    dist_package = message.PMax(particle.own_dist, particle.number, particle.p_max, particle.p_max_table)
+    dist_package = solution_header.PMax(particle.own_dist, particle.number, particle.p_max, particle.p_max_table)
     for target_direction in targets:
         target_particle = particle.get_particle_in(target_direction)
         if debug and debug_write:
@@ -48,7 +48,7 @@ def send_p_max(particle, targets):
 def send_distance_of_free_locations(particle, target_direction, target_particle):
     for free_location_direction in [direction_in_range(target_direction - 1), direction_in_range(target_direction + 1)]:
         if particle.nh_list[free_location_direction].type == "fl":
-            free_location_package = message.OwnDistance(particle.nh_list[free_location_direction].dist, None)
+            free_location_package = solution_header.OwnDistance(particle.nh_list[free_location_direction].dist, None)
             particle.write_to_with(target_particle, key=get_the_invert(free_location_direction),
                                    data=deepcopy(free_location_package))
 

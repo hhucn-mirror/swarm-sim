@@ -1,6 +1,8 @@
 from lib.swarm_sim_header import *
 import math
 
+from solution.solution_header import Neighbor
+
 
 class Neighbors:
     def __init__(self, type, dist):

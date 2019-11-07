@@ -1,5 +1,6 @@
 from lib.swarm_sim_header import *
 import math
+from solution import solution_header
 
 
 def def_distances(particle):
@@ -33,11 +34,11 @@ def scan_nh(particle):
     nh_list = []
     for direction in direction_list:
         if particle.particle_in(direction):
-            nh_list.append(Neighbor("p", math.inf))
+            nh_list.append(solution_header.Neighbor("p", math.inf))
         elif particle.tile_in(direction):
-            nh_list.append(Neighbor("t", 0))
+            nh_list.append(solution_header.Neighbor("t", 0))
         else:
-            nh_list.append(Neighbor("fl", math.inf))
+            nh_list.append(solution_header.Neighbor("fl", math.inf))
     return nh_list
 
 

@@ -1,12 +1,14 @@
 from lib.swarm_sim_header import *
 import math
 
+from solution import solution_header
+
 
 def initialize_particle(particle):
 
     setattr(particle, "own_dist", math.inf)
     # nh: neighborhood
-    setattr(particle, "nh_list", [Neighbor("fl", math.inf)] * 6)
+    setattr(particle, "nh_list", [solution_header.Neighbor("fl", math.inf)] * 6)
     setattr(particle, "rcv_buf", {})
     setattr(particle, "snd_buf", {})
     setattr(particle, "prev_direction", False)
@@ -24,7 +26,7 @@ def initialize_particle(particle):
     # setattr(particle, "fl_min", PMaxInfo())
 
     # p: particle
-    setattr(particle, "p_max", PMaxInfo())
+    setattr(particle, "p_max", solution_header.PMaxInfo())
 
     setattr(particle, "wait", False)
 
@@ -34,7 +36,7 @@ def reset_attributes(particle):
         print("resetting particle", particle.number)
     particle.own_dist = math.inf
     # particle.nh_list.clear()
-    particle.nh_list = [Neighbor("fl", math.inf)] * 6
+    particle.nh_list = [solution_header.Neighbor("fl", math.inf)] * 6
     particle.next_direction = False
     particle.keep_distance = False
     particle.read_whole_memory().clear()
