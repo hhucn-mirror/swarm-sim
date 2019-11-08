@@ -30,7 +30,7 @@ def solution(sim):
     global info_plot_dir
     global calc_count
     global table_calcs
-    threshold_limit = 0.002
+    threshold_limit = 0.000002
     table_calcs = ""
     # max count for plots and table size
     table_size_max = 1

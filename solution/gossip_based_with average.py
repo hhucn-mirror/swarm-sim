@@ -284,6 +284,7 @@ def solution(world):
         world.set_end()
 
 
+
     #every particle moves after exchanging information
     if world.get_actual_round() > 0:
         for particle in world.get_particle_list():

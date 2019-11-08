@@ -369,7 +369,7 @@ def solution(world):
         map_exchange = np.array(map_exchange)
         print(map_exchange)
         fig4, ax4 = plt.subplots()
-        a5 = ax4.scatter(Y, X, c=map_exchange_2, cmap='gray_r')
+        a5 = ax4.scatter(Y, X, c=map_exchange_2, cmap='jet')
         fig4.colorbar(a5)
 
         ax4.set_xlabel('X coord')
@@ -403,7 +403,7 @@ def solution(world):
         ax5 = fig5.add_subplot(111, projection='3d')
 
         dzc = np.array(dz)
-        colors = plt.cm.Greys(dzc / float(map_exchange_2.max()))
+        colors = plt.cm.Reds(dzc / float(map_exchange_2.max()))
 
         ax5.bar3d(x, y, z, dx, dy, dz, color=colors)
         ax5.set_xlabel('X coord')
@@ -443,7 +443,7 @@ def solution(world):
         map_exchange_u = np.array(map_exchange_u)
         print(map_exchange_u)
         fig7, ax7 = plt.subplots()
-        a7 = ax7.scatter(Y, X, c=map_exchange_u_2, cmap='gray_r')
+        a7 = ax7.scatter(Y, X, c=map_exchange_u_2, cmap='jet')
         fig7.colorbar(a7)
 
         ax7.set_xlabel('X coord')
@@ -477,9 +477,8 @@ def solution(world):
         ax8 = fig8.add_subplot(111, projection='3d')
 
         dzc = np.array(dz)
-        colors = plt.cm.Greys(dzc / float(map_exchange_u_2.max()))
-
-        ax8.bar3d(x, y, z, dx, dy, dz, color=colors)
+        colors = plt.cm.Reds(dzc / float(map_exchange_u_2.max()))
+        a8=ax8.bar3d(x, y, z, dx, dy, dz, color=colors)
         ax8.set_xlabel('X coord')
         ax8.set_ylabel('Y coord')
         ax8.set_zlabel('unnecessary exchange')
