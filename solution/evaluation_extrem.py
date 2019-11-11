@@ -57,11 +57,11 @@ def solution(sim):
         # left to middle
         m1 = Message(particles[0], particles[-1], 1, sim.message_ttl)
         # middle to left
-        m2 = Message(particles[-1], particles[0], 1, sim.message_ttl)
+       # m2 = Message(particles[-1], particles[0], 1, sim.message_ttl)
 
         delivery_assertions = []
 
-        for m in [m1, m2]:
+        for m in [m1]:
             delivery_assertions.append(DeliveryAssertions(m, delivery_round=sim.delivery_delay * hops + start_round,
                                                           hop_count=hops))
 
