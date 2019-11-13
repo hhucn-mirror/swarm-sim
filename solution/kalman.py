@@ -5,7 +5,11 @@ from solution import solution_header
 
 
 def initialize_particle(particle):
-
+    """
+    Adds all instance attributes to the particle and initializes them
+    :param particle: the particle to initialize
+    :return: none
+    """
     setattr(particle, "own_dist", math.inf)
     # nh: neighborhood
     setattr(particle, "nh_list", [solution_header.Neighbor("fl", math.inf)] * 6)
@@ -32,6 +36,11 @@ def initialize_particle(particle):
 
 
 def reset_attributes(particle):
+    """
+    Resets particle variables that are based on the particles position
+    :param particle: the particle to reset
+    :return: none
+    """
     if debug:
         print("resetting particle", particle.number)
     particle.own_dist = math.inf
@@ -43,10 +52,20 @@ def reset_attributes(particle):
 
 
 def reset_p_max(particle):
+    """
+    resets all pmax related particle variables
+    :param particle: the particle to reset
+    :return: none
+    """
     particle.p_max.reset()
     particle.p_max_table.clear()
 
 def coating_alg(particle):
+    """
+    Main coating algorithm function. checks if nh_list is not None and then calls actual calculation.
+    :param particle: the particle for which the next direction should be calculated
+    :return: the next direction the particle should move to
+    """
     #opt_coating(particle)
     if particle.nh_list is not None:
         return find_next_free_location(particle)
@@ -54,18 +73,25 @@ def coating_alg(particle):
 
 
 def find_next_free_location(particle):
+    """
+    calculates the next move direction for a particle
+    :param particle: the particle for which the next direction should be calculated
+    :return: the next direction the particle should move to
+    """
     # Check if particle has a global p_max and it is not equal to its own distance
-    # check if the local free location is smaller than the p_max_dist
     possible_directions = []
-    # (particle.nh_list[direction].dist != particle.p_max.dist - 1 or particle.own_dist !yy= particle.nh_list[direction].dist))
+    # (particle.nh_list[direction].dist != particle.p_max.dist - 1 or particle.own_dist != particle.nh_list[direction].dist))
+    # accumulate all candidates for the next movement direction in possible_directions
     for direction in reversed(direction_list):
-        if (particle.nh_list[direction].dist < particle.p_max.dist or particle.nh_list[
-            direction].dist < particle.own_dist) and not particle.particle_in(direction) and \
-                not particle.tile_in(direction) and particle.prev_direction != direction:
+        if not (particle.particle_in(direction) or         # check if direction is free
+                particle.tile_in(direction) or
+                particle.prev_direction == direction) and\
+                (particle.nh_list[direction].dist < particle.p_max.dist or
+                 particle.nh_list[direction].dist < particle.own_dist):     # check if moving to that location would be beneficial
             possible_directions.append((direction, particle.nh_list[direction].dist))
     if len(possible_directions) > 0:
         nearest_free_location = min(possible_directions, key=lambda x: x[1])
-        if particle.p_max.dist > particle.own_dist or nearest_free_location[1] < particle.own_dist \
-                and (not(particle.keep_distance) or nearest_free_location[1] <= particle.own_dist):
+        if particle.p_max.dist > particle.own_dist or nearest_free_location[1] < particle.own_dist and \
+                (not(particle.keep_distance) or nearest_free_location[1] <= particle.own_dist):     # only move away if keep_distance is false
             return nearest_free_location[0]
     return False
