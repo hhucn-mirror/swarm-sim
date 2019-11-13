@@ -3,7 +3,7 @@ from lib.swarm_sim_header import *
 from solution.def_distances import *
 from solution.read_write import *
 from solution.kalman import *
-from solution.def_p_max import *
+from solution.p_max_calculation import *
 
 import random
 
@@ -63,7 +63,7 @@ def read_cycle(particle):
         print("reading memory of particle", particle.number)
     particle.rcv_buf = read(particle.read_whole_memory())
     particle.nh_list = def_distances(particle)
-    def_p_max(particle)
+    find_p_max(particle)
     particle.rcv_buf.clear()
 
 
