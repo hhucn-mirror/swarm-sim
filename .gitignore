@@ -160,3 +160,5 @@ outputs/
 .lib/__pycache__/*
 system.log
 config.ini
+/.scannerwork/
+/solution/.scannerwork/
