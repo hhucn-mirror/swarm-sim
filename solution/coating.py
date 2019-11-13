@@ -61,7 +61,7 @@ def read_cycle(particle):
     """
     if debug and debug_read:
         print("reading memory of particle", particle.number)
-    particle.rcv_buf = read(particle.read_whole_memory())
+    particle.rcv_buf = read_and_clear(particle.read_whole_memory())
     particle.nh_list = def_distances(particle)
     find_p_max(particle)
     particle.rcv_buf.clear()
