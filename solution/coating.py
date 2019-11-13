@@ -1,6 +1,6 @@
 
 from lib.swarm_sim_header import *
-from solution.def_distances import *
+from solution.distance_calculation import *
 from solution.read_write import *
 from solution.kalman import *
 from solution.p_max_calculation import *
@@ -62,7 +62,7 @@ def read_cycle(particle):
     if debug and debug_read:
         print("reading memory of particle", particle.number)
     particle.rcv_buf = read_and_clear(particle.read_whole_memory())
-    particle.nh_list = def_distances(particle)
+    particle.nh_list = calculate_distances(particle)
     find_p_max(particle)
     particle.rcv_buf.clear()
 

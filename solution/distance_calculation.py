@@ -3,13 +3,14 @@ import math
 from solution import solution_header
 
 
-def def_distances(particle):
+def calculate_distances(particle):
     if debug and debug_distance_calculation:
         print("\n***************************************************************")
         print(" Before P", particle.number, "own distance", particle.own_dist, "coords", particle.coords)
 
+    # detect the types of all neighbors
     nh_list = scan_nh(particle)
-
+    # check received messages for distance information
     for direction in direction_list:
         nh_list[direction].dist = get_nh_dist(direction, nh_list[direction].type, particle.rcv_buf)
 
@@ -18,7 +19,9 @@ def def_distances(particle):
         for direction in direction_list:
             print(direction_number_to_string(direction), "|", nh_list[direction].type, "|", nh_list[direction].dist)
             #print("Neighborhood distance list", nh_list.values())
+    # calculate own distance
     particle.own_dist = calc_own_dist(nh_list)
+    # recalculate unknown neighbor distances based on own distance
     if particle.own_dist != math.inf:
         for direction in direction_list:
             nh_list[direction].dist = calc_nh_dist(direction, nh_list, particle.own_dist)
@@ -31,6 +34,11 @@ def def_distances(particle):
 
 
 def scan_nh(particle):
+    """
+    Scans all directions for the type of neighbor they contain
+    :param particle: the particle whose neighborhood to check
+    :return: the new neighborhood list
+    """
     nh_list = []
     for direction in direction_list:
         if particle.particle_in(direction):
@@ -44,11 +52,11 @@ def scan_nh(particle):
 
 def get_nh_dist(direction, type, rcv_buf):
     """
-    :param direction: direction of the neighborhood matter
-    :param type: The type of the neighborhood matter
-    :param rcv_buf: The receiver buffer that is a dictionary as {direction, dist} and keeps t
-                    he direction and dist of adjacent particle
-    :return: The distance of the adjacent node
+    Checks received messages for distance information of neighbors
+    :param direction: direction of the neighbor
+    :param type: The type of the neighbor
+    :param rcv_buf: the messages containing distance information
+    :return: The distance of the neighbor
     """
     if type == "t":
         return 0
@@ -59,7 +67,8 @@ def get_nh_dist(direction, type, rcv_buf):
 
 def calc_own_dist(nh_list):
     """
-    :param nh_list: A dictionary formed as  {direction_1: "dist_1", ..., direction_6: "dist_6"}
+    calculates a particles own distance
+    :param nh_list: the neighborhood of the particle
     :return: The own distance of the the particle
     """
     nh_dist_list = list() # nh_list = [neighbor.dist for neightbor in nh_list]
@@ -71,7 +80,8 @@ def calc_own_dist(nh_list):
 
 def calc_own_dist_t(matter):
     """
-    :param matter: A dictionary formed as  {direction_1: "dist_1", ..., direction_6: "dist_6"}
+    If a tile is in a particles neighborhood it's distance is always 1
+    :param matter: any matter in the particles neighborhood
     :return: The own distance of the the particle
     """
     if matter.type == "tile":
@@ -80,6 +90,13 @@ def calc_own_dist_t(matter):
 
 
 def calc_nh_dist(direction, nh_list, own_dist):
+    """
+    Calculates the distance of a neighbor based on own distance
+    :param direction: the direction of the neighbor
+    :param nh_list: the particles neighborhood
+    :param own_dist: the particles own distance
+    :return: the estimated distance of the neighbor
+    """
     if nh_list[direction].dist is math.inf and \
             (own_dist != math.inf or
              nh_list[direction_in_range(direction + 1)].dist != math.inf or
