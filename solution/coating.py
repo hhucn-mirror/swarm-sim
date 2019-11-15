@@ -1,9 +1,7 @@
-
-from lib.swarm_sim_header import *
-from solution.distance_calculation import *
-from solution.read_write import *
-from solution.kalman import *
-from solution.p_max_calculation import *
+from solution.master.distance_calculation import *
+from solution.master.read_write import *
+from solution.master.kalman import *
+from solution.master.p_max_calculation import *
 
 import random
 
