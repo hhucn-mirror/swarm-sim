@@ -8,7 +8,7 @@ coating_folder = config.ConfigData().coating_algorithm
 distance_calc_mod = importlib.import_module("solution." + coating_folder + ".distance_calculation", "solution." + coating_folder)
 read_write_mod = importlib.import_module("solution." + coating_folder + ".read_write", "solution." + coating_folder)
 p_max_calc_mod = importlib.import_module("solution." + coating_folder + ".p_max_calculation", "solution." + coating_folder)
-coating_mod = importlib.import_module("solution." + coating_folder + ".kalman", "solution." + coating_folder)
+coating_mod = importlib.import_module("solution." + coating_folder + ".coating_alg", "solution." + coating_folder)
 
 cycle_no = 3
 
