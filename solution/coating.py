@@ -1,9 +1,14 @@
-from solution.master.distance_calculation import *
-from solution.master.read_write import *
-from solution.master.kalman import *
-from solution.master.p_max_calculation import *
-
+from lib import config
+import importlib
 import random
+from lib.swarm_sim_header import *
+
+
+coating_folder = config.ConfigData().coating_algorithm
+distance_calc_mod = importlib.import_module("solution." + coating_folder + ".distance_calculation", "solution." + coating_folder)
+read_write_mod = importlib.import_module("solution." + coating_folder + ".read_write", "solution." + coating_folder)
+p_max_calc_mod = importlib.import_module("solution." + coating_folder + ".p_max_calculation", "solution." + coating_folder)
+coating_mod = importlib.import_module("solution." + coating_folder + ".kalman", "solution." + coating_folder)
 
 cycle_no = 3
 
@@ -12,10 +17,8 @@ def solution(sim):
     for particle in sim.particles:
 
         if sim.get_actual_round() == 1:
-            initialize_particle(particle)
+            coating_mod.initialize_particle(particle)
             particle.dest_t=random.choice(sim.get_tiles_list())
-
-
 
         if particle.wait:
             if sim.get_actual_round() % (cycle_no + 1) == 0:
@@ -43,12 +46,12 @@ def write_cycle(particle):
     :param particle: the particle whose turn it is
     :return: none
     """
-    particle.next_direction = coating_alg(particle)
+    particle.next_direction = coating_mod.coating_alg(particle)
     if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
         # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-        send_pmax_to_neighbors(particle)
+        read_write_mod.send_pmax_to_neighbors(particle)
     else:
-        send_own_dist_to_neighbors(particle)
+        read_write_mod.send_own_dist_to_neighbors(particle)
 
 
 def read_cycle(particle):
@@ -59,9 +62,9 @@ def read_cycle(particle):
     """
     if debug and debug_read:
         print("reading memory of particle", particle.number)
-    particle.rcv_buf = read_and_clear(particle.read_whole_memory())
-    particle.nh_list = calculate_distances(particle)
-    find_p_max(particle)
+    particle.rcv_buf = read_write_mod.read_and_clear(particle.read_whole_memory())
+    particle.nh_list = distance_calc_mod.calculate_distances(particle)
+    p_max_calc_mod.find_p_max(particle)
     particle.rcv_buf.clear()
 
 
@@ -78,7 +81,7 @@ def move_cycle(particle):
     elif particle.next_direction is not False and not particle.particle_in(particle.next_direction) \
             and not particle.tile_in(particle.next_direction):
         move_to_next_dir(particle)
-    reset_p_max(particle)
+    coating_mod.reset_p_max(particle)
 
 
 def move_to_next_dir(particle):
@@ -92,8 +95,8 @@ def move_to_next_dir(particle):
     if debug:
         print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_list])
         print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
-    reset_attributes(particle)
-    reset_p_max(particle)
+    coating_mod.reset_attributes(particle)
+    coating_mod.reset_p_max(particle)
 
 
 def move_to_target_tile(particle):
@@ -107,10 +110,10 @@ def move_to_target_tile(particle):
     if hit_a_matter or hit_a_matter is None:
         # reset_attributes(particle)
         if hit_a_matter is not None:
-            if particle.own_dist > calc_own_dist_t(hit_a_matter):
-                particle.own_dist = calc_own_dist_t(hit_a_matter)
+            if particle.own_dist > distance_calc_mod.calc_own_dist_t(hit_a_matter):
+                particle.own_dist = distance_calc_mod.calc_own_dist_t(hit_a_matter)
             if hit_a_matter.type == "tile" and debug:
                 print("got a distance from a tile")
     else:
-        reset_attributes(particle)
-        reset_p_max(particle)
+        coating_mod.reset_attributes(particle)
+        coating_mod.reset_p_max(particle)

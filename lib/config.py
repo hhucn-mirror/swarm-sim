@@ -33,6 +33,10 @@ class ConfigData:
             self.solution = config.get("File", "solution")
         except configparser.NoOptionError as noe:
             self.solution = "solution.py"
+        try:
+            self.coating_algorithm = config.get("File", "coating_algorithm")
+        except configparser.NoOptionError as noe:
+            self.coating_algorithm = "master"
 
         self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
         self.multiple_sim = 0
