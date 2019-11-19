@@ -1,0 +1,95 @@
+from copy import deepcopy
+from lib.swarm_sim_header import *
+from solution import solution_header
+
+
+# def __init__(self, own_dist, fl_min_dist, fl_hop, p_max_id, p_max_dist, p_hop):
+# self.own_dist = own_dist
+# self.fl_min_dist = fl_min_dist
+# self.fl_min_hop = fl_hop
+# self.p_max_dist = p_max_dist
+# self.p_max_hop = p_hop
+# self.p_max_id = p_max_id
+
+
+def read_and_clear(memory):
+    """
+    Reads all received messages from memory and clears it
+    :param memory: a particles memory
+    :return: a dictionary with all messages in the memory
+    """
+    if debug and debug_read:
+        print("memory: ", ["direction: " + direction_number_to_string(memkey) + " | " + str(mem) for memkey, mem in memory.items()])
+    if memory:
+        rcv_buf = deepcopy(memory)
+        memory.clear()
+        return rcv_buf
+    return {}
+
+
+def send_own_distance(particle, targets):
+    """
+    Sends a message in all target directions containing only the particles own_dist
+    :param particle: the sender particles
+    :param targets: all directions the message should be send to
+    :return: none
+    """
+    dist_package = solution_header.OwnDistance(particle.own_dist, particle.number)
+    for target_direction in targets:
+        target_particle = particle.get_particle_in(target_direction)
+        if debug and debug_write:
+            print("P", particle.number, "sends own distance package", dist_package.particle_distance,
+                  " to", target_particle.number, " in direction", direction_number_to_string(target_direction))
+        # invert the direction so the receiver particle knows from where direction it got the package
+        particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
+
+
+def send_p_max(particle, targets):
+    """
+        Sends a message in all target directions containing the particles own_dist and p_max
+        :param particle: the sender particles
+        :param targets: all directions the message should be send to
+        :return: none
+        """
+    dist_package = solution_header.PMax(particle.own_dist, particle.number, particle.p_max, {})
+    for target_direction in targets:
+        target_particle = particle.get_particle_in(target_direction)
+        if debug and debug_write:
+            print("P", particle.number, "sends Pmax package", dist_package.p_max_dist, " to", target_particle.number,
+                  " in direction", direction_number_to_string(target_direction))
+        particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
+
+
+def find_neighbor_particles(particle):
+    """
+    Find all directions containing particles
+    :param particle: the particle whose neighborhood ist checked
+    :return: all directions containing particles
+    """
+    directions_with_particles = []
+    for direction in direction_list:
+        if particle.particle_in(direction):
+            directions_with_particles.append(direction)
+    return directions_with_particles
+
+
+def send_pmax_to_neighbors(particle):
+    """
+    Sends information to all neighbors based on the particles own judgement
+    :param particle: the sender particle
+    :return: none
+    """
+    if particle.own_dist != math.inf:
+        directions_with_particles = find_neighbor_particles(particle)
+        send_p_max(particle, directions_with_particles)
+
+
+def send_own_dist_to_neighbors(particle):
+    """
+    Only sends own_dist info and never sends p_max
+    :param particle: the sender particle
+    :return: none
+    """
+    if particle.own_dist != math.inf:
+        directions_with_particles = find_neighbor_particles(particle)
+        send_own_distance(particle, directions_with_particles)
