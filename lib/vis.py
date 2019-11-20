@@ -30,7 +30,7 @@ busy_waiting_time = 1
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 20
+rounds_per_second = 60
 
 # tile_alpha = 0.6
 particle_alpha = 1
