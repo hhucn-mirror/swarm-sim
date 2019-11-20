@@ -15,7 +15,6 @@ cycle_no = 3
 
 def solution(sim):
     for particle in sim.particles:
-
         if sim.get_actual_round() == 1:
             coating_mod.initialize_particle(particle)
             particle.dest_t=random.choice(sim.get_tiles_list())
@@ -93,7 +92,7 @@ def move_to_next_dir(particle):
     particle.prev_direction = get_the_invert(particle.next_direction)
     particle.move_to(particle.next_direction)
     if debug:
-        print("dist list bevore moving", [str(neighbor) for neighbor in particle.nh_list])
+        print("dist list before moving", [str(neighbor) for neighbor in particle.nh_list])
         print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
     coating_mod.reset_attributes(particle)
     coating_mod.reset_p_max(particle)
