@@ -100,10 +100,6 @@ def calc_nh_dist(direction, nh_list, own_dist):
         # if the defined direction is a FL and in SE, SW, NW, NE and the min dist is coming
         #  from one of those direction than the fl becomes the same distance
         # """
-        if nh_list[direction].type == "fl" and direction in [SE, SW, NE, NW]:
-            min_direction = min([direction_in_range(direction + 1), direction_in_range(direction - 1)], key=(lambda k:  nh_list[k].dist))
-            if min_direction in [SE, SW, NE, NW] and nh_list[min_direction].dist < own_dist and nh_list[min_direction].dist != 0:
-                return nh_list[min_direction].dist
         return 1 + min(own_dist,
                        nh_list[direction_in_range(direction + 1)].dist,
                        nh_list[direction_in_range(direction - 1)].dist)
