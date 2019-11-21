@@ -5,9 +5,9 @@ import configparser
 
 
 def main(argv):
-    max_round = 300
+    max_round = 500
     seed_start = 1
-    seed_end = 45
+    seed_end = 40
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
 
@@ -66,12 +66,12 @@ def main(argv):
     for cp in child_processes:
         cp.wait()
     fout = open(direction+"/all_aggregates.csv","w+")
-    for seed in range(seed_start, seed_end+1):
-        f = open(direction+"/"+str(seed)+"/aggregate_rounds.csv")
-        f.__next__() # skip the header
-        for line in f:
-            fout.write(line)
-        f.close() # not really needed
+    #for seed in range(seed_start, seed_end+1):
+    #    f = open(direction+"/"+str(seed)+"/aggregate_rounds.csv")
+    #    f.__next__() # skip the header
+    #    for line in f:
+    #        fout.write(line)
+    #    f.close() # not really needed
     fout.close()
 
 

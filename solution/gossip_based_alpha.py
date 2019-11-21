@@ -17,11 +17,14 @@ W = 4
 NW = 5
 
 
-
+x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
+y_offset = [ 1, 0, -1,   -1,    0,  1]
 direction = [NE, E, SE, SW, W, NW]
 info_plot=[[]]
 filler_actual_count=[]
 calc_count = 0
+message_count=0
+u_message_count=0
 info_plot_dir = './outputs/gossip_based_standard/' + datetime.datetime.now().strftime('%Y_%m_%d_%H') + '/'
 # configurations for Gossip
 
@@ -30,6 +33,8 @@ def solution(sim):
     global info_plot_dir
     global calc_count
     global table_calcs
+    global message_count
+    global u_message_count
     threshold_limit = 0.000002
     table_calcs = ""
     # max count for plots and table size
@@ -86,6 +91,8 @@ def solution(sim):
         #he will reach for the searched neighbour
         if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0):
             if(rnd_particle.check_term==0 or rnd_particle.get_particle_in(neighbour_found_in_dir).check_term!=1):
+                r_p_old_count = rnd_particle.particle_count
+                r_p_n_old_count = rnd_particle.get_particle_in(neighbour_found_in_dir).particle_count
                 #or rnd_particle.get_particle_in(neighbour_found_in_dir).sum!=0 ):
                 print("current_sum:",current_sum)
                 print("other particle's current_sum", rnd_particle.get_particle_in(neighbour_found_in_dir).sum)
@@ -96,8 +103,15 @@ def solution(sim):
                 rnd_particle.sum = new_sum
                 rnd_particle.get_particle_in(neighbour_found_in_dir).sum= new_sum
                 #both partcle calculate the estimated amout of particles in the system
-                rnd_particle.particle_count= calculate_particle_count(rnd_particle)
-                rnd_particle.get_particle_in(neighbour_found_in_dir).particle_count = calculate_particle_count(rnd_particle.get_particle_in(neighbour_found_in_dir))
+                if rnd_particle.sum!=0:
+                    rnd_particle.particle_count= calculate_particle_count(rnd_particle)
+                    rnd_particle.get_particle_in(neighbour_found_in_dir).particle_count = calculate_particle_count(rnd_particle.get_particle_in(neighbour_found_in_dir))
+
+                if (r_p_old_count == rnd_particle.particle_count):
+                    u_message_count += 1
+                if (r_p_n_old_count == rnd_particle.get_particle_in(neighbour_found_in_dir).particle_count):
+                    u_message_count += 1
+
                 #check
                 print("after calc:",rnd_particle.sum)
                 print("N:after calc:",rnd_particle.get_particle_in(neighbour_found_in_dir).sum)
@@ -108,6 +122,7 @@ def solution(sim):
                 #checks if it has already calculates with that neighbour in the last round
                 table_calcs+=next_line_table(sim.get_particle_list())
                 calc_count+=1
+                message_count=calc_count*2
                 table_calcs+="  "+str(rnd_particle.number-1)+"-->"+str(rnd_particle.get_particle_in(neighbour_found_in_dir).number-1)
                 if(abs(current_sum-rnd_particle.sum)> 0):
                     # checks if the threshold was not reached
@@ -175,6 +190,7 @@ def solution(sim):
         ax2.plot(x2, filler_actual_count, label='Tatsächliche Anzahl im System')
         ax2.set(xlabel='Runde', ylabel='Partikel', title='Durchschnittliche Einschätzung aller Partikel')
         ax2.legend(loc='best')
+        ax2.set_yscale('log')
 
         standard_deviation_per_round = []
         for i in range(0, sim.get_actual_round() + 1):
@@ -204,7 +220,7 @@ def solution(sim):
         print("Austausche zwischen Partikel: ", calc_count)
         print("Durchschnittliche Einschätzung aller Partikel: ", average / len(sim.get_particle_list()))
 
-        csv_information=[average_plotter[len(average_plotter)-1], standard_deviation_per_round[len(standard_deviation_per_round)-1], calc_count, sim.get_actual_round() ]
+        csv_information=[average_plotter[len(average_plotter)-1], standard_deviation_per_round[len(standard_deviation_per_round)-1], calc_count, sim.get_actual_round(), u_message_count]
         print(csv_information)
 
         if not os.path.exists(info_plot_dir):
@@ -219,9 +235,9 @@ def solution(sim):
 
     if sim.get_actual_round() > 0:
         for particle in sim.get_particle_list():
-            free_space_in_dir=search_personal_space(particle)
+            free_space_in_dir=search_personal_space(particle, sim)
             if free_space_in_dir != -1:
-                particle.move_to(free_space_in_dir)
+               particle.move_to(free_space_in_dir)
 
 
 def get_free_csv_name() -> str:
@@ -243,11 +259,13 @@ def next_line_table(p_list):
     return next_line
 
 
-def search_personal_space(particle):
+def search_personal_space(particle, sim):
     dir = [0, 1, 2, 3, 4, 5]
     while len(dir) != 0:
         rnd_dir = random.choice(dir)
-        if particle.particle_in(rnd_dir):
+        if particle.particle_in(rnd_dir) or\
+                abs(particle.coords[0]+x_offset[rnd_dir])>sim.get_world_x_size() or\
+                abs(particle.coords[1]+y_offset[rnd_dir])>sim.get_world_y_size():
             dir.remove(rnd_dir)
         else:
             return rnd_dir

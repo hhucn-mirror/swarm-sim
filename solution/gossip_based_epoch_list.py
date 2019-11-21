@@ -28,7 +28,8 @@ filler_actual_count=[]
 calc_count = 0
 filler_actual_count=[]
 filler_actual_count.append(0)
-
+message_count=0
+u_message_count=0
 info_plot_dir = './outputs/gossip_based_standard/' + datetime.datetime.now().strftime('%Y_%m_%d_%H') + '/'
 # configurations for Gossip
 
@@ -38,7 +39,10 @@ def solution(sim):
     global info_plot_dir
     global calc_count
     global table_calcs
+    global message_count
+    global u_message_count
     threshold_limit = 0.000002
+    remember_count = 3
     table_calcs = ""
     # max count for plots and table size
     table_size_max = 1
@@ -53,6 +57,13 @@ def solution(sim):
             setattr(rnd_particle, "version_number", 1)
             setattr(rnd_particle, "min_rounds", 100)
             setattr(rnd_particle, "actual_round", 0)
+            # protocol
+            setattr(rnd_particle, "knows_the_particle", 0)
+            setattr(rnd_particle, "replace_index", 0)
+            for i in range(0, remember_count):
+                s = str(i)
+                setattr(rnd_particle, "already_calc_with_" + s, -1)
+
         master = random.choice(sim.get_particle_list())
         master.sum = 1
         master.version_number = 2
@@ -91,15 +102,25 @@ def solution(sim):
     if sim.get_actual_round() > 1 and len(sim.get_particle_list()) <= table_size_max:
         table_calcs+="\n|round:"+'{:_>2d}'.format(sim.get_actual_round())+"|"
 
+    print("round:" , sim.get_actual_round())
+
     while(len(helper_particle_list)!=0):
         #choose a random particle
         rnd_particle=random.choice(helper_particle_list)
-
         neighbour_found_in_dir = search_any_neighbour(rnd_particle)
+
         if (neighbour_found_in_dir != -1):
+            for i in range(0, remember_count):
+                s = str(i)
+                remember_attribute = "already_calc_with_" + s
+                if (getattr(rnd_particle, remember_attribute) == rnd_particle.get_particle_in(neighbour_found_in_dir).number):
+                    print("JA KENNE DEN")
+                    rnd_particle.knows_the_particle = 1
+
+        if (neighbour_found_in_dir != -1 and rnd_particle.knows_the_particle!=1):
             if rnd_particle.actual_round >= rnd_particle.min_rounds:
                 reset_to_master(rnd_particle)
-                print("master reset in round:" + sim.get_actual_round())
+                #print("master reset in round:" + sim.get_actual_round())
 
             if rnd_particle.version_number < rnd_particle.get_particle_in(neighbour_found_in_dir).version_number:
                 reset_particle(rnd_particle,rnd_particle.get_particle_in(neighbour_found_in_dir))
@@ -111,7 +132,7 @@ def solution(sim):
 
         #if the the random chosen particle has a sumvalue above 0
         #he will reach for the searched neighbour
-        if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0):
+        if (neighbour_found_in_dir) != -1 and (rnd_particle.sum!=0) and rnd_particle.knows_the_particle!=1:
             #if(rnd_particle.check_term==0 or rnd_particle.get_particle_in(neighbour_found_in_dir).check_term!=1):
                 #or rnd_particle.get_particle_in(neighbour_found_in_dir).sum!=0 ):
             r_p_old_count = rnd_particle.particle_count
@@ -127,8 +148,14 @@ def solution(sim):
 
             if (r_p_old_count==rnd_particle.particle_count):
                 map_exchange_u[abs(int(rnd_particle.coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(sim.get_world_x_size())] += 1
+                u_message_count+=1
             if (r_p_n_old_count==rnd_particle.get_particle_in(neighbour_found_in_dir).particle_count):
-                map_exchange_u[abs(int(rnd_particle.coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(sim.get_world_x_size())] += 1
+                map_exchange_u[abs(int(rnd_particle.get_particle_in(neighbour_found_in_dir).coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.get_particle_in(neighbour_found_in_dir).coords[0]) + 2 * int(sim.get_world_x_size())] += 1
+                u_message_count+=1
+
+            remember_attribute = "already_calc_with_" + str(rnd_particle.replace_index)
+            setattr(rnd_particle, remember_attribute, rnd_particle.get_particle_in(neighbour_found_in_dir).number)
+            rnd_particle.replace_index = (rnd_particle.replace_index + 1) % remember_count
             #check
             #print("after calc:",rnd_particle.sum)
             #print("N:after calc:",rnd_particle.get_particle_in(neighbour_found_in_dir).sum)
@@ -139,10 +166,12 @@ def solution(sim):
             #checks if it has already calculates with that neighbour in the last round
             #table_calcs+=next_line_table(sim.get_particle_list())
             calc_count+=1
+            message_count=calc_count*2
             print(sim.get_world_y_size())
             map_exchange[abs(int(rnd_particle.coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.coords[0]) + 2 * int(sim.get_world_x_size())] += 1
-            map_exchange[abs(int(rnd_particle.get_particle_in(neighbour_found_in_dir).coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.get_particle_in(neighbour_found_in_dir).coords[0]) + 2 * int(sim.get_world_x_size())]
+            map_exchange[abs(int(rnd_particle.get_particle_in(neighbour_found_in_dir).coords[1]) - int(sim.get_world_y_size()))][int(2 * rnd_particle.get_particle_in(neighbour_found_in_dir).coords[0]) + 2 * int(sim.get_world_x_size())] +=1
             rnd_particle.actual_round += 1
+        rnd_particle.knows_the_particle=0
 
 
         #table_calcs+="  "+str(rnd_particle.number-1)+"-->"+str(rnd_particle.get_particle_in(neighbour_found_in_dir).number-1)
@@ -153,7 +182,6 @@ def solution(sim):
 
             #    if(abs(other_par_cur_sum-rnd_particle.get_particle_in(neighbour_found_in_dir).sum)<threshold_limit):
             #        rnd_particle.get_particle_in(neighbour_found_in_dir).check_term=1
-
 
     #checklist_for_threshold.append(rnd_particle.check_term)
         #print(checklist_for_threshold)
@@ -256,7 +284,7 @@ def solution(sim):
         map_exchange = np.array(map_exchange)
         print(map_exchange)
         fig4, ax4 = plt.subplots()
-        a5 = ax4.scatter(Y, X, c=map_exchange_2, cmap='jet')
+        a5 = ax4.scatter(Y, X, c=map_exchange_2, cmap='Reds')
         fig4.colorbar(a5)
 
         ax4.set_xlabel('X coord')
@@ -295,7 +323,7 @@ def solution(sim):
         ax5.bar3d(x, y, z, dx, dy, dz, color=colors)
         ax5.set_xlabel('X coord')
         ax5.set_ylabel('Y coord')
-        ax5.set_zlabel('Austausche')
+        ax5.set_zlabel('Nachrichten')
 
         map_exchange_u_2 = np.copy(map_exchange_u)
 
@@ -306,7 +334,7 @@ def solution(sim):
         map_exchange_u = np.array(map_exchange_u)
         print(map_exchange_u)
         fig7, ax7 = plt.subplots()
-        a7 = ax7.scatter(Y, X, c=map_exchange_u_2, cmap='jet')
+        a7 = ax7.scatter(Y, X, c=map_exchange_u_2, cmap='Reds')
         fig7.colorbar(a7)
 
         ax7.set_xlabel('X coord')
@@ -343,13 +371,15 @@ def solution(sim):
         a8 = ax8.bar3d(x, y, z, dx, dy, dz, color=colors)
         ax8.set_xlabel('X coord')
         ax8.set_ylabel('Y coord')
-        ax8.set_zlabel('unnecessary exchange')
+        ax8.set_zlabel('Redundante Nachrichten')
 
         ##############################################################
         ##csv
 
-        csv_information=[average_plotter[len(average_plotter)-1], standard_deviation_per_round[len(standard_deviation_per_round)-1], calc_count, sim.get_actual_round() ]
+        csv_information=[average_plotter[len(average_plotter)-1], standard_deviation_per_round[len(standard_deviation_per_round)-1], calc_count, sim.get_actual_round(), u_message_count ]
         print(csv_information)
+        print("unnötige Nachrichten: ", u_message_count)
+        print("nachrichten: ", message_count)
 
         if not os.path.exists(info_plot_dir):
             os.makedirs(info_plot_dir)
@@ -369,18 +399,17 @@ def solution(sim):
             if free_space_in_dir != -1:
                 particle.move_to(free_space_in_dir)
 
-    if sim.get_actual_round()==200:
-        for i in range(0,30):
-            rnd_particle=random.choice(sim.get_particle_list())
-            sim.remove_particle(rnd_particle.get_id())
-            print("removed and its now:", len(sim.get_particle_list()))
+    #if sim.get_actual_round()==200:
+    #    for i in range(0,30):
+    #        rnd_particle=random.choice(sim.get_particle_list())
+    #        sim.remove_particle(rnd_particle.get_id())
+    #        print("removed and its now:", len(sim.get_particle_list()))
 
 def reset_to_master(particle):
     particle.sum=1
+    particle.version_number=int(particle.version_number+random.randint(1,round(particle.particle_count)))
     particle.particle_count = 1
-    particle.version_number=int(particle.version_number+random.randint(1,round(particle.particle_count))+ random.randint(1,100))
     particle.actual_round=0
-
 
 def reset_particle(rnd_particle, rnd_particle_neighbour):
     rnd_particle.sum = 0
