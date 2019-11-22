@@ -29,6 +29,7 @@ def initialize_particle(particle):
     setattr(particle, "p_max", solution_header.PMaxInfo())
     setattr(particle, "wait", False)
 
+
 def reset_attributes(particle):
     """
     Resets particle variables that are based on the particles position
@@ -73,7 +74,6 @@ def find_next_free_location(particle):
     """
     # Check if particle has a global p_max and it is not equal to its own distance
     possible_directions = []
-    # (particle.nh_list[direction].dist != particle.p_max.dist - 1 or particle.own_dist != particle.nh_list[direction].dist))
     # accumulate all candidates for the next movement direction in possible_directions
     for direction in reversed(direction_list):
         if not (particle.particle_in(direction) or         # check if direction is free

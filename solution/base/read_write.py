@@ -3,15 +3,6 @@ from lib.swarm_sim_header import *
 from solution import solution_header
 
 
-# def __init__(self, own_dist, fl_min_dist, fl_hop, p_max_id, p_max_dist, p_hop):
-# self.own_dist = own_dist
-# self.fl_min_dist = fl_min_dist
-# self.fl_min_hop = fl_hop
-# self.p_max_dist = p_max_dist
-# self.p_max_hop = p_hop
-# self.p_max_id = p_max_id
-
-
 def read_and_clear(memory):
     """
     Reads all received messages from memory and clears it

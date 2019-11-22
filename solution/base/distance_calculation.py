@@ -8,9 +8,8 @@ def calculate_distances(particle):
         print("\n***************************************************************")
         print(" Before P", particle.number, "own distance", particle.own_dist, "coords", particle.coords)
 
-    # detect the types of all neighbors
     nh_list = scan_nh(particle)
-    # check received messages for distance information
+
     for direction in direction_list:
         nh_list[direction].dist = get_nh_dist(direction, nh_list[direction].type, particle.rcv_buf)
 
@@ -18,8 +17,7 @@ def calculate_distances(particle):
         print("Direction | Type | Distance")
         for direction in direction_list:
             print(direction_number_to_string(direction), "|", nh_list[direction].type, "|", nh_list[direction].dist)
-            #print("Neighborhood distance list", nh_list.values())
-    # calculate own distance
+
     particle.own_dist = calc_own_dist(nh_list)
     # recalculate unknown neighbor distances based on own distance
     if particle.own_dist != math.inf:
@@ -96,10 +94,6 @@ def calc_nh_dist(direction, nh_list, own_dist):
     :return: the estimated distance of the neighbor
     """
     if nh_list[direction].dist is math.inf and own_dist != math.inf:
-        # """
-        # if the defined direction is a FL and in SE, SW, NW, NE and the min dist is coming
-        #  from one of those direction than the fl becomes the same distance
-        # """
         return 1 + min(own_dist,
                        nh_list[direction_in_range(direction + 1)].dist,
                        nh_list[direction_in_range(direction - 1)].dist)
