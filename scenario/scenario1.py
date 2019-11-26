@@ -2,7 +2,7 @@ def scenario(world):
 
     # Ants
     part_num = 0
-    while part_num <= 30:
+    while part_num <= 40:
         ant = world.add_particle(0, 0)
         setattr(ant, "list", [])
         part_num += 1

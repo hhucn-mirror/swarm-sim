@@ -5,7 +5,7 @@ import configparser
 
 
 def main(argv):
-    max_round = 10
+    max_round = 100
     seed_start = 1
     seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
