@@ -76,12 +76,22 @@ def find_next_free_location(particle):
     possible_directions = []
     # accumulate all candidates for the next movement direction in possible_directions
     for direction in reversed(direction_list):
-        if not (particle.particle_in(direction) or         # check if direction is free
-                particle.tile_in(direction) or
-                particle.prev_direction == direction) and\
-                particle.nh_list[direction].dist < particle.p_max.dist:
+        if (not (particle.particle_in(direction) or  # check if direction is free
+                 particle.tile_in(direction) or
+                 particle.prev_direction == direction) and  # check if the particle came from that direction
+                particle.nh_list[direction].dist < particle.p_max.dist and
+                not check_neighbor_can_move(particle.nh_list, direction, particle.own_dist)):
             possible_directions.append((direction, particle.nh_list[direction].dist))
     if len(possible_directions) > 0:
         nearest_free_location = min(possible_directions, key=lambda x: x[1])
         return nearest_free_location[0]
+    return False
+
+
+def check_neighbor_can_move(nh_list, direction, own_distance):
+    if ((nh_list[direction_in_range(direction - 1)].type == "p" and
+        nh_list[direction_in_range(direction - 1)].dist > own_distance) or
+        (nh_list[direction_in_range(direction + 1)].type == "p" and
+         nh_list[direction_in_range(direction + 1)].dist > own_distance)):
+        return False
     return False

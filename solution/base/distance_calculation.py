@@ -93,9 +93,10 @@ def calc_nh_dist(direction, nh_list, own_dist):
     :param own_dist: the particles own distance
     :return: the estimated distance of the neighbor
     """
-    if nh_list[direction].dist is math.inf and own_dist != math.inf:
-        return 1 + min(own_dist,
-                       nh_list[direction_in_range(direction + 1)].dist,
-                       nh_list[direction_in_range(direction - 1)].dist)
-
+    if own_dist != math.inf:
+        estimated_distance = 1 + min(own_dist,
+                                     nh_list[direction_in_range(direction + 1)].dist,
+                                     nh_list[direction_in_range(direction - 1)].dist)
+        if estimated_distance < nh_list[direction].dist:
+            return estimated_distance
     return nh_list[direction].dist
