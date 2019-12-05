@@ -83,6 +83,7 @@ class CsvRoundData:
         self.steps = steps
         self.steps_sum = steps
         self.particle_num = particle_num
+        self.tile_num = tiles_num
 
         self.messages_sent = 0
         self.messages_forwarded = 0
