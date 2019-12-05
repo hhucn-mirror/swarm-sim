@@ -94,7 +94,7 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.direction_name)
+    # gnuplot_generator(config_data.direction_name)
 
 
 if __name__ == "__main__":

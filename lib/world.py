@@ -283,7 +283,7 @@ class World:
                 if (x,y) not in self.get_particle_map_coords():
                     self.particle_id_counter += 1
                     new_particle = particle.Particle(self, x, y, color, alpha, self.particle_id_counter)
-                    print(new_particle.number)
+                    # print(new_particle.number)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -295,10 +295,10 @@ class World:
                     logging.info("Created particle at %s", new_particle.coords)
                     return new_particle
                 else:
-                    print("for x %f and y %f not not possible because Particle exist   ", x, y)
+                    # print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
             else:
-                 print ("for x %f and y %f not possible to draw ", x, y)
+                 # print ("for x %f and y %f not possible to draw ", x, y)
                  return False
         else:
             logging.info("Max of particles reached and no more particles can be created")
@@ -366,13 +366,13 @@ class World:
         if check_values_are_coordinates(x,y) == True:
             if (x,y) not in self.tile_map_coords:
                 self.new_tile=tile.Tile(self, x, y, color, alpha)
-                print("Before adding ", len(self.tiles) )
+                # print("Before adding ", len(self.tiles) )
                 self.tiles.append(self.new_tile)
                 self.csv_round.update_tiles_num(len(self.tiles))
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("Afer adding ", len(self.tiles), self.new_tile.coords )
+                # print("Afer adding ", len(self.tiles), self.new_tile.coords )
                 logging.info("Created tile with tile id %s on coords %s",str(self.new_tile.get_id()), str(self.new_tile.coords))
                 self.new_tile.touch()
                 return self.new_tile
@@ -400,7 +400,7 @@ class World:
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("world.add_tile",self.new_tile.coords)
+                # print("world.add_tile",self.new_tile.coords)
                 logging.info("Created tile with tile id %s on coords %s", str(self.new_tile.get_id()),
                              str(self.new_tile.coords))
                 return True

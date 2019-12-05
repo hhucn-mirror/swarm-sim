@@ -2,8 +2,8 @@ import math
 import random
 from enum import Enum
 
-debug = 1
-debug_write = 1
+debug = 0
+debug_write = 0
 debug_read = 0
 debug_p_max_calculation = 0
 debug_distance_calculation = 0
@@ -179,8 +179,9 @@ def generating_random_spraded_particles (world, max_size_particle):
         if (x, y) not in world.tile_map_coords:
             world.add_particle(x, y)
         else:
-            print(" x and y ", (x, y))
-    print("Max Size of created Particle", len(world.particles))
+            # print(" x and y ", (x, y))
+            pass
+    # print("Max Size of created Particle", len(world.particles))
 
 
 def create_particle_in_line(world, max_size_particle, start_coords):
