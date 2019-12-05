@@ -6,6 +6,7 @@ import solution.send_free_location_info.distance_calculation as distance_calc_mo
 import solution.send_free_location_info.read_write as read_write_mod
 import solution.send_free_location_info.p_max_calculation as p_max_calc_mod
 import solution.send_free_location_info.coating_alg as coating_mod
+import solution.goal_test as goal_test
 
 cycle_no = 3
 
@@ -34,8 +35,8 @@ def solution(sim):
 
         elif sim.get_actual_round() % cycle_no == 0:
             write_cycle(particle)
-    if goal_reached(sim):
-        sim.set_successful_end()
+
+    goal_test.end_sim(sim)
 
 
 def write_cycle(particle):
@@ -115,16 +116,3 @@ def move_to_target_tile(particle):
     else:
         coating_mod.reset_attributes(particle)
         coating_mod.reset_p_max(particle)
-
-
-def goal_reached(sim):
-    min_fl_distance = min(list(map(get_smallest_fl, sim.particles)), default=0)
-    max_particle_distance = max([particle.own_dist for particle in sim.particles], default=math.inf)
-    if min_fl_distance is math.inf or min_fl_distance < max_particle_distance:
-        return False
-    else:
-        return True
-
-
-def get_smallest_fl(particle):
-    return min([neighbor.dist for neighbor in particle.nh_list if neighbor.type == "fl"], default=math.inf)
