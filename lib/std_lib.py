@@ -67,33 +67,55 @@ def get_next_dir_to(src_x, src_y, dest_x, dest_y):
         next_dir = E
     return next_dir
 
-def dir_to_str(dir):
+
+def dir_to_str(dir_num):
     """
-    :param dir: the direction that should get converted to a string
+    :param dir_num: the direction that should get converted to a string
     :return: the string of the direction
     """
-    if dir == 0:
-        return "NO"
-    elif dir == 1:
-        return "O"
-    elif dir == 2:
-        return "SO"
-    elif dir == 3:
+    if dir_num == 0:
+        return "NE"
+    elif dir_num == 1:
+        return "E"
+    elif dir_num == 2:
+        return "SE"
+    elif dir_num == 3:
         return "SW"
-    elif dir == 4:
+    elif dir_num == 4:
         return "W"
-    elif dir == 5:
+    elif dir_num == 5:
         return "NW"
     else:
         return "Error"
 
 
-def get_the_invert(dir):
-    if dir >= 3:
-        return dir - 3
+def str_to_dir(dir_str):
+    """
+    :param dir_str: the direction string that should get converted
+    :return: the direction
+    """
+    if dir_str == 'NE':
+        return 0
+    elif dir_str == 'E':
+        return 1
+    elif dir_str == 'SE':
+        return 2
+    elif dir_str == 'SW':
+        return 3
+    elif dir_str == 'W':
+        return 4
+    elif dir_str == 'NW':
+        return 5
     else:
-        return dir + 3
+        return -1
 
 
-def dir_in_range(dir):
-    return dir % 6
+def get_the_invert(dir_num):
+    if dir_num >= 3:
+        return dir_num - 3
+    else:
+        return dir_num + 3
+
+
+def dir_in_range(dir_num):
+    return dir_num % 6

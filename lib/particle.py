@@ -123,6 +123,10 @@ class Particle(matter.Matter):
 
         :param dir: The direction must be either: E, SE, SW, W, NW, or NE
         :return: True: Success Moving;  False: Non moving
+
+        TODO: this method needs to account for particles freeing up locations; merge master enough?
+        sequentially calling this over a list will result in particles only moving if the one freeing up the new
+        location has already called move_to
         """
 
         if dir == -1:
@@ -130,7 +134,7 @@ class Particle(matter.Matter):
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         dir, dir_coord = self.check_within_border(dir, dir_coord)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
-
+            # TODO: change the order of these if checks; currently allows multiple particles on one location! merge master?
             if self.coords in self.sim.particle_map_coords:
                 del self.sim.particle_map_coords[self.coords]
 

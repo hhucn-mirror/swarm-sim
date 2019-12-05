@@ -1,5 +1,5 @@
 def scenario(sim):
-    radius = 1
+    radius = 5
     centre = (0, 0)
 
     hexagon = get_hexagon_coordinates(centre, radius)
