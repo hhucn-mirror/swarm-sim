@@ -301,7 +301,7 @@ def move_to_dest_step_by_step(particle, destiny, prev_dir = None):
     :return: True if movement occured, False if not movment and a Matter if the next direction point has a matter on it
     """
     next_dir = get_next_direction_to(particle.coords[0], particle.coords[1], destiny.coords[0], destiny.coords[1])
-    if prev_dir is not None and prev_dir == next_dir:
+    if next_dir in prev_dir:
         return None
     if particle.tile_in(next_dir) or particle.particle_in(next_dir):
         particle.get_matter_in(next_dir)

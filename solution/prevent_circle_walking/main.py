@@ -2,10 +2,10 @@ from lib import config
 import importlib
 import random
 from lib.swarm_sim_header import *
-import solution.base.distance_calculation as distance_calc_mod
-import solution.base.read_write as read_write_mod
-import solution.base.p_max_calculation as p_max_calc_mod
-import solution.base.coating_alg as coating_mod
+import solution. prevent_circle_walking.distance_calculation as distance_calc_mod
+import solution.prevent_circle_walking.read_write as read_write_mod
+import solution.prevent_circle_walking.p_max_calculation as p_max_calc_mod
+import solution.prevent_circle_walking.coating_alg as coating_mod
 import solution.goal_test as goal_test
 
 cycle_no = 3
@@ -90,6 +90,9 @@ def move_to_next_dir(particle):
     :param particle: the particle whose turn it is
     :return: none
     """
+    particle.prev_direction = [direction_in_range(particle.prev_direction[i] * 2 - particle.next_direction)
+                               for i in range(len(particle.prev_direction))
+                               if particle.next_direction in [particle.prev_direction[i] + 1, particle.prev_direction[i] - 1]]
     if len(particle.prev_direction) >= particle.max_prev_dirs:
         particle.prev_direction.pop(0)
     particle.prev_direction.append(get_the_invert(particle.next_direction))

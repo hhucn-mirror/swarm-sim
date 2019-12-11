@@ -17,7 +17,7 @@ def initialize_particle(particle):
     setattr(particle, "snd_buf", {})
     # setattr(particle, "prev_direction", False)
     setattr(particle, "next_direction", False)
-    setattr(particle, "prev_direction", False)
+    setattr(particle, "prev_direction", [])
 
     # t: tile
     setattr(particle, "dest_t", None)
@@ -28,6 +28,7 @@ def initialize_particle(particle):
     # p: particle
     setattr(particle, "p_max", solution_header.PMaxInfo())
     setattr(particle, "wait", False)
+    setattr(particle, "max_prev_dirs", 1)
 
 
 def reset_attributes(particle):
@@ -78,7 +79,7 @@ def find_next_free_location(particle):
     for direction in reversed(direction_list):
         if (not (particle.particle_in(direction) or  # check if direction is free
                  particle.tile_in(direction) or
-                 particle.prev_direction == direction) and  # check if the particle came from that direction
+                 direction in particle.prev_direction) and  # check if the particle came from that direction
                 particle.nh_list[direction].dist < particle.p_max.dist and
                 not check_neighbor_can_move(particle.nh_list, direction, particle.own_dist)):
             possible_directions.append((direction, particle.nh_list[direction].dist))

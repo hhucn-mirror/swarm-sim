@@ -25,7 +25,7 @@ def solution(sim):
                 continue
 
         if sim.get_actual_round() % (cycle_no * 10) == 1:
-            particle.prev_direction = None
+            particle.prev_direction.pop(0)
 
         if sim.get_actual_round() % cycle_no == 1:
             move_cycle(particle)
@@ -89,7 +89,9 @@ def move_to_next_dir(particle):
     :param particle: the particle whose turn it is
     :return: none
     """
-    particle.prev_direction = get_the_invert(particle.next_direction)
+    if len(particle.prev_direction) >= particle.max_prev_dirs:
+        particle.prev_direction.pop(0)
+    particle.prev_direction.append(get_the_invert(particle.next_direction))
     particle.move_to(particle.next_direction)
     if debug:
         print("dist list before moving", [str(neighbor) for neighbor in particle.nh_list])
