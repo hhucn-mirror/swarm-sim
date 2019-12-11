@@ -2,10 +2,10 @@ from lib import config
 import importlib
 import random
 from lib.swarm_sim_header import *
-import solution.base.distance_calculation as distance_calc_mod
-import solution.base.read_write as read_write_mod
-import solution.base.p_max_calculation as p_max_calc_mod
-import solution.base.coating_alg as coating_mod
+import solution.only_move_if_best_match.distance_calculation as distance_calc_mod
+import solution.only_move_if_best_match.read_write as read_write_mod
+import solution.only_move_if_best_match.p_max_calculation as p_max_calc_mod
+import solution.only_move_if_best_match.coating_alg as coating_mod
 import solution.goal_test as goal_test
 
 cycle_no = 3
