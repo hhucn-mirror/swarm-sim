@@ -187,13 +187,13 @@ class VisWindow(pyglet.window.Window):
         return pyglet.event.EVENT_HANDLED
 
     def on_key_press(self, symbol, modifiers):
-        if symbol == key.Q and modifiers & key.MOD_COMMAND:  # cmd+q: quit application
+        if symbol == key.Q and modifiers & key.MOD_CTRL:  # ctrl+q: quit application
             self.window_active = False
         elif symbol == key.SPACE:  # space: pause / unpause simulation
             self.pause()
-        elif symbol == key.S and modifiers & key.MOD_COMMAND:  # cmd+s: save screenshot
+        elif symbol == key.S and modifiers & key.MOD_CTRL:  # ctrl+s: save screenshot
             ScreenshotManager.takeScreenshot()
-        elif symbol == key.V and modifiers & key.MOD_COMMAND:  # cmd+v: toggle video mode
+        elif symbol == key.V and modifiers & key.MOD_CTRL:  # ctrl+v: toggle video mode
             if not self.video_mode:
                 self.video_mode = True
                 self.simulation_running = True
