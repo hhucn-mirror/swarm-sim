@@ -27,7 +27,7 @@ class PMax(OwnDistance):
         :param p_max_table: currently unused
         """
         OwnDistance.__init__(self, particle_distance, particle_id)
-        self.p_max_ids = p_max.ids
+        self.p_max_ids = deepcopy(p_max.ids)
         self.p_max_dist = p_max.dist
         self.p_max_dir = 0
         self.p_max_table = deepcopy(p_max_table)
