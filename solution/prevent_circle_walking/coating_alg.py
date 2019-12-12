@@ -30,7 +30,6 @@ def initialize_particle(particle):
     setattr(particle, "max_prev_dirs", 2)
 
 
-
 def reset_attributes(particle):
     """
     Resets particle variables that are based on the particles position
@@ -61,7 +60,6 @@ def coating_alg(particle):
     :param particle: the particle for which the next direction should be calculated
     :return: the next direction the particle should move to
     """
-    #opt_coating(particle)
     if particle.nh_list is not None:
         return find_next_free_location(particle)
     return False
