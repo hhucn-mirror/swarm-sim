@@ -25,7 +25,8 @@ def solution(sim):
                 continue
 
         if sim.get_actual_round() % (cycle_no * 10) == 1:
-            particle.prev_direction.pop(0)
+            if len(particle.prev_direction) > 0:
+                particle.prev_direction.pop(0)
 
         if sim.get_actual_round() % cycle_no == 1:
             move_cycle(particle)
