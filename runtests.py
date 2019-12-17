@@ -44,7 +44,7 @@ def run_test(solution_scenario):
 
 
 def output_sorter(test):
-    return SOLUTIONS.index(test["solution"]) * len(SCENARIOS) + SCENARIOS.index(test["scenario"])
+    return SOLUTIONS.index(test["solution"]) + SCENARIOS.index(test["scenario"]) * len(SOLUTIONS)
 
 
 if __name__ == "__main__":
