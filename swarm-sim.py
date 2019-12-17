@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import random
-from lib import world, config
+from lib import world, config, vis3d
 from lib.gnuplot_generator import gnuplot_generator
 
 
@@ -18,28 +18,34 @@ def swarm_sim(argv):
     logging.info('Started')
 
     config_data = config.ConfigData()
-    
+
     read_cmd_args(argv, config_data)
 
     create_direction_for_data(config_data)
 
     random.seed(config_data.seed_value)
-
     swarm_sim_world = world.World(config_data)
 
-    while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
-        round_start_timestamp = time.perf_counter()
+    round_start_timestamp = time.perf_counter()
+    while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
+            and swarm_sim_world.get_end() is False:
+
         if config_data.visualization:
-            swarm_sim_world.window.draw_world(round_start_timestamp)
-            if swarm_sim_world.window.window_active is False:
-                break
+            swarm_sim_world.vis.run(round_start_timestamp)
+            round_start_timestamp = time.perf_counter()
+
         run_solution(swarm_sim_world)
 
-
+    logging.info('Finished')
 
     generate_data(config_data, swarm_sim_world)
 
-    logging.info('Finished')
+
+def draw_scenario(config_data, swarm_sim_world):
+    mod = importlib.import_module('scenario.' + config_data.scenario)
+    mod.scenario(swarm_sim_world)
+    if config_data.particle_random_order:
+        random.shuffle(swarm_sim_world.particles)
 
 
 def read_cmd_args(argv, config_data):
@@ -71,21 +77,23 @@ def read_cmd_args(argv, config_data):
 def create_direction_for_data(config_data):
     if config_data.multiple_sim == 1:
         config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                               "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-                               str(config_data.seed_value)
+                                     "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
+                                     str(config_data.seed_value)
 
         config_data.direction_name = "./outputs/mulitple/" + config_data.direction_name
 
     else:
         config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                               "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
-                               str(config_data.seed_value)
+                                     "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
+                                     str(config_data.seed_value)
         config_data.direction_name = "./outputs/" + config_data.direction_name
     if not os.path.exists(config_data.direction_name):
         os.makedirs(config_data.direction_name)
 
 
 def run_solution(swarm_sim_world):
+    if swarm_sim_world.config_data.particle_random_order_always:
+        random.shuffle(swarm_sim_world.particles)
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
