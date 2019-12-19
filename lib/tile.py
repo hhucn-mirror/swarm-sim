@@ -1,28 +1,15 @@
 """The tile module provides the interface for the tiles. A tile is a hexogon that can be taken or dropped
  and be connected to each other to buld up islands"""
-import logging
 from lib import matter
-
-
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-
-read=0
-write=1
+from lib.swarm_sim_header import *
 
 
 class Tile(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-
-    def __init__(self, sim, x, y, color=gray, alpha=1):
+    def __init__(self, world, x, y, color=gray, transparency=1):
         """Initializing the marker constructor"""
-        super().__init__( sim, (x, y), color, alpha,  type="tile", mm_size=sim.config_data.tile_mm_size)
+        super().__init__( world, (x, y), color, transparency,  type="tile", mm_size=world.config_data.tile_mm_size)
         self.__isCarried = False
-        self.created = False
-
 
     def get_tile_status(self):
         """
@@ -41,61 +28,47 @@ class Tile(matter.Matter):
         """
         self.__isCarried = status
 
-
-    def take(self, coords=0):
+    def take(self, coordinates=0):
         """
         Takes the tile on the given coordinate if it is not taken
 
-        :param coords: Coordination of tile that should be taken
+        :param coordinates: Coordination of tile that should be taken
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
-        if coords==0:
+        if coordinates==0:
             if self.__isCarried == False:
-                if self.coords in self.sim.tile_map:
-                    del self.sim.tile_map_coords[self.coords]
+                if self.coordinates in self.world.tile_map:
+                    del self.world.tile_map_coordinates[self.coordinates]
                 self.__isCarried = True
-                self.set_alpha(0.5)
+                self.set_transparency(0.5)
                 self.touch()
                 return True
             else:
                 return False
         else:
             if self.__isCarried == False:
-                if self.coords in self.sim.tile_map_coords:
-                    del self.sim.tile_map_coords[self.coords]
+                if self.coordinates in self.world.tile_map_coordinates:
+                    del self.world.tile_map_coordinates[self.coordinates]
                 self.__isCarried = True
-                self.coords = coords
-                self.set_alpha(0.5)
+                self.coordinates = coordinates
+                self.set_transparency(0.5)
                 self.touch()
                 return True
             else:
                 return False
 
-
-
-    def drop_me(self, coords):
+    def drop_me(self, coordinates):
         """
         Drops the tile
 
-        :param coords: the given position
+        :param coordinates: the given position
         :return: None
         """
-        self.sim.tile_map_coords[coords] = self
-        self.coords = coords
+        self.world.tile_map_coordinates[coordinates] = self
+        self.coordinates = coordinates
         self.__isCarried = False
-        self.set_alpha(1)
+        self.set_transparency(1)
         self.touch()
-
-    def update_tile_coords(self, tile, new_coords):
-        """
-        Upadtes the tiles new coordinates
-
-        :param tile:
-        :param new_coords: new coorindation points
-        :return: None
-        """
-        tile.coords = new_coords
-        self.tile_map_coords[tile.coords] = tile
 
     def touch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""

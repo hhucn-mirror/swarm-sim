@@ -1,34 +1,34 @@
 
 #Standard Lib that has to be in each solution
-from lib.std_lib import *
+from lib.swarm_sim_header import *
 
-def solution(sim):
+def solution(world):
 
-    for particle in sim.get_particle_list():
+    for particle in world.get_particle_list():
         global ttl
         global max
-        global dir
+        global direction
 
-        if sim.get_actual_round() == 1:
+        if world.get_actual_round() == 1:
             max = 0
             ttl = 0
-            dir = NE
+            direction = NE
 
-        if (ttl==0 and (dir==NE or dir==SW)):
+        if (ttl==0 and (direction==NE or direction==SW)):
             max = max+1
 
         if ttl==0:
-            print("Round ", sim.get_actual_round())
+            print("Round ", world.get_actual_round())
             ttl=max
-            if dir==NE:
-                dir=NW
-            elif dir==NW:
-                dir=SW
-            elif dir==SW:
-                dir=SE
-            elif dir==SE:
-                dir=NE
+            if direction==NE:
+                direction=NW
+            elif direction==NW:
+                direction=SW
+            elif direction==SW:
+                direction=SE
+            elif direction==SE:
+                direction=NE
 
         particle.create_marker()
-        particle.move_to(dir)
+        particle.move_to(direction)
         ttl = ttl - 1
