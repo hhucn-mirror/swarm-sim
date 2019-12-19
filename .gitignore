@@ -229,3 +229,6 @@ system.log
 .idea/SwarmSim.iml
 .idea/swarm-sim.iml
 .idea/misc.xml
+
+# mac
+*.DS_STORE
