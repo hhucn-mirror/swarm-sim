@@ -13,7 +13,15 @@ For Linux:
 
     3. sudo pip3 install pandas
 
-    4. sudo pip3 install pyglet
+    4. sudo pip3 install PyOpenGL
+    
+    5. sudo pip3 install Pillow
+    
+    6. sudo pip3 install PyQt5
+    
+for older Systems (e.g. Ubuntu 14.04) install the PyQt5 version 5.10.1
+
+    6. sudo pip3 install PyQt5==5.10.1
 
 - install Gnuplot:
 
@@ -21,7 +29,7 @@ For Linux:
 
 - go to the main folder of the SNS-Folder and start it with:
 
-    python3.6 run.py
+    python3.6 swarm-sim.py
 
 
 For development the IDE Pycharm is recommended:
@@ -29,7 +37,7 @@ For development the IDE Pycharm is recommended:
 https://www.jetbrains.com/help/pycharm/install-and-set-up-pycharm.html
 
 
-For Windows:
+For Windows/Linux/MacOs:
 - unzip souce code
 - install python3.6
 - install pycharm
@@ -41,9 +49,11 @@ For Windows:
     1. pip3
     2. numpy
     3. pandas
-    4. pyglet
+    4. PyOpenGL
+    5. Pillow
+    6. PyQt5 (in version 5.10.1 for older Systems like Ubuntu 14.04)
 - press Okey
-- wait that everything is installed
-- chose Run->run.py
+- wait until everything is installed
+- chose Run->swarm-sim.py
     - If it gives an error that it cannot find the interpretetor
        Open Run->"Edit Configuration" Chose the python3.6 as an interpretetor

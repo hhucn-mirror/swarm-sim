@@ -10,70 +10,34 @@ TODO: Erase Memory
 """
 
 import logging
-import math
-
 from lib import csv_generator, matter
+from lib.swarm_sim_header import *
 
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-yellow = 6
-orange = 7
-cyan = 8
-violett = 9
-
-
-NE=0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-read = 0
-write = 1
-particle_counter=0
 
 class Particle(matter.Matter):
-    """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, mm_size=0):
-        """Initializing the location constructor"""
-        super().__init__(sim, (x, y), color, alpha, type="particle", mm_size=mm_size)
-        global particle_counter
-        particle_counter += 1
+    def __init__(self, world, coordinates, color, particle_counter=0):
+        """Initializing the particle constructor"""
+        super().__init__(world, coordinates, color,
+                         type="particle", mm_size=world.config_data.particle_mm_size)
         self.number = particle_counter
         self.__isCarried = False
-        self.created = False
         self.carried_tile = None
         self.carried_particle = None
-        self.__isCarried = False
         self.steps = 0
-        self.created = False
         self.csv_particle_writer = csv_generator.CsvParticleData(self.get_id(), self.number)
 
-
-    def coords_to_sim(self, coords):
-        return coords[0], coords[1] * math.sqrt(3 / 4)
-
-    def sim_to_coords(self, x, y):
-        return x, round(y / math.sqrt(3 / 4), 0)
-
     def has_tile(self):
-        if self.carried_tile == None:
+        if self.carried_tile is None:
             return False
         else:
             return True
 
     def has_particle(self):
-        if self.carried_particle == None:
+        if self.carried_particle is None:
             return False
         else:
             return True
-
 
     def get_carried_status(self):
         """
@@ -89,11 +53,10 @@ class Particle(matter.Matter):
 
         :return: True: On a tile; False: Not on a Tile
         """
-        if self.coords in self.sim.tile_map_coords:
+        if self.coordinates in self.world.tile_map_coordinates:
             return True
         else:
             return False
-
 
     def check_on_particle(self):
         """
@@ -101,723 +64,379 @@ class Particle(matter.Matter):
 
         :return: True: On a particle; False: Not on a particle
         """
-        if self.coords in self.sim.particle_map_coords:
+        if self.coordinates in self.world.particle_map_coordinates:
             return True
         else:
             return False
 
-    def check_on_marker(self):
+    def check_on_location(self):
         """
-        Checks if the particle is on a marker
+        Checks if the particle is on a location
 
-        :return: True: On a marker; False: Not on a marker
+        :return: True: On a location; False: Not on a location
         """
-        if self.coords in self.sim.marker_map_coords:
+        if self.coordinates in self.world.location_map_coordinates:
             return True
         else:
             return False
 
-    def move_to(self, dir):
+    def move_to(self, direction):
         """
         Moves the particle to the given direction
 
-        :param dir: The direction must be either: E, SE, SW, W, NW, or NE
+        :param direction: The direction is defined by loaded grid class
         :return: True: Success Moving;  False: Non moving
-
-        TODO: this method needs to account for particles freeing up locations; merge master enough?
-        sequentially calling this over a list will result in particles only moving if the one freeing up the new
-        location has already called move_to
         """
+        direction_coord = get_coordinates_in_direction(self.coordinates, direction)
+        direction, direction_coord = self.check_within_border(direction, direction_coord)
+        if self.world.grid.are_valid_coordinates(direction_coord) \
+        and direction_coord not in self.world.particle_map_coordinates:
+            if self.coordinates in self.world.particle_map_coordinates:
+                del self.world.particle_map_coordinates[self.coordinates]
+            self.coordinates = direction_coord
+            self.world.particle_map_coordinates[self.coordinates] = self
+            self.world.vis.particle_changed(self)
+            logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
+            self.world.csv_round.update_metrics(steps=1)
+            self.csv_particle_writer.write_particle(steps=1)
+            self.check_for_carried_tile_or_particle()
+            return True
 
-        if dir == -1:
-            return False
-        dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
-        dir, dir_coord = self.check_within_border(dir, dir_coord)
-        if self.sim.check_coords(dir_coord[0], dir_coord[1]):
-            # TODO: change the order of these if checks; currently allows multiple particles on one location! merge master?
-            if self.coords in self.sim.particle_map_coords:
-                del self.sim.particle_map_coords[self.coords]
-
-            if not dir_coord in self.sim.particle_map_coords:
-                self.coords = dir_coord
-                self.sim.particle_map_coords[self.coords] = self
-                logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
-                self.sim.csv_round_writer.update_metrics( steps=1)
-                self.csv_particle_writer.write_particle(steps=1)
-                self.touch()
-                self.check_for_carried_tile_or_particle()
-                return True
         return False
 
     def check_for_carried_tile_or_particle(self):
         if self.carried_tile is not None:
-            self.carried_tile.coords = self.coords
-            self.carried_tile.touch()
+            self.carried_tile.coordinates = self.coordinates
+            self.world.vis.tile_changed(self.carried_tile)
         elif self.carried_particle is not None:
-            self.carried_particle.coords = self.coords
-            self.carried_particle.touch()
+            self.carried_particle.coordinates = self.coordinates
+            self.world.vis.particle_changed(self.carried_particle)
 
-    def check_within_border(self, dir, dir_coord):
-        if self.sim.border == 1 and \
-                (abs(dir_coord[0]) > self.sim.get_sim_x_size() or abs(dir_coord[1]) > self.sim.get_sim_y_size()):
-            dir = dir - 3 if dir > 2 else dir + 3
-            dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
-        return dir, dir_coord
+    def check_within_border(self, direction, direction_coord):
+        if self.world.config_data.border == 1 and \
+                (abs(direction_coord[0]) > self.world.get_sim_x_size() or abs(
+                    direction_coord[1]) > self.world.get_sim_y_size()):
+            direction = direction - 3 if direction > 2 else direction + 3
+            direction_coord = get_coordinates_in_direction(self.coordinates, direction)
+        return direction, direction_coord
 
-    def move_to_in_bounds(self, dir):
+    def read_from_with(self, target, key=None):
         """
-            Moves the particle to the given direction if it would remain in bounds.
+        Read the memories from the matters (particle, tile, or location object) memories with a given keyword
 
-            :param dir: The direction must be either: E, SE, SW, W, NW, or NE
-            :return: True: Success Moving;  False: Non moving
-        """
-        if dir == 6:
-            return False
-
-        dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
-        sim_coord = self.coords_to_sim(dir_coord)
-        if self.sim.get_sim_x_size() >=  abs(sim_coord[0]) and \
-                        self.sim.get_sim_y_size() >=  abs(sim_coord[1]):
-            return self.move_to(dir)
-        else:
-            # 'bounce' off the wall
-            n_dir = dir - 3 if dir > 2 else dir + 3
-            self.move_to(n_dir)
-
-    def read_from_with(self, matter, key=None):
-        """
-        Read the memories from the matters (paricle, tile, or marker object) memories with a given keyword
-
-        :param matter: The matter can be either a particle, tile, or marker
+        :param target: The matter can be either a particle, tile, or location
         :param key: A string keyword to searcg for the data in the memory
         :return: The matters memory; None
         """
-        if key != None:
-            tmp_memory = matter.read_memory_with(key)
+        if key is not None:
+            tmp_memory = target.read_memory_with(key)
         else:
-            tmp_memory =  matter.read_whole_memory()
+            tmp_memory = target.read_whole_memory()
 
-        if tmp_memory != None and len(tmp_memory) > 0 :
-            if matter.type == "particle":
-                self.sim.csv_round_writer.update_metrics( particle_read=1)
+        if tmp_memory is not None \
+        and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
+            if target.type == "particle":
+                self.world.csv_round.update_metrics(particle_read=1)
                 self.csv_particle_writer.write_particle(particle_read=1)
-            elif matter.type == "tile":
-                self.sim.csv_round_writer.update_metrics( tile_read=1)
+            elif target.type == "tile":
+                self.world.csv_round.update_metrics(tile_read=1)
                 self.csv_particle_writer.write_particle(tile_read=1)
-            elif matter.type == "marker":
-                self.sim.csv_round_writer.update_metrics( marker_read=1)
-                self.csv_particle_writer.write_particle(marker_read=1)
+            elif target.type == "location":
+                self.world.csv_round.update_metrics(location_read=1)
+                self.csv_particle_writer.write_particle(location_read=1)
             return tmp_memory
-        else:
-            return None
+        return None
 
-    def matter_in(self, dir=E):
+    def matter_in(self, direction):
         """
-        :param dir: the direction to check if a matter is there
+        :param direction: the directionection to check if a matter is there
         :return: True: if a matter is there, False: if not
         """
-        if  self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords() \
-            or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords() \
-            or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_tile_map_coordinates() \
+                or get_coordinates_in_direction(self.coordinates, direction) \
+                in self.world.get_particle_map_coordinates() \
+                or get_coordinates_in_direction(self.coordinates, direction) \
+                in self.world.get_location_map_coordinates():
             return True
         else:
             return False
 
-    def tile_in(self, dir=E):
+    def tile_in(self, direction):
         """
-        :param dir: the direction to check if a tile is there
+        :param direction: the direction to check if a tile is there
         :return: True: if a tile is there, False: if not
         """
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_tile_map_coordinates():
             return True
         else:
             return False
 
-    def particle_in(self, dir=E):
+    def particle_in(self, direction):
         """
-        :param dir: the direction to check if a particle is there
+        :param direction: the direction to check if a particle is there
         :return: True: if a particle is there, False: if not
         """
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_particle_map_coordinates():
             return True
         else:
             return False
 
-    def marker_in(self, dir=E):
+    def location_in(self, direction):
         """
-        :param dir: the direction to check if a marker is there
-        :return: True: if a marker is there, False: if not
+        :param direction: the direction to check if a location is there
+        :return: True: if a location is there, False: if not
         """
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
             return True
         else:
             return False
 
-    def get_matter_in(self, dir=E):
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
-            return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        elif self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
-            return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        elif self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
-            return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+    def get_matter_in(self, direction):
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_tile_map_coordinates():
+            return self.world.get_tile_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
+        elif get_coordinates_in_direction(self.coordinates, direction) in self.world.get_particle_map_coordinates():
+            return self.world.get_particle_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
+        elif get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
+            return self.world.get_location_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
-    def get_tile_in(self, dir=E):
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
-            return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+    def get_tile_in(self, direction):
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_tile_map_coordinates():
+            return self.world.get_tile_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
-    def get_particle_in(self, dir=E):
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
-            return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+    def get_particle_in(self, direction):
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_particle_map_coordinates():
+            return self.world.get_particle_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
-    def get_marker_in(self, dir=E):
-        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
-            return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+    def get_location_in(self, direction):
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
+            return self.world.get_location_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
-    def get_marker(self):
-        if self.coords in self.sim.marker_map_coords:
-            return self.sim.get_marker_map_coords()[self.coords]
+    def get_location(self):
+        if self.coordinates in self.world.location_map_coordinates:
+            return self.world.get_location_map_coordinates()[self.coordinates]
         else:
             return False
 
     def get_tile(self):
-        if self.self.coords in self.sim.get_tile_map_coords():
-            return self.sim.get_tile_map_coords()[self.coords]
+        if self.coordinates in self.world.get_tile_map_coordinates():
+            return self.world.get_tile_map_coordinates()[self.coordinates]
         else:
             return False
 
-    def write_to_with(self, matter, key=None, data=None):
+    def write_to_with(self, target, key=None, data=None):
         """
-        Writes data with given a keyword directly on the matters (paricle, tile, or marker object) memory
+        Writes data with given a keyword direction on the matters (particle, tile, or location object) memory
 
-        :param matter: The matter can be either a particle, tile, or marker
+        :param target: The matter can be either a particle, tile, or location
         :param key: A string keyword so to order the data that is written into the memory
         :param data: The data that should be stored into the memory
         :return: True: Successful written into the memory; False: Unsuccessful
         """
-        wrote=False
-        if data != None:
-            wrote=False
-            if key==None:
-                wrote=matter.write_memory(data)
+        if data is not None:
+            if key is None:
+                wrote = target.write_memory(data)
             else:
-                wrote= matter.write_memory_with(key, data)
-            if  wrote==True:
-                if matter.type == "particle":
-                    self.sim.csv_round_writer.update_metrics( particle_write=1)
+                wrote = target.write_memory_with(key, data)
+            if wrote:
+                if target.type == "particle":
+                    self.world.csv_round.update_metrics(particle_write=1)
                     self.csv_particle_writer.write_particle(particle_write=1)
-                elif matter.type == "tile":
-                    self.sim.csv_round_writer.update_metrics( tile_write=1)
+                elif target.type == "tile":
+                    self.world.csv_round.update_metrics(tile_write=1)
                     self.csv_particle_writer.write_particle(tile_write=1)
-                elif matter.type == "marker":
-                    self.sim.csv_round_writer.update_metrics( marker_write=1)
-                    self.csv_particle_writer.write_particle(marker_write=1)
+                elif target.type == "location":
+                    self.world.csv_round.update_metrics(location_write=1)
+                    self.csv_particle_writer.write_particle(location_write=1)
                 return True
             else:
                 return False
         else:
             return False
 
-    def scan_for_matter_within(self, matter='all', hop=1):
+    def scan_for_matters_within(self, matter_type='all', hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles, tiles, or locations on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
+        :param matter_type: For what matter this method should scan for.
+                            Can be either particles, tiles, locations, or (default) all
         :param hop: The hop distance from the actual position of the scanning particle
         :return: A list of the founded matters
         """
 
-        hop_list = []
-        for i in range(1, hop + 1):
-            list = self.scan_for_matter_in(matter, i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
+        within_hop_list = []
+        for i in range(hop + 1):
+            in_list = self.scan_for_matters_in(matter_type, i)
+            if in_list is not None:
+                within_hop_list.extend(in_list)
+        if len(within_hop_list) != 0:
+            return within_hop_list
         else:
             return None
 
-    def scan_for_matter_in(self, matter='all', hop=1):
+    def scan_for_matters_in(self, matter_type='all', hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+         Scanning for particles, tiles, or locations on a given hop distance
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
-        :param hop: The hop distance from thee actual position of the scanning particle
-        :return: A list of the founded matters
-        """
-        hop_list = []
-        logging.info("particle on %s is scanning for %s in %i hops", str(self.coords), matter, hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                if matter == "particles":
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "markers":
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "tiles":
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "all":
+         :param matter_type: For what matter this method should scan for.
+                             Can be either particles, tiles, locations, or (default) all
+         :param hop: The hop distance from thee actual position of the scanning particle
+         :return: A list of the founded matters
+         """
 
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                else:
-                    logging.info("No matter specified")
-            else:
-                if matter == "particles":
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "markers":
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "tiles":
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "all":
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
+        logging.info("particle on %s is scanning for %s in %i hops", str(self.coordinates), matter_type, hop)
 
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-
-                    if (x_scan_pos, y_scan_coord_pos) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-
-                else:
-                    logging.info("No matter specified")
-            cnt += 1
-            x_offset += 0.5
-
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if matter == "particles":
-                if (x_upper_scan, y_up_scan) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_down_scan)])
-            elif matter == "markers":
-                if (x_upper_scan, y_up_scan) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_down_scan)])
-            elif matter == "tiles":
-                if (x_upper_scan, y_up_scan) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_down_scan)])
-            if matter == "all":
-                if hop == 0:
-                    if (0, 0) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(0, 0)])
-                    if (0, 0) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(0, 0)])
-                    if (0, 0) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(0, 0)])
-                else:
-                    if (x_upper_scan, y_up_scan) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.sim.particle_map_coords:
-                        hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_down_scan)])
-
-                    if (x_upper_scan, y_up_scan) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.sim.marker_map_coords:
-                        hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_down_scan)])
-
-                    if (x_upper_scan, y_up_scan) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.sim.tile_map_coords:
-                        hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_down_scan)])
-
-            else:
-                logging.info("No matter specified")
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
+        if matter_type == "particles":
+            scanned_list = scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+        elif matter_type == "tiles":
+            scanned_list = scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid)
+        elif matter_type == "locations":
+            scanned_list = scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
         else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+            scanned_list = []
+            scanned_list.extend(scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid))
+            scanned_list.extend(scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid))
+            scanned_list.extend(scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid))
+        return scanned_list
 
-
-
-    def scan_for_particle_within(self, hop=1):
+    def scan_for_particles_within(self, hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
+        :param hop: The hop distance from the actual position of the scanning particle
+        :return: A list of the founded matters
+        """
+        return scan_within(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+
+    def scan_for_particles_in(self, hop=1):
+        """
+        Scanning for particles on a given hop distance
+
+        :param hop: The hop distance from thee actual position of the scanning particle
+        :return: A list of the founded matters
+        """
+
+        return scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+
+    def scan_for_tiles_within(self, hop=1):
+        """
+        Scans for tiles on a given hop distance and all the matters within the hop distance
+
+        :todo: If nothing then everything should be scanned
+
         :param hop: The hop distance from the actual position of the scanning particle
         :return: A list of the founded matters
         """
 
-        hop_list = []
-        for i in range(1, hop + 1):
-            list = self.scan_for_particle_in( i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
-        else:
-            return None
+        return scan_within(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid)
 
-    def scan_for_particle_in(self, hop=1):
+    def scan_for_tiles_in(self, hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+        Scanning for tiles on a given hop distance
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        hop_list = []
-        logging.info("particle on %s is scanning for particle in %i hops", str(self.coords), hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.sim.particle_map_coords:
-                #     hop_list.append(self.sim.particle_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-                if (x_scan_pos, y_scan_coord_pos) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_pos) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
-                    hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
+        return scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid)
 
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.sim.particle_map_coords:
-                hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.sim.particle_map_coords:
-                hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
-
-
-
-    def scan_for_tile_within(self,  hop=1):
+    def scan_for_locations_within(self, hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles, tiles, or location on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
         :param hop: The hop distance from the actual position of the scanning particle
         :return: A list of the founded matters
         """
 
-        hop_list = []
-        for i in range(1, hop + 1):
-            list = self.scan_for_tile_in(i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
-        else:
-            return None
+        return scan_within(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
 
-    def scan_for_tile_in(self, hop=1):
+    def scan_for_locations_in(self, hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+        Scanning for particles, tiles, or location on a given hop distance
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        hop_list = []
-        logging.info("particle on %s is scanning for tile in %i hops", str(self.coords), hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.sim.tile_map_coords:
-                #     hop_list.append(self.sim.tile_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-                if (x_scan_pos, y_scan_coord_pos) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
-                    hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
+        return scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
 
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.sim.tile_map_coords:
-                hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.sim.tile_map_coords:
-                hop_list.append(self.sim.tile_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
-
-
-    def scan_for_marker_within(self, hop=1):
-        """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
-
-        :todo: If nothing then everything should be scanned
-
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
-        :param hop: The hop distance from the actual position of the scanning particle
-        :return: A list of the founded matters
-        """
-
-        hop_list = []
-        for i in range(1, hop + 1):
-            list = self.scan_for_marker_in(i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
-        else:
-            return None
-
-    def scan_for_marker_in(self, hop=1):
-        """
-        Scanning for particles, tiles, or marker on a given hop distance
-
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
-        :param hop: The hop distance from thee actual position of the scanning particle
-        :return: A list of the founded matters
-        """
-        hop_list = []
-        logging.info("particle is scanning for marker in %i hops", hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.sim.marker_map_coords:
-                #     hop_list.append(self.sim.marker_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-
-                if (x_scan_pos, y_scan_coord_pos) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_pos) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
-                    hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
-
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.sim.marker_map_coords:
-                hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.sim.marker_map_coords:
-                hop_list.append(self.sim.marker_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
-
-    def take_me(self, coords=0):
+    def take_me(self, coordinates):
         """
         The particle is getting taken from the the other particle on the given coordinate
 
-        :param coords: Coordination of particle that should be taken
+        :param coordinates, the coordinates of the particle which takes this particle
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
 
         if not self.__isCarried:
-            if self.coords in self.sim.particle_map_coords:
-                del self.sim.particle_map_coords[self.coords]
+            if self.coordinates in self.world.particle_map_coordinates:
+                del self.world.particle_map_coordinates[self.coordinates]
             self.__isCarried = True
-            self.coords = coords
-            self.set_alpha(0.5)
-            self.touch()
+            self.coordinates = coordinates
+            self.world.vis.particle_changed(self)
             return True
         else:
             return False
 
-    def drop_me(self, coords):
+    def drop_me(self, coordinates):
         """
         The actual particle is getting dropped
 
-        :param coords: the given position
+        :param coordinates: the given position
         :return: None
         """
-        self.sim.particle_map_coords[coords] = self
-        self.coords = coords
+        self.coordinates = coordinates
+        self.world.particle_map_coordinates[coordinates] = self
         self.__isCarried = False
-        self.set_alpha(1)
-        self.touch()
+        self.world.vis.particle_changed(self)
 
-    def create_tile(self, color=gray, alpha=1):
+    def create_tile(self):
         """
         Creates a tile on the particles actual position
 
         :return: New Tile or False
         """
-        logging.info("Going to create a tile on position %s", str(self.coords))
-        new_tile = self.sim.add_tile(self.coords[0], self.coords[1], color, alpha)
+        logging.info("Going to create a tile on position %s", str(self.coordinates))
+        new_tile = self.world.add_tile(self.coordinates)
         if new_tile:
-            self.sim.tile_map_coords[self.coords[0], self.coords[1]].created = True
+            self.world.tile_map_coordinates[self.coordinates].created = True
             self.csv_particle_writer.write_particle(tile_created=1)
-            self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()))
-            self.sim.csv_round_writer.update_metrics( tile_created=1)
+            self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()))
+            self.world.csv_round.update_metrics(tile_created=1)
             return new_tile
         else:
             return False
 
-    def create_tile_in(self, dir=None, color=gray, alpha=1):
+    def create_tile_in(self, direction=None):
         """
         Creates a tile either in a given direction
 
-        :param dir: The direction on which the tile should be created. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the tile should be created.
         :return: New tile or False
         """
-        logging.info("particle with id %s is", self.get_id())
-        logging.info("Going to create a tile in %s ", str(dir) )
-        if dir != None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            new_tile = self.sim.add_tile(coords[0], coords[1], color, alpha)
+        logging.info("particle with id %s is" % self.get_id())
+        logging.info("Going to create a tile in %s " % str(direction))
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            new_tile = self.world.add_tile(coordinates)
             if new_tile:
-                self.sim.tile_map_coords[coords[0], coords[1]].created = True
+                self.world.tile_map_coordinates[coordinates].created = True
                 logging.info("Tile is created")
-                self.sim.new_tile_flag = True
+                self.world.new_tile_flag = True
                 self.csv_particle_writer.write_particle(tile_created=1)
-                self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()))
-                self.sim.csv_round_writer.update_metrics( tile_created=1)
+                self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()))
+                self.world.csv_round.update_metrics(tile_created=1)
                 return new_tile
             else:
                 return False
@@ -825,32 +444,30 @@ class Particle(matter.Matter):
             logging.info("Not created tile ")
             return False
 
-    def create_tile_on(self, x=None, y=None, color=gray, alpha=1):
+    def create_tile_on(self, coordinates=None):
         """
         Creates a tile either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates: the coordinates
         :return: New Tile or False
         """
 
         logging.info("particle with id %s is", self.get_id())
-        if x is not None and y is not None:
-            coords = (x, y)
-            if self.sim.check_coords(x,y):
-                logging.info("Going to create a tile on position \(%i , %i\)", x,y )
-                if self.sim.add_tile(coords[0], coords[1], color, alpha) == True:
-                    self.sim.tile_map_coords[coords[0], coords[1]].created = True
-                    self.sim.new_tile_flag = True
+        if coordinates is not None:
+            if self.world.grid.are_valid_coordinates(coordinates):
+                logging.info("Going to create a tile on position %s" % str(coordinates))
+                if self.world.add_tile(coordinates):
+                    self.world.tile_map_coordinates[coordinates].created = True
+                    self.world.new_tile_flag = True
                     self.csv_particle_writer.write_particle(tile_created=1)
-                    self.sim.csv_round_writer.update_tiles_num(len(self.sim.get_tiles_list()) )
-                    self.sim.csv_round_writer.update_metrics( tile_created=1)
+                    self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()))
+                    self.world.csv_round.update_metrics(tile_created=1)
                     return True
                 else:
-                    logging.info("Not created tile on coords  \(%i , %i\)", y,x )
+                    logging.info("Not created tile on coordinates %s" % str(coordinates))
                     return False
             else:
-                logging.info("Not created tile on coords   \(%i , %i\)", y,x )
+                logging.info("Not created tile on coordinates %s" % str(coordinates))
                 return False
 
     def delete_tile(self):
@@ -859,54 +476,54 @@ class Particle(matter.Matter):
 
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        logging.info("Particle %s is", self.get_id())
+        logging.info("Particle %s is" % self.get_id())
         logging.info("is going to delete a tile on current position")
-        if self.coords in self.sim.get_tile_map_coords():
-            if self.sim.remove_tile_on(self.coords):
+        if self.coordinates in self.world.get_tile_map_coordinates():
+            if self.world.remove_tile_on(self.coordinates):
                 self.csv_particle_writer.write_particle(tile_deleted=1)
                 return True
         else:
             logging.info("Could not delet tile")
             return False
 
-    def delete_tile_with(self, id):
+    def delete_tile_with(self, tile_id):
         """
         Deletes a tile with a given tile-id
 
         :param tile_id: The id of the tile that should be deleted
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        logging.info("Particle %s is", self.get_id())
-        logging.info("is going to delete a tile with tile id %s", str(id))
-        if self.sim.remove_tile(id):
+        logging.info("Particle %s is" % self.get_id())
+        logging.info("is going to delete a tile with tile id %s" % str(tile_id))
+        if self.world.remove_tile(tile_id):
             self.csv_particle_writer.write_particle(tile_deleted=1)
             return True
         else:
-            logging.info("Could not delet tile with tile id %s", str(id))
+            logging.info("Could not delet tile with tile id %s" % str(tile_id))
             return False
 
-    def delete_tile_in(self, dir=None):
+    def delete_tile_in(self, direction=None):
         """
-        Deletes a tile either in a given direction
+        Deletes a tile either in a given directionection
 
-        :param dir: The direction on which the tile should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The directionection on which the tile should be deleted. Options: E, SE, SW, W, NW, NE,
 
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        coords = ()
-        if dir is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
-            if coords is not None:
-                if self.sim.remove_tile_on(coords):
-                    logging.info("Deleted tile with tile on coords %s", str(coords))
+        coordinates = ()
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            logging.info("Deleting tile in %s directionection" % str(direction))
+            if coordinates is not None:
+                if self.world.remove_tile_on(coordinates):
+                    logging.info("Deleted tile with tile on coordinates %s" % str(coordinates))
                     self.csv_particle_writer.write_particle(tile_deleted=1)
                     return True
                 else:
-                    logging.info("Could not delet tile on coords %s", str(coords))
+                    logging.info("Could not delet tile on coordinates %s" % str(coordinates))
                     return False
         else:
-            logging.info("Could not delet tile on coords %s", str(coords))
+            logging.info("Could not delet tile on coordinates %s" % str(coordinates))
             return False
 
     def delete_tile_on(self, x=None, y=None):
@@ -917,129 +534,84 @@ class Particle(matter.Matter):
         :param y: y coordinate
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        coords = ()
+        coordinates = ()
         if x is not None and y is not None:
-            coords = (x, y)
-            if self.sim.remove_tile_on(coords):
-                logging.info("Deleted tile with tile on coords %s", str(coords))
+            coordinates = (x, y)
+            if self.world.remove_tile_on(coordinates):
+                logging.info("Deleted tile with tile on coordinates %s" % str(coordinates))
                 self.csv_particle_writer.write_particle(tile_deleted=1)
                 return True
             else:
-                logging.info("Could not delet tile on coords %s", str(coords))
+                logging.info("Could not delet tile on coordinates %s" % str(coordinates))
                 return False
         else:
-            logging.info("Could not delet tile on coords %s", str(coords))
+            logging.info("Could not delet tile on coordinates %s" % str(coordinates))
+            return False
+
+    def take_tile_with(self, tile_id):
+        """
+        Takes a tile with a given tile id
+
+        :param tile_id:  The id of the tile that should be taken
+        :return: True: successful taken; False: unsuccessful taken
+        """
+        if self.carried_particle is None and self.carried_tile is None:
+            if tile_id in self.world.tile_map_id:
+                self.carried_tile = self.world.tile_map_id[tile_id]
+                if self.carried_tile.take():
+                    logging.info("Tile with tile id %s  has been taken", str(tile_id))
+                    self.carried_tile.coordinates = self.coordinates
+                    self.world.vis.tile_changed(self.carried_tile)
+                    self.world.csv_round.update_metrics(tiles_taken=1)
+                    self.csv_particle_writer.write_particle(tiles_taken=1)
+                    return True
+                else:
+                    self.carried_tile = None
+                    logging.info("Tile with tile id %s could not be taken" % str(tile_id))
+                    return False
+            else:
+                logging.info("Tile with tile id %s is not in the world" % str(tile_id))
+                return False
+        else:
+
+            logging.info("Tile cannot taken because particle is carrying either a tile or a particle (%s, %s)"
+                         % (str(self.carried_tile), str(self.carried_particle)))
+            return False
+
+    def take_tile_in(self, direction):
+        """
+        Takes a tile that is in a given direction
+
+        :param direction: The direction on which the tile should be taken.
+        :return: True: successful taken; False: unsuccessful taken
+        """
+        coordinates = get_coordinates_in_direction(self.coordinates, direction)
+        return self.take_tile_on(coordinates)
+
+    def take_tile_on(self, coordinates):
+        """
+        Takes a tile on given coordinates
+
+        :param coordinates of the tile
+        :return: True: successful taken; False: unsuccessful taken
+        """
+        if self.world.grid.are_valid_coordinates(coordinates):
+            if coordinates in self.world.tile_map_coordinates:
+                return self.take_tile_with(self.world.tile_map_coordinates[coordinates].get_id())
+            else:
+                logging.info("There is no Tile at %s" % str(coordinates))
+                return False
+        else:
+            logging.info("invalid coordinates %s" % str(coordinates))
             return False
 
     def take_tile(self):
         """
         Takes a tile on the actual position
 
-        :param id:  The id of the tile that should be taken
         :return: True: successful taken; False: unsuccessful taken
         """
-        if self.carried_particle is None and self.carried_tile is None:
-            if self.coords in self.sim.tile_map_coords:
-                self.carried_tile = self.sim.tile_map_coords[self.coords]
-                if self.carried_tile.take(coords=self.coords):
-                    logging.info("Tile has been taken")
-                    self.sim.csv_round_writer.update_metrics( tiles_taken=1)
-                    self.csv_particle_writer.write_particle(tiles_taken=1)
-                    return True
-                else:
-                    logging.info("Tile could not be taken")
-                    return False
-            else:
-                logging.info("No tile on the actual position not in the sim")
-                return False
-        else:
-            logging.info("Tile cannot taken because particle is carrieng either a tile or a particle")
-            return False
-
-    def take_tile_with(self, id):
-        """
-        Takes a tile with a given tile id
-
-        :param id:  The id of the tile that should be taken
-        :return: True: successful taken; False: unsuccessful taken
-        """
-        if self.carried_particle is None and self.carried_tile is None:
-            if id in self.sim.tile_map_id:
-                logging.info("Tile with tile id %s is in the sim", str(id))
-                self.carried_tile = self.sim.tile_map_id[id]
-                if self.carried_tile.take(coords=self.coords):
-                    logging.info("Tile with tile id %s  has been taken", str(id))
-                    self.sim.csv_round_writer.update_metrics( tiles_taken=1)
-                    self.csv_particle_writer.write_particle(tiles_taken=1)
-                    return True
-                else:
-                    logging.info("Tile with tile id %s could not be taken", str(id))
-                    return False
-            else:
-                logging.info("Tile with tile id %s is not in the sim", str(id))
-                return False
-        else:
-            logging.info("Tile cannot taken because particle is carrieng either a tile or a particle", str(id))
-            return False
-
-    def take_tile_in(self, dir):
-        """
-        Takes a tile that is in a given direction
-
-        :param dir: The direction on which the tile should be taken. Options: E, SE, SW, W, NW, NE,
-        :return: True: successful taken; False: unsuccessful taken
-        """
-        if self.carried_particle is None and self.carried_tile is None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            if coords in self.sim.tile_map_coords:
-                self.carried_tile = self.sim.tile_map_coords[coords]
-                logging.info("Tile with tile id %s is in the sim", str(self.carried_tile.get_id()))
-                if self.carried_tile.take(coords=self.coords):
-                    logging.info("Tile with tile id %s  has been taken", str(self.carried_tile.get_id()))
-                    self.sim.csv_round_writer.update_metrics( tiles_taken=1)
-                    self.csv_particle_writer.write_particle(tiles_taken=1)
-                    return True
-                else:
-                    logging.info("Tile with tile id %s could not be taken", str(self.carried_tile.get_id()))
-                    return False
-            else:
-                logging.info("Tile is not in the sim")
-                return False
-        else:
-            logging.info("Tile cannot taken because particle is carrieng either a tile or a particle")
-            return False
-
-    def take_tile_on(self, x=None, y=None):
-        """
-        Takes a tile that is in a given direction
-
-        :param x: x coordinate
-        :param y: y coordinate
-        :return: True: successful taken; False: unsuccessful taken
-        """
-        if self.carried_particle is None and self.carried_tile is None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                if coords in self.sim.tile_map_coords:
-                    self.carried_tile = self.sim.tile_map_coords[coords]
-                    logging.info("Tile with tile id %s is in the sim", str(self.carried_tile.get_id()))
-                    if self.carried_tile.take(coords=self.coords):
-                        self.sim.csv_round_writer.update_metrics( tiles_taken=1)
-                        self.csv_particle_writer.write_particle(tiles_taken=1)
-                        logging.info("Tile with tile id %s  has been taken", str(self.carried_tile.get_id()))
-                        return True
-                    else:
-                        logging.info("Tile with tile id %s could not be taken", str(self.carried_tile.get_id()))
-                        return False
-                else:
-                    logging.info("Tile is not in the sim")
-                    return False
-            else:
-                logging.info("Coordinates are wrong")
-                return False
-        else:
-            logging.info("Tile cannot taken because particle is carrieng either a tile or a particle")
-            return False
+        return self.take_tile_on(self.coordinates)
 
     def drop_tile(self):
         """
@@ -1047,68 +619,33 @@ class Particle(matter.Matter):
 
         :return: None
         """
-        if self.carried_tile is not None:
-            if self.coords not in self.sim.tile_map_coords:
-                try:  # cher: insert so to overcome the AttributeError
-                    self.carried_tile.drop_me(self.coords)
-                except AttributeError:
-                    pass
-                self.carried_tile = None
-                logging.info("Tile has been dropped on the actual position")
-                self.sim.csv_round_writer.update_metrics( tiles_dropped=1)
-                self.csv_particle_writer.write_particle(tiles_dropped=1)
-                return True
-            else:
-                logging.info("Is not possible to drop the tile on that position because it is occupied")
-                return False
-        else:
-            return False
+        return self.drop_tile_on(self.coordinates)
 
-    def drop_tile_in(self, dir):
+    def drop_tile_in(self, direction):
         """
         Drops the taken tile on a given direction
 
-         :param dir: The direction on which the tile should be dropped. Options: E, SE, SW, W, NW, NE,
+         :param direction: The directionection on which the tile should be dropped. Options: E, SE, SW, W, NW, NE,
         """
-        if self.carried_tile is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            if coords not in self.sim.tile_map_coords:
-                try:  # cher: insert so to overcome the AttributeError
-                    self.carried_tile.drop_me(coords)
-                except AttributeError:
-                    pass
-                self.carried_tile = None
-                self.sim.csv_round_writer.update_metrics( tiles_dropped=1)
-                self.csv_particle_writer.write_particle(tiles_dropped=1)
-                logging.info("Dropped tile on %s coordinate", str(coords))
-                return True
-            else:
-                logging.info("Is not possible to drop the tile on that position")
-                return False
+        return self.drop_tile_on(get_coordinates_in_direction(self.coordinates, direction))
 
-        else:
-            logging.info("No tile taken for dropping")
-            return False
-
-    def drop_tile_on(self, x=None, y=None):
+    def drop_tile_on(self, coordinates):
         """
         Drops the taken tile on a given direction
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates
         """
         if self.carried_tile is not None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                if coords not in self.sim.get_tile_map_coords():
+            if self.world.grid.are_valid_coordinates(coordinates):
+                if coordinates not in self.world.get_tile_map_coordinates():
                     try:  # cher: insert so to overcome the AttributeError
-                        self.carried_tile.drop_me(coords)
+                        self.carried_tile.drop_me(coordinates)
                     except AttributeError:
                         pass
                     self.carried_tile = None
-                    self.sim.csv_round_writer.update_metrics( tiles_dropped=1)
+                    self.world.csv_round.update_metrics(tiles_dropped=1)
                     self.csv_particle_writer.write_particle(tiles_dropped=1)
-                    logging.info("Dropped tile on %s coordinate", str(coords))
+                    logging.info("Dropped tile on %s coordinate", str(coordinates))
                     return True
                 else:
                     logging.info("Is not possible to drop the tile on that position because it is occupied")
@@ -1120,71 +657,67 @@ class Particle(matter.Matter):
             logging.info("No tile is taken for dropping")
             return False
 
-    def create_particle(self, color=black, alpha=1):
+    def create_particle(self):
         """
         Creates a particle on the particles actual position
 
         :return: New Particle or False
         """
-        logging.info("Going to create on position %s", str(self.coords))
-        new_particle = self.sim.add_particle(self.coords[0], self.coords[1], color, alpha)
+        logging.info("Going to create on position %s", str(self.coordinates))
+        new_particle = self.world.add_particle(self.coordinates)
         if new_particle:
-            self.sim.particle_map_coords[self.coords[0], self.coords[1]].created=True
+            self.world.particle_map_coordinates[self.coordinates[0], self.coordinates[1]].created = True
             self.csv_particle_writer.write_particle(particle_created=1)
-            self.sim.csv_round_writer.update_particle_num(len(self.sim.get_particle_list()))
-            self.sim.csv_round_writer.update_metrics( particle_created=1)
+            self.world.csv_round.update_particle_num(len(self.world.get_particle_list()))
+            self.world.csv_round.update_metrics(particle_created=1)
             return new_particle
         else:
             return False
 
-    def create_particle_in(self, dir=None, color=black, alpha=1):
+    def create_particle_in(self, direction=None):
         """
         Creates a particle either in a given direction
 
-        :toDo: seperate the direction and coordinates and delete state
+        :toDo: separate the direction and coordinates and delete state
 
-        :param dir: The direction on which the particle should be created. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the particle should be created. Options: E, SE, SW, W, NW, NE,
         :return: New Particle or False
         """
-        coords = (0, 0)
-        if dir is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            logging.info("Going to create a particle in %s on position %s", str(dir), str(coords))
-            new_particle= self.sim.add_particle(coords[0], coords[1], color, alpha)
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            logging.info("Going to create a particle in %s on position %s", str(direction), str(coordinates))
+            new_particle = self.world.add_particle(coordinates)
             if new_particle:
-                self.sim.particle_map_coords[coords[0], coords[1]].created = True
-                logging.info("Created particle on coords %s", coords)
-                self.sim.csv_round_writer.update_particle_num(len(self.sim.get_particle_list()))
-                self.sim.csv_round_writer.update_metrics( particle_created=1)
+                self.world.particle_map_coordinates[coordinates].created = True
+                logging.info("Created particle on coordinates %s", coordinates)
+                self.world.csv_round.update_particle_num(len(self.world.get_particle_list()))
+                self.world.csv_round.update_metrics(particle_created=1)
                 self.csv_particle_writer.write_particle(particle_created=1)
                 return new_particle
             else:
                 return False
         else:
-            logging.info("Not created particle on coords %s", str(coords))
+            logging.info("Particle not created. invalid direction (None)")
             return False
 
-    def create_particle_on(self, x=None, y=None, color=black, alpha=1):
+    def create_particle_on(self, coordinates):
         """
-        Creates a particle either on a given x,y coordinates
+        Creates a particle either on the given coordinates
 
-        :toDo: seperate the direction and coordinates and delete state
+        :toDo: separate the direction and coordinates and delete state
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates: the coordinates
         :return: New Particle or False
         """
-        coords = (0, 0)
-        if x is not None and y is not None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                logging.info("Going to create a particle on position %s", str(coords))
-                new_particle = self.sim.add_particle(coords[0], coords[1], color, alpha)
+        if coordinates is not None:
+            if self.world.grid.are_valid_coordinates(coordinates):
+                logging.info("Going to create a particle on position %s" % str(coordinates))
+                new_particle = self.world.add_particle(coordinates)
                 if new_particle:
-                    self.sim.particle_map_coords[coords[0], coords[1]].created = True
-                    logging.info("Created particle on coords %s", str(coords))
-                    self.sim.csv_round_writer.update_particle_num(len(self.sim.get_particle_list()))
-                    self.sim.csv_round_writer.update_metrics( particle_created=1)
+                    self.world.particle_map_coordinates[coordinates].created = True
+                    logging.info("Created particle on coordinates %s" % str(coordinates))
+                    self.world.csv_round.update_particle_num(len(self.world.get_particle_list()))
+                    self.world.csv_round.update_metrics(particle_created=1)
                     self.csv_particle_writer.write_particle(particle_created=1)
                     return new_particle
                 else:
@@ -1192,7 +725,7 @@ class Particle(matter.Matter):
             else:
                 return False
         else:
-            logging.info("Not created particle on coords %s", str(coords))
+            logging.info("Not created particle on coordinates %s" % str(coordinates))
             return False
 
     def delete_particle(self):
@@ -1203,67 +736,127 @@ class Particle(matter.Matter):
         """
         logging.info("Particle %s is", self.get_id())
         logging.info("is going to delete a particle on current position")
-        if self.coords in self.sim.get_particle_map_coords():
-            if self.sim.remove_particle_on(self.coords):
+        if self.coordinates in self.world.get_particle_map_coordinates():
+            if self.world.remove_particle_on(self.coordinates):
                 self.csv_particle_writer.write_particle(particle_deleted=1)
                 return True
         else:
             logging.info("Could not delet particle")
             return False
 
-    def delete_particle_with(self, id):
+    def delete_particle_with(self, particle_id):
         """
         Deletes a particle with a given id
 
-        :param id: The id of the particle that should be deleted
+        :param particle_id: The id of the particle that should be deleted
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         logging.info("Particle %s is", self.get_id())
-        logging.info("is going to delete a particle with id %s", str(id))
-        if self.sim.remove_particle(id):
+        logging.info("is going to delete a particle with id %s" % str(particle_id))
+        if self.world.remove_particle(particle_id):
             self.csv_particle_writer.write_particle(particle_deleted=1)
-            return
+            return True
         else:
-            logging.info("Could not delet particle with particle id %s", str(id))
+            logging.info("Could not delet particle with particle id %s" % str(particle_id))
+            return False
 
-    def delete_particle_in(self, dir=None):
+    def delete_particle_in(self, direction=None):
         """
-        Deletes a particle either in a given direction
+        Deletes a particle either in a given directionection
 
-        :param dir: The direction on which the particle should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The directionection on which the particle should be deleted. Options: E, SE, SW, W, NW, NE,
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if dir is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
-            if self.sim.remove_particle_on(coords):
-                logging.info("Deleted particle with particle on coords %s", str(coords))
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            logging.info("Deleting tile in %s directionection" % str(direction))
+            if self.world.remove_particle_on(coordinates):
+                logging.info("Deleted particle with particle on coordinates %s" % str(coordinates))
                 self.csv_particle_writer.write_particle(particle_deleted=1)
+                return True
             else:
-                logging.info("Could not delet particle on coords %s", str(coords))
+                logging.info("Could not delet particle on coordinates %s" % str(coordinates))
+                return False
 
-    def delete_particle_on(self, x=None, y=None):
+    def delete_particle_on(self, coordinates=None):
         """
         Deletes a particle either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if x is not None and y is not None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                if self.sim.remove_particle_on(coords):
-                    logging.info("Deleted particle with particle on coords %s", str(coords))
-                    self.csv_particle_writer.write_particle(particle_deleted=1)
-                    return True
-                else:
-                    logging.info("Could not delet particle on coords %s", str(coords))
-                    return False
-            else:
-                return False
-        else:
+        if coordinates is None:
+            logging.info("coordinates are 'None'...")
             return False
+
+        if not self.world.grid.are_valid_coordinates(coordinates):
+            logging.info("invalid coordinates")
+            return False
+
+        if self.world.remove_particle_on(coordinates):
+            logging.info("Deleted particle with particle on coordinates %s" % str(coordinates))
+            self.csv_particle_writer.write_particle(particle_deleted=1)
+            return True
+        else:
+            logging.info("Could not delete particle on coordinates %s" % str(coordinates))
+            return False
+
+
+    def take_particle_with(self, particle_id):
+        """
+        Takes a particle with a given tile id
+
+        :param particle_id:  The id of the particle that should be taken
+        :return: True: successful taken; False: unsuccessful taken
+        """
+        if self.carried_tile is not None or self.carried_particle is not None:
+            logging.info("particle %s is already carrying a particle or a tile" % str(self.get_id()))
+            return False
+
+        if particle_id not in self.world.get_particle_map_id():
+            logging.info("particle with particle id %s is not in the world" % str(particle_id))
+            return False
+
+        self.carried_particle = self.world.particle_map_id[particle_id]
+        if self.carried_particle.take_me(self.coordinates):
+            logging.info("particle with particle id %s  has been taken" % str(particle_id))
+            self.carried_particle.coordinates = self.coordinates
+            self.world.vis.particle_changed(self.carried_particle)
+            self.world.csv_round.update_metrics(particles_taken=1)
+            self.csv_particle_writer.write_particle(particles_taken=1)
+            return True
+        else:
+            self.carried_particle = None
+            logging.info("particle with particle id %s could not be taken" % str(particle_id))
+            return False
+
+
+    def take_particle_on(self, coordinates):
+        """
+        Takes the particle on the given coordinates if it is not taken
+
+        :param coordinates: the particle coordinates
+        :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
+        """
+
+        if not self.world.grid.are_valid_coordinates(coordinates):
+            logging.info("Coordinates are invalid")
+            return False
+
+        if coordinates in self.world.particle_map_coordinates:
+            return self.take_particle_with(self.world.particle_map_coordinates[coordinates].get_id())
+        else:
+            logging.info("There is no particle on %s" % str(coordinates))
+            return False
+
+    def take_particle_in(self, direction):
+        """
+        Takes a particle that is in a given direction
+
+        :param direction: The direction on which the particle should be taken. Options: E, SE, SW, W, NW, NE,
+        :return: True: successful taken; False: unsuccessful taken
+        """
+        return self.take_particle_on(get_coordinates_in_direction(self.coordinates, direction))
 
     def take_particle(self):
         """
@@ -1271,108 +864,7 @@ class Particle(matter.Matter):
 
         :return: True: successful taken; False: unsuccessful taken
         """
-        if self.carried_particle is None and self.carried_tile is None:
-            if self.coords in self.sim.particle_map_coords:
-                self.carried_particle = self.sim.particle_map_coords[self.coords]
-                if self.carried_particle.take_me(coords=self.coords):
-                    logging.info("particle has been taken")
-                    self.sim.csv_round_writer.update_metrics( particles_taken=1)
-                    self.csv_particle_writer.write_particle(particles_taken=1)
-                    return True
-                else:
-                    logging.info("particle could not be taken")
-                    return False
-            else:
-                logging.info("No particle on the actual position not in the sim")
-                return False
-        else:
-            logging.info("particle cannot taken because particle is carrieng either a particle or a particle")
-            return False
-
-    def take_particle_with(self, id):
-        """
-        Takes a particle with a given tile id
-
-        :param id:  The id of the particle that should be taken
-        :return: True: successful taken; False: unsuccessful taken
-        """
-        if self.carried_tile is None and self.carried_particle is None:
-            if id in self.sim.get_particle_map_id():
-                logging.info("particle with particle id %s is in the sim", str(id))
-                self.carried_particle = self.sim.particle_map_id[id]
-                if self.carried_particle.take_me(self.coords):
-                    logging.info("particle with particle id %s  has been taken", str(id))
-
-                    self.sim.csv_round_writer.update_metrics(
-                                                               particles_taken=1)
-                    self.csv_particle_writer.write_particle(particles_taken=1)
-                    return True
-                else:
-                    logging.info("particle with particle id %s could not be taken", str(id))
-                    return False
-            else:
-                logging.info("particle with particle id %s is not in the sim", str(id))
-        else:
-            logging.info("particle cannot taken because particle is carrieng either a particle or a particle", str(id))
-
-    def take_particle_in(self, dir):
-        """
-        Takes a particle that is in a given direction
-
-        :param dir: The direction on which the particle should be taken. Options: E, SE, SW, W, NW, NE,
-        :return: True: successful taken; False: unsuccessful taken
-        """
-        if self.carried_tile is None and self.carried_particle is None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            if coords in self.sim.particle_map_coords:
-                logging.info("Take particle")
-                self.carried_particle = self.sim.particle_map_coords[coords]
-                if self.carried_particle.take_me(coords=self.coords):
-                    logging.info("particle with particle id %s  has been taken", str(self.carried_particle.get_id()))
-                    self.sim.csv_round_writer.update_metrics(
-                                                               particles_taken=1)
-                    self.csv_particle_writer.write_particle(particles_taken=1)
-                    return True
-                else:
-                    logging.info("particle could not be taken")
-                    return False
-            else:
-                pass
-                logging.info("particl is not in the sim")
-        else:
-            logging.info("particle cannot be  taken")
-
-    def take_particle_on(self, x=None, y=None):
-        """
-        Takes the particle on the given coordinate if it is not taken
-
-        :param y:
-        :param x:
-        :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
-        """
-        if self.carried_particle is None and self.carried_tile is None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                if coords in self.sim.particle_map_coords:
-                    self.carried_particle = self.sim.particle_map_coords[coords]
-                    logging.info("Particle with id %s is in the sim", str(self.carried_particle.get_id()))
-                    if self.carried_particle.take_me(coords=self.coords):
-                        self.sim.csv_round_writer.update_metrics( particles_taken=1)
-                        self.csv_particle_writer.write_particle(particles_taken=1)
-                        logging.info("particle with tile id %s has been taken", str(self.carried_particle.get_id()))
-                        return True
-                    else:
-                        logging.info("Particle with id %s could not be taken", str(self.carried_particle.get_id()))
-                        return False
-                else:
-                    logging.info("Particle is not in the sim")
-                    return False
-            else:
-                logging.info("Coordinates are wrong")
-                return False
-        else:
-            logging.info("Particle cannot taken because particle is carrieng either a tile or a particle")
-            return False
+        return self.take_particle_on(self.coordinates)
 
     def drop_particle(self):
         """
@@ -1380,233 +872,192 @@ class Particle(matter.Matter):
 
         :return: None
         """
-        if self.carried_particle is not None:
-            if self.coords not in self.sim.particle_map_coords:
-                try:  # cher: insert so to overcome the AttributeError
-                    self.carried_particle.drop_me(self.coords)
-                except AttributeError:
-                    pass
-            self.carried_particle = None
-            self.sim.csv_round_writer.update_metrics( particles_dropped=1)
-            self.csv_particle_writer.write_particle(particles_dropped=1)
-            logging.info("Particle succesfull dropped")
-            return True
-        else:
-            logging.info("No particle taken to drop")
-            return False
+        return self.drop_particle_on(self.coordinates)
 
-    def drop_particle_in(self, dir):
+    def drop_particle_in(self, direction):
         """
         Drops the particle tile in a given direction
 
-         :param dir: The direction on which the particle should be dropped. Options: E, SE, SW, W, NW, NE,
+         :param direction: The direction on which the particle should be dropped.
         """
-        if self.carried_particle is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            if coords not in self.sim.particle_map_coords:
-                try:  # cher: insert so to overcome the AttributeError
-                    self.carried_particle.drop_me(coords)
-                except AttributeError:
-                    pass
+        return self.drop_particle_on(get_coordinates_in_direction(self.coordinates, direction))
+
+    def drop_particle_on(self, coordinates=None):
+        """
+        Drops the particle tile on the given coordinates
+
+        :param coordinates:
+        """
+        if self.carried_particle is not None and coordinates is not None:
+            if self.world.grid.are_valid_coordinates(coordinates):
+                if coordinates not in self.world.particle_map_coordinates:
+                    try:  # cher: insert so to overcome the AttributeError
+                        self.carried_particle.drop_me(coordinates)
+                    except AttributeError:
+                        logging.info("Dropped particle on: Error while dropping")
+                        return False
                     self.carried_particle = None
-                    logging.info("Dropped particle on %s coordinate", str(coords))
-                    self.sim.csv_round_writer.update_metrics( particles_dropped=1)
+                    logging.info("Dropped particle on %s coordinate", str(coordinates))
+                    self.world.csv_round.update_metrics(particles_dropped=1)
                     self.csv_particle_writer.write_particle(particles_dropped=1)
                     return True
                 else:
-                    logging.info("Is not possible to drop the particle on that position")
+                    logging.info("Is not possible to drop the particle on that position because it is occupied")
                     return False
             else:
-                logging.info("Is not possible to drop the particle on that position because it is occupied")
-                return False
+                logging.info("invalid coordinates")
         else:
-            logging.info("No particle taken to drop")
+            logging.info("drop_particle_on: coordinates are 'None' or not carrying a particle")
             return False
 
-    def drop_particle_on(self, x=None, y=None):
-        """
-        Drops the particle tile on a given x and y coordination
-
-        :param x: x coordinate
-        :param y: y coordinate
-        """
-        if self.carried_particle is not None:
-            if x is not None and y is not None:
-                if self.sim.check_coords(x, y):
-                    coords = (x, y)
-                    if coords not in self.sim.particle_map_coords:
-                        try:  # cher: insert so to overcome the AttributeError
-                            self.carried_particle.drop_me(coords)
-                        except AttributeError:
-                            pass
-                        self.carried_particle = None
-                        logging.info("Dropped particle on %s coordinate", str(coords))
-                        self.sim.csv_round_writer.update_metrics(
-                                                                   particles_dropped=1)
-                        self.csv_particle_writer.write_particle(particles_dropped=1)
-                        return True
-                    else:
-                        logging.info("Is not possible to drop the particle on that position  because it is occupied")
-                        return False
-                else:
-                    logging.info("Wrong coordinates for dropping particle")
-                    return False
-            else:
-                logging.info("No coordinates for dropping particle")
-                return False
-        else:
-            logging.info("No particle taken to drop")
-            return False
-
-    def update_particle_coords(self, particle, new_coords):
+    def update_particle_coordinates(self, particle, new_coordinates):
         """
         Upadting the particle with new coordinates
         Only necessary for taking and moving particles
 
         :param particle: The particle object
-        :param new_coords: new coorindation points
+        :param new_coordinates: new coorindation points
         :return: None
         """
-        particle.coords = new_coords
-        self.particle_map_coords[new_coords] = particle
-
-    def create_marker(self, color=black, alpha=1):
-        """
-         Creates a marker on the particles actual position
-
-        :return: New marker or False
-        """
-
-        logging.info("Going to create on position %s", str(self.coords))
-        new_marker=self.sim.add_marker(self.coords[0], self.coords[1], color, alpha)
-        if new_marker != False:
-            self.csv_particle_writer.write_particle(marker_created=1)
-            self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
-            self.sim.csv_round_writer.update_metrics( marker_created=1)
-            return  new_marker
+        if self.world.grid.are_valid_coordinates(new_coordinates):
+            particle.coordinates = new_coordinates
+            self.world.particle_map_coordinates[new_coordinates] = particle
+            self.world.vis.particle_changed(particle)
+            return True
         else:
             return False
 
-    def create_marker_in(self, dir=None, color=black, alpha=1):
+    def create_location(self):
         """
-        Creates a marker either in a given direction
-        :param dir: The direction on which the marker should be created. Options: E, SE, SW, W, NW, NE,
-        :return: New marker or False
+         Creates a location on the particles actual position
+
+        :return: New location or False
+        """
+
+        logging.info("Going to create on position %s" % str(self.coordinates))
+        new_location = self.world.add_location(self.coordinates)
+        if new_location:
+            self.csv_particle_writer.write_particle(location_created=1)
+            self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+            self.world.csv_round.update_metrics(location_created=1)
+            return new_location
+        else:
+            return False
+
+    def create_location_in(self, direction=None):
+        """
+        Creates a location either in a given direction
+        :param direction: The direction on which the location should be created.
+        :return: New location or False
 
         """
-        coords = (0, 0)
-        if dir is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            logging.info("Going to create a marker in %s on position %s", str(dir), str(coords))
-            new_marker = self.sim.add_marker(coords[0], coords[1], color, alpha)
-            if new_marker:
-                logging.info("Created marker on coords %s", str(coords))
-                self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
-                self.sim.csv_round_writer.update_metrics( marker_created=1)
-                return new_marker
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            logging.info("Going to create a location in %s on position %s" % (str(direction), str(coordinates)))
+            new_location = self.world.add_location(coordinates)
+            if new_location:
+                logging.info("Created location on coordinates %s" % str(coordinates))
+                self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+                self.world.csv_round.update_metrics(location_created=1)
+                return new_location
             else:
                 return False
         else:
-            logging.info("Not created marker on coords %s", str(coords))
+            logging.info("Location not created. Invalid direction (None)")
             return False
 
-    def create_marker_on(self, x=None, y=None, color=black, alpha=1):
+    def create_location_on(self, coordinates=None):
         """
-        Creates a marker either on a given x,y coordinates
+        Creates a location either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
-        :return: New marker or False
+        :return: New location or False
 
         """
-        coords = (0, 0)
-        if x is not None and y is not None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                logging.info("Going to create a marker on position %s", str(coords))
-                new_marker =  self.sim.add_marker(coords[0], coords[1], color, alpha)
-                if new_marker:
-                    logging.info("Created marker on coords %s", str(coords))
-                    self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
-                    self.sim.csv_round_writer.update_metrics( marker_created=1)
-                    return new_marker
+        if coordinates is not None:
+            if self.world.grid.are_valid_coordinates(coordinates):
+                logging.info("Going to create a location on position %s", str(coordinates))
+                new_location = self.world.add_location(coordinates)
+                if new_location:
+                    logging.info("Created location on coordinates %s", str(coordinates))
+                    self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+                    self.world.csv_round.update_metrics(location_created=1)
+                    return new_location
             else:
                 return False
         else:
-            logging.info("Not created marker on coords %s", str(coords))
+            logging.info("Location not created. invalid coordinates (None)")
             return False
 
-    def delete_marker(self):
+    def delete_location_with(self, location_id):
         """
-        Deletes a marker on current position
+        Deletes a location with a given location-id
+        :param location_id: The id of the location that should be deleted
+        :return: True: Deleting successful; False: Deleting unsuccessful
+        """
+        logging.info("Particle %s is going to delete location with location id %s" % (self.get_id(), location_id))
+        if self.world.remove_location(location_id):
+            self.csv_particle_writer.write_particle(location_deleted=1)
+            return True
+        else:
+            logging.info("Could not delete location with location id %s", str(location_id))
+            return False
+
+    def delete_location(self):
+        """
+        Deletes a location on current position
 
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        logging.info("Particle %s is", self.get_id())
-        logging.info("is going to delete a marker on current position")
-        if self.coords in self.sim.get_marker_map_coords():
-            if self.sim.remove_marker_on(self.coords):
-                self.csv_particle_writer.write_particle(marker_deleted=1)
+        logging.info("Particle %s is going to delete a location on current position" % self.get_id())
+        if self.coordinates in self.world.get_location_map_coordinates():
+            if self.world.remove_location_on(self.coordinates):
+                self.csv_particle_writer.write_particle(location_deleted=1)
                 return True
         else:
-            logging.info("Could not delet marker")
+            logging.info("Could not delete location")
             return False
 
-    def delete_marker_with(self, marker_id):
+    def delete_location_in(self, direction=None):
         """
-        Deletes a marker with a given marker-id
+        Deletes a location in a given direction
 
-        :param marker_id: The id of the marker that should be deleted
+        :param direction: The direction on which the location should be deleted.
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-
-        logging.info("marker %s is", self.get_id())
-        logging.info("is going to delete a marker with id %s", str(marker_id))
-        if self.sim.remove_marker(marker_id):
-            self.csv_particle_writer.write_particle(marker_deleted=1)
-            return
-        else:
-            logging.info("Could not delet marker with marker id %s", str(marker_id))
-
-    def delete_marker_in(self, dir=None):
-        """
-        Deletes a marker either in a given direction or on a given x,y coordinates
-
-        :param dir: The direction on which the marker should be deleted. Options: E, SE, SW, W, NW, NE,
-        :param x: x coordinate
-        :param y: y coordinate
-        :return: True: Deleting successful; False: Deleting unsuccessful
-        """
-
-        if dir is not None:
-            coords = self.sim.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
-            if self.sim.remove_marker_on(coords):
-                logging.info("Deleted marker with marker on coords %s", str(coords))
-                self.csv_particle_writer.write_particle(marker_deleted=1)
+        if direction is not None:
+            coordinates = get_coordinates_in_direction(self.coordinates, direction)
+            logging.info("Deleting tile in %s direction", str(direction))
+            if self.world.remove_location_on(coordinates):
+                logging.info("Deleted location with location on coordinates %s", str(coordinates))
+                self.csv_particle_writer.write_particle(location_deleted=1)
+                return True
             else:
-                logging.info("Could not delet marker on coords %s", str(coords))
+                logging.info("Could not delete location on coordinates %s", str(coordinates))
+                return False
+        else:
+            logging.info("invalid direction %d", str(direction))
 
-    def delete_marker_on(self, x=None, y=None):
+    def delete_location_on(self, coordinates=None):
         """
         Deletes a particle either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates: the coordinates
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if x is not None and y is not None:
-            if self.sim.check_coords(x, y):
-                coords = (x, y)
-                if self.sim.remove_marker_on(coords):
-                    logging.info("Deleted marker  oords %s", str(coords))
-                    self.csv_particle_writer.write_particle(marker_deleted=1)
+        if coordinates is not None:
+            if self.world.grid.are_valid_coordinates(coordinates):
+                if self.world.remove_location_on(coordinates):
+                    logging.info("Deleted location on coordinates %s", str(coordinates))
+                    self.csv_particle_writer.write_particle(location_deleted=1)
                     return True
                 else:
-                    logging.info("Could not delet marker on coords %s", str(coords))
+                    logging.info("Could not delete location on coordinates %s", str(coordinates))
                     return False
             else:
                 return False
         else:
             return False
 
+    def set_color(self, color):
+        super().set_color(color)
+        self.world.vis.particle_changed(self)

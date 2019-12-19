@@ -2,19 +2,25 @@
 This solution just scans for particles that are within 5 hops range and prints them out.
 """
 
-#Standard Lib that has to be in each solution
-from lib.std_lib import *
 
-def solution(sim):
-
-    all_matters_list=[]
-    if sim.get_actual_round() == 1:
-        all_matters_list=sim.get_particle_map_coords()[(0,0)].scan_for_matter_within(hop=5)
-        for list in all_matters_list:
-            if list.type=='particle':
-                print ("particle at", list.coords)
-            elif list.type=='tile':
-                print("tile", list.coords)
-            elif list.type=='marker':
-                print("marker", list.coords)
-
+def solution(world):
+    center = world.grid.get_center()
+    if world.get_actual_round() == 1:
+        all_matters_list = world.get_particle_map_coordinates()[center].scan_for_matters_within(hop=5)
+        for matter in all_matters_list:
+            if matter.type == 'particle':
+                print("particle at", matter.coordinates)
+            elif matter.type == 'tile':
+                print("tile", matter.coordinates)
+            elif matter.type == 'location':
+                print("location", matter.coordinates)
+    if world.get_actual_round() == 2:
+        all_matters_list = world.get_particle_map_coordinates()[center].scan_for_particles_within(hop=5)
+        for matter in all_matters_list:
+            print("particle at", matter.coordinates)
+        all_matters_list = world.get_particle_map_coordinates()[center].scan_for_tiles_within(hop=5)
+        for matter in all_matters_list:
+            print("tile", matter.coordinates)
+        all_matters_list = world.get_particle_map_coordinates()[center].scan_for_locations_within(hop=5)
+        for matter in all_matters_list:
+            print("location", matter.coordinates)
