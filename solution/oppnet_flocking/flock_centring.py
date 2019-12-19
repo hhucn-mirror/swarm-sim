@@ -1,4 +1,5 @@
-from lib.oppnet.mobility_model import MobilityModel
+import random
+
 from lib.std_lib import get_next_dir_to
 
 
@@ -8,7 +9,7 @@ def next_intended_direction(particles):
         if most_one_hop_location is not None:
             intended_direction[particle] = direction_from_location_neighbour(particle, most_one_hop_location)
         else:
-            intended_direction[particle] = MobilityModel.random_direction()
+            intended_direction[particle] = random.choices(["NE", "E", "SE", "SW", "NW", "W"])[0]
     return intended_direction
 
 
@@ -20,14 +21,14 @@ def initialisation(sim):
 def initialise_particles(particles):
     intended = {}
     for particle in particles:
-        intended[particle] = MobilityModel.random_direction()
+        intended[particle] = "NE"
     return intended
 
 
 def most_neighbours_locations(particles):
     most_neighbours = {}
     for particle in particles:
-        two_hop = particle.scan_for_particle_within(hop=2)
+        two_hop = particle.scan_for_particles_in(hop=2)
         two_hop_locations = locations_from_particles(two_hop)
         most_one_hop_location = most_one_hop_neighbours_location(particle, two_hop_locations)
         most_neighbours[particle] = most_one_hop_location
@@ -37,17 +38,17 @@ def most_neighbours_locations(particles):
 def locations_from_particles(particles):
     if particles is None:
         return set([])
-    return set([p.coords for p in particles])
+    return set([p.coordinates for p in particles])
 
 
 def direction_from_location_neighbour(particle, neighbour_location):
-    (p_x, p_y) = particle.coords
+    (p_x, p_y) = particle.coordinates
     (n_x, n_y) = neighbour_location
     return get_next_dir_to(p_x, p_y, n_x, n_y)
 
 
 def most_one_hop_neighbours_location(particle, two_hop_locations):
-    one_hop_locations = neighbour_locations(particle.coords, 1)
+    one_hop_locations = neighbour_locations(particle.coordinates, 1)
     most_one_hop_neighbours = set([])
     most_neighbours_location = None
     for neighbour_location in one_hop_locations:

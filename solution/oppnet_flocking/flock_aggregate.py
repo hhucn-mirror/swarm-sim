@@ -1,7 +1,7 @@
 import random
 from collections import Counter
 
-from lib.std_lib import dir_to_str, str_to_dir
+from lib.particle import Particle
 
 
 def aggregate(intended_directions):
@@ -13,11 +13,11 @@ def aggregate(intended_directions):
 
 def aggregate_direction(particle, intended_directions):
     neighbours = neighbourhood(particle)
-    direction_counter = Counter({'NE': 0, 'E': 0, 'SE': 0, 'SW': 0, 'W': 0, 'NW': 0})
+    direction_counter = Counter({"NE": 0, "E": 0, "SE": 0, "SW": 0, "W": 0, "NW": 0})
     if not neighbours:
         return intended_directions[particle]
     for neighbour in neighbours:
-        neighbour_intended = dir_to_str(intended_directions[neighbour])
+        neighbour_intended = intended_directions[neighbour]
         direction_counter[neighbour_intended] += 1
     particle_intended = intended_directions[particle]
     return most_common_dir(particle_intended, direction_counter)
@@ -35,10 +35,10 @@ def most_common_dir(particle_intended, direction_counter):
         choices_list = most_commons[0:i + 1]
         weights = __choices__weights__(choices_list, particle_intended)
         choices_list.append(particle_intended)
-        common_direction_str, _ = random.choices(choices_list, weights, k=1)
+        common_direction, _ = random.choices(choices_list, weights, k=1)
     else:
-        common_direction_str, _ = most_commons[0]
-    return str_to_dir(common_direction_str)
+        common_direction, _ = most_commons[0]
+    return common_direction
 
 
 def __choices__weights__(choices, particle_intended):
@@ -48,5 +48,5 @@ def __choices__weights__(choices, particle_intended):
     return weights
 
 
-def neighbourhood(particle):
-    return particle.scan_for_particle_within(hop=1)
+def neighbourhood(particle: Particle):
+    return particle.scan_for_particles_in(hop=1)

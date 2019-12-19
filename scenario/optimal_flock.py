@@ -4,7 +4,7 @@ def scenario(sim):
 
     hexagon = get_hexagon_coordinates(centre, radius)
     for l in hexagon:
-        sim.add_particle(l[0], l[1])
+        sim.add_particle(l)
 
 
 def get_hexagon_coordinates(centre, r_max):

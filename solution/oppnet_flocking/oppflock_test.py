@@ -4,11 +4,12 @@ from solution.oppnet_flocking.flock_centring import next_intended_direction, ini
 intended = {}
 
 
-def solution(sim):
+def solution(world):
     global intended
 
-    current_round = sim.get_actual_round()
-    particles = sim.get_particle_list()
+    current_round = world.get_actual_round()
+    particles = world.get_particle_list()
+    dirs = world.grid.get_directions_dictionary()
 
     if current_round == 1:
         intended = initialise_particles(particles)
@@ -18,4 +19,5 @@ def solution(sim):
         aggregated = aggregate(intended)
         for particle, aggregate_direction in aggregated.items():
             if aggregate_direction != -1:
-                particle.move_to(aggregate_direction)
+                direction = dirs[aggregate_direction]
+                particle.move_to(direction)
