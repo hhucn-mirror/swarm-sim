@@ -6,8 +6,7 @@ import os
 import sys
 import time
 import random
-from lib import world, config, vis3d
-from lib.gnuplot_generator import gnuplot_generator
+from lib import world, config, vis3d, gnuplot_generator
 
 
 def swarm_sim(argv):
@@ -102,7 +101,7 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.direction_name)
+    gnuplot_generator.generate_gnuplot(config_data.direction_name)
 
 
 if __name__ == "__main__":
