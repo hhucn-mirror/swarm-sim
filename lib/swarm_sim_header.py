@@ -1,5 +1,16 @@
 import sys
 
+# colors
+black = (0, 0, 0, 1)
+gray = (128, 128, 128, 1)
+red = (255, 0, 0, 1)
+green = (0, 128, 0, 1)
+blue = (0, 0, 255, 1)
+yellow = (255, 255, 0, 1)
+orange = (255, 165, 0, 1)
+cyan = (0, 255, 255, 1)
+purple = (128, 0, 128, 1)
+
 
 def eeprint(*args, sep=' ', end='\n'):
     """

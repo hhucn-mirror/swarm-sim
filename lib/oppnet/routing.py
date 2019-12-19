@@ -110,7 +110,7 @@ def __next_step_epidemic__(sender, nearby=None):
 
     routing_params = RoutingParameters.get(sender)
     if nearby is None:
-        nearby = sender.scan_for_particle_within(hop=routing_params.scan_radius)
+        nearby = sender.scan_for_particles_within(hop=routing_params.scan_radius)
         if nearby is None:
             return
 
@@ -126,7 +126,7 @@ def __next_step_manet_epidemic__(particle):
     :type particle: :class:`~particle.Particle`
     """
     routing_params = RoutingParameters.get(particle)
-    nearby = particle.scan_for_particle_within(hop=routing_params.scan_radius)
+    nearby = particle.scan_for_particles_within(hop=routing_params.scan_radius)
     if nearby is None:
         return
 

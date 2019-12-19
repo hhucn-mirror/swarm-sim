@@ -6,12 +6,12 @@ It also have the the coordination system and stated the maximum of the x and y c
 """
 import importlib
 import logging
+import os
 import random
 import threading
-import os
 import time
 
-from lib import csv_generator, particle, tile, location, vis3d
+from lib import tile, location, vis3d
 from lib.swarm_sim_header import eprint
 
 
@@ -55,10 +55,16 @@ class World:
         self.config_data = config_data
         self.grid = config_data.grid
 
-        self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
-                                                    solution=config_data.solution,
-                                                    seed=config_data.seed_value,
-                                                    directory=config_data.direction_name)
+        self.particle_ms_size = config_data.ms_size
+        self.particle_ms_strategy = config_data.ms_strategy
+
+        self.particle_mod = importlib.import_module(config_data.particle)
+
+        self.csv_generator = importlib.import_module(config_data.csv_generator)
+        self.csv_round = self.csv_generator.CsvRoundData(sim=self,
+                                                         solution=config_data.solution,
+                                                         seed=config_data.seed_value,
+                                                         directory=config_data.direction_name)
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -151,7 +157,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.config_data.direction_name)
+        particle_csv = self.csv_generator.CsvParticleFile(self.config_data.direction_name)
         for p in self.particles:
             particle_csv.write_particle(p)
         particle_csv.csv_file.close()
@@ -355,7 +361,7 @@ class World:
                     if color is None:
                         color = self.config_data.particle_color
                     self.particle_id_counter += 1
-                    self.new_particle = particle.Particle(self, coordinates, color, self.particle_id_counter)
+                    self.new_particle = self.particle_mod.Particle(self, coordinates, color, self.particle_id_counter)
                     if self.vis is not None:
                         self.vis.particle_changed(self.new_particle)
                     self.particles_created.append(self.new_particle)

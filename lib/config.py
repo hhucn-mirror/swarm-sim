@@ -1,7 +1,11 @@
 import configparser
-from datetime import datetime
-from ast import literal_eval as make_tuple
 import importlib
+from ast import literal_eval as make_tuple
+from datetime import datetime
+
+from lib.oppnet.messagestore import BufferStrategy
+from lib.oppnet.mobility_model import Mode
+from lib.oppnet.routing import Algorithm
 
 
 class ConfigData:
@@ -78,6 +82,13 @@ class ConfigData:
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
         self.location_mm_size = config.getint("Matter", "location_mm_size")
 
+        self.ms_size = config.getint("Routing", "ms_size")
+        self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
+        self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
+        self.message_ttl = config.getint("Routing", "message_ttl")
+
+        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
+
         try:
             self.scenario = config.get("File", "scenario")
         except configparser.NoOptionError as noe:
@@ -88,6 +99,15 @@ class ConfigData:
         except configparser.NoOptionError as noe:
             self.solution = "solution.py"
 
+        try:
+            self.csv_generator = config.get("File", "csv_generator")
+        except configparser.NoOptionError as noe:
+            self.csv_generator = "lib.csv_generator.py"
+
+        try:
+            self.particle = config.get("File", "particle")
+        except configparser.NoOptionError as noe:
+            self.particle = "lib.particle.py"
 
         self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
         self.multiple_sim = 0

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from lib.std_lib import green, blue, orange, yellow, red
+from lib.swarm_sim_header import green, blue, orange, yellow, red
 
 
 class EventType(Enum):

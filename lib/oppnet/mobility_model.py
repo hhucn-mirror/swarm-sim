@@ -1,8 +1,6 @@
 import random
 from enum import Enum
 
-from ..std_lib import NE, E, SE, SW, W, NW
-
 
 class Mode(Enum):
     """
@@ -21,6 +19,14 @@ class MobilityModel:
     """
     Class to define particle movement.
     """
+    NE = (0.5, 1, 0)
+    E = (1, 0, 0)
+    SE = (0.5, -1, 0)
+    SW = (-0.5, -1, 0)
+    W = (-1, 0, 0)
+    NW = (-0.5, 1, 0)
+
+    directions = [NE, E, SE, SW, W, NW]
 
     @staticmethod
     def get(particle):
@@ -114,18 +120,18 @@ class MobilityModel:
         if self.steps < self.route_length:
             self.steps += 1
         else:
-            if self.current_dir == NE:
-                self.current_dir = NW
-            elif self.current_dir == NW:
-                self.current_dir = W
-            elif self.current_dir == W:
-                self.current_dir = SW
-            elif self.current_dir == SW:
-                self.current_dir = SE
-            elif self.current_dir == SE:
-                self.current_dir = E
-            elif self.current_dir == E:
-                self.current_dir = NE
+            if self.current_dir == self.NE:
+                self.current_dir = self.NW
+            elif self.current_dir == self.NW:
+                self.current_dir = self.W
+            elif self.current_dir == self.W:
+                self.current_dir = self.SW
+            elif self.current_dir == self.SW:
+                self.current_dir = self.SE
+            elif self.current_dir == self.SE:
+                self.current_dir = self.E
+            elif self.current_dir == self.E:
+                self.current_dir = self.NE
             self.steps = 1
             # new circle if we walked a full circle
             if self.current_dir == self.starting_dir:
@@ -173,21 +179,21 @@ class MobilityModel:
         (x, y) = current_x_y
         # check if at min_x then head anywhere but west
 
-        directions = {W,
-                      SW,
-                      NW,
-                      E,
-                      SE,
-                      NE}
+        directions = {self.W,
+                      self.SW,
+                      self.NW,
+                      self.E,
+                      self.SE,
+                      self.NE}
 
         if self.min_x >= x:
-            directions = directions.difference({W, SW, NW})
+            directions = directions.difference({self.W, self.SW, self.NW})
         if self.max_x <= x:
-            directions = directions.difference({E, SE, NE})
+            directions = directions.difference({self.E, self.SE, self.NE})
         if self.min_y >= y:
-            directions = directions.difference({SE, SW})
+            directions = directions.difference({self.SE, self.SW})
         if self.max_y <= y:
-            directions = directions.difference({NE, NW})
+            directions = directions.difference({self.NE, self.NW})
 
         next_dir = MobilityModel.random_direction(list(directions))
         return next_dir
@@ -200,5 +206,5 @@ class MobilityModel:
         :return: a random next direction in directions, or complete random
         """
         if directions is None:
-            directions = [W, SW, NW, E, SE, NE]
+            directions = MobilityModel.directions
         return random.choice(directions)

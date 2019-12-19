@@ -1,10 +1,14 @@
-def scenario(sim):
+from lib.swarm_sim_header import green
+from lib.world import World
+
+
+def scenario(world: World):
     radius = 5
     centre = (0, 0)
 
     hexagon = get_hexagon_coordinates(centre, radius)
     for l in hexagon:
-        sim.add_particle(l)
+        world.add_particle(l, color=green)
 
 
 def get_hexagon_coordinates(centre, r_max):
