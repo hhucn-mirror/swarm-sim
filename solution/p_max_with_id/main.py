@@ -22,12 +22,16 @@ def solution(sim):
                 particle.prev_direction.pop(0)
 
         if sim.get_actual_round() % cycle_no == 1:
-            move_cycle(particle, sim)
+            if particle.wait:
+                coating_mod.reset_attributes(particle)
+                particle.wait = False
+            else:
+                move_cycle(particle, sim)
 
-        elif sim.get_actual_round() % cycle_no == 2:
+        elif sim.get_actual_round() % cycle_no == 2 and not particle.wait:
             read_cycle(particle)
 
-        elif sim.get_actual_round() % cycle_no == 0:
+        elif sim.get_actual_round() % cycle_no == 0 and not particle.wait:
             write_cycle(particle)
 
     goal_test.end_sim(sim)
@@ -92,6 +96,7 @@ def move_to_next_dir(particle):
         print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
     coating_mod.reset_attributes(particle)
     coating_mod.reset_p_max(particle)
+    particle.wait = True
 
 
 def move_to_target_tile(particle, sim):
@@ -112,3 +117,4 @@ def move_to_target_tile(particle, sim):
     else:
         coating_mod.reset_attributes(particle)
         coating_mod.reset_p_max(particle)
+        particle.wait = True
