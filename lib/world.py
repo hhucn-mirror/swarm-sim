@@ -57,6 +57,7 @@ class World:
                                                     seed=config_data.seed_value,
                                                     directory=config_data.direction_name)
 
+        self.vis = None
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
 

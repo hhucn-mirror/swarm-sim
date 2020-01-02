@@ -128,14 +128,14 @@ class Visualization:
         :return:
         """
 
-        loading_window = LoadingWindow(window_message, window_title)
+        # loading_window = LoadingWindow(window_message, window_title)
         if self._gui is not None and issubclass(self._gui.__class__, QWidget):
             self._gui.setDisabled(True)
         thread.start()
         while thread.is_alive():
             self._app.processEvents()
         thread.join()
-        loading_window.close()
+        # loading_window.close()
         self._gui.setDisabled(False)
 
     def rotate_light(self):
