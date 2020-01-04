@@ -15,13 +15,9 @@ def initialize_particle(particle):
     setattr(particle, "nh_list", [solution_header.Neighbor("fl", math.inf)] * 6)
     setattr(particle, "rcv_buf", {})
     setattr(particle, "snd_buf", {})
-    setattr(particle, "prev_direction", False)
+    # setattr(particle, "prev_direction", False)
     setattr(particle, "next_direction", False)
-    setattr(particle, "first_send", True)
-    setattr(particle, "p_max_table", {})
-    setattr(particle, "keep_distance", False)
-    setattr(particle, "broadcast_pmax", False)
-    setattr(particle, "stop_sending", False)
+    setattr(particle, "prev_direction", [])
 
     # t: tile
     setattr(particle, "dest_t", None)
@@ -31,8 +27,8 @@ def initialize_particle(particle):
 
     # p: particle
     setattr(particle, "p_max", solution_header.PMaxInfo())
-
     setattr(particle, "wait", False)
+    setattr(particle, "max_prev_dirs", 2)
 
 
 def reset_attributes(particle):
@@ -47,7 +43,6 @@ def reset_attributes(particle):
     # particle.nh_list.clear()
     particle.nh_list = [solution_header.Neighbor("fl", math.inf)] * 6
     particle.next_direction = False
-    particle.keep_distance = False
     particle.read_whole_memory().clear()
 
 
@@ -58,7 +53,6 @@ def reset_p_max(particle):
     :return: none
     """
     particle.p_max.reset()
-    particle.p_max_table.clear()
 
 
 def coating_alg(particle):
@@ -80,18 +74,24 @@ def find_next_free_location(particle):
     """
     # Check if particle has a global p_max and it is not equal to its own distance
     possible_directions = []
-    # (particle.nh_list[direction].dist != particle.p_max.dist - 1 or particle.own_dist != particle.nh_list[direction].dist))
     # accumulate all candidates for the next movement direction in possible_directions
     for direction in reversed(direction_list):
-        if not (particle.particle_in(direction) or         # check if direction is free
-                particle.tile_in(direction) or
-                particle.prev_direction == direction) and\
-                (particle.nh_list[direction].dist < particle.p_max.dist or
-                 particle.nh_list[direction].dist < particle.own_dist):     # check if moving to that location would be beneficial
+        if (not (particle.particle_in(direction) or  # check if direction is free
+                 particle.tile_in(direction) or
+                 direction in particle.prev_direction) and  # check if the particle came from that direction
+                particle.nh_list[direction].dist < particle.p_max.dist and
+                not check_neighbor_can_move(particle.nh_list, direction, particle.own_dist)):
             possible_directions.append((direction, particle.nh_list[direction].dist))
     if len(possible_directions) > 0:
         nearest_free_location = min(possible_directions, key=lambda x: x[1])
-        if particle.p_max.dist > particle.own_dist or nearest_free_location[1] < particle.own_dist and \
-                (not(particle.keep_distance) or nearest_free_location[1] <= particle.own_dist):     # only move away if keep_distance is false
-            return nearest_free_location[0]
+        return nearest_free_location[0]
+    return False
+
+
+def check_neighbor_can_move(nh_list, direction, own_distance):
+    if ((nh_list[direction_in_range(direction - 1)].type == "p" and
+        nh_list[direction_in_range(direction - 1)].dist > own_distance) or
+        (nh_list[direction_in_range(direction + 1)].type == "p" and
+         nh_list[direction_in_range(direction + 1)].dist > own_distance)):
+        return False
     return False

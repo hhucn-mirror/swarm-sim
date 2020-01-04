@@ -8,6 +8,10 @@ import solution.master.p_max_calculation as p_max_calc_mod
 import solution.master.coating_alg as coating_mod
 import solution.goal_test as goal_test
 
+# contains:
+# p_max_with_id
+# prevent_circle_walking
+
 cycle_no = 3
 
 
@@ -17,23 +21,21 @@ def solution(sim):
             coating_mod.initialize_particle(particle)
             particle.dest_t=random.choice(sim.get_tiles_list())
 
-        if particle.wait:
-            if sim.get_actual_round() % (cycle_no + 1) == 0:
-                particle.wait = False
-            else:
-                #particle.delete_whole_memeory()
-                continue
-
         if sim.get_actual_round() % (cycle_no * 10) == 1:
-            particle.prev_direction = None
+            if len(particle.prev_direction) > 0:
+                particle.prev_direction.pop(0)
 
         if sim.get_actual_round() % cycle_no == 1:
-            move_cycle(particle)
+            if particle.wait:
+                coating_mod.reset_attributes(particle)
+                particle.wait = False
+            else:
+                move_cycle(particle, sim)
 
-        elif sim.get_actual_round() % cycle_no == 2:
+        elif sim.get_actual_round() % cycle_no == 2 and not particle.wait:
             read_cycle(particle)
 
-        elif sim.get_actual_round() % cycle_no == 0:
+        elif sim.get_actual_round() % cycle_no == 0 and not particle.wait:
             write_cycle(particle)
 
     goal_test.end_sim(sim)
@@ -67,7 +69,7 @@ def read_cycle(particle):
     particle.rcv_buf.clear()
 
 
-def move_cycle(particle):
+def move_cycle(particle, sim):
     """
     Lets the current particle move.
     :param particle: the particle whose turn it is
@@ -76,7 +78,7 @@ def move_cycle(particle):
     if particle.next_direction is False and particle.own_dist > 1:
         if debug and debug_movement:
             print("moving closer to target tile")
-        move_to_target_tile(particle)
+        move_to_target_tile(particle, sim)
     elif particle.next_direction is not False and not particle.particle_in(particle.next_direction) \
             and not particle.tile_in(particle.next_direction):
         move_to_next_dir(particle)
@@ -89,23 +91,30 @@ def move_to_next_dir(particle):
     :param particle: the particle whose turn it is
     :return: none
     """
-    particle.prev_direction = get_the_invert(particle.next_direction)
+    particle.prev_direction = [direction_in_range(particle.prev_direction[i] * 2 - particle.next_direction)
+                               for i in range(len(particle.prev_direction))
+                               if particle.next_direction in [particle.prev_direction[i] + 1,
+                                                              particle.prev_direction[i] - 1]]
+    if len(particle.prev_direction) >= particle.max_prev_dirs:
+        particle.prev_direction.pop(0)
+    particle.prev_direction.append(get_the_invert(particle.next_direction))
     particle.move_to(particle.next_direction)
     if debug:
         print("dist list before moving", [str(neighbor) for neighbor in particle.nh_list])
         print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
     coating_mod.reset_attributes(particle)
     coating_mod.reset_p_max(particle)
+    particle.wait = True
 
 
-def move_to_target_tile(particle):
+def move_to_target_tile(particle, sim):
     """
     Moves the particle in the global direction of it's target tile.
     This method uses information from the world class.
     :param particle: the particle whose turn it is
     :return: none
     """
-    hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
+    hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, sim.grid.directions, particle.prev_direction)
     if hit_a_matter or hit_a_matter is None:
         # reset_attributes(particle)
         if hit_a_matter is not None:
@@ -116,3 +125,4 @@ def move_to_target_tile(particle):
     else:
         coating_mod.reset_attributes(particle)
         coating_mod.reset_p_max(particle)
+        particle.wait = True
