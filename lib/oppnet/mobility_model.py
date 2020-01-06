@@ -28,15 +28,6 @@ class MobilityModel:
 
     directions = [NE, E, SE, SW, W, NW]
 
-    @staticmethod
-    def get(particle):
-        """
-        Returns the mobility_model attribute of a :param particle:
-        :param particle: the particle to check
-        :return: the mobility_model attribute
-        """
-        return getattr(particle, "mobility_model")
-
     def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=(), starting_dir=None):
         """
         Constructor.
@@ -83,8 +74,19 @@ class MobilityModel:
         Calculates the return direction based on starting direction, i.e. the opposing direction.
         :return: the opposing direction to starting_dir
         """
-        return self.starting_dir - 3 if self.starting_dir > 2 else self.starting_dir + 3
-    
+        if self.starting_dir == self.NE:
+            return self.SW
+        elif self.starting_dir == self.E:
+            return self.W
+        elif self.starting_dir == self.SE:
+            return self.NW
+        elif self.starting_dir == self.SW:
+            return self.NE
+        elif self.starting_dir == self.W:
+            return self.E
+        else:
+            return self.SE
+
     def next_direction(self, current_x_y=None):
         """
         Determines the next direction of the model.

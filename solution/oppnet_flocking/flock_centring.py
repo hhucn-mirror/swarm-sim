@@ -42,8 +42,8 @@ def locations_from_particles(particles):
 
 
 def direction_from_location_neighbour(particle, neighbour_location):
-    (p_x, p_y) = particle.coordinates
-    (n_x, n_y) = neighbour_location
+    (p_x, p_y, _) = particle.coordinates
+    (n_x, n_y, _) = neighbour_location
     return get_next_dir_to(p_x, p_y, n_x, n_y)
 
 
@@ -67,12 +67,12 @@ def neighbour_locations(centre, radius):
     displacement = - radius + 0.5
     iteration = 0
     for i in range(1, radius + 1):
-        locations.add((i, centre[1]))
-        locations.add((-i, centre[1]))
+        locations.add((i, centre[1], 0))
+        locations.add((-i, centre[1], 0))
     for i in range(1, radius + 1):
         for j in range(0, (2 * radius) - iteration):
-            locations.add((displacement + j + centre[0], i + centre[1]))
-            locations.add((displacement + j + centre[0], -i + centre[1]))
+            locations.add((displacement + j + centre[0], i + centre[1], 0))
+            locations.add((displacement + j + centre[0], -i + centre[1], 0))
         iteration = iteration + 1
         displacement = displacement + 0.5
     return locations

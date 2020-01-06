@@ -8,15 +8,15 @@
 TODO: Erase Memory
 
 """
-
 import logging
-from lib import csv_generator, matter
+
+from lib import matter
 from lib.swarm_sim_header import *
 
 
 class Particle(matter.Matter):
 
-    def __init__(self, world, coordinates, color, particle_counter=0):
+    def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None):
         """Initializing the particle constructor"""
         super().__init__(world, coordinates, color,
                          type="particle", mm_size=world.config_data.particle_mm_size)

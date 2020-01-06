@@ -21,7 +21,7 @@ class MANeTRole(Enum):
 
 class RoutingParameters:
 
-    def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0, delivery_delay=2):
+    def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0):
         """
         Constructor
         :param algorithm: The routing algorithm to be used.
@@ -32,8 +32,6 @@ class RoutingParameters:
         :type manet_role: :class:`~routing.MANeTRole`
         :param manet_group: Group the particle belongs to.
         :type manet_group: int
-        :param delivery_delay: The number of rounds to wait until the message is delivered.
-        :type delivery_delay: int
         """
         if type(algorithm) == str:
             self.algorithm = Algorithm[algorithm]
@@ -44,25 +42,6 @@ class RoutingParameters:
         if manet_role is None:
             self.manet_role = MANeTRole.Node
         self.scan_radius = scan_radius
-        self.delivery_delay = delivery_delay
-
-    def set(self, particle):
-        """
-        Sets attribute routing_params of :param particle:.
-        :param particle: the particle whose attribute is set
-        """
-        setattr(particle, "routing_params", self)
-
-    @staticmethod
-    def get(particle):
-        """
-        Gets the routing_params attribute of :param particle:.
-        :param particle: The particle to get the attribute from.
-        :type particle: :class:`~particle.Particle`
-        :return: MobilityModel of :param particle:.
-        :rtype: :class:`~mobility_model.MobilityModel`
-        """
-        return getattr(particle, "routing_params")
 
     @staticmethod
     def same_manet_group(particle1, particle2):
@@ -75,7 +54,7 @@ class RoutingParameters:
         :return: If :param particle1: and :param particle2: are in the same MANeT group.
         :rtype: bool
         """
-        rp1, rp2 = RoutingParameters.get(particle1), RoutingParameters.get(particle2)
+        rp1, rp2 = particle1.routing_parameters, particle2.routing_parameters
         return rp1.manet_group == rp2.manet_group
 
 
@@ -89,7 +68,7 @@ def next_step(particles, scan_radius=None):
     """
     # execute the SendEvents for each particle
     for particle in particles:
-        routing_params = RoutingParameters.get(particle)
+        routing_params = particle.routing_parameters
         if scan_radius is not None:
             routing_params.scan_radius = scan_radius
 
@@ -108,7 +87,7 @@ def __next_step_epidemic__(sender, nearby=None):
     :type nearby: list
     """
 
-    routing_params = RoutingParameters.get(sender)
+    routing_params = sender.routing_parameters
     if nearby is None:
         nearby = sender.scan_for_particles_within(hop=routing_params.scan_radius)
         if nearby is None:
@@ -125,7 +104,7 @@ def __next_step_manet_epidemic__(particle):
     :param particle: The particle which routing model should be executed.
     :type particle: :class:`~particle.Particle`
     """
-    routing_params = RoutingParameters.get(particle)
+    routing_params = particle.routing_parameters
     nearby = particle.scan_for_particles_within(hop=routing_params.scan_radius)
     if nearby is None:
         return

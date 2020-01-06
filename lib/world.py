@@ -58,6 +58,13 @@ class World:
         self.particle_ms_size = config_data.ms_size
         self.particle_ms_strategy = config_data.ms_strategy
 
+        self.particle_mm_mode = config_data.mobility_model_mode
+        self.particle_mm_length = config_data.mobility_model_length
+        self.particle_mm_zone = config_data.mobility_model_zone
+        self.particle_mm_starting_dir = config_data.mobility_model_starting_dir
+
+        self.message_ttl = config_data.message_ttl
+
         self.particle_mod = importlib.import_module(config_data.particle)
 
         self.csv_generator = importlib.import_module(config_data.csv_generator)
@@ -361,7 +368,9 @@ class World:
                     if color is None:
                         color = self.config_data.particle_color
                     self.particle_id_counter += 1
-                    self.new_particle = self.particle_mod.Particle(self, coordinates, color, self.particle_id_counter)
+                    self.new_particle = self.particle_mod.Particle(self, coordinates=coordinates, color=color,
+                                                                   particle_counter=self.particle_id_counter,
+                                                                   csv_generator=self.csv_generator)
                     if self.vis is not None:
                         self.vis.particle_changed(self.new_particle)
                     self.particles_created.append(self.new_particle)

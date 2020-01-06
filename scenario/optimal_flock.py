@@ -8,7 +8,7 @@ def scenario(world: World):
 
     hexagon = get_hexagon_coordinates(centre, radius)
     for l in hexagon:
-        world.add_particle(l, color=green)
+        world.add_particle(coordinates=l, color=green)
 
 
 def get_hexagon_coordinates(centre, r_max):

@@ -1,5 +1,6 @@
 import configparser
 import importlib
+import json
 from ast import literal_eval as make_tuple
 from datetime import datetime
 
@@ -87,7 +88,14 @@ class ConfigData:
         self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
         self.message_ttl = config.getint("Routing", "message_ttl")
 
-        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
+        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mm_mode"))
+        self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))
+        self.mobility_model_zone = json.loads(config.get("MobilityModel", "mm_zone"))
+        self.mobility_model_starting_dir = config.has_option("MobilityModel", "mm_starting_dir") \
+                                           and json.loads(config.get("MobilityModel", "mm_starting_dir")) \
+                                           or (0.5, 1, 0)
+        if type(self.mobility_model_starting_dir) is list:
+            self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
 
         try:
             self.scenario = config.get("File", "scenario")
