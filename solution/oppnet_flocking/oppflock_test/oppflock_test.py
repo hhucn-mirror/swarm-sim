@@ -1,5 +1,5 @@
-from solution.oppnet_flocking.flock_aggregate import aggregate
-from solution.oppnet_flocking.flock_centring import next_intended_direction, initialise_particles
+from solution.oppnet_flocking.oppflock_test.flock_aggregate import aggregate
+from solution.oppnet_flocking.oppflock_test.flock_centring import next_intended_direction, initialise_particles
 
 intended = {}
 
