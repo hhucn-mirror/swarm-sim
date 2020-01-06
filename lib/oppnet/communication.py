@@ -8,7 +8,7 @@ from lib.oppnet.point import Point
 class Message:
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round: int, ttl: int, content=None, is_copy=False, actual_receiver=None):
+    def __init__(self, sender, receiver, start_round=None, ttl=None, content=None, is_copy=False, actual_receiver=None):
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
@@ -28,9 +28,13 @@ class Message:
         self.seq_number = Message.seq_number
         self.key = self.__create_msg_key__()
         self.delivered = 0
+        if not self.start_round:
+            start_round = sender.world.get_actual_round()
         self.start_round = start_round
         self.delivery_round = 0
         self.forwarder = None
+        if not ttl:
+            ttl = sender.world.message_ttl
         self.ttl = ttl
         self.hops = 0
         self.content = content
@@ -88,6 +92,14 @@ class Message:
         :return: the current sender
         """
         return self.sender
+
+    def get_content(self):
+        """
+        Returns the message content.
+        :return: the message content
+        :rtype: any
+        """
+        return self.content
 
     def __copy__(self):
         """
@@ -158,6 +170,23 @@ def send_message(sender, receiver, message: Message):
     memory = sender.world.memory
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
+
+
+def broadcast_message(sender, receivers, message_content):
+    """
+    Sends :param message_content: from :param sender: to all :param receivers: by giving it to the memory module.
+    Checks beforehand if ttl has expired and in such case does not send it.
+    :param sender: The particle sending the Message.
+    :type sender: :class:`~opp_particle.Particle`
+    :param receivers: The intended receivers of the message.
+    :type receivers: :class:`~opp_particle.Particle`
+    :param message_content: The content of the message to be send.
+    :type message_content: any`
+    """
+
+    for receiver in receivers:
+        message = Message(sender, receiver, content=message_content)
+        send_message(sender, receiver, message)
 
 
 def ttl_expired(message, store):

@@ -46,3 +46,9 @@ class Particle(Particle):
 
     def set_routing_parameters(self, routing_parameters):
         self.routing_parameters = routing_parameters
+
+    def get_all_received(self):
+        received = set()
+        while len(self.rcv_store) > 0:
+            received.add(self.rcv_store.pop())
+        return received
