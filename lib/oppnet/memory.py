@@ -25,10 +25,10 @@ class Memory:
             # TODO: throw error
             print("wrong mode")
 
-    def try_deliver_scheduled_messages(self, sim):
-        if sim.get_actual_round() in self.memory.keys():
-            m_particles = sim.get_particle_map_id()
-            tuples_particles = self.memory.pop(sim.get_actual_round())
+    def try_deliver_scheduled_messages(self, world):
+        if world.get_actual_round() in self.memory.keys():
+            m_particles = world.get_particle_map_id()
+            tuples_particles = self.memory.pop(world.get_actual_round())
             for e in tuples_particles:
                 p_id = e[0]
                 p_msg = e[1]
@@ -48,8 +48,8 @@ class Memory:
             # TODO: throw error
             print("wrong mode")
 
-    def try_deliver_delta_messages(self, sim):
-        actual_round = sim.get_actual_round()
+    def try_deliver_delta_messages(self, world):
+        actual_round = world.get_actual_round()
         print(actual_round)
         new_memory = {}
         for target in self.memory.keys():
@@ -63,7 +63,7 @@ class Memory:
                 past_rounds = actual_round - start_round
                 distance = delta * past_rounds
                 particle_point = self.get_point_from_vector(
-                    sim.get_particle_map_id()[target].coords)  # TODO check existing particle
+                    world.get_particle_map_id()[target].coordinates)  # TODO check existing particle
                 distance_start_target = self.get_distance(position, particle_point)
                 if distance < expirerate:
                     if distance >= distance_start_target:
@@ -92,8 +92,8 @@ class Memory:
         else:
             return y_diff
 
-    def try_deliver_messages(self, sim):
-        self.option[self.mode](self, sim)
+    def try_deliver_messages(self, world):
+        self.option[self.mode](self, world)
 
     option = {MemoryMode.Schedule: try_deliver_scheduled_messages,
               MemoryMode.Delta: try_deliver_delta_messages}

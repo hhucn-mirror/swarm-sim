@@ -1,12 +1,13 @@
 """This is the main module of the Opportunistic Robotics Network Simulator"""
-import importlib
 import getopt
+import importlib
 import logging
 import os
+import random
 import sys
 import time
-import random
-from lib import world, config, vis3d, gnuplot_generator
+
+from lib import world, config, gnuplot_generator
 
 
 def swarm_sim(argv):
@@ -95,6 +96,7 @@ def run_solution(swarm_sim_world):
         random.shuffle(swarm_sim_world.particles)
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
+    swarm_sim_world.memory.try_deliver_messages(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
     swarm_sim_world.inc_round_counter_by(number=1)
 

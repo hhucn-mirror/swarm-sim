@@ -124,7 +124,7 @@ class Message:
         self.sender = sender
 
     def update_delivery(self):
-        delivery_round = self.sender.sim.get_actual_round()
+        delivery_round = self.sender.world.get_actual_round()
         if self.delivery_round == 0:
             self.delivery_round = delivery_round
         self.delivered += 1
@@ -142,7 +142,7 @@ def send_message(sender, receiver, message: Message):
     :type message: :class:`~communication.Message`
     """
 
-    current_round = sender.sim.get_actual_round()
+    current_round = sender.world.get_actual_round()
     msg_store = sender.send_store
 
     # check if the message ttl has expired after this
@@ -155,8 +155,8 @@ def send_message(sender, receiver, message: Message):
     message.set_sender(sender)
     message.set_receiver(receiver)
 
-    memory = sender.sim.memory
-    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coords[0], sender.coords[1]),
+    memory = sender.world.memory
+    memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
 
 
@@ -206,7 +206,7 @@ def store_message(message, sender, receiver):
         process_event(EventType.ReceiverOutOfMem, message)
 
 
-def generate_random_messages(particle_list, amount, sim, ttl_range=None):
+def generate_random_messages(particle_list, amount, world, ttl_range=None):
     """
     Creates :param amount: many messages for each particle in :param particle_list: with a TTL randomly picked from
     :param ttl_range.
@@ -215,8 +215,8 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     :type particle_list: list
     :param amount: The amount of messages to be created for each particle.
     :type amount: number
-    :param sim: The simulator instance.
-    :type sim: :class:`~sim.Sim`
+    :param world: The simulator instance.
+    :type world: :class:`~world.World`
     :param ttl_range: Min and max value for the TTL value to be randomly drawn from for each message.
     :type ttl_range: tuple
     :return: list of generated messages
@@ -224,12 +224,12 @@ def generate_random_messages(particle_list, amount, sim, ttl_range=None):
     messages = []
     if ttl_range is not None:
         if ttl_range is not tuple:
-            ttl_range = (1, round(sim.get_max_round() / 10))
+            ttl_range = (1, round(world.get_max_round() / 10))
     else:
-        ttl_range = (sim.message_ttl, sim.message_ttl)
+        ttl_range = (world.message_ttl, world.message_ttl)
     for sender in particle_list:
         for _ in range(0, amount):
             receiver = random.choice([particle for particle in particle_list if particle != sender])
-            messages.append(Message(sender, receiver, start_round=sim.get_actual_round(),
+            messages.append(Message(sender, receiver, start_round=world.get_actual_round(),
                                     ttl=random.randint(ttl_range[0], ttl_range[1])))
     return messages

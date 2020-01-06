@@ -1060,4 +1060,5 @@ class Particle(matter.Matter):
 
     def set_color(self, color):
         super().set_color(color)
-        self.world.vis.particle_changed(self)
+        if self.world.vis:
+            self.world.vis.particle_changed(self)

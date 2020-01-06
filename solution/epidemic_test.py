@@ -4,12 +4,12 @@ from lib.oppnet.communication import generate_random_messages
 message_amount = 50
 
 
-def solution(sim):
-    particles = sim.get_particle_list()
+def solution(world):
+    particles = world.get_particle_list()
 
-    if sim.get_actual_round() == 1:
+    if world.get_actual_round() == 1:
         # initially generate 5 message per particle
-        generate_random_messages(particles, amount=2, sim=sim)
+        generate_random_messages(particles, amount=2, world=world)
     else:
         # generate 1 message per particle, every 20 rounds
         # if sim.get_actual_round() % 20 == 0:

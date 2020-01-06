@@ -12,6 +12,8 @@ import threading
 import time
 
 from lib import tile, location, vis3d
+from lib.oppnet.memory import Memory
+from lib.oppnet.routing import RoutingParameters
 from lib.swarm_sim_header import eprint
 
 
@@ -63,6 +65,10 @@ class World:
         self.particle_mm_zone = config_data.mobility_model_zone
         self.particle_mm_starting_dir = config_data.mobility_model_starting_dir
 
+        self.particle_scan_radius = config_data.scan_radius
+
+        self.routing_parameters = RoutingParameters(config_data.routing_algorithm, config_data.scan_radius)
+
         self.message_ttl = config_data.message_ttl
 
         self.particle_mod = importlib.import_module(config_data.particle)
@@ -75,6 +81,8 @@ class World:
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
+        else:
+            self.vis = None
 
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
 
@@ -87,6 +95,8 @@ class World:
 
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)
+
+        self.memory = Memory(config_data.memory_mode)
 
     def reset(self):
         """

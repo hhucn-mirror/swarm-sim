@@ -4,6 +4,7 @@ import json
 from ast import literal_eval as make_tuple
 from datetime import datetime
 
+from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import Mode
 from lib.oppnet.routing import Algorithm
@@ -86,6 +87,7 @@ class ConfigData:
         self.ms_size = config.getint("Routing", "ms_size")
         self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
         self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
+        self.scan_radius = config.getint("Routing", "scan_radius")
         self.message_ttl = config.getint("Routing", "message_ttl")
 
         self.mobility_model_mode = Mode(config.getint("MobilityModel", "mm_mode"))
@@ -96,6 +98,8 @@ class ConfigData:
                                            or (0.5, 1, 0)
         if type(self.mobility_model_starting_dir) is list:
             self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
+
+        self.memory_mode = MemoryMode(config.getint("Memory", "memory_mode"))
 
         try:
             self.scenario = config.get("File", "scenario")
