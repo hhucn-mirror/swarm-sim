@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 
 from lib.oppnet.communication import store_message
@@ -56,16 +57,9 @@ class Memory:
             new_msgs = []
             for m in self.memory[target]:
                 msg = m[0]
-                position = m[1]
-                start_round = m[2]
-                delta = m[3]
-                expirerate = m[4]
-                past_rounds = actual_round - start_round
-                distance = delta * past_rounds
-                particle_point = self.get_point_from_vector(
-                    world.get_particle_map_id()[target].coordinates)  # TODO check existing particle
-                distance_start_target = self.get_distance(position, particle_point)
-                if distance < expirerate:
+                expiry_rate = m[4]
+                distance, distance_start_target = self.__calculate_distances__(actual_round, m, target, world)
+                if distance < expiry_rate:
                     if distance >= distance_start_target:
                         store_message(msg, msg.get_sender(), msg.get_receiver())
                     else:
@@ -73,6 +67,20 @@ class Memory:
             if len(new_msgs) > 0:
                 new_memory[target] = new_msgs
         self.memory = new_memory
+
+    def __calculate_distances__(self, actual_round, m, target, world):
+        position = m[1]
+        start_round = m[2]
+        delta = m[3]
+        past_rounds = actual_round - start_round
+        distance = delta * past_rounds
+        if target in world.get_particle_map_id():
+            vector = world.get_particle_map_id()[target].coordinates
+            particle_point = self.get_point_from_vector(vector)
+            distance_start_target = self.get_distance(position, particle_point)
+        else:
+            distance_start_target = math.inf
+        return distance, distance_start_target
 
     @staticmethod
     def get_point_from_vector(vector):
