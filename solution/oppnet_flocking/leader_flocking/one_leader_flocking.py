@@ -16,11 +16,11 @@ def solution(world):
         leaders, followers = split_particles(particles, 1)
         initialise_leaders()
     else:
-        if current_round % 10 == 0:
-            initialise_leaders()
         update_t_wait_values(particles)
         process_received_messages()
         move_to_next_direction(particles)
+        if current_round % 10 == 0:
+            initialise_leaders()
 
 
 def set_t_wait_values():
@@ -57,7 +57,10 @@ def process_received_messages():
 
 
 def move_to_next_direction(particles):
+    particle_directions = {}
     for particle in particles:
         next_direction = particle.next_moving_direction()
         if next_direction:
-            particle.move_to(next_direction)
+            particle_directions[particle] = next_direction
+
+    particles[0].world.move_particles(particle_directions)

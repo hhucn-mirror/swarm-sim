@@ -48,6 +48,7 @@ class Particle(Particle):
 
         self.t_wait = t_wait
         self.chosen_direction = None
+        self.proposed_direction = None
 
         self.__flock_member_type__ = FlockMemberType.follower
 
@@ -67,6 +68,7 @@ class Particle(Particle):
 
     def set_t_wait(self, t_wait):
         self.t_wait = t_wait
+        self.__update_directions__()
 
     def set_flock_member_type(self, flock_member_type):
         self.__flock_member_type__ = flock_member_type
@@ -83,26 +85,31 @@ class Particle(Particle):
     def get_flock_member_type(self):
         return self.__flock_member_type__
 
+    def __update_directions__(self):
+        if self.t_wait == 0 and self.__flock_member_type__ == FlockMemberType.leader:
+            self.chosen_direction = self.proposed_direction
+            self.proposed_direction = None
+
     def decrement_t_wait(self):
         if self.t_wait:
             self.t_wait -= 1
+            self.__update_directions__()
 
     def choose_direction(self):
         dirs = self.world.grid.get_directions_dictionary()
-        self.chosen_direction = random.choice(list(dirs.values()))
-        return self.chosen_direction
+        self.proposed_direction = random.choice(list(dirs.values()))
+        return self.proposed_direction
 
     def broadcast_direction_proposal(self, proposed_direction=None):
         if not proposed_direction:
             proposed_direction = self.choose_direction()
-            self.chosen_direction = proposed_direction
 
         max_hops = self.routing_parameters.scan_radius
         neighbours = self.scan_for_particles_in(hop=max_hops)
 
         for hop in range(1, max_hops + 1):
             receivers = self.scan_for_particles_in(hop=hop)
-            content = LeaderMessageContent(self, proposed_direction, receivers, self.t_wait - hop + 1,
+            content = LeaderMessageContent(self, proposed_direction, receivers, self.t_wait - hop,
                                            LeaderMessageType.instruct)
             broadcast_message(self, neighbours, content)
 
@@ -150,5 +157,8 @@ class Particle(Particle):
     def next_moving_direction(self):
         if self.t_wait == 0:
             return self.chosen_direction
+        elif self.get_flock_member_type() == FlockMemberType.leader:
+            if self.proposed_direction:
+                return self.chosen_direction
         else:
             return None
