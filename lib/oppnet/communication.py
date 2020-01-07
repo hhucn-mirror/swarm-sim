@@ -28,7 +28,7 @@ class Message:
         self.seq_number = Message.seq_number
         self.key = self.__create_msg_key__()
         self.delivered = 0
-        if not self.start_round:
+        if not start_round:
             start_round = sender.world.get_actual_round()
         self.start_round = start_round
         self.delivery_round = 0
