@@ -31,6 +31,7 @@ class PMax(OwnDistance):
         self.p_max_dist = p_max.dist
         self.p_max_dir = 0
         self.p_max_table = deepcopy(p_max_table)
+        self.p_max_lifetime = p_max.lifetime
 
     def __str__(self):
         return OwnDistance.__str__(self) + " | max_id: " + str(self.p_max_id) + " | max_dist: " + \
@@ -64,6 +65,7 @@ class PMaxInfo:
         self.dist = -math.inf
         self.directions = []
         self.black_list = []
+        self.lifetime = 0
 
     def __str__(self):
         return "id: " + str(self.ids) + "|" + "dist: " + str(self.dist) + "|" + "direction: " + str(self.directions) \
@@ -77,3 +79,4 @@ class PMaxInfo:
         self.dist = -math.inf
         self.directions = []
         self.black_list.clear()
+        self.lifetime = 0

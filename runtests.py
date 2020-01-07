@@ -11,7 +11,7 @@ NUMBER_OF_SEEDS = 5
 MAX_ROUNDS = 10000
 SCENARIOS = ["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
              "concave_shape", "simple_shape", "tube_island", "strange_cave", "giant_cave"]
-SOLUTIONS = ["master.main", "base.main"]#, "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
+SOLUTIONS = ["master.main", "base.main", "p_max_lifetime.main"]#, "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
 
 
