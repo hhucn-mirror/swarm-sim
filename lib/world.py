@@ -4,6 +4,7 @@ It also have the the coordination system and stated the maximum of the x and y c
 
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
 """
+import collections
 import importlib
 import logging
 import os
@@ -14,7 +15,7 @@ import time
 from lib import tile, location, vis3d
 from lib.oppnet.memory import Memory
 from lib.oppnet.routing import RoutingParameters
-from lib.swarm_sim_header import eprint
+from lib.swarm_sim_header import eprint, get_coordinates_in_direction
 
 
 class World:
@@ -587,3 +588,36 @@ class World:
             return self.remove_location(self.location_map_coordinates[coordinates].get_id())
         else:
             return False
+
+    def move_particles(self, particle_directions: dict):
+        """
+        Moves all particles inside the :param particle_directions: keys
+        direction of the corresponding dictionary value. Moves them one
+        after another to avoid crowding locations.
+        :param particle_directions: particle -> direction dictionary
+        :type particle_directions: dict
+        """
+        particle_set = set(particle_directions.keys())
+        ordered_particles = collections.OrderedDict()
+        particle_map_coordinates = self.particle_map_coordinates
+        i = 0
+        while i < len(particle_directions) ** 2 and len(particle_set) > 0:
+            i += 1
+            for particle in list(particle_set):
+                direction = particle_directions[particle]
+                direction_coord = get_coordinates_in_direction(particle.coordinates, direction)
+                direction, direction_coord = particle.check_within_border(direction, direction_coord)
+                # remove the particle from the set if the next coordinates are not valid
+                if not self.grid.are_valid_coordinates(direction_coord):
+                    particle_set.remove(particle)
+                    del particle_map_coordinates[particle.coordinates]
+                # add it to the ordered dictionary
+                elif direction_coord not in particle_map_coordinates \
+                        and particle not in ordered_particles:
+                    particle_set.remove(particle)
+                    ordered_particles[particle] = direction
+                    if particle.coordinates in particle_map_coordinates:
+                        del particle_map_coordinates[particle.coordinates]
+
+        for particle, direction in ordered_particles.items():
+            particle.move_to(direction)
