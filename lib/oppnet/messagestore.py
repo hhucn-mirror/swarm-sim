@@ -43,6 +43,34 @@ class MessageStore(deque):
         """
         return super().__len__()
 
+    def pop(self, **kwargs):
+        """
+        Pops right element of the queue
+        :param kwargs: Unused Pyobject of collections.deque
+        :type kwargs: Pyobject
+        :return: right element of the deque
+        """
+        message = super().pop(**kwargs)
+        try:
+            self.keys.pop(message.key)
+        except KeyError:
+            pass
+        return message
+
+    def popleft(self, **kwargs):
+        """
+        Pops left element of the queue
+        :param kwargs: Unused Pyobject of collections.deque
+        :type kwargs: Pyobject
+        :return: left element of the deque
+        """
+        message = super().popleft()
+        try:
+            self.keys.pop(message.key)
+        except KeyError:
+            pass
+        return message
+
     def append(self, m: Message):
         """
         Appends :param m: to deque and adds its key. Handles a full deque by popping messages at the ends of the deque.
