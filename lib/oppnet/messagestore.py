@@ -80,14 +80,10 @@ class MessageStore(deque):
         if self.contains_key(m.key):
             return
         if self.maxlen == len(self):
-            k = list(self)[0].key
-            if self.strategy == BufferStrategy.lifo:
-                k = list(self)[-1].key
-                super().pop()
-            try:
-                self.keys.pop(k)
-            except KeyError:
-                pass
+            if self.strategy == BufferStrategy.fifo:
+                self.popleft()
+            else:
+                self.pop()
 
         super().append(m)
         self.__append_key__(m.key, m)
