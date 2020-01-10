@@ -3,7 +3,7 @@ from lib.world import World
 
 
 def scenario(world: World):
-    radius = 5
+    radius = 2
     centre = (0, 0)
 
     hexagon = get_hexagon_coordinates(centre, radius)

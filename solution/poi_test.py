@@ -15,7 +15,7 @@ def solution(sim):
         for i, particle in enumerate(particles):
             m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.POI,
                                     poi=(random.randint(-sim_x, sim_x), random.randint(-sim_y, sim_y)))
-            m_model.set(particle)
+            particle
     else:
         for particle in particles:
             m_model = MobilityModel.get(particle)

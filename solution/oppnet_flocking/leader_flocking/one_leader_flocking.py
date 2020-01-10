@@ -1,8 +1,8 @@
 from lib.oppnet.leader_flocking.opp_particle import FlockMemberType
 from lib.swarm_sim_header import red
 
-radius = 1
-t_wait = 2 * radius + 1
+radius = 2
+t_wait = 2 * radius
 
 
 def solution(world):
@@ -16,21 +16,15 @@ def solution(world):
         leaders, followers = split_particles(particles, 1)
         initialise_leaders()
     else:
-        update_t_wait_values(particles)
         process_received_messages()
         move_to_next_direction(particles)
-        if current_round % 10 == 0:
+        if current_round % 40 == 0:
             initialise_leaders()
 
 
 def set_t_wait_values():
     for particle in leaders:
         particle.set_t_wait(t_wait)
-
-
-def update_t_wait_values(particles):
-    for particle in particles:
-        particle.decrement_t_wait()
 
 
 def split_particles(particles, leader_count):
@@ -50,8 +44,8 @@ def initialise_leaders():
 
 def process_received_messages():
     for follower in followers:
-        received_messages = follower.get_all_received_messages()
-        next_instruct_message = follower.next_instruct_from_messages(received_messages)
+        follower.process_received_messages()
+        next_instruct_message = follower.get_current_instruct()
         if next_instruct_message:
             follower.broadcast_received_content(next_instruct_message)
 
@@ -62,5 +56,5 @@ def move_to_next_direction(particles):
         next_direction = particle.next_moving_direction()
         if next_direction:
             particle_directions[particle] = next_direction
-
-    particles[0].world.move_particles(particle_directions)
+    if particle_directions:
+        particles[0].world.move_particles(particle_directions)

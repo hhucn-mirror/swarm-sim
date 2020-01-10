@@ -1,4 +1,3 @@
-import math
 import random
 from enum import Enum
 
@@ -44,11 +43,15 @@ class Particle(Particle):
 
         self.routing_parameters = world.routing_parameters
 
-        self.signal_velocity = 1
+        self.signal_velocity = 2
 
         self.t_wait = t_wait
-        self.chosen_direction = None
+        self.instruct_round = None
+        self.__instruction__number = 1
+        self.current_direction = None
         self.proposed_direction = None
+
+        self.current_instruct_message = None
 
         self.__flock_member_type__ = FlockMemberType.follower
 
@@ -68,13 +71,9 @@ class Particle(Particle):
 
     def set_t_wait(self, t_wait):
         self.t_wait = t_wait
-        self.__update_directions__()
 
     def set_flock_member_type(self, flock_member_type):
         self.__flock_member_type__ = flock_member_type
-
-    def set_chosen_direction(self, chosen_direction):
-        self.chosen_direction = chosen_direction
 
     def get_all_received_messages(self):
         received = []
@@ -85,15 +84,8 @@ class Particle(Particle):
     def get_flock_member_type(self):
         return self.__flock_member_type__
 
-    def __update_directions__(self):
-        if self.t_wait == 0 and self.__flock_member_type__ == FlockMemberType.leader:
-            self.chosen_direction = self.proposed_direction
-            self.proposed_direction = None
-
-    def decrement_t_wait(self):
-        if self.t_wait:
-            self.t_wait -= 1
-            self.__update_directions__()
+    def get_current_instruct(self):
+        return self.current_instruct_message
 
     def choose_direction(self):
         dirs = self.world.grid.get_directions_dictionary()
@@ -109,9 +101,11 @@ class Particle(Particle):
 
         for hop in range(1, max_hops + 1):
             receivers = self.scan_for_particles_in(hop=hop)
-            content = LeaderMessageContent(self, proposed_direction, receivers, self.t_wait - hop,
-                                           LeaderMessageType.instruct)
-            broadcast_message(self, neighbours, content)
+            content = LeaderMessageContent(self, proposed_direction, neighbours, self.t_wait - hop,
+                                           LeaderMessageType.instruct, self.__instruction__number)
+            broadcast_message(self, receivers, content)
+        self.instruct_round = self.t_wait + self.world.get_actual_round()
+        self.__instruction__number += 1
 
     def broadcast_received_content(self, received):
         received_content = received.get_content()
@@ -120,45 +114,45 @@ class Particle(Particle):
             neighbours = self.scan_for_particles_in(hop=max_hops)
 
             for hop in range(1, max_hops + 1):
-                receivers = set(self.scan_for_particles_in(hop=hop)).difference({received.get_sender()})
+                exclude = set(received_content.get_receivers()).union({received.get_sender()})
+                receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
                 content = received_content.create_forward_copy(neighbours, hop)
                 broadcast_message(self, receivers, content)
 
-    def forward_received_messages(self, received_messages):
-        for received_message in received_messages:
-            self.broadcast_received_content(received_message)
+    def process_received_messages(self):
+        received_messages = self.get_all_received_messages()
+        if received_messages:
+            highest_number_message = self.__find_highest_number_message__(received_messages)
+            self.__update__instruct_round__(highest_number_message)
 
-    def next_instruct_from_messages(self, received_messages):
-        if self.t_wait:
-            min_t_wait = self.t_wait
+    def __find_highest_number_message__(self, received_messages):
+        highest_number_message = None
+        highest_number = -1
+        for message in received_messages:
+            content = message.get_content()
+            if isinstance(content, LeaderMessageContent):
+                if content.get_number() > highest_number:
+                    highest_number = content.get_number()
+                    highest_number_message = message
+            else:
+                print("opp_particle -> Particle {} received none LeaderMessageContent".format(self.number))
+        return highest_number_message
+
+    def __update__instruct_round__(self, highest_number_message):
+        highest_number = highest_number_message.get_content().get_number()
+        if self.current_instruct_message:
+            current_number = self.current_instruct_message.get_content().get_number()
         else:
-            min_t_wait = math.inf
-
-        next_direction = self.chosen_direction
-        next_instruct_message = None
-
-        for received_message in received_messages:
-            next_instruct_message = self.__update_min_t_wait__(received_message, min_t_wait, next_direction)
-
-        return next_instruct_message
-
-    def __update_min_t_wait__(self, message, min_t_wait, next_direction):
-        content = message.get_content()
-        next_instruct_message = None
-        if isinstance(content, LeaderMessageContent):
-            if content.get_t_wait() < min_t_wait:
-                self.set_t_wait(content.get_t_wait())
-                self.set_chosen_direction(content.get_proposed_direction())
-                next_instruct_message = message
-        else:
-            print("Particle {} received a message without LeaderMessageContent.".format(self.get_id()))
-        return next_instruct_message
+            current_number = 0
+        if highest_number > current_number:
+            self.instruct_round = self.world.get_actual_round() + highest_number_message.get_content().get_t_wait()
+            self.proposed_direction = highest_number_message.get_content().get_proposed_direction()
+            self.current_instruct_message = highest_number_message
 
     def next_moving_direction(self):
-        if self.t_wait == 0:
-            return self.chosen_direction
-        elif self.get_flock_member_type() == FlockMemberType.leader:
-            if self.proposed_direction:
-                return self.chosen_direction
-        else:
-            return None
+        try:
+            if self.world.get_actual_round() >= self.instruct_round:
+                self.current_direction = self.proposed_direction
+        except TypeError:
+            pass
+        return self.current_direction
