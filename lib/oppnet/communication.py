@@ -101,6 +101,14 @@ class Message:
         """
         return self.content
 
+    def get_hops(self):
+        """
+        Returns the number of hops the message has travelled.
+        :return: hops
+        :rtype: int
+        """
+        return self.hops
+
     def __copy__(self):
         """
         Creates a copy of the message object by reusing the same key and sequence number.
