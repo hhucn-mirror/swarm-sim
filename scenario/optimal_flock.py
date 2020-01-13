@@ -1,14 +1,14 @@
-from lib.swarm_sim_header import green
+from lib.swarm_sim_header import black
 from lib.world import World
 
 
 def scenario(world: World):
-    radius = 2
+    radius = world.config_data.flock_radius
     centre = (0, 0)
 
     hexagon = get_hexagon_coordinates(centre, radius)
     for l in hexagon:
-        world.add_particle(coordinates=l, color=green)
+        world.add_particle(coordinates=l, color=black)
 
 
 def get_hexagon_coordinates(centre, r_max):

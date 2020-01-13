@@ -7,7 +7,7 @@ from datetime import datetime
 from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import Mode
-from lib.oppnet.routing import Algorithm
+from lib.oppnet.routing import Algorithm, RoutingParameters
 
 
 class ConfigData:
@@ -84,11 +84,14 @@ class ConfigData:
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
         self.location_mm_size = config.getint("Matter", "location_mm_size")
 
-        self.ms_size = config.getint("Routing", "ms_size")
-        self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
-        self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
-        self.scan_radius = config.getint("Routing", "scan_radius")
+        self.message_store_size = config.getint("Routing", "ms_size")
+        self.message_store_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
+        routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
+        scan_radius = config.getint("Routing", "scan_radius")
+        self.routing_parameters = RoutingParameters(routing_algorithm, scan_radius)
+
         self.message_ttl = config.getint("Routing", "message_ttl")
+        self.signal_velocity = config.getint("Routing", "signal_velocity")
 
         self.mobility_model_mode = Mode(config.getint("MobilityModel", "mm_mode"))
         self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))
@@ -100,6 +103,8 @@ class ConfigData:
             self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
 
         self.memory_mode = MemoryMode(config.getint("Memory", "memory_mode"))
+
+        self.flock_radius = config.getint("Flocking", "flock_radius")
 
         try:
             self.scenario = config.get("File", "scenario")

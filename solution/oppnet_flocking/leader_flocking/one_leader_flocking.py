@@ -1,8 +1,7 @@
+import random
+
 from lib.oppnet.leader_flocking.opp_particle import FlockMemberType
 from lib.swarm_sim_header import red
-
-radius = 2
-t_wait = 2 * radius
 
 
 def solution(world):
@@ -11,31 +10,32 @@ def solution(world):
     current_round = world.get_actual_round()
     particles = world.get_particle_list()
     dirs = world.grid.get_directions_dictionary()
+    t_wait = world.config_data.flock_radius * 2
+    t_pick = t_wait * 2
 
     if current_round == 1:
         leaders, followers = split_particles(particles, 1)
-        initialise_leaders()
+        initialise_leaders(t_wait)
     else:
         process_received_messages()
         move_to_next_direction(particles)
-        if current_round % 40 == 0:
-            initialise_leaders()
+        if current_round % t_pick == 0:
+            initialise_leaders(t_wait)
 
 
-def set_t_wait_values():
+def set_t_wait_values(t_wait):
     for particle in leaders:
         particle.set_t_wait(t_wait)
 
 
 def split_particles(particles, leader_count):
-    # leader_set = set(random.sample(particles, leader_count))
-    leader_set = {particles[0]}
+    leader_set = set(random.sample(particles, leader_count))
     follower_set = set(particles).difference(leader_set)
     return leader_set, follower_set
 
 
-def initialise_leaders():
-    set_t_wait_values()
+def initialise_leaders(t_wait):
+    set_t_wait_values(t_wait)
     for leader in leaders:
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.leader)

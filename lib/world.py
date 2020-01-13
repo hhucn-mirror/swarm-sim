@@ -14,7 +14,6 @@ import time
 
 from lib import tile, location, vis3d
 from lib.oppnet.memory import Memory
-from lib.oppnet.routing import RoutingParameters
 from lib.swarm_sim_header import eprint, get_coordinates_in_direction
 
 
@@ -58,17 +57,7 @@ class World:
         self.config_data = config_data
         self.grid = config_data.grid
 
-        self.particle_ms_size = config_data.ms_size
-        self.particle_ms_strategy = config_data.ms_strategy
-
-        self.particle_mm_mode = config_data.mobility_model_mode
-        self.particle_mm_length = config_data.mobility_model_length
-        self.particle_mm_zone = config_data.mobility_model_zone
-        self.particle_mm_starting_dir = config_data.mobility_model_starting_dir
-
-        self.particle_scan_radius = config_data.scan_radius
-
-        self.routing_parameters = RoutingParameters(config_data.routing_algorithm, config_data.scan_radius)
+        self.routing_parameters = config_data.routing_parameters
 
         self.message_ttl = config_data.message_ttl
 
