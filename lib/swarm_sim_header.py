@@ -104,8 +104,12 @@ def generating_random_spraded_particles(world, max_size_particle):
         y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
         if y % 2 == 1:
             x = x + 0.5
-        if (x, y) not in world.tile_map_coordinates:
-            world.add_particle((x, y))
+        while (x, y, 0.0) in world.tile_map_coordinates:
+            x = random.randrange(-world.get_world_x_size(), world.get_world_x_size())
+            y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
+            if y % 2 == 1:
+                x = x + 0.5
+        world.add_particle((x, y, 0.0))
 
 
 def move_to_dest_step_by_step(particle, destiny, directions, prev_dir=None):
