@@ -123,7 +123,7 @@ def get_rps_slider(vis):
         vis.set_rounds_per_second(value)
         desc.setText("rounds per second (%d) : " % vis.get_rounds_per_second())
 
-    hbox.addWidget(create_slider(10, 2, 120, 1, vis.get_rounds_per_second(), set_rps), alignment=Qt.AlignBaseline)
+    hbox.addWidget(create_slider(10, 2, 240, 1, vis.get_rounds_per_second(), set_rps), alignment=Qt.AlignBaseline)
     return hbox
 
 
