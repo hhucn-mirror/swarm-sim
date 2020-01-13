@@ -50,7 +50,6 @@ def send_p_max(particle, targets):
             print("P", particle.number, "sends Pmax package", dist_package.p_max_dist, " to", target_particle.number,
                   " in direction", direction_number_to_string(target_direction))
         particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
-
         # send_distance_of_free_locations(particle, target_direction)
 
 
