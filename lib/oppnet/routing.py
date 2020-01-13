@@ -115,3 +115,57 @@ def __next_step_manet_epidemic__(particle):
 
     elif routing_params.manet_role == MANeTRole.Router:
         __next_step_epidemic__(particle)
+
+
+class RoutingContact:
+    def __init__(self, contact_id, target_id, hops):
+        self.__contact_id__ = contact_id
+        self.__target_id__ = target_id
+        self.__hops__ = hops
+
+    def get_contact_id(self):
+        return self.__contact_id__
+
+    def get_target_id(self):
+        return self.__target_id__
+
+    def get_hops(self):
+        return self.__hops__
+
+
+class RoutingMap(dict):
+
+    def __init__(self):
+        super(RoutingMap, self).__init__()
+        self.__max_hops_contact__ = None
+        self.__max_hops__ = -1
+
+    def add_contact(self, contact_id, target_id, hops, contact=None):
+        if not contact:
+            contact = RoutingContact(contact_id, target_id, hops)
+
+        if not contact.get_target_id() in self:
+            contacts = dict({contact.get_contact_id(): contact})
+            self[contact.get_target_id()] = contacts
+        else:
+            self[contact.get_target_id()][contact.get_contact_id()] = contact
+
+        if contact.get_hops() > self.__max_hops__ or self.__max_hops_contact__ is None:
+            self.__max_hops__ = contact.get_hops()
+            self.__max_hops_contact__ = contact
+
+    def get_contact(self, target_id, contact_id):
+        return self[target_id][contact_id]
+
+    def get_max_hops_(self):
+        return self.__max_hops__
+
+    def get_max_hops_contact(self):
+        return self.__max_hops_contact__
+
+    def update_contact(self, contact_id, target_id, hops):
+        self.add_contact(contact_id, target_id, hops)
+
+    def remove_contact(self, contact: RoutingContact):
+        target_entry = self[contact.get_target_id()]
+        del target_entry[contact.get_contact_id()]
