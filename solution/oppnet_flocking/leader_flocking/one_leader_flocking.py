@@ -39,16 +39,12 @@ def initialise_leaders(t_wait):
     for leader in leaders:
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.leader)
-        leader.broadcast_direction_proposal()
+        leader.broadcast_direction_instruct()
 
 
 def process_received_messages():
     for follower in followers:
         follower.process_received_messages()
-        next_instruct_message = follower.get_current_instruct()
-        if next_instruct_message:
-            follower.broadcast_received_content(next_instruct_message)
-
 
 def move_to_next_direction(particles):
     particle_directions = {}
