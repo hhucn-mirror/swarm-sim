@@ -43,14 +43,14 @@ def swarm_sim(argv):
 
 def draw_scenario(config_data, swarm_sim_world):
     mod = importlib.import_module('scenario.' + config_data.scenario)
-    mod.scenario(swarm_sim_world)
+    mod.scenario(swarm_sim_world, config_data.init_particle_count)
     if config_data.particle_random_order:
         random.shuffle(swarm_sim_world.particles)
 
 
 def read_cmd_args(argv, config_data):
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
+        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:pc:", ["solution=", "scenario="])
     except getopt.GetoptError:
         print('Error: swarm-swarm_sim_world.py -r <seed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
@@ -72,6 +72,8 @@ def read_cmd_args(argv, config_data):
             config_data.visualization = int(arg)
         elif opt in "-d":
             config_data.local_time = str(arg)
+        elif opt in "-pc":
+            config_data.init_particle_count = int(arg)
 
 
 def create_direction_for_data(config_data):

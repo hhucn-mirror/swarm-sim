@@ -72,7 +72,7 @@ class World:
             x = threading.Thread(target=mod.scenario, args=(self,))
             self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
         else:
-            mod.scenario(self)
+            mod.scenario(self, config_data.init_particle_count)
 
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)

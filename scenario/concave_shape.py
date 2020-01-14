@@ -1,9 +1,9 @@
 from lib.swarm_sim_header import *
 
-max=42
 
-
-def scenario(sim):
+def scenario(sim, particle_count):
+    if particle_count == -1:
+        particle_count = 42
     sim.add_tile((0, 0))
     sim.add_tile((-1.0, 0.0))
     sim.add_tile((-1.5, -1.0))
@@ -29,4 +29,4 @@ def scenario(sim):
     sim.add_tile((-3.5, 1.0))
     sim.add_tile((-4.5, 1.0))
     sim.add_location((0.0, 0.0))
-    generating_random_spraded_particles(sim, max)
+    generating_random_spraded_particles(sim, particle_count)

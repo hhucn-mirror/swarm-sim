@@ -7,11 +7,11 @@ import random
 import importlib
 from multiprocessing import Pool
 
-NUMBER_OF_SEEDS = 5
+NUMBER_OF_SEEDS = 20
 MAX_ROUNDS = 10000
-SCENARIOS = ["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
-             "concave_shape", "simple_shape", "tube_island", "strange_cave", "giant_cave"]
-SOLUTIONS = ["master.main", "base.main", "p_max_lifetime.main"]#, "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
+SCENARIOS = ["giant_cave"]#["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
+            # "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave"]
+SOLUTIONS = ["p_max_lifetime.main"]#, "base.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
 
 
@@ -39,7 +39,7 @@ def run_test(solution_scenario):
     avg = MAX_ROUNDS
     if (len(files) - failures) > 0:
         avg = sum / (len(files) - failures)
-    print("Solution ", solution, "in Scenario ", scenario, "done.")
+    print("Solution", solution, "in Scenario", scenario, "done.")
     return {"solution": solution, "scenario": scenario,
             "avg": avg, "fails": failures, "failed_seeds": failed_seeds}
 
