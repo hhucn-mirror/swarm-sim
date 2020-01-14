@@ -118,13 +118,13 @@ def __next_step_manet_epidemic__(particle):
 
 
 class RoutingContact:
-    def __init__(self, contact_id, target_id, hops):
-        self.__contact_id__ = contact_id
+    def __init__(self, contact_particle, target_id, hops):
+        self.__contact_particle__ = contact_particle
         self.__target_id__ = target_id
         self.__hops__ = hops
 
-    def get_contact_id(self):
-        return self.__contact_id__
+    def get_contact_particle(self):
+        return self.__contact_particle__
 
     def get_target_id(self):
         return self.__target_id__
@@ -140,22 +140,22 @@ class RoutingMap(dict):
         self.__max_hops_contact__ = None
         self.__max_hops__ = -1
 
-    def add_contact(self, contact_id, target_id, hops, contact=None):
+    def add_contact(self, contact_particle, target_id, hops, contact=None):
         if not contact:
-            contact = RoutingContact(contact_id, target_id, hops)
+            contact = RoutingContact(contact_particle, target_id, hops)
 
         if not contact.get_target_id() in self:
-            contacts = dict({contact.get_contact_id(): contact})
+            contacts = dict({contact.get_contact_particle(): contact})
             self[contact.get_target_id()] = contacts
         else:
-            self[contact.get_target_id()][contact.get_contact_id()] = contact
+            self[contact.get_target_id()][contact.get_contact_particle()] = contact
 
         if contact.get_hops() > self.__max_hops__ or self.__max_hops_contact__ is None:
             self.__max_hops__ = contact.get_hops()
             self.__max_hops_contact__ = contact
 
-    def get_contact(self, target_id, contact_id):
-        return self[target_id][contact_id]
+    def get_contact(self, target_particle, contact_id):
+        return self[target_particle][contact_id]
 
     def get_max_hops_(self):
         return self.__max_hops__
@@ -168,4 +168,4 @@ class RoutingMap(dict):
 
     def remove_contact(self, contact: RoutingContact):
         target_entry = self[contact.get_target_id()]
-        del target_entry[contact.get_contact_id()]
+        del target_entry[contact]

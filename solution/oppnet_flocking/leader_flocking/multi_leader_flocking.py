@@ -2,6 +2,7 @@ import random
 
 from lib.oppnet.leader_flocking.opp_particle import FlockMemberType
 from lib.swarm_sim_header import red
+from solution.oppnet_flocking.leader_flocking.message_types.leader_message import LeaderMessageType
 
 
 def solution(world):
@@ -14,13 +15,11 @@ def solution(world):
     t_pick = t_wait * 2
 
     if current_round == 1:
-        leaders, followers = split_particles(particles, 1)
+        leaders, followers = split_particles(particles, 2)
         initialise_leaders(t_wait)
     else:
         process_received_messages()
         move_to_next_direction(particles)
-        if current_round % t_pick == 0:
-            initialise_leaders(t_wait)
 
 
 def set_t_wait_values(t_wait):
@@ -39,12 +38,12 @@ def initialise_leaders(t_wait):
     for leader in leaders:
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.leader)
-        leader.broadcast_direction_instruct()
+        leader.broadcast_leader_message_(LeaderMessageType.propose)
 
 
 def process_received_messages():
-    for follower in followers:
-        follower.process_received_messages()
+    for particle in followers.union(leaders):
+        particle.process_received_messages()
 
 
 def move_to_next_direction(particles):
