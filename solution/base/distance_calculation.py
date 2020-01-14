@@ -56,7 +56,7 @@ def get_nh_dist(direction, type, rcv_buf):
     """
     if type == "t":
         return 0
-    if direction in rcv_buf:
+    elif direction in rcv_buf:
         return rcv_buf[direction].particle_distance
     return math.inf
 

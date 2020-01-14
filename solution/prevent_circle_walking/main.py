@@ -23,7 +23,6 @@ def solution(sim):
 
         if sim.get_actual_round() % cycle_no == 1:
             if particle.wait:
-                coating_mod.reset_attributes(particle)
                 particle.wait = False
             else:
                 move_cycle(particle, sim)
