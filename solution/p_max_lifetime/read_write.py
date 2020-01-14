@@ -83,6 +83,17 @@ def find_neighbor_particles(particle):
     return directions_with_particles
 
 
+def divide_neighbors(nh_list, neighbor_directions, own_distance):
+    p_max_targets = []
+    own_distance_targets = []
+    for direction in neighbor_directions:
+        if nh_list[direction].dist > own_distance:
+            own_distance_targets.append(direction)
+        else:
+            p_max_targets.append(direction)
+    return own_distance_targets, p_max_targets
+
+
 def send_pmax_to_neighbors(particle):
     """
     Sends information to all neighbors based on the particles own judgement
@@ -90,10 +101,14 @@ def send_pmax_to_neighbors(particle):
     :return: none
     """
     if particle.own_dist != math.inf:
+        directions_with_particles = find_neighbor_particles(particle)
+        own_distance_targets, p_max_targets = divide_neighbors(particle.nh_list,
+                                                               directions_with_particles,
+                                                               particle.own_dist)
         if particle.p_max.lifetime > 0:
             particle.p_max.lifetime -= 1
-            directions_with_particles = find_neighbor_particles(particle)
-            send_p_max(particle, directions_with_particles)
+            send_p_max(particle, p_max_targets)
+        send_own_distance(particle, own_distance_targets)
         if particle.p_max.lifetime == 0:
             particle.p_max.reset()
 
@@ -106,4 +121,7 @@ def send_own_dist_to_neighbors(particle):
     """
     if particle.own_dist != math.inf:
         directions_with_particles = find_neighbor_particles(particle)
-        send_own_distance(particle, directions_with_particles)
+        own_distance_targets, _ = divide_neighbors(particle.nh_list,
+                                                   directions_with_particles,
+                                                   particle.own_dist)
+        send_own_distance(particle, own_distance_targets)
