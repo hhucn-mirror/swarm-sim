@@ -90,8 +90,12 @@ def send_pmax_to_neighbors(particle):
     :return: none
     """
     if particle.own_dist != math.inf:
-        directions_with_particles = find_neighbor_particles(particle)
-        send_p_max(particle, directions_with_particles)
+        if particle.p_max.lifetime > 0:
+            particle.p_max.lifetime -= 1
+            directions_with_particles = find_neighbor_particles(particle)
+            send_p_max(particle, directions_with_particles)
+        if particle.p_max.lifetime == 0:
+            particle.p_max.reset()
 
 
 def send_own_dist_to_neighbors(particle):

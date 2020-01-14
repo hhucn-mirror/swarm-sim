@@ -11,6 +11,7 @@ import solution.goal_test as goal_test
 # contains:
 # p_max_with_id
 # prevent_circle_walking
+# p_max_lifetime
 
 cycle_no = 3
 
@@ -27,7 +28,6 @@ def solution(sim):
 
         if sim.get_actual_round() % cycle_no == 1:
             if particle.wait:
-                coating_mod.reset_attributes(particle)
                 particle.wait = False
             else:
                 move_cycle(particle, sim)

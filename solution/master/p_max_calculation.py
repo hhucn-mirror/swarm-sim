@@ -19,7 +19,10 @@ def find_p_max(particle):
         print("id | dist | direction")
         print(particle.p_max)
 
-    own_p_max(particle.own_dist, particle.p_max, particle.number, particle.nh_list)
+    if own_p_max(particle.own_dist, particle.p_max, particle.number, particle.nh_list):
+        particle.own_p_max_lifetime += 1
+        if particle.p_max.lifetime < particle.own_p_max_lifetime:
+            particle.p_max.lifetime = particle.own_p_max_lifetime
     global_p_max(particle)
 
     if debug and debug_p_max_calculation:
@@ -48,6 +51,7 @@ def own_p_max(own_distance, p_max, particle_number, nh_list):
             neighbor = nh_list[direction]
             if neighbor.type == "p" and p_max.dist < neighbor.dist:
                 p_max.dist = neighbor.dist
+        return True
     return False
 
 
@@ -62,8 +66,12 @@ def global_p_max(particle):
             if particle.rcv_buf[rcv_direction].p_max_dist > particle.p_max.dist:
                 particle.p_max.dist = particle.rcv_buf[rcv_direction].p_max_dist
                 particle.p_max.ids = deepcopy(particle.rcv_buf[rcv_direction].p_max_ids)
+                particle.p_max.lifetime = particle.rcv_buf[rcv_direction].p_max_lifetime
+                particle.own_p_max_lifetime = 0
             elif particle.rcv_buf[rcv_direction].p_max_dist == particle.p_max.dist:
                 particle.p_max.ids |= particle.rcv_buf[rcv_direction].p_max_ids
+                if particle.p_max.lifetime < particle.rcv_buf[rcv_direction].p_max_lifetime:
+                    particle.p_max.lifetime = particle.rcv_buf[rcv_direction].p_max_lifetime
     return False
 
 

@@ -27,6 +27,7 @@ def initialize_particle(particle):
 
     # p: particle
     setattr(particle, "p_max", solution_header.PMaxInfo())
+    setattr(particle, "own_p_max_lifetime", 0)
     setattr(particle, "wait", False)
     setattr(particle, "max_prev_dirs", 2)
 
@@ -44,6 +45,7 @@ def reset_attributes(particle):
     particle.nh_list = [solution_header.Neighbor("fl", math.inf)] * 6
     particle.next_direction = False
     particle.read_whole_memory().clear()
+    particle.own_p_max_lifetime = 0
 
 
 def reset_p_max(particle):
