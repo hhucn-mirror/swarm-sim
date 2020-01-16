@@ -90,8 +90,17 @@ class Message:
         """
         Returns the current sender.
         :return: the current sender
+        :rtype: Particle
         """
         return self.sender
+
+    def get_original_sender(self):
+        """
+        Returns the original sender.
+        :return: the original sender
+        :rtype: Particle
+        """
+        return self.original_sender
 
     def get_content(self):
         """

@@ -118,16 +118,16 @@ def __next_step_manet_epidemic__(particle):
 
 
 class RoutingContact:
-    def __init__(self, contact_particle, target_id, hops):
+    def __init__(self, contact_particle, target_particle, hops):
         self.__contact_particle__ = contact_particle
-        self.__target_id__ = target_id
+        self.__target_particle__ = target_particle
         self.__hops__ = hops
 
     def get_contact_particle(self):
         return self.__contact_particle__
 
-    def get_target_id(self):
-        return self.__target_id__
+    def get_target_particle(self):
+        return self.__target_particle__
 
     def get_hops(self):
         return self.__hops__
@@ -140,15 +140,15 @@ class RoutingMap(dict):
         self.__max_hops_contact__ = None
         self.__max_hops__ = -1
 
-    def add_contact(self, contact_particle, target_id, hops, contact=None):
+    def add_contact(self, contact_particle, target_particle, hops, contact=None):
         if not contact:
-            contact = RoutingContact(contact_particle, target_id, hops)
+            contact = RoutingContact(contact_particle, target_particle, hops)
 
-        if not contact.get_target_id() in self:
-            contacts = dict({contact.get_contact_particle(): contact})
-            self[contact.get_target_id()] = contacts
+        if target_particle not in self:
+            contacts = dict({contact_particle: contact})
+            self[target_particle] = contacts
         else:
-            self[contact.get_target_id()][contact.get_contact_particle()] = contact
+            self[target_particle][contact_particle] = contact
 
         if contact.get_hops() > self.__max_hops__ or self.__max_hops_contact__ is None:
             self.__max_hops__ = contact.get_hops()
@@ -163,9 +163,15 @@ class RoutingMap(dict):
     def get_max_hops_contact(self):
         return self.__max_hops_contact__
 
-    def update_contact(self, contact_id, target_id, hops):
-        self.add_contact(contact_id, target_id, hops)
+    def update_contact(self, contact_particle, target_particle, hops):
+        self.add_contact(contact_particle, target_particle, hops)
 
     def remove_contact(self, contact: RoutingContact):
-        target_entry = self[contact.get_target_id()]
+        target_entry = self[contact.get_target_particle()]
         del target_entry[contact]
+
+    def get_all_contact_particles(self):
+        all_contacts = []
+        for _, contacts in self.items():
+            all_contacts.extend(contacts.keys())
+        return all_contacts

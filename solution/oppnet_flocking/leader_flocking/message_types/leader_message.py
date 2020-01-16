@@ -11,16 +11,16 @@ class LeaderMessageType(Enum):
 
 class LeaderMessageContent:
 
-    def __init__(self, leader, proposed_direction, receivers, t_wait, message_type, number):
+    def __init__(self, sending_leader, proposed_direction, receivers, t_wait, message_type, number):
         self.__number__ = number
-        self.__leader__ = leader
+        self.__sending_leader__ = sending_leader
         self.__proposed__direction = proposed_direction
         self.__receivers__ = receivers
         self.__t_wait__ = t_wait
         self.__message_type__ = message_type
 
-    def get_leader(self):
-        return self.__leader__
+    def get_sending_leader(self):
+        return self.__sending_leader__
 
     def get_proposed_direction(self):
         return self.__proposed__direction
@@ -39,7 +39,7 @@ class LeaderMessageContent:
 
     def create_forward_copy(self, new_receivers, t_wait_decrement=1):
         new_t_wait = self.get_t_wait() - t_wait_decrement
-        forward_copy = type(self)(self.get_leader(), self.get_proposed_direction(), new_receivers, new_t_wait,
+        forward_copy = type(self)(self.get_sending_leader(), self.get_proposed_direction(), new_receivers, new_t_wait,
                                   self.get_message_type(), self.__number__)
         return forward_copy
 
