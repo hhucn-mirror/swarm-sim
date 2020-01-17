@@ -104,7 +104,7 @@ def generating_random_spraded_particles(world, max_size_particle):
         y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
         if y % 2 == 1:
             x = x + 0.5
-        while (x, y, 0.0) in world.tile_map_coordinates:
+        while (x, y, 0.0) in world.tile_map_coordinates or (x, y, 0.0) in world.particle_map_coordinates:
             x = random.randrange(-world.get_world_x_size(), world.get_world_x_size())
             y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
             if y % 2 == 1:
