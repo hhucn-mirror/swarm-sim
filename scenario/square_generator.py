@@ -53,7 +53,7 @@ def scenario(sim):
 
     #sim.add_particle(end_point_on_x[0] -0.5 , 1)
     #creates locations on the y coordinate from the starting_point
-    for i in range (0, 2*square_size +1):
+    for i in range (0,  square_size +1):
         end_point_on_y = (starting_point[0], (starting_point[1] + i))
         if i % 2 == 1:
             sim.add_location(end_point_on_y[0] - 0.5, end_point_on_y[1] )
@@ -63,17 +63,21 @@ def scenario(sim):
 
     #sim.add_particle(end_point_on_y[0] +0.5, end_point_on_y[1] - 1)
     #creates locations on the y coordinate from the ending point of the x coordinate
-    for i in range (0,  2*square_size+1):
+    for i in range (0,  square_size+1):
         if i % 2 == 1:
             sim.add_location(end_point_on_x[0] + 0.5, end_point_on_x[1] + i)
             continue
         sim.add_location(end_point_on_x[0], end_point_on_x [1]+i )
 
-    sim.add_particle(end_point_on_x[0]-0.5, end_point_on_x [1]+i-1)
+    #sim.add_particle(end_point_on_x[0]-0.5, end_point_on_x [1]+i-1)
 
-    #sim.add_particle(end_point_on_y[0] +0.5, end_point_on_y[1] - 1)
+
+    sim.add_particle(square_size/2+0.5, round(square_size/2))
     #creates locations on the x coordinate from the ending point of the y coordinate
     for i in range (0, square_size+1):
-        sim.add_location(end_point_on_y[0] + i, end_point_on_y[1] )
+        if square_size % 2 == 1:
+            sim.add_location(end_point_on_y[0] + i +0.5, end_point_on_y[1])
+        else:
+            sim.add_location(end_point_on_y[0] + i, end_point_on_y[1] )
 
 
