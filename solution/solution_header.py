@@ -51,6 +51,9 @@ class Neighbor:
     def __str__(self):
         return str(self.type) + " | " + str(self.dist)
 
+    def __repr__(self):
+        return str(self)
+
 
 class PMaxInfo:
     def __init__(self):
