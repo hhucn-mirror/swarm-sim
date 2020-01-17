@@ -7,41 +7,60 @@ import random
 import importlib
 from multiprocessing import Pool
 
-NUMBER_OF_SEEDS = 20
+NUMBER_OF_SEEDS = 5
+MAX_PARTICLE_COUNT = 100
+MIN_PARTICLE_COUNT = 70
+USE_PARTICLE_COUNT = True
 MAX_ROUNDS = 10000
-SCENARIOS = ["giant_cave"]#["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
-            # "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave"]
+SCENARIOS = ["single_tile_few_particles"]#["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
+            # "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave"]
 SOLUTIONS = ["p_max_lifetime.main"]#, "base.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
 
 
-def run_test(solution_scenario):
+def run_test(args):
     simulator = importlib.import_module("swarm-sim")
+    solution = args[0]
+    scenario = args[1]
+    seed = args[2]
+    particle_count = args[3]
+    simulator.swarm_sim(["-r", str(seed), "-w", scenario, "-s", solution, "-v", "0",
+                         "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-42", "-m", "1", "-p", particle_count])
+
+def eval_test(solution_scenario):
     solution = solution_scenario[0]
     scenario = solution_scenario[1]
-    for i in range(NUMBER_OF_SEEDS):
-        simulator.swarm_sim(["-r", str(random.randint(0, sys.maxsize)), "-w", scenario, "-s", solution, "-v", "0",
-                             "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-42", "-m", "1"])
     files = glob("./outputs/mulitple/1337-01-11_13-37-42_" + scenario + "_" +
-                 solution.split(".")[0] + "/*/rounds.csv")
-    sum = 0
-    failures = 0
-    failed_seeds = []
+                 solution.split(".")[0] + "/*/aggregate_rounds.csv")
+    data_by_particle_count = {}
     for file in files:
         data = pandas.read_csv(file)
-        line = data.tail(1)["Round Number"].values
-        if len(line > 0):
-            if line[0] < MAX_ROUNDS:
-                sum += line[0]
+        particle_count = data["Particle Counter"].values[0]
+        if data_by_particle_count.get(particle_count) is None:
+            data_by_particle_count[particle_count] = []
+        data_by_particle_count[particle_count].append(data)
+    output_map = {} # particle_count -> output data
+    for particle_count, data_list in data_by_particle_count.items():
+        sum = 0
+        failures = 0
+        failed_seeds = []
+        successful_seeds = []
+        for data in data_list:
+            rounds_taken = data["Rounds Total"].values[0]
+            if rounds_taken < MAX_ROUNDS:
+                sum += rounds_taken
+                successful_seeds.append(data["Seed"].values[0])
             else:
                 failures += 1
-                failed_seeds.append(file.split("\\")[-2])
-    avg = MAX_ROUNDS
-    if (len(files) - failures) > 0:
-        avg = sum / (len(files) - failures)
+                failed_seeds.append(data["Seed"].values[0])
+        avg = MAX_ROUNDS
+        if (len(data_list) - failures) > 0:
+            avg = sum / (len(data_list) - failures)
+        output_map[particle_count] = {"avg": avg, "fails": failures, "failed_seeds": failed_seeds,
+                                      "successful_seeds": successful_seeds}
     print("Solution", solution, "in Scenario", scenario, "done.")
     return {"solution": solution, "scenario": scenario,
-            "avg": avg, "fails": failures, "failed_seeds": failed_seeds}
+            "output_data": output_map}
 
 
 def output_sorter(test):
@@ -50,18 +69,36 @@ def output_sorter(test):
 
 if __name__ == "__main__":
     pandas.set_option("display.max_columns", 100)
-    if os.path.isdir("/Users/Gorden/Python/swarm-sim/outputs"):
-        shutil.rmtree("/Users/Gorden/Python/swarm-sim/outputs")
+    if os.path.isdir("./outputs"):
+        shutil.rmtree("./outputs")
     solutions_scenarios = ((solution, scenario) for scenario in SCENARIOS for solution in SOLUTIONS)
+    if USE_PARTICLE_COUNT:
+        args = ((solution, scenario, random.randint(0, sys.maxsize), particle_count)
+                for scenario in SCENARIOS
+                for solution in SOLUTIONS
+                for _ in range(NUMBER_OF_SEEDS)
+                for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, 5))
+    else:
+        args = ((solution, scenario, random.randint(0, sys.maxsize), -1)
+                for scenario in SCENARIOS
+                for solution in SOLUTIONS
+                for _ in range(NUMBER_OF_SEEDS))
     with Pool(processes=4) as pool:
         print("starting")
-        output = list(pool.map(run_test, solutions_scenarios))
+        list(pool.map(run_test, args))
+        print("test done, starting evaluation")
+        output = list(pool.map(eval_test, solutions_scenarios))
         output.sort(key=output_sorter)
     outfile = open("./outputs/output.txt", "w+")
     for test in output:
         outfile.write("Solution: " + str(test["solution"]) + "\n")
         outfile.write("scenario: " + str(test["scenario"]) + "\n")
-        outfile.write("avg rounds taken: " + str(test["avg"]) + "\n")
-        outfile.write("failed simulations: " + str(test["fails"]) + "\n")
-        if test["fails"] > 0:
-            outfile.write("failed seeds: " + str(test["failed_seeds"]) + "\n")
+        sorted_output = sorted(list(test["output_data"].items()), key=lambda x: x[0])
+        for particle_count, test_data in sorted_output:
+            outfile.write(" Particle count: " + str(particle_count) + "\n")
+            outfile.write("     avg rounds taken: " + str(test_data["avg"]) + "\n")
+            if test_data["avg"] < MAX_ROUNDS:
+                outfile.write("     successful seeds: " + str(test_data["successful_seeds"]) + "\n")
+            outfile.write("     failed simulations: " + str(test_data["fails"]) + "\n")
+            if test_data["fails"] > 0:
+                outfile.write("     failed seeds: " + str(test_data["failed_seeds"]) + "\n")
