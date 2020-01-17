@@ -39,6 +39,8 @@ def scan_nh(particle):
     for direction in direction_list:
         if particle.particle_in(direction):
             nh_list.append(solution_header.Neighbor("p", math.inf))
+            if direction not in particle.rcv_buf and particle.own_dist < math.inf:
+                particle.wait = True
         elif particle.tile_in(direction):
             nh_list.append(solution_header.Neighbor("t", 0))
         else:
