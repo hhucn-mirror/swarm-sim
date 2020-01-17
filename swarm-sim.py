@@ -50,7 +50,7 @@ def draw_scenario(config_data, swarm_sim_world):
 
 def read_cmd_args(argv, config_data):
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:pc:", ["solution=", "scenario="])
+        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:p:", ["solution=", "scenario="])
     except getopt.GetoptError:
         print('Error: swarm-swarm_sim_world.py -r <seed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
@@ -72,7 +72,7 @@ def read_cmd_args(argv, config_data):
             config_data.visualization = int(arg)
         elif opt in "-d":
             config_data.local_time = str(arg)
-        elif opt in "-pc":
+        elif opt in "-p":
             config_data.init_particle_count = int(arg)
 
 
