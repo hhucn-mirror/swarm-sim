@@ -27,10 +27,10 @@ def solution(sim):
             else:
                 move_cycle(particle, sim)
 
-        elif sim.get_actual_round() % cycle_no == 2 and not particle.wait:
+        elif sim.get_actual_round() % cycle_no == 2:
             read_cycle(particle)
 
-        elif sim.get_actual_round() % cycle_no == 0 and not particle.wait:
+        elif sim.get_actual_round() % cycle_no == 0:
             write_cycle(particle)
 
     goal_test.end_sim(sim)
