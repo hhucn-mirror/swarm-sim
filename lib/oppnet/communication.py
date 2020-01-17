@@ -158,6 +158,12 @@ class Message:
             self.delivery_round = delivery_round
         self.delivered += 1
 
+    def set_content(self, content):
+        self.content = content
+
+    def set_ttl(self, ttl):
+        self.ttl = ttl
+
 
 def send_message(sender, receiver, message: Message):
     """
@@ -189,7 +195,7 @@ def send_message(sender, receiver, message: Message):
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
 
 
-def broadcast_message(sender, receivers, message_content):
+def broadcast_message(sender, receivers, message_content, ttl):
     """
     Sends :param message_content: from :param sender: to all :param receivers: by giving it to the memory module.
     Checks beforehand if ttl has expired and in such case does not send it.
@@ -198,11 +204,13 @@ def broadcast_message(sender, receivers, message_content):
     :param receivers: The intended receivers of the message.
     :type receivers: :class:`~opp_particle.Particle`
     :param message_content: The content of the message to be send.
-    :type message_content: any`
+    :type message_content: any
+    :param ttl: time to live of the messages
+    :type ttl: int
     """
 
     for receiver in receivers:
-        message = Message(sender, receiver, content=message_content)
+        message = Message(sender, receiver, content=message_content, ttl=ttl)
         send_message(sender, receiver, message)
 
 

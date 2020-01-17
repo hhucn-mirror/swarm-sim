@@ -17,7 +17,7 @@ class LeaderMessageContent:
         self.__proposed__direction = proposed_direction
         self.__receivers__ = receivers
         self.__t_wait__ = t_wait
-        self.__message_type__ = message_type
+        self.message_type = message_type
 
     def get_sending_leader(self):
         return self.__sending_leader__
@@ -32,7 +32,7 @@ class LeaderMessageContent:
         return self.__t_wait__
 
     def get_message_type(self):
-        return self.__message_type__
+        return self.message_type
 
     def get_number(self):
         return self.__number__
