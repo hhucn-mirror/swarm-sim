@@ -69,7 +69,7 @@ class World:
 
         if config_data.visualization:
             import threading
-            x = threading.Thread(target=mod.scenario, args=(self,))
+            x = threading.Thread(target=mod.scenario, args=(self, self.config_data.init_particle_count,))
             self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
         else:
             mod.scenario(self, config_data.init_particle_count)
@@ -119,7 +119,7 @@ class World:
 
         if self.config_data.visualization:
             # if visualization is on, run the scenario in a separate thread and show that the program runs..
-            x = threading.Thread(target=mod.scenario, args=(self,))
+            x = threading.Thread(target=mod.scenario, args=(self, self.config_data.init_particle_count,))
             self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
             self.vis.update_visualization_data()
 
