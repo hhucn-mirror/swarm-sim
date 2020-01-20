@@ -170,6 +170,9 @@ class RoutingMap(dict):
         target_entry = self[contact.get_target_particle()]
         del target_entry[contact]
 
+    def remove_target(self, target_particle):
+        del self[target_particle]
+
     def get_all_contact_particles(self):
         all_contacts = []
         for _, contacts in self.items():

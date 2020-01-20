@@ -20,7 +20,8 @@ class LeaderStateName(Enum):
     WaitingForCommits = 0,
     WaitingForDiscoverAck = 1,
     CommittedToInstruct = 2,
-    PerformingInstruct = 3
+    PerformingInstruct = 3,
+    SendInstruct = 4
 
 
 class LeaderState:
@@ -43,10 +44,13 @@ class LeaderState:
         except KeyError:
             print("LeaderState -> remove_from_waiting() tried not existing removed key.")
 
-    def is_completed(self):
+    def get_waiting_ids(self):
+        return self.__waiting_ids__
+
+    def is_completed(self, current_round):
         if self.__leader_state_name__ in [LeaderStateName.WaitingForCommits, LeaderStateName.WaitingForDiscoverAck,
                                           LeaderStateName.CommittedToInstruct]:
-            return len(self.__waiting_ids__) == 0
+            return self.__end_round__ <= current_round
         else:
             return True
 
@@ -98,7 +102,7 @@ class Particle(Particle):
         self.follower_contacts = RoutingMap()
 
         self.next_direction_proposal_round = None
-        self.__back_off_number__ = 0
+        self.__next_proposal_seed__ = 0
         self.__leader_states__ = dict()
 
     def __init_message_stores__(self, ms_size, ms_strategy):
@@ -113,12 +117,21 @@ class Particle(Particle):
 
     def set_t_wait(self, t_wait):
         self.t_wait = t_wait
-        self.set_random_next_direction_proposal_round()
 
-    def set_random_next_direction_proposal_round(self):
-        self.__back_off_number__ += 1
-        self.next_direction_proposal_round = self.world.get_actual_round() + random.randint(1, self.__back_off_number__
-                                                                                            * self.t_wait + self.number)
+    def set_next_direction_proposal_round(self, next_round):
+        if not next_round:
+            print("b")
+        self.next_direction_proposal_round = next_round
+        self.__next_proposal_seed__ = next_round
+
+    def update_next_direction_proposal_round(self):
+        if not self.next_direction_proposal_round:
+            print("b")
+        self.__next_proposal_seed__ = self.next_direction_proposal_round
+        self.next_direction_proposal_round = None
+
+    def reset_random_next_direction_proposal_round(self):
+        self.next_direction_proposal_round = self.__next_proposal_seed__ * 2
 
     def set_flock_member_type(self, flock_member_type):
         self.__flock_member_type__ = flock_member_type
@@ -130,6 +143,12 @@ class Particle(Particle):
         while len(self.send_store) > 0:
             received.append(self.send_store.pop())
         return received
+
+    def get_all_to_forward(self):
+        to_forward = []
+        while len(self.send_store) > 0:
+            to_forward.append(self.send_store.pop())
+        return to_forward
 
     def get_flock_member_type(self):
         return self.__flock_member_type__
@@ -145,11 +164,21 @@ class Particle(Particle):
         if hops * 2 > self.t_wait:
             self.t_wait = hops * 2
 
-    def delete_route(self, contact: RoutingContact, target, is_leader=False):
+    def delete_route(self, contact: RoutingContact, is_leader=False):
         if is_leader:
             self.leader_contacts.remove_contact(contact)
         else:
             self.follower_contacts.remove_contact(contact)
+
+    def delete_target_routes(self, target_id, is_leader=False):
+        try:
+            target_particle = self.world.get_particle_map_id()[target_id]
+            if is_leader:
+                self.leader_contacts.remove_target(target_particle)
+            else:
+                self.follower_contacts.remove_target(target_particle)
+        except KeyError:
+            print("opp_particle -> delete_target_routes() tried deleting non-existant target_id.")
 
     def choose_direction(self):
         dirs = self.world.grid.get_directions_dictionary()
@@ -172,21 +201,21 @@ class Particle(Particle):
     def __is__waiting_for_commit__(self):
         if LeaderStateName.WaitingForCommits in self.__leader_states__:
             leader_state = self.__leader_states__[LeaderStateName.WaitingForCommits]
-            return not leader_state.is_completed()
+            return not leader_state.is_completed(self.world.get_actual_round())
         else:
             return False
 
     def __is_committed_to_instruct__(self):
         if LeaderStateName.CommittedToInstruct in self.__leader_states__:
             leader_state = self.__leader_states__[LeaderStateName.CommittedToInstruct]
-            return not leader_state.is_completed()
+            return not leader_state.is_completed(self.world.get_actual_round())
         else:
             return False
 
     def __is__waiting_for_discover_ack__(self):
         if LeaderStateName.WaitingForDiscoverAck in self.__leader_states__:
             leader_state = self.__leader_states__[LeaderStateName.WaitingForDiscoverAck]
-            return leader_state.is_completed()
+            return leader_state.is_completed(self.world.get_actual_round())
         else:
             return False
 
@@ -253,11 +282,14 @@ class Particle(Particle):
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
             content = received_content.create_forward_copy(all_receivers, hop)
-            broadcast_message(self, receivers, content, ttl=hop)
+            received_message.set_content(content)
+            for receiver in receivers:
+                send_message(self, receiver, received_message)
 
-    def forward_to_leader_via_contacts(self, received_message):
+    def forward_to_leader_via_contacts(self, received_message, receiving_leader=None):
         received_content = received_message.get_content()
-        receiving_leader = received_message.get_actual_receiver()
+        if not receiving_leader:
+            receiving_leader = received_message.get_actual_receiver()
         if receiving_leader not in self.leader_contacts:
             self.broadcast_received_content(received_message)
         else:
@@ -292,8 +324,7 @@ class Particle(Particle):
         if isinstance(contact, RoutingContact):
             contact = contact.get_contact_particle()
         try:
-            t_wait = self.t_wait
-            # t_wait = self.t_wait - self.leader_contacts.get_contact(leader, contact).get_hops()
+            t_wait = self.t_wait - self.leader_contacts.get_contact(leader, contact).get_hops()
         except KeyError:
             t_wait = self.t_wait
         return t_wait
@@ -304,16 +335,20 @@ class Particle(Particle):
             if leader_state.is_timed_out(self.world.get_actual_round()):
                 keys_to_delete.append(leader_state_name)
         for leader_state_name in keys_to_delete:
-            del self.__leader_states__[leader_state_name]
             if leader_state_name == LeaderStateName.WaitingForCommits:
-                self.set_random_next_direction_proposal_round()
+                self.reset_random_next_direction_proposal_round()
+            del self.__leader_states__[leader_state_name]
 
     def process_received_messages(self):
-        received_messages = self.get_all_received_messages()
+        all_messages = self.get_all_received_messages()
         if self.get_flock_member_type() == FlockMemberType.follower:
-            self.__process_as_follower__(received_messages)
+            self.__process_as_follower__(all_messages)
         elif self.get_flock_member_type() == FlockMemberType.leader:
-            self.__process_as_leader__(received_messages)
+            self.__process_as_leader__(all_messages)
+
+    def __forward_messages__(self):
+        for to_forward in list(self.send_store):
+            send_message(self, to_forward.get_actual_receiver(), to_forward)
 
     def __process_as_leader__(self, received_messages: [Message]):
         remaining = self.__process_commit_and_ack__(received_messages)
@@ -335,8 +370,16 @@ class Particle(Particle):
             if isinstance(content, LeaderMessageContent):
                 message_type = content.get_message_type()
                 sending_leader = content.get_sending_leader()
-                if sending_leader not in self.leader_contacts:
+                if (sending_leader not in self.leader_contacts) and sending_leader.get_id() != self.get_id():
                     self.__new_leader_found__(message, sending_leader)
+                if not message_type == LeaderMessageType.instruct:
+                    # send discover messages to the receiver of every non-instruct message receiver
+                    actual_receiver = message.get_actual_receiver()
+                    if actual_receiver.get_id() != self.get_id():
+                        if actual_receiver not in self.leader_contacts:
+                            self.__new_leader_found__(message, actual_receiver)
+                        else:
+                            self.forward_to_leader_via_contacts(message, actual_receiver)
                 if message_type == LeaderMessageType.commit:
                     self.__process_commit_as_leader__(message)
                 elif message_type == LeaderMessageType.discover_ack:
@@ -350,7 +393,7 @@ class Particle(Particle):
         self.__send_content_to_leader_via_contacts__(self, sending_leader, LeaderMessageType.discover)
         self.__add_leader_state__(LeaderStateName.WaitingForDiscoverAck, set(sending_leader.get_id()),
                                   self.world.get_actual_round(), message.get_hops() * 2)
-        self.next_direction_proposal_round = None
+        self.update_next_direction_proposal_round()
 
     def __process_instruct_as_leader__(self, message: Message):
         if self.__update__instruct_round_as_leader__(message):
@@ -360,8 +403,9 @@ class Particle(Particle):
         content = message.get_content()
         if message.get_actual_receiver() == self:
             self.__remove_id_from_states__(content.get_sending_leader().get_id(), LeaderStateName.WaitingForCommits)
-            if not self.__is__waiting_for_commit__():
+            if not self.__is__waiting_for_commit__() and LeaderStateName.SendInstruct not in self.__leader_states__:
                 self.broadcast_direction_instruct()
+                self.__add_leader_state__(LeaderStateName.SendInstruct, set(), self.world.get_actual_round(), 1)
         else:
             self.__process_commit_as_follower__(message)
 
@@ -370,27 +414,30 @@ class Particle(Particle):
         if message.get_actual_receiver() == self:
             self.__send_content_to_leader_via_contacts__(self, content.get_sending_leader(),
                                                          LeaderMessageType.discover_ack)
-        else:
+        if message.get_hops() < self.t_wait:
             self.__process_discover_as_follower__(message)
+        else:
+            print("check")
 
     def __process_discover_ack_as_leader__(self, message: Message):
         content = message.get_content()
         if message.get_actual_receiver() == self:
             self.__remove_id_from_states__(content.get_sending_leader().get_id(), LeaderStateName.WaitingForDiscoverAck)
             if not self.__is__waiting_for_discover_ack__():
-                self.set_random_next_direction_proposal_round()
+                self.reset_random_next_direction_proposal_round()
         else:
             self.__process_discover_ack_as_follower__(message)
 
     def __process_propose_as_leader__(self, message: Message):
         if self.__is__waiting_for_commit__() or self.__is_committed_to_instruct__():
             return
-        self.next_direction_proposal_round = None
+        self.update_next_direction_proposal_round()
         content = message.get_content()
         sending_leader = content.get_sending_leader()
         self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader.get_id},
                                   self.world.get_actual_round(), message.get_hops() * 2)
         self.__send_content_to_leader_via_contacts__(self, content.get_sending_leader(), LeaderMessageType.commit)
+        self.__process_propose_as_follower__(message)
         self.__instruction_number__ = content.get_number()
 
     def __process_as_follower__(self, received_messages: [Message]):
@@ -420,24 +467,16 @@ class Particle(Particle):
             self.broadcast_received_content(self.current_instruct_message)
 
     def __process_commit_as_follower__(self, message: Message):
-        content = message.get_content()
-        if content.get_number() > self.__instruction_number__:
-            self.forward_to_leader_via_contacts(message)
+        self.forward_to_leader_via_contacts(message)
 
     def __process_discover_as_follower__(self, message: Message):
-        content = message.get_content()
-        if content.get_number() > self.__instruction_number__:
-            self.forward_to_leader_via_contacts(message)
+        self.forward_to_leader_via_contacts(message)
 
     def __process_discover_ack_as_follower__(self, message: Message):
-        content = message.get_content()
-        if content.get_number() > self.__instruction_number__:
-            self.forward_to_leader_via_contacts(message)
+        self.forward_to_leader_via_contacts(message)
 
     def __process_propose_as_follower__(self, message: Message):
-        content = message.get_content()
-        if content.get_number() > self.__instruction_number__:
-            self.forward_to_leader_via_contacts(message)
+        self.forward_to_leader_via_contacts(message)
 
     def __update__instruct_round_as_leader__(self, received_message: Message):
         lowest_number = received_message.get_content().get_number()
