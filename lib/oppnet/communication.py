@@ -128,6 +128,7 @@ class Message:
         new.key = self.key
         new.seq_number = self.seq_number
         new.hops = self.hops + 1
+        new.original_sender = self.original_sender
         Message.seq_number -= 1
         return new
 
@@ -195,7 +196,7 @@ def send_message(sender, receiver, message: Message):
                                 current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
 
 
-def broadcast_message(sender, receivers, message_content, ttl):
+def broadcast_message(sender, receivers, message_content, ttl=None):
     """
     Sends :param message_content: from :param sender: to all :param receivers: by giving it to the memory module.
     Checks beforehand if ttl has expired and in such case does not send it.

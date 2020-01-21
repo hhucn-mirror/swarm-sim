@@ -39,7 +39,7 @@ def split_particles(particles):
 
 def initialise_leaders(t_wait):
     set_t_wait_values(t_wait)
-    left_bound = t_wait * 2
+    left_bound = t_wait * 3 + 1
     right_bound = left_bound + t_wait * 2 * leader_count + 1
     next_direction_proposal_rounds = random.sample(range(left_bound, right_bound, left_bound), leader_count)
     for index, leader in enumerate(leaders):
@@ -68,9 +68,16 @@ def send_direction_proposals(current_round):
 
 def move_to_next_direction(particles):
     particle_directions = {}
+    first_direction = particles[0].next_moving_direction()
     for particle in particles:
         next_direction = particle.next_moving_direction()
         if next_direction:
             particle_directions[particle] = next_direction
+            if first_direction and next_direction != first_direction:
+                print("multi_leader_flocking -> move_to_next_direction()" +
+                      "not all particles in the flock are moving to in the same direction!")
     if particle_directions:
+        if len(particle_directions) != len(particles):
+            print("multi_leader_flocking -> move_to_next_direction()" +
+                  "not all particles returned a next_moving_direction()")
         particles[0].world.move_particles(particle_directions)
