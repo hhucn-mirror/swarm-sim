@@ -7,9 +7,10 @@ import random
 import importlib
 from multiprocessing import Pool
 
-NUMBER_OF_SEEDS = 5
+NUMBER_OF_SEEDS = 10
 MAX_PARTICLE_COUNT = 100
-MIN_PARTICLE_COUNT = 70
+MIN_PARTICLE_COUNT = 60
+STEPSIZE_PARTICLE_COUNT = 5
 USE_PARTICLE_COUNT = True
 MAX_ROUNDS = 10000
 SCENARIOS = ["single_tile_few_particles"]#["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
@@ -26,6 +27,7 @@ def run_test(args):
     particle_count = args[3]
     simulator.swarm_sim(["-r", str(seed), "-w", scenario, "-s", solution, "-v", "0",
                          "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-42", "-m", "1", "-p", particle_count])
+
 
 def eval_test(solution_scenario):
     solution = solution_scenario[0]
@@ -77,7 +79,7 @@ if __name__ == "__main__":
                 for scenario in SCENARIOS
                 for solution in SOLUTIONS
                 for _ in range(NUMBER_OF_SEEDS)
-                for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, 5))
+                for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT))
     else:
         args = ((solution, scenario, random.randint(0, sys.maxsize), -1)
                 for scenario in SCENARIOS

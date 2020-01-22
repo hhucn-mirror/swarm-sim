@@ -53,6 +53,24 @@ def send_p_max(particle, targets):
         # send_distance_of_free_locations(particle, target_direction)
 
 
+def send_dummy_messages(particle, targets):
+    """
+    Sends a message in all target directions containing only the particles own_dist
+    :param particle: the sender particles
+    :param targets: all directions the message should be send to
+    :return: none
+    """
+    dist_package = solution_header.OwnDistance(math.inf, particle.number)
+    for target_direction in targets:
+        target_particle = particle.get_particle_in(target_direction)
+        if debug and debug_write:
+            print("P", particle.number, "sends own distance package", dist_package.particle_distance,
+                  " to", target_particle.number, " in direction", direction_number_to_string(target_direction))
+        # invert the direction so the receiver particle knows from where direction it got the package
+        particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
+        # send_distance_of_free_locations(particle, target_direction)
+
+
 def send_distance_of_free_locations(particle, target_direction):
     """
     Sends the distance of shared free locations to a target particle
@@ -121,7 +139,10 @@ def send_own_dist_to_neighbors(particle):
     """
     if particle.own_dist != math.inf:
         directions_with_particles = find_neighbor_particles(particle)
-        own_distance_targets, _ = divide_neighbors(particle.nh_list,
+        own_distance_targets, dummy_message_targets = divide_neighbors(particle.nh_list,
                                                    directions_with_particles,
                                                    particle.own_dist)
         send_own_distance(particle, own_distance_targets)
+        if particle.waiting_rounds > 5:
+            send_dummy_messages(particle, dummy_message_targets)
+            particle.waiting_rounds = 0
