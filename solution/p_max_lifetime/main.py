@@ -1,5 +1,6 @@
 from lib import config
 import importlib
+import copy
 import random
 from lib.swarm_sim_header import *
 import solution.p_max_lifetime.distance_calculation as distance_calc_mod
@@ -61,6 +62,7 @@ def read_cycle(particle):
     particle.rcv_buf = read_write_mod.read_and_clear(particle.read_whole_memory())
     particle.nh_list = distance_calc_mod.calculate_distances(particle)
     p_max_calc_mod.find_p_max(particle)
+    particle.rcv_buf_dbg = copy.deepcopy(particle.rcv_buf)
     particle.rcv_buf.clear()
 
 

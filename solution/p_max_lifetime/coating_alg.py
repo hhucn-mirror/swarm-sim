@@ -14,6 +14,7 @@ def initialize_particle(particle):
     # nh: neighborhood
     setattr(particle, "nh_list", [solution_header.Neighbor("fl", math.inf)] * 6)
     setattr(particle, "rcv_buf", {})
+    setattr(particle, "rcv_buf_dbg", {})
     setattr(particle, "snd_buf", {})
     # setattr(particle, "prev_direction", False)
     setattr(particle, "next_direction", False)
