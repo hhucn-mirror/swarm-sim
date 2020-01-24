@@ -44,10 +44,13 @@ def own_p_max(own_distance, p_max, particle_number, nh_list):
     if own_distance is not math.inf:
         p_max.dist = own_distance
         p_max.ids = {particle_number}
+        higher_neighbors = 0
         for direction in direction_list:
             neighbor = nh_list[direction]
             if neighbor.type == "p" and p_max.dist < neighbor.dist:
-                p_max.dist = neighbor.dist
+                higher_neighbors += 1
+        if higher_neighbors > 2:
+            p_max.reset()
         return True
     return False
 
