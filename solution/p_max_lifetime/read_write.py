@@ -146,3 +146,5 @@ def send_own_dist_to_neighbors(particle):
         if particle.waiting_rounds > 5:
             send_dummy_messages(particle, dummy_message_targets)
             particle.waiting_rounds = 0
+        else:
+            particle.waiting_rounds += 1
