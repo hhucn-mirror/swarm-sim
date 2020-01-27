@@ -1,6 +1,6 @@
 import random
 
-from lib.oppnet.communication import broadcast_message, send_message, Message
+from lib.oppnet.communication import multicast_message, send_message, Message
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
@@ -54,6 +54,8 @@ class Particle(Particle):
         self.__next_proposal_seed__ = 0
         self.__leader_states__ = dict()
 
+        self.starting_neighbourhood = None
+
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -81,6 +83,10 @@ class Particle(Particle):
 
     def set_flock_member_type(self, flock_member_type):
         self.__flock_member_type__ = flock_member_type
+
+    def init_neighbourhood(self):
+        neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
+        self.starting_neighbourhood = neighbourhood
 
     def get_all_received_messages(self):
         received = []
@@ -172,7 +178,7 @@ class Particle(Particle):
             receivers = self.scan_for_particles_in(hop=hop)
             content = LeaderMessageContent(self, self.proposed_direction, neighbours, self.t_wait - hop,
                                            message_type, self.__instruction_number__)
-            broadcast_message(self, receivers, content)
+            multicast_message(self, receivers, content)
 
     def send_direction_proposal(self, proposed_direction=None):
         if not proposed_direction:
@@ -437,3 +443,13 @@ class Particle(Particle):
         except TypeError:
             pass
         return self.current_direction
+
+    def check_neighbourhood(self):
+        if self.__neighbourhood_changed__():
+            print("round {}: opp_particle -> check_neighbourhood() neighbourhood for particle {} has changed."
+                  .format(self.world.get_actual_round(), self.number))
+
+    def __neighbourhood_changed__(self):
+        neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
+        difference = neighbourhood.difference(self.starting_neighbourhood)
+        return difference != set()

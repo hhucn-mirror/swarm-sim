@@ -9,6 +9,7 @@ from lib.oppnet.point import Point
 class MemoryMode(Enum):
     Schedule = 0
     Delta = 1
+    Broadcast = 2
 
 
 class Memory:
@@ -23,8 +24,7 @@ class Memory:
             else:
                 self.memory[round_number] = [(target_id, msg)]
         else:
-            # TODO: throw error
-            print("wrong mode")
+            raise NotImplementedError
 
     def try_deliver_scheduled_messages(self, world):
         if world.get_actual_round() in self.memory.keys():
@@ -37,17 +37,16 @@ class Memory:
                     p = m_particles.get(p_id)
                     p.write_memory(p_msg)
 
-    def add_delta_message_on(self, target_id, msg, position, start_round, delta, expirerate):
+    def add_delta_message_on(self, target_id, msg, position, start_round, signal_velocity, expiry_rate):
         if self.mode == MemoryMode.Delta:
             process_event(EventType.MessageSent, msg)  # TODO rethink section
             if target_id in self.memory.keys():
-                self.memory.get(target_id).append((msg, position, start_round, delta, expirerate))
+                self.memory.get(target_id).append((msg, position, start_round, signal_velocity, expiry_rate))
             else:
-                self.memory[target_id] = [(msg, position, start_round, delta, expirerate)]
+                self.memory[target_id] = [(msg, position, start_round, signal_velocity, expiry_rate)]
 
         else:
-            # TODO: throw error
-            print("wrong mode")
+            raise NotImplementedError
 
     def try_deliver_delta_messages(self, world):
         actual_round = world.get_actual_round()
@@ -67,12 +66,59 @@ class Memory:
                 new_memory[target] = new_msgs
         self.memory = new_memory
 
+    def add_broadcast_message(self, msg, position, start_round, signal_velocity, expiry_rate):
+        if self.mode == MemoryMode.Broadcast:
+            process_event(EventType.MessageSent, msg)
+            sender_id = msg.get_sender().get_id()
+            if msg.get_sender() in self.memory.keys():
+                self.memory[sender_id] = []
+            self.memory[sender_id].append((msg, position, start_round, signal_velocity, expiry_rate))
+        else:
+            raise NotImplementedError
+
+    def try_deliver_broadcasts(self, world):
+        for sender_id, entries in list(self.memory.items()):
+            for entry in entries:
+                receivers = self.__get_broadcast_receivers__(entry, world)
+                self.__deliver__message(entry[0], receivers)
+
+    @staticmethod
+    def __deliver__message(message, receivers):
+        for receiver in receivers:
+            store_message(message, message.get_sender(), receiver)
+
+    def __get_broadcast_receivers__(self, entry, world):
+        msg, position, start_round, signal_velocity, expiry_rate = entry
+        traveled_distance = signal_velocity * (world.get_actual_round() - start_round)
+        locations = self.__get_location_coordinates__(position, traveled_distance)
+        receivers = []
+        for particle_coordinates, particle in world.get_particle_map_coordinates().items():
+            if particle_coordinates in locations:
+                receivers.append(particle)
+        return receivers
+
+    @staticmethod
+    def __get_location_coordinates__(centre, r_max):
+        locations = {centre}
+        displacement = - r_max + 0.5
+        iteration = 0
+        for i in range(1, r_max + 1):
+            locations.add((i, centre[1]))
+            locations.add((-i, centre[1]))
+        for i in range(1, r_max + 1):
+            for j in range(0, (2 * r_max) - iteration):
+                locations.add((displacement + j + centre[0], i + centre[1]))
+                locations.add((displacement + j + centre[0], -i + centre[1]))
+            iteration = iteration + 1
+            displacement = displacement + 0.5
+        return locations
+    
     def __calculate_distances__(self, actual_round, m, target, world):
         position = m[1]
         start_round = m[2]
-        delta = m[3]
+        signal_velocity = m[3]
         past_rounds = actual_round - start_round
-        distance = delta * past_rounds
+        distance = signal_velocity * past_rounds
         if target in world.get_particle_map_id():
             vector = world.get_particle_map_id()[target].coordinates
             particle_point = self.get_point_from_vector(vector)

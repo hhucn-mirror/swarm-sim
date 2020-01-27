@@ -18,7 +18,9 @@ def solution(world):
     if current_round == 1:
         leaders, followers = split_particles(particles)
         initialise_leaders(t_wait)
+        initialise_neighbourhoods(particles)
     else:
+        check_neighbourhoods(particles)
         update_leader_states()
         routing.next_step(particles)
         send_direction_proposals(current_round)
@@ -47,6 +49,16 @@ def initialise_leaders(t_wait):
         leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
         leader.broadcast_leader_message(LeaderMessageType.discover)
         print("leader {} next_direction_proposal: {}".format(leader.number, leader.next_direction_proposal_round))
+
+
+def initialise_neighbourhoods(particles):
+    for particle in particles:
+        particle.init_neighbourhood()
+
+
+def check_neighbourhoods(particles):
+    for particle in particles:
+        particle.check_neighbourhood()
 
 
 def update_leader_states():
