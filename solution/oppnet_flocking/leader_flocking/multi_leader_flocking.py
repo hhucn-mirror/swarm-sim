@@ -1,6 +1,7 @@
 import random
 
-from lib.oppnet.leader_flocking.opp_particle import FlockMemberType
+from lib.oppnet import routing
+from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
 from lib.swarm_sim_header import red
 from solution.oppnet_flocking.leader_flocking.message_types.leader_message import LeaderMessageType
 
@@ -12,16 +13,14 @@ def solution(world):
 
     current_round = world.get_actual_round()
     particles = world.get_particle_list()
-    dirs = world.grid.get_directions_dictionary()
     t_wait = world.config_data.flock_radius * 2
-    t_pick = t_wait * 2
 
     if current_round == 1:
         leaders, followers = split_particles(particles)
         initialise_leaders(t_wait)
     else:
         update_leader_states()
-        process_received_messages()
+        routing.next_step(particles)
         send_direction_proposals(current_round)
         move_to_next_direction(particles)
 
@@ -40,7 +39,7 @@ def split_particles(particles):
 def initialise_leaders(t_wait):
     set_t_wait_values(t_wait)
     left_bound = t_wait * 3 + 1
-    right_bound = left_bound + t_wait * 2 * leader_count + 1
+    right_bound = left_bound * (leader_count + 1)
     next_direction_proposal_rounds = random.sample(range(left_bound, right_bound, left_bound), leader_count)
     for index, leader in enumerate(leaders):
         leader.set_color(red)
@@ -53,11 +52,6 @@ def initialise_leaders(t_wait):
 def update_leader_states():
     for leader in leaders:
         leader.update_leader_states()
-
-
-def process_received_messages():
-    for particle in followers.union(leaders):
-        particle.process_received_messages()
 
 
 def send_direction_proposals(current_round):

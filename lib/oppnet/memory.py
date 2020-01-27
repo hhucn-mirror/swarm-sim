@@ -51,7 +51,6 @@ class Memory:
 
     def try_deliver_delta_messages(self, world):
         actual_round = world.get_actual_round()
-        print(actual_round)
         new_memory = {}
         for target in self.memory.keys():
             new_msgs = []

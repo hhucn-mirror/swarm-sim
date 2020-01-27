@@ -1,6 +1,7 @@
 from enum import Enum
 
 from lib.oppnet.communication import send_message
+from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
 
 
 class Algorithm(Enum):
@@ -9,6 +10,8 @@ class Algorithm(Enum):
     """
     Epidemic = 0
     Epidemic_MANeT = 1
+    One_Leader_Flocking = 2
+    Multi_Leader_Flocking = 3
 
 
 class MANeTRole(Enum):
@@ -66,7 +69,6 @@ def next_step(particles, scan_radius=None):
     :param scan_radius: Particle scan radius.
     :type scan_radius: int
     """
-    # execute the SendEvents for each particle
     for particle in particles:
         routing_params = particle.routing_parameters
         if scan_radius is not None:
@@ -76,6 +78,10 @@ def next_step(particles, scan_radius=None):
             __next_step_manet_epidemic__(particle)
         elif routing_params.algorithm == Algorithm.Epidemic:
             __next_step_epidemic__(particle)
+        elif routing_params.algorithm == Algorithm.One_Leader_Flocking:
+            __next_step_one_leader_flocking__(particle)
+        elif routing_params.algorithm == Algorithm.Multi_Leader_Flocking:
+            __next_step_multi_leader_flocking__(particle)
 
 
 def __next_step_epidemic__(sender, nearby=None):
@@ -115,6 +121,20 @@ def __next_step_manet_epidemic__(particle):
 
     elif routing_params.manet_role == MANeTRole.Router:
         __next_step_epidemic__(particle)
+
+
+def __next_step_one_leader_flocking__(particle):
+    all_messages = particle.get_all_received_messages()
+    if particle.get_flock_member_type() == FlockMemberType.follower:
+        particle.__process_as_follower__(all_messages)
+
+
+def __next_step_multi_leader_flocking__(particle):
+    all_messages = particle.get_all_received_messages()
+    if particle.get_flock_member_type() == FlockMemberType.follower:
+        particle.__process_as_follower__(all_messages)
+    elif particle.get_flock_member_type() == FlockMemberType.leader:
+        particle.__process_as_leader__(all_messages)
 
 
 class RoutingContact:

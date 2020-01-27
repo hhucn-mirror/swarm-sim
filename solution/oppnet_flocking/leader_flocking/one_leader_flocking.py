@@ -1,11 +1,13 @@
 import random
 
-from lib.oppnet.leader_flocking.opp_particle import FlockMemberType
+from lib.oppnet import routing
+from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
 from lib.swarm_sim_header import red
+from solution.oppnet_flocking.leader_flocking.message_types.leader_message import LeaderMessageType
 
 
 def solution(world):
-    global leaders, followers
+    global leader, followers
 
     current_round = world.get_actual_round()
     particles = world.get_particle_list()
@@ -14,37 +16,27 @@ def solution(world):
     t_pick = t_wait * 2
 
     if current_round == 1:
-        leaders, followers = split_particles(particles, 1)
-        initialise_leaders(t_wait)
+        leader, followers = split_particles(particles, 1)
+        initialise_leaders(t_wait, current_round)
     else:
-        process_received_messages()
+        routing.next_step(particles)
         move_to_next_direction(particles)
         if current_round % t_pick == 0:
-            initialise_leaders(t_wait)
-
-
-def set_t_wait_values(t_wait):
-    for particle in leaders:
-        particle.set_t_wait(t_wait)
+            initialise_leaders(t_wait, current_round)
 
 
 def split_particles(particles, leader_count):
-    leader_set = set(random.sample(particles, leader_count))
-    follower_set = set(particles).difference(leader_set)
-    return leader_set, follower_set
+    leader_particle = random.sample(particles, leader_count)[0]
+    follower_set = set(particles).difference({leader_particle})
+    return leader_particle, follower_set
 
 
-def initialise_leaders(t_wait):
-    set_t_wait_values(t_wait)
-    for leader in leaders:
-        leader.set_color(red)
-        leader.set_flock_member_type(FlockMemberType.leader)
-        leader.broadcast_direction_instruct()
-
-
-def process_received_messages():
-    for follower in followers:
-        follower.process_received_messages()
+def initialise_leaders(t_wait, current_round):
+    leader.set_t_wait(t_wait)
+    leader.set_color(red)
+    leader.set_flock_member_type(FlockMemberType.leader)
+    leader.set_instruction_number(current_round)
+    leader.broadcast_leader_message(LeaderMessageType.instruct)
 
 
 def move_to_next_direction(particles):
