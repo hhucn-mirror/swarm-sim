@@ -89,3 +89,30 @@ def create_matter_in_line(world, start, direction, amount, matter_type='particle
             return
         current_position = get_coordinates_in_direction(current_position, direction)
 
+
+def get_hexagon_coordinates(centre, r_max, exclude_centre=False):
+    """
+    Returns all locations of a 2d-hexagon with centre :param centre: and radius :param r_max:.
+    :param exclude_centre: should the centre coordinate be included
+    :type exclude_centre: boolean
+    :param centre: the centre location of the hexagon
+    :type centre: tuple
+    :param r_max: radius of the hexagon
+    :type r_max: int
+    :return: list of locations
+    :rtype: list
+    """
+    locations = []
+    if not exclude_centre:
+        locations.append(centre)
+    displacement = - r_max + 0.5
+    iteration = 0
+    for y in range(1, r_max + 1):
+        locations.append((centre[0] + y, centre[1], 0))
+        locations.append(((centre[0] - y), centre[1], 0))
+        for x in range(0, (2 * r_max) - iteration):
+            locations.append((centre[0] + displacement + x, centre[1] + y, 0))
+            locations.append((centre[0] + displacement + x, centre[1] - y, 0))
+        iteration = iteration + 1
+        displacement = displacement + 0.5
+    return locations

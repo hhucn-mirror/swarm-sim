@@ -86,7 +86,7 @@ class World:
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)
 
-        self.memory = Memory(config_data.memory_mode)
+        self.memory = Memory()
 
     def reset(self):
         """

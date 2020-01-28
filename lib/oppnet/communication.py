@@ -1,4 +1,5 @@
 import copy
+import math
 import random
 
 from lib.oppnet.meta import EventType, process_event
@@ -193,7 +194,7 @@ def send_message(sender, receiver, message: Message):
 
     memory = sender.world.memory
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
-                                current_round, sender.signal_velocity, 5)  # TODO: add attributes to particles
+                                current_round, sender.signal_velocity, math.inf)  # TODO: add attributes to particles
 
 
 def multicast_message(sender, receivers, message_content, ttl=None):
@@ -213,6 +214,24 @@ def multicast_message(sender, receivers, message_content, ttl=None):
     for receiver in receivers:
         message = Message(sender, receiver, content=message_content, ttl=ttl)
         send_message(sender, receiver, message)
+
+
+def broadcast_message(sender, message):
+    """
+    Sends a omnidirectional signal that expands proportionally to a hexagon and its velocity. I.e. for a
+    signal velocity of 2, the signal will reach 7 + 12 = 19 locations.
+    :param sender: The particle sending the broadcast message.
+    :type sender: :class:`~opp_particle.Particle`
+    :param message: The message to be broadcast.
+    :type message: :class:`~communication.Message`
+    """
+    if message.hops == message.ttl:
+        return
+    memory = sender.world.memory
+    message = copy.copy(message)
+    current_round = sender.world.get_actual_round()
+    memory.add_broadcast_message(message, Point(sender.coordinates[0], sender.coordinates[1]), current_round,
+                                 sender.signal_velocity, math.inf)
 
 
 def ttl_expired(message, store):
