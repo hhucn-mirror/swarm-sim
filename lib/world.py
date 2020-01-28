@@ -483,7 +483,6 @@ class World:
             except KeyError:
                 pass
             self.csv_round.update_tiles_num(len(self.tiles))
-            self.csv_round.update_metrics(tile_deleted=1)
             self.__tile_deleted = True
             return True
         else:
