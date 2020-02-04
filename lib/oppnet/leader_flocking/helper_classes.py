@@ -9,7 +9,7 @@ class FlockMemberType(Enum):
 class LeaderStateName(Enum):
     WaitingForCommits = 0,
     WaitingForDiscoverAck = 1,
-    CommitedToPropose = 2,
+    CommittedToPropose = 2,
     CommittedToInstruct = 3,
     PerformingInstruct = 4,
     SendInstruct = 5
@@ -17,28 +17,34 @@ class LeaderStateName(Enum):
 
 class LeaderState:
 
-    def __init__(self, leader_state_name: LeaderStateName, waiting_ids: set, start_round, expected_rounds=0):
+    def __init__(self, leader_state_name: LeaderStateName, waiting_particles: set, start_round, expected_rounds=0):
         self.leader_state_name = leader_state_name
-        self.waiting_ids = waiting_ids
+        self.waiting_particles = waiting_particles
         self.start_round = start_round
         self.end_round = start_round + expected_rounds
 
     def get_leader_state_name(self):
         return self.leader_state_name
 
-    def add_to_waiting(self, id_to_add):
-        self.waiting_ids.add(id_to_add)
+    def add_to_waiting(self, particle_to_add):
+        if isinstance(particle_to_add, set):
+            self.waiting_particles.union(particle_to_add)
+        else:
+            self.waiting_particles.add(particle_to_add)
 
-    def remove_from_waiting(self, id_to_remove):
-        self.waiting_ids.remove(id_to_remove)
+    def remove_from_waiting(self, particle_to_remove):
+        self.waiting_particles.remove(particle_to_remove)
 
-    def get_waiting_ids(self):
-        return self.waiting_ids
+    def get_waiting_particles(self):
+        return self.waiting_particles
+
+    def waiting_count(self):
+        return len(self.waiting_particles)
 
     def is_completed(self):
         if self.leader_state_name in [LeaderStateName.WaitingForCommits, LeaderStateName.WaitingForDiscoverAck,
-                                      LeaderStateName.CommittedToInstruct, LeaderStateName.CommitedToPropose]:
-            return len(self.waiting_ids) == 0
+                                      LeaderStateName.CommittedToInstruct, LeaderStateName.CommittedToPropose]:
+            return len(self.waiting_particles) == 0
         else:
             return True
 
