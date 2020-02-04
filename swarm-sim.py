@@ -14,7 +14,12 @@ def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
     the swarm_sim_world and the swarm_sim_world object is created. Afterwards the run method of the swarm_sim_world
     is called in which the simlator is going to start to run"""
-    logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
+
+    if os.environ.get('USING_PDB'):
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.INFO
+    logging.basicConfig(filename='system.log', filemode='w', level=log_level, format='%(message)s')
     logging.info('Started')
 
     config_data = config.ConfigData()

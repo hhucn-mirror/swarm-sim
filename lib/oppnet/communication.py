@@ -197,7 +197,7 @@ def send_message(sender, receiver, message: Message):
                                 current_round, sender.signal_velocity, math.inf)  # TODO: add attributes to particles
 
 
-def multicast_message(sender, receivers, message_content, ttl=None):
+def multicast_message_content(sender, receivers, message_content, ttl=None):
     """
     Sends :param message_content: from :param sender: to all :param receivers: by giving it to the memory module.
     Checks beforehand if ttl has expired and in such case does not send it.
@@ -214,7 +214,6 @@ def multicast_message(sender, receivers, message_content, ttl=None):
     for receiver in receivers:
         message = Message(sender, receiver, content=message_content, ttl=ttl)
         send_message(sender, receiver, message)
-
 
 def broadcast_message(sender, message):
     """

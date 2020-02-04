@@ -105,6 +105,8 @@ class ConfigData:
         self.memory_mode = MemoryMode(config.getint("Memory", "memory_mode"))
 
         self.flock_radius = config.getint("Flocking", "flock_radius")
+        self.leader_count = config.getint("Flocking", "leader_count")
+        self.commit_quorum = config.getfloat("Flocking", "commit_quorum")
 
         try:
             self.scenario = config.get("File", "scenario")

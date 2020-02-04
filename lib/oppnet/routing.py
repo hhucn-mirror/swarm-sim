@@ -174,8 +174,8 @@ class RoutingMap(dict):
             self.__max_hops__ = contact.get_hops()
             self.__max_hops_contact__ = contact
 
-    def get_contact(self, target_particle, contact_id):
-        return self[target_particle][contact_id]
+    def get_contact(self, target_particle, contact_particle):
+        return self[target_particle][contact_particle]
 
     def get_max_hops_(self):
         return self.__max_hops__
@@ -198,3 +198,9 @@ class RoutingMap(dict):
         for _, contacts in self.items():
             all_contacts.extend(contacts.keys())
         return all_contacts
+
+    def get_leader_contacts(self, leader_particle):
+        try:
+            return self[leader_particle].values()
+        except KeyError:
+            return []
