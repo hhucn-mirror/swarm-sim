@@ -3,12 +3,11 @@ import random
 
 from lib.oppnet.communication import multicast_message_content, send_message, Message
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState
+from lib.oppnet.leader_flocking.message_types.leader_message import LeaderMessageContent, LeaderMessageType
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from lib.oppnet.routing import RoutingMap, RoutingContact
 from lib.particle import Particle
-from solution.oppnet_flocking.leader_flocking.message_types.leader_message import LeaderMessageContent, \
-    LeaderMessageType
 
 
 class Particle(Particle):
@@ -247,17 +246,20 @@ class Particle(Particle):
                     received_message.get_sender(),
                     received_message.get_original_sender()
                 })
-            for leader_particle in receivers:
-                for contact in self.leader_contacts.get_leader_contacts(leader_particle):
-                    hops = contact.get_hops()
-                    content = received_content.create_forward_copy(receivers, hops)
-                    received_message.set_content(content)
-                    received_message.set_actual_receiver(leader_particle)
-                    send_message(self, contact.get_contact_particle(), received_message)
-                    logging.debug("round {}: opp_particle -> particle {} forwarded {} #{} to {} via {}".format(
-                        self.world.get_actual_round(), self.number, content.get_message_type().name,
-                        received_content.get_number(),
-                        leader_particle.number, contact.get_contact_particle().number))
+            self.__forward_via_all_contacts__(received_content, received_message, receivers)
+
+    def __forward_via_all_contacts__(self, received_content, received_message, receivers):
+        for leader_particle in receivers:
+            for contact in self.leader_contacts.get_leader_contacts(leader_particle):
+                hops = contact.get_hops()
+                content = received_content.create_forward_copy(receivers, hops)
+                received_message.set_content(content)
+                received_message.set_actual_receiver(leader_particle)
+                send_message(self, contact.get_contact_particle(), received_message)
+                logging.debug("round {}: opp_particle -> particle {} forwarded {} #{} to {} via {}".format(
+                    self.world.get_actual_round(), self.number, content.get_message_type().name,
+                    received_content.get_number(),
+                    leader_particle.number, contact.get_contact_particle().number))
 
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
                                                 message_type: LeaderMessageType,
