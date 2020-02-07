@@ -1,21 +1,51 @@
 """
-A world is created that has particles formated in a ring structure that is up to 5 hops big
+A sim is created that has particles formated in a ring structure that is up to 5 hops big
 """
 
 
-def scenario(world):
 
-    world.add_particle(world.grid.get_center())
+def scenario(sim):
+    sim.add_particle(0, 0, color=3)
+    # 1st ring
+    sim.add_particle(1.000000, 0.000000, color=1)
+    sim.add_particle(-1.000000, 0.000000, color=1)
+    sim.add_particle(0.500000, 1.000000, color=1)
+    sim.add_particle(0.500000, -1.000000, color=1)
+    sim.add_particle(-0.500000, 1.000000, color=1)
+    sim.add_particle(-0.500000, -1.000000, color=1)
 
-    particle_ring = world.grid.get_n_sphere_border((0, 0, 0), 1)
-    tile_ring = world.grid.get_n_sphere_border((0, 0, 0), 3)
-    location_ring = world.grid.get_n_sphere_border((0, 0, 0), 5)
+    # 2nd ring
+    sim.add_tile(2.000000, 0.000000, color=2)
+    sim.add_tile(-2.000000, 0.000000, color=2)
+    sim.add_tile(1.500000, 1.000000, color=2)
+    sim.add_tile(1.500000, -1.000000, color=2)
+    sim.add_tile(-1.500000, 1.000000, color=2)
+    sim.add_tile(-1.500000, -1.000000, color=2)
+    sim.add_tile(1.000000, 2.000000, color=2)
+    sim.add_tile(1.000000, -2.000000, color=2)
+    sim.add_tile(0.000000, 2.000000, color=2)
+    sim.add_tile(0.000000, -2.000000, color=2)
+    sim.add_tile(-1.000000, 2.000000, color=2)
+    sim.add_tile(-1.000000, -2.000000, color=2)
 
-    for p in particle_ring:
-        world.add_particle(p)
+    # 3rd ring
+    sim.add_marker(3.000000, 0.000000, color=3)
+    sim.add_marker(-3.000000, 0.000000, color=3)
+    sim.add_marker(2.500000, 1.000000, color=3)
+    sim.add_marker(2.500000, -1.000000, color=3)
+    sim.add_marker(-2.500000, 1.000000, color=3)
+    sim.add_marker(-2.500000, -1.000000, color=3)
+    sim.add_marker(2.000000, 2.000000, color=3)
+    sim.add_marker(2.000000, -2.000000, color=3)
+    sim.add_marker(-2.000000, 2.000000, color=3)
+    sim.add_marker(-2.000000, -2.000000, color=3)
+    sim.add_marker(1.500000, 3.000000, color=3)
+    sim.add_marker(1.500000, -3.000000, color=3)
+    sim.add_marker(0.500000, 3.000000, color=3)
+    sim.add_marker(0.500000, -3.000000, color=3)
+    sim.add_marker(-0.500000, 3.000000, color=3)
+    sim.add_marker(-0.500000, -3.000000, color=3)
+    sim.add_marker(-1.500000, 3.000000, color=3)
+    sim.add_marker(-1.500000, -3.000000, color=3)
 
-    for t in tile_ring:
-        world.add_tile(t)
 
-    for l in location_ring:
-        world.add_location(l)

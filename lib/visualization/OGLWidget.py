@@ -69,7 +69,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         self.update_programs_projection_matrix()
         self.update_programs_view_matrix()
-        self.update_programs_world_matrix()
+        self.update_programs_matrix()
         if self.ctrl:
             self.update_cursor_data()
         self.glDraw()
@@ -133,24 +133,24 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # initialize the openGL programs
         self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
-        self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["particle"].set_scaling(self.world.grid.get_scaling())
         self.programs["particle"].set_model_scaling(self.world.config_data.particle_scaling)
 
         self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
-        self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["tile"].set_scaling(self.world.grid.get_scaling())
         self.programs["tile"].set_model_scaling(self.world.config_data.tile_scaling)
 
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
-        self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["location"].set_scaling(self.world.grid.get_scaling())
         self.programs["location"].set_model_scaling(self.world.config_data.location_scaling)
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
                                             self.world.config_data.tile_model_file,
-                                            (self.world.get_world_x_size(),
-                                             self.world.get_world_y_size(),
-                                             self.world.get_world_z_size()))
-        self.programs["grid"].set_world_scaling(self.world.grid.get_scaling())
+                                            (self.world.get_x_size(),
+                                             self.world.get_y_size(),
+                                             self.world.get_z_size()))
+        self.programs["grid"].set_scaling(self.world.grid.get_scaling())
         self.programs["grid"].set_line_scaling(self.world.config_data.line_scaling)
         self.programs["grid"].show_lines = self.world.config_data.show_lines
         self.programs["grid"].set_model_scaling(self.world.config_data.coordinates_scaling)
@@ -161,7 +161,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["grid"].update_offsets(self.world.grid.get_box(self.world.grid.size))
 
         self.programs["center"] = OffsetColorProgram(self.world.config_data.particle_model_file)
-        self.programs["center"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["center"].set_scaling(self.world.grid.get_scaling())
         self.programs["center"].set_model_scaling((0.3, 0.3, 0.3))
         self.programs["center"].update_offsets([self.world.grid.get_center()])
         self.programs["center"].update_colors(self.world.config_data.center_color)
@@ -173,19 +173,19 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # cursor programs.. loading in the init, so on change it doesnt has to be loaded again
         self.programs["cursor_tile"] = OffsetColorProgram(self.world.config_data.tile_model_file)
-        self.programs["cursor_tile"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_tile"].set_scaling(self.world.grid.get_scaling())
         self.programs["cursor_tile"].set_model_scaling((1.1, 1.1, 1.1))
         self.programs["cursor_tile"].update_offsets([0.0, 0.0, 0.0])
         self.programs["cursor_tile"].update_colors(self.world.config_data.cursor_color)
 
         self.programs["cursor_particle"] = OffsetColorProgram(self.world.config_data.particle_model_file)
-        self.programs["cursor_particle"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_particle"].set_scaling(self.world.grid.get_scaling())
         self.programs["cursor_particle"].set_model_scaling((1.1, 1.1, 1.1))
         self.programs["cursor_particle"].update_offsets([0.0, 0.0, 0.0])
         self.programs["cursor_particle"].update_colors(self.world.config_data.cursor_color)
 
         self.programs["cursor_location"] = OffsetColorProgram(self.world.config_data.location_model_file)
-        self.programs["cursor_location"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_location"].set_scaling(self.world.grid.get_scaling())
         self.programs["cursor_location"].set_model_scaling((1.1, 1.1, 1.1))
         self.programs["cursor_location"].update_offsets([0.0, 0.0, 0.0])
         self.programs["cursor_location"].update_colors(self.world.config_data.cursor_color)
@@ -218,14 +218,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
         for p in self.programs.values():
             p.set_projection_matrix(self.camera.projection_matrix)
 
-    def update_programs_world_matrix(self):
+    def update_programs_matrix(self):
         """
         updates the world matrix of all OpenGL programs
         :return:
         """
         # upload the model matrix to the gpu
         for p in self.programs.values():
-            p.set_world_matrix(self.camera.world_matrix)
+            p.set_matrix(self.camera.world_matrix)
 
     def update_programs_view_matrix(self):
         """
@@ -410,7 +410,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         """
         self.camera.rotate(- drag_amount[0] / self.rotation_sensitivity, drag_amount[1] / self.rotation_sensitivity)
 
-        self.update_programs_world_matrix()
+        self.update_programs_matrix()
         self.update_programs_view_matrix()
         self.glDraw()
 
@@ -424,7 +424,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.camera.move(- drag_amount[0] / self.drag_sensitivity * self.camera.get_radius(),
                          drag_amount[1] / self.drag_sensitivity * self.camera.get_radius(), 0)
 
-        self.update_programs_world_matrix()
+        self.update_programs_matrix()
         self.update_programs_view_matrix()
         self.programs["focus"].update_offsets(-self.camera.get_look_at())
         self.glDraw()
@@ -475,9 +475,9 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # if the screenshot folder exists save it, else print an error.
         if os.path.exists("screenshots") and os.path.isdir("screenshots"):
             now = datetime.datetime.now()
-            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.jpg"
+            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.png"
                            % (now.year, now.month, now.day, now.hour, now.minute, now.second))
-            i.save(filename, "JPEG")
+            i.save(filename, "PNG")
 
             # checks if the file exists. If not, some unknown error occured in the Image library.
             if not os.path.exists(filename) or not os.path.isfile(filename):

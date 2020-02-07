@@ -62,16 +62,56 @@ class TriangularGrid(Grid):
     def get_dimension_count(self):
         return 2
 
-    def get_distance(self, start, end):
-        dx = abs(start[0]-end[0])
-        dy = abs(start[1]-end[1])
-        if dx*2 >= dy:
-            return (dx*2+dy)/2
-        else:
-            return dy
 
     def get_center(self):
         return 0, 0, 0
 
     def get_scaling(self):
         return 1.0, math.sqrt(3/4), 1.0
+
+
+    def get_next_dir_to(self, src_x, src_y, dest_x, dest_y):
+        """
+        :param src_x: x coordinate of the source
+        :param src_y: y coordinate of the source
+        :param dest_x: x coordinate of the destiny
+        :param dest_y: y coordinate of the destiny
+        :return: the next direction that brings the matter closer to the destiny
+        """
+        next_dir = ()
+        if (src_x < dest_x or src_x == dest_x) and src_y < dest_y:
+            next_dir = (0.5,   1, 0)
+        elif src_y < dest_y and src_x > dest_x:
+            next_dir = (-0.5,  1, 0)
+        elif src_y > dest_y and src_x < dest_x:
+            next_dir = (0.5,  -1, 0)
+        elif (src_x > dest_x or src_x == dest_x) and src_y > dest_y :
+            next_dir = (-0.5, -1, 0)
+        elif src_y == dest_y and src_x > dest_x:
+            next_dir = (-1,    0, 0)
+        elif src_y == dest_y and src_x < dest_x:
+            next_dir = (1,     0, 0)
+        return next_dir
+
+
+    def get_distance(self,start,end):
+        if start[1] == end[1] and start[0] != end[0]:
+            return abs(end[0] - start[0])
+        elif (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5 > 0:
+            return abs(end[1] - start[1]) + (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5
+        return abs(end[1] - start[1])
+
+    def get_nearest_direction(self, start, end):
+        best = None
+        best_direction  = None
+        for d in self.get_directions_list():
+            next_coords =self.get_coordinates_in_direction(start, d)
+            tmp_best = self.get_distance(next_coords, end)
+            if best is None:
+                best = tmp_best
+                best_direction = d
+            else:
+                if tmp_best < best:
+                    best = tmp_best
+                    best_direction = d
+        return best_direction

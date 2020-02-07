@@ -49,8 +49,8 @@ class Program(ABC):
         eye = np.eye(4, 4)
         self.set_projection_matrix(eye)
         self.set_view_matrix(eye)
-        self.set_world_matrix(eye)
-        self.set_world_scaling((1.0, 1.0, 1.0))
+        self.set_matrix(eye)
+        self.set_scaling((1.0, 1.0, 1.0))
         self.rotate_light(0.0)
         self.set_model_scaling((1.0, 1.0, 1.0))
         self.set_ambient_light(0.2)
@@ -185,7 +185,7 @@ class Program(ABC):
         """
         return self.get_uniform("view", 16)
 
-    def set_world_matrix(self, world_matrix):
+    def set_matrix(self, world_matrix):
         """
         sets the world matrix in the vertex shader
         :param world_matrix: 4x4 float32
@@ -194,19 +194,19 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(world_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            eprint("ERROR: length of set_world_matrix parameter not correct, expected 16 got %d " % len(gpu_data))
+            eprint("ERROR: length of set_matrix parameter not correct, expected 16 got %d " % len(gpu_data))
         else:
             loc = self.get_uniform_location("world")
             gl.glUniformMatrix4fv(loc, 1, False, world_matrix)
 
-    def get_world_matrix(self):
+    def get_matrix(self):
         """
         reads the world matrix from the vertex shader
         :return:
         """
         return self.get_uniform("world", 16)
 
-    def set_world_scaling(self, scaling):
+    def set_scaling(self, scaling):
         """
         sets the world scaling uniform in the vertex shader
         :param scaling:
@@ -215,12 +215,12 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            eprint("ERROR: length of set_world_scaling parameter not correct, expected 3 got %d " % len(gpu_data))
+            eprint("ERROR: length of set_scaling parameter not correct, expected 3 got %d " % len(gpu_data))
         else:
             loc = self.get_uniform_location("world_scaling")
             gl.glUniform3f(loc, *gpu_data)
 
-    def get_world_scaling(self):
+    def get_scaling(self):
         """
         reads the world scaling vector from the vertex shader
         :return:

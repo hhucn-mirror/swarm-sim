@@ -118,18 +118,18 @@ class Particle(matter.Matter):
     def check_within_border(self, direction, direction_coord):
         if self.world.config_data.border == 1:
             if self.world.config_data.type == 1:
-                if abs(direction_coord[0]) > self.world.get_world_x_size():
+                if abs(direction_coord[0]) > self.world.get_x_size():
                     direction_coord = (-1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
-                if abs(direction_coord[1]) > self.world.get_world_y_size():
+                if abs(direction_coord[1]) > self.world.get_y_size():
                     direction_coord = (direction_coord[0], -1* (self.coordinates[1] - direction[1]), direction_coord[2])
-                if abs(direction_coord[2]) > self.world.get_world_z_size():
+                if abs(direction_coord[2]) > self.world.get_z_size():
                     direction_coord = (direction_coord[0], direction_coord[1], -1* (self.coordinates[2] - direction[2]))
             else:
-                if abs(direction_coord[0]) > self.world.get_world_x_size():
+                if abs(direction_coord[0]) > self.world.get_x_size():
                     direction_coord = (self.coordinates[0], direction_coord[1], direction_coord[2])
-                if abs(direction_coord[1]) > self.world.get_world_y_size():
+                if abs(direction_coord[1]) > self.world.get_y_size():
                     direction_coord = (direction_coord[0], self.coordinates[1], direction_coord[2])
-                if abs(direction_coord[2]) > self.world.get_world_z_size():
+                if abs(direction_coord[2]) > self.world.get_z_size():
                     direction_coord = (direction_coord[0], direction_coord[1], self.coordinates[2])
         return direction_coord
 
