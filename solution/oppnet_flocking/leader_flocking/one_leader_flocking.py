@@ -36,7 +36,7 @@ def initialise_leaders(t_wait, current_round):
     leader.set_color(red)
     leader.set_flock_member_type(FlockMemberType.leader)
     leader.set_instruction_number(current_round)
-    leader.broadcast_leader_message(LeaderMessageType.instruct)
+    leader.multicast_leader_message(LeaderMessageType.instruct)
 
 
 def move_to_next_direction(particles):

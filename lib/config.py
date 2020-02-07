@@ -6,7 +6,7 @@ from datetime import datetime
 
 from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
-from lib.oppnet.mobility_model import Mode
+from lib.oppnet.mobility_model import MobilityModelMode
 from lib.oppnet.routing import Algorithm, RoutingParameters
 
 
@@ -93,7 +93,7 @@ class ConfigData:
         self.message_ttl = config.getint("Routing", "message_ttl")
         self.signal_velocity = config.getint("Routing", "signal_velocity")
 
-        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mm_mode"))
+        self.mobility_model_mode = MobilityModelMode(config.getint("MobilityModel", "mm_mode"))
         self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))
         self.mobility_model_zone = json.loads(config.get("MobilityModel", "mm_zone"))
         self.mobility_model_starting_dir = config.has_option("MobilityModel", "mm_starting_dir") \

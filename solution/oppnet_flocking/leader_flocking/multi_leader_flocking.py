@@ -47,7 +47,7 @@ def initialise_leaders(t_wait, leader_count):
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.leader)
         leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
-        leader.broadcast_leader_message(LeaderMessageType.discover)
+        leader.multicast_leader_message(LeaderMessageType.discover)
         print("leader {} next_direction_proposal: {}".format(leader.number, leader.next_direction_proposal_round))
 
 
