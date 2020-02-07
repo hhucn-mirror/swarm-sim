@@ -1,6 +1,6 @@
 import lib.oppnet.routing
 from lib.oppnet.communication import generate_random_messages
-from lib.oppnet.mobility_model import MobilityModel, Mode
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 
 scan_radius = 1
 
@@ -56,8 +56,8 @@ def get_zone_and_group(particle_number, sim):
 def get_role_and_model(particle_number, particle, p_zone):
     if particle_number % 4 == 0:
         p_role = lib.oppnet.routing.MANeTRole.Router
-        m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Static)
+        m_model = MobilityModel(particle.coords[0], particle.coords[1], MobilityModelMode.Static)
     else:
         p_role = lib.oppnet.routing.MANeTRole.Node
-        m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.Static, zone=p_zone)
+        m_model = MobilityModel(particle.coords[0], particle.coords[1], MobilityModelMode.Static, zone=p_zone)
     return p_role, m_model

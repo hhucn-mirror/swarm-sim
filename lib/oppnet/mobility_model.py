@@ -2,7 +2,7 @@ import random
 from enum import Enum
 
 
-class Mode(Enum):
+class MobilityModelMode(Enum):
     """
     Used to easily distinguish MobilityModels.
     """
@@ -12,7 +12,9 @@ class Mode(Enum):
     Random = 3
     Static = 4
     Zonal = 5
-    Random_Mode = 6
+    POI = 6
+    Manual = 7
+    Random_Mode = 8
 
 
 class MobilityModel:
@@ -28,19 +30,19 @@ class MobilityModel:
 
     directions = [NE, E, SE, SW, W, NW]
 
-    def __init__(self, start_x, start_y, mode: Mode, length=(5, 30), zone=(), starting_dir=None):
+    def __init__(self, start_x, start_y, mode: MobilityModelMode, length=(5, 30), zone=(), starting_dir=None, poi=()):
         """
         Constructor.
         :param start_x: starting x coordinate
         :param start_y: starting y coordinate
-        :param mode: the Mode of the MobilityModel
+        :param mode: the MobilityModelMode of the MobilityModel
         :param length: the length of a route as interval, e.g. for Random_Walk
         :param zone: the zone as square with 4 values: top-left x, top-left y, bottom-right x, bottom-right y
         :param starting_dir: initial direction
         """
-        if mode == Mode.Random_Mode:
-            mode = random.choice(list(Mode)[:-1])
-        if mode == Mode.Zonal:
+        if mode == MobilityModelMode.Random_Mode:
+            mode = random.choice(list(MobilityModelMode)[:-1])
+        if mode == MobilityModelMode.Zonal:
             self.min_x = zone[0]
             self.min_y = zone[1]
             self.max_x = zone[2]
@@ -61,6 +63,7 @@ class MobilityModel:
         self.route_length = random.randint(self.min_length, self.max_length)
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir
+        self.poi = poi
 
     def set(self, particle):
         """
@@ -87,24 +90,28 @@ class MobilityModel:
         else:
             return self.SE
 
-    def next_direction(self, current_x_y=None):
+    def next_direction(self, current_x_y_z=None):
         """
         Determines the next direction of the model.
-        :param current_x_y: the current x and y coordinates of the particle as tuple
+        :param current_x_y_z: the current x, y and z coordinates of the particle as tuple
         :return: the next direction
         """
-        if self.mode == Mode.Back_And_Forth:
+        if self.mode == MobilityModelMode.Back_And_Forth:
             return self.__back_and_forth__()
-        elif self.mode == Mode.Random_Walk:
+        elif self.mode == MobilityModelMode.Random_Walk:
             return self.__random_walk__()
-        elif self.mode == Mode.Circle:
+        elif self.mode == MobilityModelMode.Circle:
             return self.__circle__()
-        elif self.mode == Mode.Random:
+        elif self.mode == MobilityModelMode.Random:
             return self.__random__()
-        elif self.mode == Mode.Static:
+        elif self.mode == MobilityModelMode.Static:
             return False
-        elif self.mode == Mode.Zonal:
-            return self.__zonal__(current_x_y)
+        elif self.mode == MobilityModelMode.Zonal:
+            return self.__zonal__(current_x_y_z)
+        elif self.mode == MobilityModelMode.POI:
+            return self.__poi__(current_x_y_z)
+        elif self.mode == MobilityModelMode.Manual:
+            return self.current_dir
 
     def __random__(self):
         """
@@ -173,12 +180,12 @@ class MobilityModel:
             self.steps -= 1
             return self.return_dir
 
-    def __zonal__(self, current_x_y):
+    def __zonal__(self, current_x_y_z):
         """
         The next direction in zonal mode.
         :return: next direction
         """
-        (x, y) = current_x_y
+        (x, y, z) = current_x_y_z
         # check if at min_x then head anywhere but west
 
         directions = {self.W,
@@ -199,6 +206,32 @@ class MobilityModel:
 
         next_dir = MobilityModel.random_direction(list(directions))
         return next_dir
+
+    def __poi__(self, current_x_y_z):
+        if current_x_y_z == self.poi:
+            return False
+
+        # southern movement
+        if current_x_y_z[1] > self.poi[1]:
+            # western movement
+            if current_x_y_z[0] > self.poi[0]:
+                return self.SW
+            # eastern movement
+            elif current_x_y_z[0] < self.poi[0]:
+                return self.SE
+        # northern movement
+        elif current_x_y_z[1] < self.poi[1]:
+            # western movement
+            if current_x_y_z[0] > self.poi[0]:
+                return self.NW
+            # eastern movement
+            elif current_x_y_z[0] < self.poi[0]:
+                return self.NE
+
+        if current_x_y_z[0] < self.poi[0]:
+            return self.E
+        else:
+            return self.W
 
     @staticmethod
     def random_direction(directions=None):

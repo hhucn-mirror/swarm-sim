@@ -1,6 +1,6 @@
 import random
 
-from lib.oppnet.mobility_model import MobilityModel, Mode
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 
 
 def solution(sim):
@@ -13,7 +13,7 @@ def solution(sim):
 
         # initialize the particle mobility models
         for i, particle in enumerate(particles):
-            m_model = MobilityModel(particle.coords[0], particle.coords[1], Mode.POI,
+            m_model = MobilityModel(particle.coords[0], particle.coords[1], MobilityModelMode.POI,
                                     poi=(random.randint(-sim_x, sim_x), random.randint(-sim_y, sim_y)))
             particle
     else:
