@@ -1,6 +1,8 @@
 import logging
 import random
 
+import numpy as np
+
 from lib.oppnet.communication import multicast_message_content, send_message, Message, broadcast_message
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState
 from lib.oppnet.leader_flocking.message_types.leader_message import LeaderMessageContent, LeaderMessageType
@@ -56,7 +58,7 @@ class Particle(Particle):
 
         self.commit_quorum = self.world.config_data.commit_quorum
 
-        self.starting_neighbourhood = None
+        self.__previous_neighbourhood__ = None
 
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -88,7 +90,7 @@ class Particle(Particle):
 
     def init_neighbourhood(self):
         neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
-        self.starting_neighbourhood = neighbourhood
+        self.__previous_neighbourhood__ = neighbourhood
 
     def get_all_received_messages(self):
         received = []
@@ -143,7 +145,7 @@ class Particle(Particle):
         else:
             logging.debug(
                 "round {}: opp_particle -> __add_leader_state__() Tried adding LeaderState {} which is already set!"
-                .format(start_round, state_name.name))
+                    .format(start_round, state_name.name))
 
     def __remove_particle_from_states__(self, waiting_particle, state_name):
         if state_name in self.__leader_states__:
@@ -238,11 +240,12 @@ class Particle(Particle):
         else:
             if receiving_leader:
                 receivers = {receiving_leader}
-            else:
+            elif isinstance(received_content, LeaderMessageContent):
                 receivers = received_content.get_receivers()
+            else:
+                receivers = set(self.leader_contacts.keys())
             receivers = receivers.difference(
                 {
-                    received_content.get_sending_leader(),
                     received_message.get_sender(),
                     received_message.get_original_sender()
                 })
@@ -252,13 +255,15 @@ class Particle(Particle):
         for leader_particle in receivers:
             for contact in self.leader_contacts.get_leader_contacts(leader_particle):
                 hops = contact.get_hops()
-                content = received_content.create_forward_copy(receivers, hops)
-                received_message.set_content(content)
+                if isinstance(received_content, LeaderMessageContent):
+                    content = received_content.create_forward_copy(receivers, hops)
+                    received_message.set_content(content)
+                else:
+                    content = received_content
                 received_message.set_actual_receiver(leader_particle)
                 send_message(self, contact.get_contact_particle(), received_message)
-                logging.debug("round {}: opp_particle -> particle {} forwarded {} #{} to {} via {}".format(
+                logging.debug("round {}: opp_particle -> particle {} forwarded {} to {} via {}".format(
                     self.world.get_actual_round(), self.number, content.get_message_type().name,
-                    received_content.get_number(),
                     leader_particle.number, contact.get_contact_particle().number))
 
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
@@ -332,6 +337,8 @@ class Particle(Particle):
                     self.__process_discover_ack_as_leader__(message)
                 elif self.get_id() not in [sending_leader.get_id(), message.get_original_sender()]:
                     remaining.append(message)
+            else:
+                remaining.append(message)
         return remaining
 
     def __new_leader_found__(self, message: Message, sending_leader: Particle):
@@ -356,20 +363,23 @@ class Particle(Particle):
             if self.__is_committed_to_propose__():
                 return
             logging.debug("round {}: opp_particle -> particle {} received commit #{} from particle {}"
-                  .format(self.world.get_actual_round(),
-                          self.number, content.get_number(), content.get_sending_leader().number))
+                          .format(self.world.get_actual_round(),
+                                  self.number, content.get_number(), content.get_sending_leader().number))
             self.__remove_particle_from_states__(content.get_sending_leader(), LeaderStateName.WaitingForCommits)
             if self.__quorum_fulfilled__() and LeaderStateName.SendInstruct not in self.__leader_states__:
-                self.reset_random_next_direction_proposal_round()
-                self.multicast_leader_message(LeaderMessageType.instruct)
-                self.__add_leader_state__(LeaderStateName.SendInstruct, set(), self.world.get_actual_round(),
-                                          self.t_wait * 2)
-                logging.debug("round {}: opp_particle -> particle {} broadcast instruct # {}".format(
-                    self.world.get_actual_round(),
-                    self.number,
-                    self.__instruction_number__))
+                self.__multicast_instruct__()
         else:
             self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
+
+    def __multicast_instruct__(self):
+        self.reset_random_next_direction_proposal_round()
+        self.multicast_leader_message(LeaderMessageType.instruct)
+        self.__add_leader_state__(LeaderStateName.SendInstruct, set(), self.world.get_actual_round(),
+                                  self.t_wait * 2)
+        logging.debug("round {}: opp_particle -> particle {} broadcast instruct # {}".format(
+            self.world.get_actual_round(),
+            self.number,
+            self.__instruction_number__))
 
     def __quorum_fulfilled__(self):
         if self.__is__waiting_for_commit__():
@@ -397,10 +407,10 @@ class Particle(Particle):
     def __process_propose_as_leader__(self, message: Message):
         content = message.get_content()
         sending_leader = content.get_sending_leader()
+        self.forward_to_leader_via_contacts(message)
         if self.__is__waiting_for_commit__() or self.__is_committed_to_propose__() \
                 or LeaderStateName.SendInstruct in self.__leader_states__:
             return
-        self.forward_to_leader_via_contacts(message)
         self.next_direction_proposal_round = None
         self.__instruction_number__ = content.get_number()
         self.__add_leader_state__(LeaderStateName.CommittedToPropose, {sending_leader},
@@ -433,8 +443,7 @@ class Particle(Particle):
             self.reset_random_next_direction_proposal_round()
             broadcast_message(self, Message(self, message.get_original_sender(), content=
             LostMessageContent(self.__get_estimate_centre_from_leader_contacts__(),
-                               LostMessageType.RejoinMessage))
-                              )
+                               LostMessageType.RejoinMessage)))
         elif message_type == LostMessageType.RejoinMessage and message.get_actual_receiver() == self:
             self.mobility_model = MobilityModel(self.coordinates[0], self.coordinates[1], MobilityModelMode.POI,
                                                 poi=content.get_current_location())
@@ -458,9 +467,10 @@ class Particle(Particle):
 
     def __add__new_contacts_as_follower__(self, received_messages):
         for message in received_messages:
-            sending_leader = message.get_content().get_sending_leader()
-            if sending_leader not in self.leader_contacts:
-                self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
+            if isinstance(message.get_content(), LeaderMessageContent):
+                sending_leader = message.get_content().get_sending_leader()
+                if sending_leader not in self.leader_contacts:
+                    self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
 
     def __process_instruct_as_follower__(self, message: Message):
         self.__update__instruct_round_as_follower_(message)
@@ -479,9 +489,10 @@ class Particle(Particle):
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
         message_type = content.get_message_type()
-        if message_type == LostMessageType.RejoinMessage and message.get_actual_receiver() == self:
-            self.mobility_model = MobilityModel(self.coordinates[0], self.coordinates[1], MobilityModelMode.POI,
-                                                poi=content.get_current_location())
+        if message_type == LostMessageType.RejoinMessage:
+            if message.get_actual_receiver() == self:
+                self.mobility_model = MobilityModel(self.coordinates[0], self.coordinates[1], MobilityModelMode.POI,
+                                                    poi=content.get_current_location())
 
     def next_moving_direction(self):
         if self.mobility_model.mode == MobilityModelMode.Manual:
@@ -502,11 +513,12 @@ class Particle(Particle):
 
     def __neighbourhood_changed__(self):
         neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
-        difference = neighbourhood.difference(self.starting_neighbourhood)
-        return difference != set()
+        difference = neighbourhood.difference(self.__previous_neighbourhood__)
+        self.__previous_neighbourhood__ = neighbourhood
+        return difference != {}
 
     def __get_estimate_centre_from_leader_contacts__(self):
-        x_sum, y_sum, _ = [leader.coordinates for leader in self.leader_contacts.keys()]
+        x_sum, y_sum, _ = np.sum([leader.coordinates for leader in self.leader_contacts.keys()], axis=0)
         x_sum += self.coordinates[0]
         y_sum += self.coordinates[1]
-        return x_sum / len(self.leader_contacts), y_sum / len(self.leader_contacts)
+        return round(x_sum / len(self.leader_contacts)), round(y_sum / len(self.leader_contacts))
