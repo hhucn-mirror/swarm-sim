@@ -56,10 +56,7 @@ class MobilityModel:
         self.steps = 0
         self.min_length = length[0]
         self.max_length = length[1]
-        if not starting_dir:
-            self.starting_dir = self.random_direction()
-        else:
-            self.starting_dir = starting_dir
+        self.starting_dir = starting_dir
         self.route_length = random.randint(self.min_length, self.max_length)
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir

@@ -15,7 +15,7 @@ def swarm_sim(argv):
     the swarm_sim_world and the swarm_sim_world object is created. Afterwards the run method of the swarm_sim_world
     is called in which the simlator is going to start to run"""
 
-    if os.environ.get('USING_PDB'):
+    if sys.gettrace() is not None:
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO

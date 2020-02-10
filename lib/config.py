@@ -96,11 +96,12 @@ class ConfigData:
         self.mobility_model_mode = MobilityModelMode(config.getint("MobilityModel", "mm_mode"))
         self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))
         self.mobility_model_zone = json.loads(config.get("MobilityModel", "mm_zone"))
-        self.mobility_model_starting_dir = config.has_option("MobilityModel", "mm_starting_dir") \
-                                           and json.loads(config.get("MobilityModel", "mm_starting_dir")) \
-                                           or (0.5, 1, 0)
-        if type(self.mobility_model_starting_dir) is list:
-            self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
+        if config.has_option("MobilityModel", "mm_starting_dir"):
+            self.mobility_model_starting_dir = json.loads(config.get("MobilityModel", "mm_starting_dir"))
+            if type(self.mobility_model_starting_dir) is list:
+                self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
+        else:
+            self.mobility_model_starting_dir = None
 
         self.memory_mode = MemoryMode(config.getint("Memory", "memory_mode"))
 
