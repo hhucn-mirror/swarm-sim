@@ -106,7 +106,7 @@ class Memory:
     def __get_broadcast_receivers__(entry, current_round, particle_map_coordinates):
         msg, position, start_round, signal_velocity, expiry_rate = entry
         traveled_distance = signal_velocity * (current_round - start_round)
-        locations = get_hexagon_coordinates(position, traveled_distance, True)
+        locations = get_hexagon_coordinates((position.getx(), position.gety()), traveled_distance, True)
         particle_locations = particle_map_coordinates.keys()
         receiving_particles = [particle_map_coordinates.get(key) for key in locations if key in particle_locations]
         return receiving_particles
