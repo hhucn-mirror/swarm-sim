@@ -30,16 +30,16 @@ class MobilityModel:
 
     directions = [NE, E, SE, SW, W, NW]
 
-    def __init__(self, start_x, start_y, mode: MobilityModelMode, length=(5, 30), zone=(), starting_dir=None, poi=()):
+    def __init__(self, start_coordinates, mode: MobilityModelMode, length=(5, 30), zone=(), starting_dir=None, poi=()):
         """
         Constructor.
-        :param start_x: starting x coordinate
-        :param start_y: starting y coordinate
+        :param start_coordinates: starting coordinates
         :param mode: the MobilityModelMode of the MobilityModel
         :param length: the length of a route as interval, e.g. for Random_Walk
         :param zone: the zone as square with 4 values: top-left x, top-left y, bottom-right x, bottom-right y
         :param starting_dir: initial direction
         """
+        start_x, start_y, _ = start_coordinates
         if mode == MobilityModelMode.Random_Mode:
             mode = random.choice(list(MobilityModelMode)[:-1])
         if mode == MobilityModelMode.Zonal:
@@ -60,6 +60,7 @@ class MobilityModel:
         self.route_length = random.randint(self.min_length, self.max_length)
         self.return_dir = self.__return_direction()
         self.current_dir = self.starting_dir
+        self.previous_coordinates = start_coordinates
         self.poi = poi
 
     def set(self, particle):
@@ -68,6 +69,17 @@ class MobilityModel:
         :param particle: the particle the MobilityModel as attribute to.
         """
         setattr(particle, "mobility_model", self)
+
+    def set_mode(self, mode: MobilityModelMode):
+        """
+        Sets the MobilityModelMode. If Manual then sets current_dir to None.
+        :param mode: the mode to set to
+        :type mode: MobilityModelMode
+        :return: None
+        """
+        self.mode = mode
+        if mode == MobilityModelMode.Manual:
+            self.current_dir = None
 
     def __return_direction(self):
         """
@@ -87,12 +99,13 @@ class MobilityModel:
         else:
             return self.SE
 
-    def next_direction(self, current_x_y_z=None):
+    def next_direction(self, current_x_y_z):
         """
         Determines the next direction of the model.
         :param current_x_y_z: the current x, y and z coordinates of the particle as tuple
         :return: the next direction
         """
+        self.previous_coordinates = current_x_y_z
         if self.mode == MobilityModelMode.Back_And_Forth:
             return self.__back_and_forth__()
         elif self.mode == MobilityModelMode.Random_Walk:
@@ -205,7 +218,7 @@ class MobilityModel:
         return next_dir
 
     def __poi__(self, current_x_y_z):
-        if current_x_y_z == self.poi:
+        if current_x_y_z == self.poi or current_x_y_z == self.previous_coordinates:
             return False
 
         # southern movement
