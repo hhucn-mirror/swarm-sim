@@ -35,7 +35,7 @@ class Message:
         self.delivery_round = 0
         self.forwarder = None
         if not ttl:
-            ttl = sender.world.message_ttl
+            ttl = sender.world.get_message_ttl()
         self.ttl = ttl
         self.hops = 0
         self.content = content
@@ -211,9 +211,13 @@ def multicast_message_content(sender, receivers, message_content, ttl=None):
     :type ttl: int
     """
 
+    if not ttl:
+        ttl = sender.world.get_message_ttl()
+
     for receiver in receivers:
         message = Message(sender, receiver, content=message_content, ttl=ttl)
         send_message(sender, receiver, message)
+
 
 def broadcast_message(sender, message):
     """

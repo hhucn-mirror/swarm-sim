@@ -57,10 +57,6 @@ class World:
         self.config_data = config_data
         self.grid = config_data.grid
 
-        self.routing_parameters = config_data.routing_parameters
-
-        self.message_ttl = config_data.message_ttl
-
         self.particle_mod = importlib.import_module(config_data.particle)
 
         self.csv_generator = importlib.import_module(config_data.csv_generator)
@@ -340,6 +336,9 @@ class World:
 
     def get_location_deleted(self):
         return self.__location_deleted
+
+    def get_message_ttl(self):
+        return self.config_data.message_ttl
 
     def set_tile_deleted(self):
         self.__tile_deleted = False
