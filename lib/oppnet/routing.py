@@ -193,6 +193,25 @@ class RoutingMap(dict):
     def remove_target(self, target_particle):
         del self[target_particle]
 
+    def remove_all_entries_with_particle(self, particle_to_remove):
+        delete_count = 0
+        try:
+            self.remove_target(particle_to_remove)
+            delete_count += 1
+        except KeyError:
+            pass
+        for contacts in list(self.values()):
+            try:
+                del contacts[particle_to_remove]
+                delete_count += 1
+            except KeyError:
+                pass
+        return delete_count
+
+    def remove_all_entries_with_particles(self, particles_to_remove):
+        for particle in particles_to_remove:
+            self.remove_all_entries_with_particle(particle)
+
     def get_all_contact_particles(self):
         all_contacts = []
         for _, contacts in self.items():

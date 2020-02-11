@@ -17,18 +17,19 @@ def solution(world):
     if current_round == 1:
         leader_count = world.config_data.leader_count
         leaders, followers = split_particles(particles, leader_count)
+        set_t_wait_values(particles, t_wait)
         initialise_leaders(t_wait, leader_count)
         initialise_neighbourhoods(particles)
     else:
         check_neighbourhoods(particles)
         routing.next_step(particles)
-        update_leader_states()
+        update_particle_states(particles)
         send_direction_proposals(current_round)
         move_to_next_direction(particles)
 
 
-def set_t_wait_values(t_wait):
-    for particle in leaders:
+def set_t_wait_values(particles, t_wait):
+    for particle in particles:
         particle.set_t_wait(t_wait)
 
 
@@ -39,14 +40,14 @@ def split_particles(particles, leader_count):
 
 
 def initialise_leaders(t_wait, leader_count):
-    set_t_wait_values(t_wait)
     left_bound = t_wait * 3 + 1
     right_bound = left_bound * (leader_count + 1)
     next_direction_proposal_rounds = range(left_bound, right_bound, left_bound)
     for index, leader in enumerate(leaders):
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.leader)
-        leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
+        # leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
+        leader.set_next_direction_proposal_round(left_bound * (index % 2 + 1))
         leader.multicast_leader_message(LeaderMessageType.discover)
         print("leader {} next_direction_proposal: {}".format(leader.number, leader.next_direction_proposal_round))
 
@@ -61,9 +62,11 @@ def check_neighbourhoods(particles):
         particle.check_neighbourhood()
 
 
-def update_leader_states():
+def update_particle_states(particles):
     for leader in leaders:
         leader.update_leader_states()
+    for particle in particles:
+        particle.update_free_locations()
 
 
 def send_direction_proposals(current_round):
