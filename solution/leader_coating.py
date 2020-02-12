@@ -20,13 +20,14 @@ def solution(world):
     global cave_entrance_coordinates
     global cave_width
     global level
-    directions_list = world.grid.get_directions_list()
     if world.get_actual_round() == 1:
-        handle_first_round(directions_list, world)
+        handle_first_round(world)
         ##sim.get_particle_map_id()[leader]
     else:
         if leader.stage == "scanning":
             handle_scanning(leader)
+        elif leader.stage == "toTile":
+            handle_to_tile(leader)
         elif leader.stage == "taking":
             handle_taking(leader)
         elif leader.stage == "dropping":
@@ -35,62 +36,47 @@ def solution(world):
             handle_checking(leader)
 
 
-def handle_first_round(directions_list, world):
+def handle_first_round(world):
     global leader
-    leader = getIdOfNearestParticleToIsland(world)
+    leader, distance, closest_tile_coordinates = getIdOfNearestParticleToIsland(world)
     leader.set_color((0.0, 1, 0.0, 1.0))
-    setattr(leader, "get_an_obstacles_direction", get_an_obstacles_direction)
-    setattr(leader, "directions_list", directions_list)
-    setattr(leader, "move_around_obstacles", move_around_obstacles)
-   # setattr(leader, "move_around_obstacles_anti", move_around_obstacles_anti)
-    setattr(leader, "surroundings", [])
+    setattr(leader, "directions_list", world.grid.get_directions_list())
     setattr(leader, "coating_locations", [])
-    setattr(leader, "starting_location", leader.coordinates)
+    setattr(leader, "starting_location", ())
     setattr(leader, "active_matters", world.particles.copy())
     leader.active_matters.remove(leader)
-    setattr(leader, "obstacle_dir", leader.get_an_obstacles_direction(leader))
-    leader.move_around_obstacles(leader)
     setattr(leader, "am_distances", get_sorted_list_of_particles_distances(leader))
     setattr(leader, "aim", ())
     setattr(leader, "prev_aim", leader.aim)
     setattr(leader, "aim_path", [])
-    setattr(leader, "stage", "scanning")
-    print("Start with scanning")
+    setattr(leader, "obstacle_dir", False)
+    if distance == 1:
+        leader.starting_location = leader.coordinates
+        if get_an_adjacent_obstacle_directions_scanning(leader):
+            dire = obstacles_free_direction(leader)
+        leader.coating_locations.append(leader.coordinates)
+        leader.move_to(dire)
+        setattr(leader, "stage", "scanning")
+        print("Start with scanning")
+    else:
+        setattr(leader, "stage", "toTile")
+        leader.aim = closest_tile_coordinates
+        leader.aim_path = world.grid.get_shortest_path(leader.coordinates, closest_tile_coordinates)
+        print("Start with going to Tile")
 
-
-def reached_aim(aim, leader):
-    if leader.aim_path:
-        next_dir = leader.aim_path.pop(0)
-        next_coords = header.get_coordinates_in_direction(leader.coordinates, next_dir)
-        if header.get_coordinates_in_direction(leader.coordinates, next_dir) == leader.prev_aim:
-            obstacle_dir = get_an_obstacles_direction(leader)
-            if obstacle_dir:
-                leader.aim_path = obstacle_avoidance(leader, obstacle_dir)
-                next_dir = leader.aim_path.pop(0)
-                next_coords = header.get_coordinates_in_direction(leader.coordinates, next_dir)
-        if leader.tile_in(next_dir):
-            leader.aim_path = obstacle_avoidance(leader, leader.directions_list.index(next_dir))
-            return False
-        if aim == next_coords:
-            return True
-        prev_aim = leader.coordinates
-        if not leader.move_to(next_dir):
-            print("obstacle")
-            leader.aim_path = obstacle_avoidance(leader, leader.directions_list.index(next_dir))
-            print ("new_path", leader.aim_path)
-            return False
-        leader.prev_aim = prev_aim
-        #leader.move_to(next_dir)
-
-        return False
 
 
 def handle_scanning(leader):
     if leader.coordinates != leader.starting_location:
-        leader.obstacle_dir = leader.get_an_obstacles_direction(leader)
-        leader.move_around_obstacles(leader)
+        if get_an_adjacent_obstacle_directions_scanning(leader):
+            dire = obstacles_free_direction(leader)
+            leader.coating_locations.append(leader.coordinates)
+            leader.prev_aim = leader.coordinates
+            leader.move_to(dire)
+
     else:
-        if leader.am_distances:
+        if leader.active_matters:
+            leader.am_distances = get_sorted_list_of_particles_distances(leader)
             leader.aim = leader.am_distances.pop(0)
             leader.aim_path = leader.world.grid.get_shortest_path(leader.coordinates, leader.aim)
 
@@ -99,6 +85,18 @@ def handle_scanning(leader):
         else:
             leader.stage = "leader"
             print("from scanning --> leader")
+
+def handle_to_tile(leader):
+    if reached_aim(leader.aim, leader):
+        leader.starting_location = leader.coordinates
+        if get_an_adjacent_obstacle_directions(leader):
+            dire = obstacles_free_direction(leader)
+            leader.coating_locations.append(leader.coordinates)
+            leader.prev_aim = leader.coordinates
+            leader.move_to(dire)
+
+        print("from toTile --> scanning")
+        leader.stage = "scanning"
 
 
 def handle_taking(leader):
@@ -113,6 +111,7 @@ def handle_taking(leader):
 def handle_dropping(leader):
     if reached_aim(leader.aim, leader):
         leader.drop_particle_on(leader.aim)
+        leader.active_matters.remove((leader.get_particle_in(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))))
         leader.stage = "checking"
         print("from dropping -->  checking")
 
@@ -121,57 +120,22 @@ def handle_checking(leader):
     if not leader.coating_locations:
         print("from checking -->  scanning")
         leader.starting_location = leader.coordinates
-        leader.obstacle_dir = leader.get_an_obstacles_direction(leader)
-        leader.move_around_obstacles(leader)
+        if get_an_adjacent_obstacle_directions(leader):
+            dire = obstacles_free_direction(leader)
+            leader.coating_locations.append(leader.coordinates)
+            leader.move_to(dire)
         leader.stage = "scanning"
-    elif not leader.am_distances:
-        print("It is my turn")
-        leader.stage = "leader"
-    else:
+    elif leader.active_matters:
+        leader.am_distances = get_sorted_list_of_particles_distances(leader)
         leader.aim = leader.am_distances.pop(0)
         leader.aim_path = leader.world.grid.get_shortest_path(leader.coordinates, leader.aim)
         leader.prev_aim = leader.coordinates
         print("from checking -->  taking")
         leader.stage = "taking"
+    else:
+        print("It is my turn")
+        leader.stage = "leader"
 
-
-# path = leader.world.grid.get_shortest_path(leader.coordinates, leader.aim)
-
-
-def move_to_dest_in_one_rnd(particle, destiny):
-    if move_to_dest_step_by_step(particle, destiny):
-        return True
-    move_to_dest_in_one_rnd(particle, destiny)
-
-
-def move_to_dest_step_by_step(particle, destiny):
-    next_dir = particle.world.grid.get_next_dir_to(particle.coordinates[0], particle.coordinates[1], destiny[0], destiny[1])
-    next_coords = header.get_coordinates_in_direction(particle.coordinates, next_dir)
-    if  next_coords == destiny:
-        return True
-    elif particle.matter_in(next_dir):
-        next_dir = matter_avoidance(leader,leader.directions_list.index(next_dir))
-    elif next_coords == leader.prev_aim:
-        next_dir = matter_avoidance_anti(leader,leader.directions_list.index(next_dir))
-        # print("Do not return back")
-        # dir = get_an_obstacles_direction(leader)
-        # next_dir = matter_avoidance(leader, dir)
-        # next_coords = header.get_coordinates_in_direction(particle.coordinates, next_dir)
-        # if next_coords == leader.prev_aim:
-        #     while True:
-        #         next_dir = random.choice(leader.directions_list)
-        #         next_coords = header.get_coordinates_in_direction(particle.coordinates, next_dir)
-        #         if next_coords != leader.prev_aim and leader.matter_in(next_dir) is False:
-        #             break
-
-
-    leader.prev_aim = leader.coordinates
-    particle.move_to(next_dir)
-    return False
-
-
-def go_to_aim(aim_coords, leader):
-    return move_to_dest_step_by_step(leader, aim_coords)
 
 
 def get_sorted_list_of_particles_distances(leader):
@@ -192,7 +156,8 @@ def get_sorted_list_of_particles_distances(leader):
     return sorted_list_of_particles_coordinates
 
 
-def obstacle_avoidance(leader, index_of_dir):
+def obstacle_avoidance_path(leader, obstacle_dir):
+    index_of_dir = leader.directions_list.index(obstacle_dir)
     if index_of_dir is not None:
         for idx in range(len(leader.directions_list)):
             dir_1 = leader.directions_list[(idx + index_of_dir) % len(leader.directions_list)]
@@ -207,72 +172,104 @@ def obstacle_avoidance(leader, index_of_dir):
             idx -= 1
         path_1 = [dir_1]
         path_2 = [dir_2]
-        path_1.extend( leader.world.grid.get_shortest_path(header.get_coordinates_in_direction(leader.coordinates, dir_1), leader.aim))
-        path_2.extend(leader.world.grid.get_shortest_path(header.get_coordinates_in_direction(leader.coordinates, dir_2), leader.aim))
+        path_1.extend( leader.world.grid.get_shortest_path(leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_1), leader.aim))
+        path_2.extend(leader.world.grid.get_shortest_path(leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_2), leader.aim))
         if len(path_1) < len(path_2):
-            if leader.prev_aim != header.get_coordinates_in_direction(leader.coordinates, dir_1):
+            if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_1):
                 return path_1
         elif len(path_1) == len(path_2):
-            if leader.prev_aim == header.get_coordinates_in_direction(leader.coordinates, dir_2):
+            if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_2):
                 return path_1
-        if leader.prev_aim == header.get_coordinates_in_direction(leader.coordinates, dir_2):
+        if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_2):
             return path_1
         return path_2
 
-def matter_avoidance(leader, dir):
-    if dir is not None:
-        for idx in range(len(leader.directions_list)):
-            dire = leader.directions_list[(idx + dir) % len(leader.directions_list)]
-            if leader.matter_in(dire) is False:
-                return dire
-    return random.choice(leader.directions_list)
 
-def matter_avoidance_anti(leader, dir):
-    if dir is not None:
-        idx = len(leader.directions_list)
-        while idx >= 0:
-            dire = leader.directions_list[(idx + dir) % len(leader.directions_list)]
-            if leader.matter_in(dire) is False:
-                return dire
-
-def move_around_obstacles(leader):
+def obstacles_free_direction(leader):
+    index_dir = leader.directions_list.index(leader.obstacle_dir)
     for idx in range(len(leader.directions_list)):
-        dire = leader.directions_list[(idx + leader.obstacle_dir) % len(leader.directions_list)]
+        dire = leader.directions_list[(idx + index_dir) % len(leader.directions_list)]
         if leader.matter_in(dire) is False:
-            leader.move_to(dire)
-            leader.coating_locations.append(leader.coordinates)
+            return dire
             break
 
-def move_around_obstacles_anti(leader):
-    idx = len(leader.directions_list)
-    while idx >= 0 :
-        dire = leader.directions_list[(idx + leader.obstacle_dir) % len(leader.directions_list)]
-        if leader.matter_in(dire) is False:
-            leader.move_to(dire)
-            leader.coating_locations.append(leader.coordinates)
-            break
-        idx -= 1
 
-def get_an_obstacles_direction(leader):
+def get_adjacent_obstacles_directions(leader):
+    leader.obstacle_dir.clear()
     for dir in leader.directions_list:
-        if leader.matter_in(dir) is True:
-            return leader.directions_list.index(dir)
+        if leader.matter_in(dir):
+            leader.obstacle_dir.append(dir)
+    if bool(leader.obstacle_dir):
+        return True
     return False
     #return surroundings
 # region surround island
 
 
+def get_an_adjacent_obstacle_directions(leader):
+    leader.obstacle_dir = None
+    for dir in leader.directions_list:
+        if leader.matter_in(dir):
+            leader.obstacle_dir = dir
+    if bool(leader.obstacle_dir):
+        return True
+    return False
+
+
+def get_an_adjacent_obstacle_directions_scanning(leader):
+    leader.obstacle_dir = None
+    for dir in leader.directions_list:
+        if leader.matter_in(dir):
+            if leader.get_matter_in(dir).type == "particle" and leader.get_matter_in(dir) in leader.active_matters:
+                leader.active_matters.remove(leader.get_matter_in(dir))
+            leader.obstacle_dir = dir
+    if bool(leader.obstacle_dir):
+        return True
+    return False
 
 
 def getIdOfNearestParticleToIsland(sim):
     closestParticle = sim.get_particle_list()[0]
-    min = 1.7976931348623157e+308
+    min = None
     for particle in sim.get_particle_list():
         for tile in sim.get_tiles_list():
-            xdiff = tile.coordinates[0] - particle.coordinates[0]
-            ydiff = tile.coordinates[1] - particle.coordinates[1]
-            value = math.sqrt((xdiff * xdiff) + (ydiff * ydiff))
-            if (value < min):
+            value = sim.grid.get_distance(particle.coordinates, tile.coordinates)
+            if min is None:
                 min = value
                 closestParticle = particle
-    return closestParticle
+                closest_tile_coordinate = tile.coordinates
+            elif (value < min):
+                min = value
+                closestParticle = particle
+                closest_tile_coordinate = tile.coordinates
+    return closestParticle, min, closest_tile_coordinate
+
+
+
+def reached_aim(aim, leader):
+    if leader.aim_path:
+        next_dir = leader.aim_path.pop(0)
+        next_coords = header.get_coordinates_in_direction(leader.coordinates, next_dir)
+        print(" next coords ", next_coords, " path ", leader.aim_path )
+        if aim == next_coords:
+            return True
+        if header.get_coordinates_in_direction(leader.coordinates, next_dir) == leader.prev_aim:
+            if get_an_adjacent_obstacle_directions(leader):
+                leader.aim_path = obstacle_avoidance_path(leader, leader.obstacle_dir)
+                next_dir = leader.aim_path.pop(0)
+                next_coords = leader.world.grid.get_coordinates_in_direction(leader.coordinates, next_dir)
+        if leader.tile_in(next_dir):
+            print(" tile obstacle ")
+            leader.aim_path = obstacle_avoidance_path(leader, next_dir)
+            print(" new path ", leader.aim_path)
+
+            return False
+        prev_aim = leader.coordinates
+        if not leader.move_to(next_dir):
+            print("obstacle")
+            leader.aim_path = obstacle_avoidance_path(leader, next_dir)
+            print ("new_path", leader.aim_path)
+            return False
+        leader.prev_aim = prev_aim
+        #leader.move_to(next_dir)
+        return False

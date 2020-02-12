@@ -356,7 +356,7 @@ class World:
     def set_location_deleted(self):
         self.__location_deleted = False
 
-    def add_particle(self, coordinates, color=None):
+    def add_particle(self, coordinates, color=None, new_class=particle.Particle):
         """
         Add a particle to the world database
 
@@ -377,7 +377,7 @@ class World:
                     if color is None:
                         color = self.config_data.particle_color
                     self.particle_id_counter += 1
-                    self.new_particle = particle.Particle(self, coordinates, color, self.particle_id_counter)
+                    self.new_particle = new_class(self, coordinates, color, self.particle_id_counter)
                     if self.vis is not None:
                         self.vis.particle_changed(self.new_particle)
                     self.particles_created.append(self.new_particle)
