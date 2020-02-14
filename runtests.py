@@ -2,21 +2,35 @@ import pandas
 import shutil
 import os
 import sys
+import time
 from glob import glob
 import random
 import importlib
-from multiprocessing import Pool
+from multiprocessing import Pool, Queue, Process, Manager
+from queue import Empty
 
 NUMBER_OF_SEEDS = 10
-MAX_PARTICLE_COUNT = 100
-MIN_PARTICLE_COUNT = 60
-STEPSIZE_PARTICLE_COUNT = 5
+MIN_PARTICLE_COUNT = 150
+MAX_PARTICLE_COUNT = 300
+STEPSIZE_PARTICLE_COUNT = 50
 USE_PARTICLE_COUNT = True
 MAX_ROUNDS = 10000
-SCENARIOS = ["single_tile_few_particles"]#["single_tile_particle_line", "single_tile_few_particles", "single_tile_many_particles",
-            # "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave"]
-SOLUTIONS = ["p_max_lifetime.main"]#, "base.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
+SCENARIOS = ["single_tile_few_particles"]
+            #["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave"]
+SOLUTIONS = ["base.main"]#, "base.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
+
+
+def progress_counter_func(taskqueue, test_count):
+    tests_done = 0
+    while tests_done < test_count:
+        try:
+            taskqueue.get(False)
+            tests_done += 1
+            print(str(tests_done / test_count * 100) + "%", "done.")
+        except Empty:
+            pass
+        time.sleep(5)
 
 
 def run_test(args):
@@ -25,8 +39,10 @@ def run_test(args):
     scenario = args[1]
     seed = args[2]
     particle_count = args[3]
+    taskqueue = args[4]
     simulator.swarm_sim(["-r", str(seed), "-w", scenario, "-s", solution, "-v", "0",
                          "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-42", "-m", "1", "-p", particle_count])
+    taskqueue.put(seed)
 
 
 def eval_test(solution_scenario):
@@ -73,24 +89,33 @@ if __name__ == "__main__":
     pandas.set_option("display.max_columns", 100)
     if os.path.isdir("./outputs"):
         shutil.rmtree("./outputs")
+    taskmanager = Manager()
+    taskqueue = taskmanager.Queue()
     solutions_scenarios = ((solution, scenario) for scenario in SCENARIOS for solution in SOLUTIONS)
     if USE_PARTICLE_COUNT:
-        args = ((solution, scenario, random.randint(0, sys.maxsize), particle_count)
+        args = ((solution, scenario, random.randint(0, sys.maxsize), particle_count, taskqueue)
                 for scenario in SCENARIOS
                 for solution in SOLUTIONS
                 for _ in range(NUMBER_OF_SEEDS)
                 for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT))
     else:
-        args = ((solution, scenario, random.randint(0, sys.maxsize), -1)
+        args = ((solution, scenario, random.randint(0, sys.maxsize), -1, taskqueue)
                 for scenario in SCENARIOS
                 for solution in SOLUTIONS
                 for _ in range(NUMBER_OF_SEEDS))
-    with Pool(processes=4) as pool:
+    args = list(args)
+    test_count = len(args)
+    print("number of tests:", test_count)
+    progress_process = Process(target=progress_counter_func, args=(taskqueue, test_count))
+    progress_process.daemon = True
+    progress_process.start()
+    with Pool(processes=3) as pool:
         print("starting")
         list(pool.map(run_test, args))
-        print("test done, starting evaluation")
+        print("tests done, starting evaluation")
         output = list(pool.map(eval_test, solutions_scenarios))
         output.sort(key=output_sorter)
+    progress_process.join()
     outfile = open("./outputs/output.txt", "w+")
     for test in output:
         outfile.write("Solution: " + str(test["solution"]) + "\n")
