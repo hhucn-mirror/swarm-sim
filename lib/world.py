@@ -14,6 +14,7 @@ import time
 
 from lib import tile, location, vis3d
 from lib.oppnet.memory import Memory
+from lib.particle import Particle
 from lib.swarm_sim_header import eprint, get_coordinates_in_direction
 
 
@@ -608,3 +609,61 @@ class World:
 
         for particle, direction in ordered_particles.items():
             particle.move_to(direction)
+
+    def move_particles_collision_free(self, particles: [Particle], direction):
+        """
+        Moves a list of :param particles: in a :param direction: while avoiding
+        collisions, i.e. particles are moved in the order of their 'closeness'
+        to :param direction:. E.g. two particles a, b with coordinates a_c = (0.5, 1, 0)
+        and b_c = (1, 0, 0) moving northeast -> (0.5, 1, 0). Particle b would move
+        after a, since a is equivalent to the northeast vector.
+        :param particles: list of particles to move
+        :type particles: list of Particle objects
+        :param direction: the direction for particles to move to
+        :type direction: a direction vector
+        :return: sorted list of particle coordinates
+        :rtype: list of coordinates
+        """
+        coordinates_list = [particle.coordinates for particle in particles]
+        # northeast
+        if direction == (0.5, 1, 0):
+            coordinates_list.sort(key=self.__get_x_y__)
+        # east
+        elif direction == (1, 0, 0):
+            coordinates_list.sort(key=self.__get_x__)
+        # southeast
+        elif direction == (0.5, -1, 0):
+            coordinates_list.sort(key=self.__get_y__, reverse=True)
+            coordinates_list.sort(key=self.__get_x__)
+        # southwest
+        elif direction == (-0.5, -1, 0):
+            coordinates_list.sort(key=self.__get_x_y__, reverse=True)
+        # west
+        elif direction == (-1, 0, 0):
+            coordinates_list.sort(key=self.__get_x__, reverse=True)
+        # northwest
+        else:
+            coordinates_list.sort(key=self.__get_y__)
+            coordinates_list.sort(key=self.__get_x__, reverse=True)
+
+        for coordinates in coordinates_list:
+            particle = self.particle_map_coordinates[coordinates]
+            particle.move_to(direction)
+
+        return coordinates_list
+
+    @staticmethod
+    def __get_x__(coordinates):
+        return coordinates[0]
+
+    @staticmethod
+    def __get_y__(coordinates):
+        return coordinates[1]
+
+    @staticmethod
+    def __get_x_y__(coordinates):
+        return coordinates[0] + coordinates[1]
+
+    @staticmethod
+    def __get_z__(coordinates):
+        return coordinates[2]
