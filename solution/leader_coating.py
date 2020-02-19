@@ -95,6 +95,10 @@ def handle_scanning(leader):
             print("1st_level_scanning --> checking")
             leader.first_level = False
             return
+        if leader.caving_locations:
+            print("from checking -->  fill_up_cave", leader.caving_locations)
+            leader.in_cave = True
+            return
         print("scanning --> checking")
 
 
@@ -188,9 +192,12 @@ def handle_found_cave(cave_entrance_tmp, cave_exit_tmp, leader):
     leader.cave_entrance= leader.coordinates
     leader.cave_exit = cave_exit_tmp
     leader.cave_1st_location = cave_entrance_tmp
-    leader.caving_locations.append(cave_exit_tmp)
-    leader.caving_locations.append(leader.coordinates)
-    leader.caving_locations.append(cave_entrance_tmp)
+    if cave_exit_tmp not in leader.caving_locations:
+        leader.caving_locations.append(cave_exit_tmp)
+    if leader.coordinates not in leader.caving_locations:
+        leader.caving_locations.append(leader.coordinates)
+    if cave_entrance_tmp not in leader.caving_locations:
+        leader.caving_locations.append(cave_entrance_tmp)
     if cave_exit_tmp not in leader.coating_locations:
         leader.coating_locations.append(cave_exit_tmp)
     if leader.coordinates not in leader.coating_locations:
@@ -385,8 +392,14 @@ def handle_to_tile(leader):
 def handle_taking(leader):
     if reached_aim(leader.aim, leader):
         leader.take_particle_on(leader.aim)
-        leader.aim = leader.coating_locations.pop()
-        leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+        if leader.caving_locations and leader.in_cave:
+            leader.aim = leader.caving_locations.pop()
+            leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+        else:
+            leader.in_cave = False
+            leader.aim = leader.coating_locations.pop()
+            leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+
         print("from taking --> dropping")
         leader.state = "dropping"
 
@@ -402,7 +415,7 @@ def handle_dropping(leader):
         leader.state = "checking"
         get_neighbors(leader)
         dir, dir_exit = cave_entrance(leader)
-        if dir and dir_exit and len(leader.neighbors) != 5:
+        if dir and dir_exit and len(leader.neighbors) == 4:
             print("Im infront of cave")
             c= leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
             d = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_exit)
@@ -430,20 +443,13 @@ def handle_checking(leader):
             leader.state = "scanning"
             return
     if leader.active_matters:
-        if leader.in_cave:
-            print("from checking -->  in_cave")
-            leader.aim = leader.cave_exit
-            leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-            leader.prev_aim = leader.coordinates
-            leader.state = "in_cave"
-        else:
-            print("from checking -->  taking")
-            leader.scanning = False
-            leader.am_distances = get_sorted_list_of_particles_distances(leader)
-            leader.aim = leader.am_distances.pop(0)
-            leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-            leader.prev_aim = leader.coordinates
-            leader.state = "taking"
+        print("from checking -->  taking")
+        leader.scanning = False
+        leader.am_distances = get_sorted_list_of_particles_distances(leader)
+        leader.aim = leader.am_distances.pop(0)
+        leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+        leader.prev_aim = leader.coordinates
+        leader.state = "taking"
     else:
         print("It is my turn")
         leader.state = "leader"
