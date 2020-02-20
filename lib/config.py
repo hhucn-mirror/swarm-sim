@@ -100,6 +100,8 @@ class ConfigData:
             self.mobility_model_starting_dir = json.loads(config.get("MobilityModel", "mm_starting_dir"))
             if type(self.mobility_model_starting_dir) is list:
                 self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
+            elif type(self.mobility_model_starting_dir) == str and self.mobility_model_starting_dir == 'random':
+                self.mobility_model_starting_dir = 'random'
         else:
             self.mobility_model_starting_dir = None
 

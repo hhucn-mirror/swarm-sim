@@ -61,7 +61,6 @@ class Particle(Particle):
 
         self.__previous_neighbourhood__ = None
 
-
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)

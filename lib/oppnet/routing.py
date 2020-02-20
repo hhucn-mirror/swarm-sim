@@ -12,6 +12,7 @@ class Algorithm(Enum):
     Epidemic_MANeT = 1
     One_Leader_Flocking = 2
     Multi_Leader_Flocking = 3
+    Average_Consensus_Flocking = 4
 
 
 class MANeTRole(Enum):
@@ -82,6 +83,8 @@ def next_step(particles, scan_radius=None):
             __next_step_one_leader_flocking__(particle)
         elif routing_params.algorithm == Algorithm.Multi_Leader_Flocking:
             __next_step_multi_leader_flocking__(particle)
+        elif routing_params.algorithm == Algorithm.Average_Consensus_Flocking:
+            __next_step_average_consensus_flocking__(particle)
 
 
 def __next_step_epidemic__(sender, nearby=None):
@@ -135,6 +138,12 @@ def __next_step_multi_leader_flocking__(particle):
         particle.__process_as_follower__(all_messages)
     elif particle.get_flock_member_type() == FlockMemberType.leader:
         particle.__process_as_leader__(all_messages)
+
+
+def __next_step_average_consensus_flocking__(particle):
+    particle.check_current_neighbourhood()
+    particle.send_all_to_forward()
+    particle.process_received()
 
 
 class RoutingContact:
