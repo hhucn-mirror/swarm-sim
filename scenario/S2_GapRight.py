@@ -3,9 +3,9 @@ from scenario.particleGroups import *
 
 def scenario(sim):
     #doubleline20(sim)
-    #around37(sim)
+    around37(sim)
     #star50(sim)
-    block100(sim)
+    #block100(sim)
 
 # 3 places diameter
     #sim.add_tile (10.5, 5.0)
