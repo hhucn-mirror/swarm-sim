@@ -15,8 +15,8 @@ def solution(world):
             handle_taking(leader)
         elif leader.state == "dropping":
             handle_dropping(leader)
-        elif leader.state == "in_cave":
-            handle_in_cave(leader)
+        elif leader.state == "get_out_from_cave":
+            handle_get_out_from_cave(leader)
         elif leader.state == "checking":
             handle_checking(leader)
         elif leader.state == "self_positioning":
@@ -64,19 +64,14 @@ def handle_first_round(world):
         print("Start with going to Tile")
     return leader
 
+
 def handle_scanning(leader):
     if leader.coordinates != leader.starting_location:
-        get_neighbors(leader)
-        dir, dir_exit = cave_entrance(leader)
-        if dir is not None and dir_exit is not None:
-            leader.cave_found =  True
-            cave_entrance_tmp = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
-            cave_exit_tmp = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_exit)
-            if (leader.coordinates is not leader.cave_entrance and cave_entrance_tmp is not leader.cave_exit)\
-                    and (cave_entrance_tmp is not leader.cave_entrance and leader.coordinates  is not leader.cave_exit):
-                handle_found_cave(cave_entrance_tmp, cave_exit_tmp, leader)
-            return from_scanning_to_caving(dir, leader)
-        if leader.first_level:
+        dire, dire_exit = checking_for_a_cave(leader)
+        if dire:
+            leader.state = "caving"
+            print("scanning --> caving")
+        elif leader.first_level:
             dire = first_level_scanning(leader)
         else:
             dire = other_level_scanning(leader)
@@ -89,11 +84,19 @@ def handle_scanning(leader):
             print("1st_level_scanning --> checking")
             leader.first_level = False
             return
-        if leader.caving_locations:
-            print("from checking -->  fill_up_cave", leader.caving_locations)
-            leader.cave_coating = True
-            return
         print("scanning --> checking")
+
+
+def checking_for_a_cave(leader):
+    get_neighbors(leader)
+    dir, dir_exit = check_cave_entrance(leader)
+    if dir is not None and dir_exit is not None:
+        leader.cave_found = True
+        leader.cave_1st_location = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
+        leader.cave_entrance = leader.coordinates
+        leader.cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_exit)
+        #handle_found_cave(leader)
+    return dir, dir_exit
 
 
 def handle_caving(leader):
@@ -104,15 +107,17 @@ def handle_caving(leader):
     if get_an_adjacent_obstacle_directions_scanning(leader):
         dire = obstacles_free_direction(leader)
         # if get_an_adjacent_tile_directions_scanning(leader):
-        if leader.coordinates not in leader.coating_locations:
-            leader.coating_locations.append(leader.coordinates)
-        if leader.coordinates not in leader.caving_locations:
+        if leader.coordinates not in leader.caving_locations\
+                and leader.coordinates != leader.cave_exit\
+                and leader.coordinates != leader.cave_entrance\
+                and leader.coordinates != leader.cave_1st_location :
             leader.caving_locations.append(leader.coordinates)
         leader.prev_aim = leader.coordinates
         leader.move_to(dire)
-    if leader.coordinates not in leader.caving_locations:
+    if leader.coordinates != leader.cave_exit\
+                and leader.coordinates != leader.cave_entrance\
+                and leader.coordinates != leader.cave_1st_location :
         return
-
     else:
         leader.aim=leader.cave_exit
         if leader.coordinates == leader.aim:
@@ -120,20 +125,13 @@ def handle_caving(leader):
             leader.state = "scanning"
             return
         leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-        print("from caving -->.cave_coating")
-        leader.state = "in_cave"
+        print("from caving -->get out of the cave")
+        leader.state = "get_out_from_cave"
 
 
 def delete_cave_entrances(leader):
     if leader.cave_exit and leader.cave_exit in leader.coating_locations:
         leader.coating_locations.remove(leader.cave_exit)
-    if leader.cave_entrance and leader.cave_entrance in leader.coating_locations:
-        leader.coating_locations.remove(leader.cave_entrance)
-    if leader.cave_1st_location and leader.cave_1st_location in leader.coating_locations:
-        leader.coating_locations.remove(leader.cave_1st_location)
-    leader.cave_entrance = None
-    leader.cave_exit = None
-    leader.cave_1st_location = None
 
 
 def other_level_scanning(leader):
@@ -151,18 +149,7 @@ def first_level_scanning(leader):
     return dire
 
 
-def from_scanning_to_caving(dir, leader):
-    leader.state = "caving"
-    leader.prev_aim = leader.coordinates
-    """ Go into the cave"""
-    leader.move_to(dir)
-    if leader.first_level:
-        print("1st_level_scanning --> caving")
-        return
-    print("scanning --> caving")
-
-
-def cave_entrance(leader):
+def check_cave_entrance(leader):
     dire = None
     dire_exit = None
     if leader.obstacle_dir:
@@ -174,26 +161,6 @@ def cave_entrance(leader):
         elif len(leader.neighbors) == 4:
              dire, dire_exit = handle_four_matters(dire, index_dir, leader, neighbors_string)
     return dire, dire_exit
-
-
-def handle_found_cave(cave_entrance_tmp, cave_exit_tmp, leader):
-    leader.cave_entrance= leader.coordinates
-    leader.cave_exit = cave_exit_tmp
-    leader.cave_1st_location = cave_entrance_tmp
-    leader.caving_locations.clear()
-    if cave_exit_tmp not in leader.caving_locations:
-        leader.caving_locations.append(cave_exit_tmp)
-    if leader.coordinates not in leader.caving_locations:
-        leader.caving_locations.append(leader.coordinates)
-    if cave_entrance_tmp not in leader.caving_locations:
-        leader.caving_locations.append(cave_entrance_tmp)
-    if cave_exit_tmp not in leader.coating_locations:
-        leader.coating_locations.append(cave_exit_tmp)
-    if leader.coordinates not in leader.coating_locations:
-        leader.coating_locations.append(leader.coordinates)
-    if cave_entrance_tmp not in leader.coating_locations:
-        leader.coating_locations.append(cave_entrance_tmp)
-    print(" Check Found Cave")
 
 
 def scan_adjacent_locations(leader):
@@ -218,6 +185,24 @@ def handle_three_matters(dire, index_dir, leader, neighbors_string):
         dire, dire_exit = handle_MLMLLM(dire, dire_exit, index_dir, leader)
     elif neighbors_string == "MLLMML":
         dire, dire_exit = handle_MLLMML(dire, dire_exit, index_dir, leader)
+    elif neighbors_string == "MLLMLM":
+        dire, dire_exit = handle_MLLMLM(dire, dire_exit, index_dir, leader)
+    elif neighbors_string == "MMLLML":
+        dire, dire_exit = handle_MMLLML(dire, dire_exit, index_dir, leader)
+    return dire, dire_exit
+
+def handle_MLLMLM(dire, dire_exit, index_dir, leader):
+    dire = leader.directions_list[(4 + index_dir) % len(leader.directions_list)]
+    dire_exit = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
+    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+        dire_exit = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
+    return dire, dire_exit
+
+def handle_MMLLML(dire, dire_exit, index_dir, leader):
+    dire = leader.directions_list[(5 + index_dir) % len(leader.directions_list)]
+    dire_exit = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
+    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+        dire_exit = leader.directions_list[(3 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
 
 
@@ -250,7 +235,7 @@ def handle_MMMLML(dire, dire_exit, index_dir, leader):
 def handle_MLMMLM(dire, dire_exit, index_dir, leader):
     dire_exit = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     dire = leader.directions_list[(4 + index_dir) % len(leader.directions_list)]
-    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+    if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
         dire_exit = leader.directions_list[(4 + index_dir) % len(leader.directions_list)]
         dire = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
@@ -259,7 +244,7 @@ def handle_MLMMLM(dire, dire_exit, index_dir, leader):
 def handle_MMLMML(dire, dire_exit, index_dir, leader):
     dire_exit = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
     dire = leader.directions_list[(5 + index_dir) % len(leader.directions_list)]
-    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+    if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
         dire_exit = leader.directions_list[(5 + index_dir) % len(leader.directions_list)]
         dire = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
@@ -268,7 +253,7 @@ def handle_MMLMML(dire, dire_exit, index_dir, leader):
 def handle_MLMMML(dire, dire_exit, index_dir, leader):
     dire_exit = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     dire = leader.directions_list[(5 + index_dir) % len(leader.directions_list)]
-    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+    if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
         dire_exit = leader.directions_list[(5 + index_dir) % len(leader.directions_list)]
         dire = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
@@ -277,7 +262,7 @@ def handle_MLMMML(dire, dire_exit, index_dir, leader):
 def handle_MLMLMM(dire, dire_exit, index_dir, leader):
     dire_exit = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     dire = leader.directions_list[(3 + index_dir) % len(leader.directions_list)]
-    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+    if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
         dire_exit = leader.directions_list[(3 + index_dir) % len(leader.directions_list)]
         dire = leader.directions_list[(1 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
@@ -286,7 +271,7 @@ def handle_MLMLMM(dire, dire_exit, index_dir, leader):
 def handle_MMLMLM(dire, dire_exit, index_dir, leader):
     dire_exit = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
     dire = leader.directions_list[(4 + index_dir) % len(leader.directions_list)]
-    if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
+    if leader.prev_aim != leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_exit):
         dire_exit = leader.directions_list[(4 + index_dir) % len(leader.directions_list)]
         dire = leader.directions_list[(2 + index_dir) % len(leader.directions_list)]
     return dire, dire_exit
@@ -382,24 +367,22 @@ def get_neighbors(leader):
 def handle_tube_end(leader):
     leader.aim = leader.cave_exit
     leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-    if leader.coordinates not in leader.coating_locations:
-        leader.coating_locations.append(leader.coordinates)
     if leader.coordinates not in leader.caving_locations:
         leader.caving_locations.append(leader.coordinates)
-    print("from caving -->.cave_coating")
-    leader.state = "in_cave"
+    print("from caving --> get out of the cave")
+    leader.state = "get_out_from_cave"
 
 
-def handle_in_cave(leader):
+def handle_get_out_from_cave(leader):
     if reached_aim(leader.aim, leader):
         leader.cave_coating = False
         leader.prev_aim = leader.coordinates
         leader.move_to(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))
         if leader.scanning:
-            print("from.cave_coating --> scanning")
+            print("from  get out of the cave --> scanning")
             leader.state = "scanning"
             return
-        print("from.cave_coating --> checking")
+        print("from  get out of the cave --> checking")
         leader.state = "checking"
 
 
@@ -420,8 +403,6 @@ def handle_taking(leader):
         leader.take_particle_on(leader.aim)
         if leader.caving_locations and leader.cave_coating:
             leader.aim = leader.caving_locations.pop()
-            if leader.aim in leader.coating_locations:
-                leader.coating_locations.remove(leader.aim)
             leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
         else:
             leader.cave_coating = False
@@ -435,36 +416,36 @@ def handle_taking(leader):
 def handle_dropping(leader):
     if reached_aim(leader.aim, leader):
         leader.drop_particle_on(leader.aim)
-        if leader.aim in leader.caving_locations:
-            leader.caving_locations.remove(leader.aim)
-
         if leader.get_particle_in(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim)) in leader.active_matters:
             leader.active_matters.remove((leader.get_particle_in(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))))
         leader.state = "checking"
         get_neighbors(leader)
-        dir, dir_exit = cave_entrance(leader)
+        dir, dir_exit = check_cave_entrance(leader)
         if dir and dir_exit and 3<=len(leader.neighbors) <5 and not leader.cave_found:
             #leader.cave_found = True
-            print("Im infront of cave")
-            entrance = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
-            exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_exit)
-            if entrance in leader.coating_locations:
-                leader.coating_locations.remove(entrance)
-            if exit in leader.coating_locations:
-                leader.coating_locations.remove(exit)
-            if leader.coordinates in leader.coating_locations:
-                leader.coating_locations.remove(leader.coordinates)
-            if exit not in leader.caving_locations:
-                leader.caving_locations.append(exit)
-            if leader.coordinates in leader.caving_locations:
-                leader.caving_locations.append(leader.coordinates)
-            if entrance not in leader.caving_locations:
-                leader.caving_locations.append(entrance)
+            handle_cave_entrance_while_dropping(dir, dir_exit, leader)
         print("from dropping -->  checking")
 
 
+def handle_cave_entrance_while_dropping(dir, dir_exit, leader):
+    print("Im infront of cave")
+    leader.cave_entrance = leader.coordinates
+    leader.cave_first_location =  leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
+    leader.cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir_exit)
+    if leader.cave_entrance in leader.coating_locations:
+        leader.coating_locations.remove(leader.cave_entrance)
+    if leader.cave_exit in leader.coating_locations:
+        leader.coating_locations.remove(leader.cave_exit)
+    if leader.cave_first_location in leader.coating_locations:
+        leader.coating_locations.remove(leader.cave_first_location)
+    leader.caving_locations.clear()
+    leader.caving_locations.append(leader.cave_exit)
+    leader.caving_locations.append(leader.cave_entrance)
+    leader.caving_locations.append(leader.cave_first_location)
+
+
 def handle_checking(leader):
-    if not leader.coating_locations:
+    if not leader.coating_locations and not leader.caving_locations:
             print("from checking -->  scanning")
             leader.starting_location = leader.coordinates
             if get_an_adjacent_obstacle_directions(leader):
@@ -479,6 +460,9 @@ def handle_checking(leader):
                 leader.cave_found = False
             leader.state = "scanning"
             return
+    elif leader.caving_locations:
+        print("from checking -->  fill_up_cave", leader.caving_locations)
+        leader.cave_coating = True
     if leader.active_matters:
         print("from checking -->  taking")
         leader.scanning = False
@@ -489,13 +473,15 @@ def handle_checking(leader):
         leader.state = "taking"
     else:
         print("It is my turn")
-        if leader.coordinates in leader.coating_locations:
+        leader.state = "self_positioning"
+        if leader.coating_locations:
+            leader.aim =  leader.coating_locations.pop()
+        else:
+            leader.aim = leader.caving_locations.pop()
+        if leader.coordinates == leader.aim:
             leader.state = "finished"
             print("Finished immediatly")
-        else:
-            leader.state = "self_positioning"
-            leader.aim =  leader.coating_locations.pop()
-            leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+        leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
 
 
 def handle_self_positioning(leader):
@@ -662,6 +648,7 @@ def reached_aim(aim, leader, leader_positioning = False):
         next_coords = leader.world.grid.get_coordinates_in_direction(leader.coordinates, next_dir)
         if aim == next_coords and leader_positioning is False:
             return True
+        leader.prev_aim = leader.coordinates 
         leader.move_to(next_dir)
         if leader_positioning and leader.coordinates == aim:
             return True
