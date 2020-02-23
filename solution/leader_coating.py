@@ -488,12 +488,16 @@ def handle_checking(leader):
             leader.state = "scanning"
             return
     elif leader.caving_locations and not leader.cave_coating:
+        print("active vs locations ", (len(leader.active_matters) + 1),
+              len(leader.caving_locations))
+        if (len(leader.active_matters) + 1) < len(leader.caving_locations):
+            leader.caving_locations.pop()
+            print ("Not enough particles. active vs locations ", (len(leader.active_matters) + 1), len(leader.caving_locations))
         leader.cave_coating = True
 
     print("from checking -->  fill_up_cave", leader.caving_locations)
     if leader.active_matters:
         print("from checking -->  taking")
-
         leader.scanning = False
         leader.am_distances = get_sorted_list_of_particles_distances(leader)
         leader.aim = leader.am_distances.pop(0)
@@ -503,10 +507,10 @@ def handle_checking(leader):
     else:
         print("It is my turn")
         leader.state = "self_positioning"
-        if leader.coating_locations:
-            leader.aim = leader.coating_locations.pop()
-        else:
+        if leader.cave_coating and leader.caving_locations:
             leader.aim = leader.caving_locations.pop()
+        elif leader.coating_locations:
+            leader.aim = leader.coating_locations.pop()
         if leader.coordinates == leader.aim:
             leader.state = "finished"
             print("Finished immediatly")
