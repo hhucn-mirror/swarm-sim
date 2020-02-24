@@ -173,72 +173,68 @@ def first_level_scanning(leader):
 
 def check_cave_entrance(leader):
     location_cnt = 0
-    cnt_cnter = 0
-    dir_especial = []
+    sum_of_neighbors_numbers = 0
     neighbors = {}
-    for idx in range(len(leader.directions_list)):
-        cnt_cnter, location_cnt = give_neighbors_numbers(cnt_cnter, dir_especial, idx, leader, location_cnt, neighbors)
-    dir_entry, dir_exit = encode_neighbors_numbers_to_get_cave_entry_and_exit(cnt_cnter, dir_especial,
+    sum_of_neighbors_numbers, location_cnt = give_neighbors_numbers(sum_of_neighbors_numbers,
+                                                                    leader, location_cnt, neighbors)
+    dir_entry, dir_exit = encode_neighbors_numbers_to_get_cave_entry_and_exit(sum_of_neighbors_numbers,
                                                                           leader, location_cnt, neighbors)
     return dir_entry, dir_exit
 
 
-def encode_neighbors_numbers_to_get_cave_entry_and_exit(cnt_cnter, dir_especial, leader, location_cnt, neighbors):
+def encode_neighbors_numbers_to_get_cave_entry_and_exit(sum_of_neighbors_numbers,  leader, location_cnt, neighbors):
     dir_entry = None
     dir_exit = None
-    if location_cnt == 2 and cnt_cnter == 4:
-        dir_entry = dir_especial[0]
+    if location_cnt == 2:
         for dire in neighbors:
             if neighbors[dire] == 10:
                 dir_exit = dire
-    elif dir_especial and location_cnt == 3:
-        for dire in dir_especial:
-            if neighbors[dire] != 10:
+            elif neighbors[dire] == 2:
                 dir_entry = dire
-            for dire in neighbors:
-                if neighbors[dire] == 5:
-                    dir_exit = dire
-    elif dir_especial and location_cnt == 4:
-        for dire in dir_especial:
-            if neighbors[dire] != 10:
+    elif location_cnt == 3:
+        for dire in neighbors:
+            if neighbors[dire] == 2:
                 dir_entry = dire
-            for dire in neighbors:
-                if neighbors[dire] == 1:
-                    dir_exit = dire
-    elif location_cnt == cnt_cnter and location_cnt == 4:
+            elif neighbors[dire] == 5:
+                dir_exit = dire
+    elif location_cnt == 4 and sum_of_neighbors_numbers == 18:
+        for dire in neighbors:
+            if neighbors[dire] == 2:
+                dir_entry = dire
+            if neighbors[dire] == 1:
+                dir_exit = dire
+    elif location_cnt == 4 and sum_of_neighbors_numbers == 17:
         for dire in neighbors:
             if neighbors[dire] == 5:
                 dir_exit = dire
-            elif neighbors[dire] != 10:
+            elif neighbors[dire] == 1:
                 if leader.matter_in(dire) is False:
                     dir_entry = dire
     return dir_entry, dir_exit
 
 
-def give_neighbors_numbers(cnt_cnter, dir_especial, idx, leader, location_cnt, neighbors):
-    cnt = 0
-    dire = leader.directions_list[(idx) % len(leader.directions_list)]
-    dire_left = leader.directions_list[(idx - 1) % len(leader.directions_list)]
-    dire_right = leader.directions_list[(idx + 1) % len(leader.directions_list)]
-    if leader.matter_in(dire_left) is True:
-        cnt += 1
-    if leader.matter_in(dire_right) is True:
-        cnt += 1
-    if leader.matter_in(dire) is False:
-        cnt_cnter += cnt
-        if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire):
-            cnt = 10
-        elif leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_left) \
-                and leader.matter_in(dire_left) is False:
-            cnt = 5
-        elif leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_right) \
-                and leader.matter_in(dire_right) is False:
-            cnt = 5
-        neighbors[dire] = cnt
-        location_cnt += 1
-        if cnt == 2:
-            dir_especial.append(dire)
-    return cnt_cnter, location_cnt
+def give_neighbors_numbers(sum_of_neighbors_numbers, leader, location_cnt, neighbors):
+    for idx in range(len(leader.directions_list)):
+        dire = leader.directions_list[(idx) % len(leader.directions_list)]
+        if leader.matter_in(dire) is False:
+            dire_left = leader.directions_list[(idx - 1) % len(leader.directions_list)]
+            dire_right = leader.directions_list[(idx + 1) % len(leader.directions_list)]
+            number = 0
+            if leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is True:
+                number = 2
+            elif leader.matter_in(dire_left) is True or leader.matter_in(dire_right) is True:
+                number = 1
+            if leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire):
+                number = 10
+            elif (leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_left) \
+                    and leader.matter_in(dire_left) is False)\
+                or (leader.prev_aim == leader.world.grid.get_coordinates_in_direction(leader.coordinates, dire_right) \
+                    and leader.matter_in(dire_right) is False):
+                number = 5
+            sum_of_neighbors_numbers += number
+            neighbors[dire] = number
+            location_cnt += 1
+    return sum_of_neighbors_numbers, location_cnt
 
 
 def scan_adjacent_locations(leader):
