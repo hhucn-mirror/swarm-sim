@@ -490,9 +490,19 @@ def handle_checking(leader):
     elif leader.caving_locations and not leader.cave_coating:
         print("active vs locations ", (len(leader.active_matters) + 1),
               len(leader.caving_locations))
-        if (len(leader.active_matters) + 1) < len(leader.caving_locations):
-            leader.caving_locations.pop()
-            print ("Not enough particles. active vs locations ", (len(leader.active_matters) + 1), len(leader.caving_locations))
+        if (len(leader.active_matters) +1 ) < len(leader.caving_locations):
+            if abs( len(leader.active_matters) + 1 - len(leader.caving_locations) ) == 1:
+                inner_cave= leader.caving_locations[-1]
+                outside_cave= leader.caving_locations[0]
+                distance_inner = get_closest_tile_distance(inner_cave)
+                distance_outside = get_closest_tile_distance(outside_cave)
+                if distance_inner == distance_outside:
+                    leader.caving_locations.pop(0)
+                else:
+                    leader.caving_locations.pop()
+            else:
+                leader.caving_locations.pop()
+        print ("Not enough particles. active vs locations ", (len(leader.active_matters) + 1), len(leader.caving_locations))
         leader.cave_coating = True
 
     print("from checking -->  fill_up_cave", leader.caving_locations)
@@ -674,6 +684,13 @@ def get_all_surounding_coordinates(pcoordinates, world):
         surrounding_coordinates.append(world.grid.get_coordinates_in_direction(pcoordinates, direction))
     return surrounding_coordinates
 
+def get_closest_tile_distance(source):
+    min = None
+    for tile in leader.world.get_tiles_list():
+        value = leader.world.grid.get_distance(source, tile.coordinates)
+        if min is None or (value < min):
+            min = value
+    return min
 
 def reached_aim(aim, leader, leader_positioning = False):
     if leader.aim_path:
