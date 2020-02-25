@@ -122,10 +122,7 @@ def send_pmax_to_neighbors(particle):
     :return: none
     """
     if particle.own_dist != math.inf:
-        directions_with_particles = find_neighbor_particles(particle)
-        own_distance_targets, p_max_targets = divide_neighbors(particle.nh_list,
-                                                               directions_with_particles,
-                                                               particle.own_dist)
+        p_max_targets = find_neighbor_particles(particle)
         send_p_max(particle, p_max_targets)
         send_own_distance(particle, own_distance_targets)
 
