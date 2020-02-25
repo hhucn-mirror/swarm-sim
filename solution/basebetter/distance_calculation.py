@@ -17,8 +17,9 @@ def calculate_distances(particle):
         print("Direction | Type | Distance")
         for direction in direction_list:
             print(direction_number_to_string(direction), "|", nh_list[direction].type, "|", nh_list[direction].dist)
-
-    particle.own_dist = calc_own_dist(nh_list)
+    new_own_dist = calc_own_dist(nh_list)
+    if new_own_dist < particle.own_dist:
+        particle.own_dist = new_own_dist
     # recalculate unknown neighbor distances based on own distance
     if particle.own_dist != math.inf:
         for direction in direction_list:

@@ -3,10 +3,10 @@ import importlib
 import copy
 import random
 from lib.swarm_sim_header import *
-import solution.base.distance_calculation as distance_calc_mod
-import solution.base.read_write as read_write_mod
-import solution.base.p_max_calculation as p_max_calc_mod
-import solution.base.coating_alg as coating_mod
+import solution.basebetter.distance_calculation as distance_calc_mod
+import solution.basebetter.read_write as read_write_mod
+import solution.basebetter.p_max_calculation as p_max_calc_mod
+import solution.basebetter.coating_alg as coating_mod
 import solution.goal_test as goal_test
 
 cycle_no = 3
@@ -95,9 +95,15 @@ def move_to_next_dir(particle):
     if debug:
         print("dist list before moving", [str(neighbor) for neighbor in particle.nh_list])
         print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
+    new_own_dist = particle.nh_list[particle.next_direction].dist
+    neighbor_left = particle.nh_list[direction_in_range(particle.next_direction - 1)]
+    neighbor_right = particle.nh_list[direction_in_range(particle.next_direction + 1)]
     coating_mod.reset_attributes(particle)
     coating_mod.reset_p_max(particle)
     particle.wait = True
+    particle.own_dist = new_own_dist
+    particle.nh_list[direction_in_range(particle.prev_direction[-1] + 1)] = neighbor_left
+    particle.nh_list[direction_in_range(particle.prev_direction[-1] - 1)] = neighbor_right
 
 
 def move_to_target_tile(particle, sim):

@@ -98,5 +98,5 @@ def check_neighbor_can_move(nh_list, direction, own_distance):
         nh_list[direction_in_range(direction - 1)].dist > own_distance) or
         (nh_list[direction_in_range(direction + 1)].type == "p" and
          nh_list[direction_in_range(direction + 1)].dist > own_distance)):
-        return False
+        return False # set to True to enable this function
     return False

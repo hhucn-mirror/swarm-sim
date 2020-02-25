@@ -47,6 +47,8 @@ def own_p_max(own_distance, p_max, particle_number, nh_list):
             neighbor = nh_list[direction]
             if neighbor.type == "p" and p_max.dist < neighbor.dist:
                 higher_neighbors += 1
+            elif neighbor.type == "p" and neighbor.dist is math.inf:
+                higher_neighbors += 3
         if higher_neighbors > 2:
             p_max.reset()
         return True

@@ -33,7 +33,8 @@ def send_own_distance(particle, targets):
                   " to", target_particle.number, " in direction", direction_number_to_string(target_direction))
         # invert the direction so the receiver particle knows from where direction it got the package
         particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
-        # send_distance_of_free_locations(particle, target_direction)
+        # if particle.nh_list[target_direction].dist > particle.own_dist:
+        #     send_distance_of_free_locations(particle, target_direction)
 
 
 def send_p_max(particle, targets):
@@ -50,7 +51,8 @@ def send_p_max(particle, targets):
             print("P", particle.number, "sends Pmax package", dist_package.p_max_dist, " to", target_particle.number,
                   " in direction", direction_number_to_string(target_direction))
         particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
-        # send_distance_of_free_locations(particle, target_direction)
+        # if particle.nh_list[target_direction].dist > particle.own_dist:
+        #     send_distance_of_free_locations(particle, target_direction)
 
 
 def send_dummy_messages(particle, targets):
@@ -68,7 +70,8 @@ def send_dummy_messages(particle, targets):
                   " to", target_particle.number, " in direction", direction_number_to_string(target_direction))
         # invert the direction so the receiver particle knows from where direction it got the package
         particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
-        # send_distance_of_free_locations(particle, target_direction)
+        # if particle.nh_list[target_direction].dist > particle.own_dist:
+        #     send_distance_of_free_locations(particle, target_direction)
 
 
 def send_distance_of_free_locations(particle, target_direction):
@@ -119,14 +122,10 @@ def send_pmax_to_neighbors(particle):
     :return: none
     """
     if particle.own_dist != math.inf:
-        directions_with_particles = find_neighbor_particles(particle)
-        own_distance_targets, p_max_targets = divide_neighbors(particle.nh_list,
-                                                               directions_with_particles,
-                                                               particle.own_dist)
+        p_max_targets = find_neighbor_particles(particle)
         if particle.p_max.lifetime > 0:
             particle.p_max.lifetime -= 1
             send_p_max(particle, p_max_targets)
-        send_own_distance(particle, own_distance_targets)
         if particle.p_max.lifetime == 0:
             particle.p_max.reset()
 
@@ -143,7 +142,7 @@ def send_own_dist_to_neighbors(particle):
                                                    directions_with_particles,
                                                    particle.own_dist)
         send_own_distance(particle, own_distance_targets)
-        if particle.waiting_rounds > 5:
+        if particle.waiting_rounds > 15:
             send_dummy_messages(particle, dummy_message_targets)
             particle.waiting_rounds = 0
         else:
