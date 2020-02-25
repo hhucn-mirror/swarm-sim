@@ -29,6 +29,7 @@ class Particle(Particle):
         if not mm_starting_dir:
             if world.config_data.mobility_model_starting_dir == 'random':
                 mm_starting_dir = MobilityModel.random_direction()
+                print("opp_particle -> initialised particle {} with direction {}".format(self.number, mm_starting_dir))
             else:
                 mm_starting_dir = world.config_data.mobility_model_starting_dir
 
@@ -153,6 +154,7 @@ class Particle(Particle):
         """
         if len(self.__neighbourhood_direction_counter__) > 0:
             self.mobility_model.current_dir = self.__neighbourhood_direction_counter__.most_common(1)[0][0]
+            self.__neighbourhood_direction_counter__ = collections.Counter()
 
     def set_average_direction(self):
         """
@@ -161,6 +163,7 @@ class Particle(Particle):
         """
         if len(self.__neighbourhood_direction_counter__) > 0:
             self.mobility_model.current_dir = self.__average_coordinates__(self.__neighbourhood_direction_counter__)
+            self.__neighbourhood_direction_counter__ = collections.Counter()
 
     def __average_coordinates__(self, directions_counter: collections.Counter):
         """
@@ -171,7 +174,7 @@ class Particle(Particle):
         :return: average direction
         """
         total_x, total_y, total_z, total_count = 0, 0, 0, 0
-        for (x, y, z), count in directions_counter:
+        for (x, y, z), count in directions_counter.items():
             total_x += x * count
             total_y += y * count
             total_z += z * count
