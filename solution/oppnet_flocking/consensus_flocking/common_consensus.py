@@ -10,15 +10,11 @@ def solution(world):
     particles = world.get_particle_list()
     if current_round == 1:
         send_current_directions(particles)
-    elif current_round % 5 == 1:
-        routing.next_step(particles)
-        move_to_next_direction(particles)
     elif current_round % 5 == 0:
         # pick a random sample of particles to choose a new direction
-        particles_subset = random.sample(particles, round(len(particles) * 0.55))
+        particles_subset = random.sample(particles, round(len(particles) * 0.70))
         set_random_directions(particles_subset)
-        # only the subset sends their current directions
-        send_current_directions(particles_subset)
+        send_current_directions(particles)
     else:
         routing.next_step(particles)
         move_to_next_direction(particles)
@@ -41,7 +37,7 @@ def set_random_directions(particles):
 def move_to_next_direction(particles):
     particle_directions = {}
     for particle in particles:
-        particle.set_most_common_direction()
+        particle.set_most_common_direction(True)
         next_direction = particle.mobility_model.next_direction(particle.coordinates)
         if next_direction:
             particle_directions[particle] = next_direction

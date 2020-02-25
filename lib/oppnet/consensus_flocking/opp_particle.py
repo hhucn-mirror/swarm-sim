@@ -1,5 +1,8 @@
 import collections
 import logging
+import random
+
+import numpy as np
 
 from lib.oppnet.communication import send_message, Message
 from lib.oppnet.consensus_flocking.message_types.direction_message import DirectionMessageContent
@@ -147,13 +150,37 @@ class Particle(Particle):
         self.__current_neighbourhood__[message.get_sender()] = content
         self.__neighbourhood_direction_counter__[content.get_direction()] += 1
 
-    def set_most_common_direction(self):
+    def set_most_common_direction(self, weighted_choice=False):
         """
-        Sets the current_dir value of the particles MobilityModel to the most common value it received from neighbours.
+        Sets the current_dir value of the particle's MobilityModel to the most common value it received from neighbours,
+        with a weighted probability of 1/neighbourhood_size, i.e. the size of the current neighbourhood it received
+        directions from. The other possibility is for the direction not to change with the inverse probability.
+        :param weighted_choice: boolean whether to use weighted choice or not.
         :return: nothing
         """
-        if len(self.__neighbourhood_direction_counter__) > 0:
-            self.mobility_model.current_dir = self.__neighbourhood_direction_counter__.most_common(1)[0][0]
+        neighbourhood_size = len(self.__neighbourhood_direction_counter__)
+        if neighbourhood_size > 0:
+            most_common = self.__neighbourhood_direction_counter__.most_common(1)[0][0]
+            if weighted_choice:
+                choice = random.choices([most_common, self.mobility_model.current_dir],
+                                        [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])
+            else:
+                choice = most_common
+            self.mobility_model.current_dir = choice[0]
+            self.__neighbourhood_direction_counter__ = collections.Counter()
+
+    def set_random_weighted_direction(self):
+        """
+        Sets the current_dir value of the particle's MobilityModel to one of the values it received by interpreting it
+        as weighted probability distribution. Weights are proportional to number of times the particle received a
+        direction.
+        :return: nothing
+        """
+        neighbourhood_size = len(self.__neighbourhood_direction_counter__)
+        if neighbourhood_size > 0:
+            weights = 1 / np.asarray(list(self.__neighbourhood_direction_counter__.values()))
+            choice = random.choices(self.__neighbourhood_direction_counter__.keys(), weights)
+            self.mobility_model.current_dir = choice[0]
             self.__neighbourhood_direction_counter__ = collections.Counter()
 
     def set_average_direction(self):
