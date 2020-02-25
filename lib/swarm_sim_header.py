@@ -128,6 +128,9 @@ def move_to_dest_step_by_step(particle, destiny, directions, prev_dir=None):
     if particle.tile_in(next_dir) or particle.particle_in(next_dir):
         particle.get_matter_in(next_dir)
         return particle.get_matter_in(next_dir)
+    if len(particle.prev_direction) >= particle.max_prev_dirs:
+        particle.prev_direction.pop(0)
+    particle.prev_direction.append(get_the_invert(particle.next_direction))
     particle.move_to(next_dir)
     if debug and debug_movement:
         print("\n P", particle.number, " moves to", direction_coordinates_to_string(next_dir, directions))
