@@ -26,9 +26,9 @@ class OGLWidget(QtOpenGL.QGLWidget):
         fmt.setSampleBuffers(True)
         super(OGLWidget, self).__init__(fmt)
 
-        self.info_frame = MatterInfoFrame()
-        self.info_frame.setParent(self)
-        self.info_frame.hide()
+        #self.info_frame = MatterInfoFrame()
+        #self.info_frame.setParent(self)
+        #self.info_frame.hide()
 
         self.debug = False
         self.world = world
@@ -334,14 +334,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         if self.ctrl:
-            self.update_info_frame()
+            # self.update_info_frame()
             if self.world.grid.get_dimension_count() < 3:
                 self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
                 self.camera.set_cursor_radius(-self.camera.get_radius())
             else:
                 self.camera.update_cursor_radius(-a0.angleDelta().y() / self.cursor_zoom_sensitivity)
         else:
-            self.update_info_frame()
+            # self.update_info_frame()
             self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
 
         self.update_scene()
@@ -361,9 +361,9 @@ class OGLWidget(QtOpenGL.QGLWidget):
             self.camera.update_mouse_position(self.mouse_pos)
             self.update_cursor_data()
             self.glDraw()
-            self.update_info_frame()
+            #self.update_info_frame()
         else:
-            self.update_info_frame()
+            #self.update_info_frame()
             if self.drag_state:
                 drag_amount = [self.last_position[0] - self.mouse_pos[0], self.last_position[1] - self.mouse_pos[1]]
 
@@ -377,7 +377,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
     def update_info_frame(self):
         if not self.ctrl:
-            self.info_frame.hide()
+            # self.info_frame.hide()
             return
         vc = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
         matter = []
@@ -394,12 +394,12 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if vc in self.world.location_map_coordinates:
             matter.append(self.world.location_map_coordinates[vc])
 
-        if len(matter) > 0:
-            self.info_frame.show()
-            self.info_frame.move(self.mouse_pos[0] + 20, self.mouse_pos[1] + 20)
-            self.info_frame.set_info(matter)
-        else:
-            self.info_frame.hide()
+        #if len(matter) > 0:
+            #self.info_frame.show()
+            #self.info_frame.move(self.mouse_pos[0] + 20, self.mouse_pos[1] + 20)
+            #self.info_frame.set_info(matter)
+        #else:
+            #self.info_frame.hide()
 
     def rotate_view(self, drag_amount):
         """

@@ -130,8 +130,17 @@ def move_to_dest_step_by_step(particle, destiny, directions, prev_dir=None):
         return particle.get_matter_in(next_dir)
     particle.move_to(next_dir)
     if debug and debug_movement:
-        print("\n P", particle.number, " moves to", direction_number_to_string(next_dir))
+        print("\n P", particle.number, " moves to", direction_coordinates_to_string(next_dir, directions))
     return False
+
+
+def direction_number_to_string(direction):
+    direction_names = ["NE", "E", "SE", "SW", "W", "NW"]
+    return direction_names[direction]
+
+
+def direction_coordinates_to_string(direction, directions):
+    return next(key for key, value in directions.items() if value == direction)
 
 
 def get_next_direction_to(src_x, src_y, dest_x, dest_y, directions):
