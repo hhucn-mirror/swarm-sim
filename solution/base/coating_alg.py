@@ -14,6 +14,7 @@ def initialize_particle(particle):
     # nh: neighborhood
     setattr(particle, "nh_list", [solution_header.Neighbor("fl", math.inf)] * 6)
     setattr(particle, "rcv_buf", {})
+    setattr(particle, "rcv_buf_dbg", {})
     setattr(particle, "snd_buf", {})
     # setattr(particle, "prev_direction", False)
     setattr(particle, "next_direction", False)
@@ -93,5 +94,5 @@ def check_neighbor_can_move(nh_list, direction, own_distance):
         nh_list[direction_in_range(direction - 1)].dist > own_distance) or
         (nh_list[direction_in_range(direction + 1)].type == "p" and
          nh_list[direction_in_range(direction + 1)].dist > own_distance)):
-        return False
+        return False # set to True to enable this function
     return False
