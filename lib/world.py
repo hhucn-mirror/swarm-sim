@@ -170,7 +170,11 @@ class World:
 
     def set_successful_end(self):
         self.csv_round.success()
+        self.__end = True
         # self.set_end()
+
+    def set_successful_round(self):
+        self.csv_round.success()
 
     def get_max_round(self):
         """
