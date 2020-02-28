@@ -58,7 +58,7 @@ class World:
         self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
-                                                    directory=config_data.direction_name)
+                                                    directory=config_data.folder_name)
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -163,7 +163,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.config_data.direction_name)
+        particle_csv = csv_generator.CsvParticleFile(self.config_data.folder_name)
         for p in self.particles:
             particle_csv.write_particle(p)
         particle_csv.csv_file.close()

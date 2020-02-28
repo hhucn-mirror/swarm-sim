@@ -2,10 +2,11 @@ import sys, getopt, subprocess
 from datetime import datetime
 import os
 import configparser
+from lib.gnuplot_generator import plot_generator
 
 
 def main(argv):
-    max_round = 10
+
     seed_start = 1
     seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
@@ -42,17 +43,18 @@ def main(argv):
             seed_end = int(arg)
         elif opt in ("-n", "--maxrounds"):
             max_round = int(arg)
-
-    direction = "./outputs/mulitple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" + \
-          solution_file.rsplit('.', 1)[0]
-    if not os.path.exists(direction):
-        os.makedirs(direction)
-    out = open(direction + "/multiprocess.txt", "w")
+    folder = "./outputs/mulitple/" + str(n_time) + "_" + solution_file.rsplit('.', 1)[0]
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    out = open("./"+folder + "/multiprocess.txt", "w")
     child_processes = []
     process_cnt=0
-    for seed in range(seed_start, seed_end+1):
-        process ="python3.6", "swarm-sim.py", "-n"+ str(max_round), "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(seed), "-v" + str(0)
+    #scenarios = ["tube_10", "tube_20"]
+    max_radius = 10
+    min_radius = 6
+    for radius in range(min_radius, max_radius):
+        process ="python3.6", "swarm-sim.py",'-b' +folder, "-m 1", "-d"+str(n_time),\
+                              "-r"+ str(radius), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
@@ -64,15 +66,25 @@ def main(argv):
 
     for cp in child_processes:
         cp.wait()
-    fout = open(direction+"/all_aggregates.csv","w+")
-    for seed in range(seed_start, seed_end+1):
-        f = open(direction+"/"+str(seed)+"/aggregate_rounds.csv")
-        f.__next__() # skip the header
+    fout = open(folder+"/all_aggregates.csv","w+")
+    first=True
+    #for scenario in scenarios:
+    for radius in range(min_radius, max_radius):
+        #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+        f = open(folder+"/"+str(radius)+"/aggregate_rounds.csv")
+        if not first:
+            f.__next__() # skip the header
+        else:
+            first=False
         for line in f:
             fout.write(line)
         f.close() # not really needed
     fout.close()
+    plot_generator("all_aggregates.csv", folder, 3, "aggregate", "bar")
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
+
+

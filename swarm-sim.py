@@ -7,7 +7,7 @@ import sys
 import time
 import random
 from lib import world, config, vis3d
-from lib.gnuplot_generator import gnuplot_generator
+from lib.gnuplot_generator import plot_generator
 
 
 def swarm_sim(argv):
@@ -18,10 +18,9 @@ def swarm_sim(argv):
     logging.info('Started')
 
     config_data = config.ConfigData()
-
     read_cmd_args(argv, config_data)
 
-    create_direction_for_data(config_data)
+    create_folder_for_data(config_data)
 
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
@@ -35,7 +34,8 @@ def swarm_sim(argv):
             round_start_timestamp = time.perf_counter()
 
         run_solution(swarm_sim_world)
-
+    if config_data.visualization:
+        swarm_sim_world.vis.run(round_start_timestamp)
     logging.info('Finished')
 
     generate_data(config_data, swarm_sim_world)
@@ -50,7 +50,7 @@ def draw_scenario(config_data, swarm_sim_world):
 
 def read_cmd_args(argv, config_data):
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
+        opts, args = getopt.getopt(argv, "h:s:w:r:n:m:d:v:b:", ["solution=", "scenario="])
     except getopt.GetoptError:
         print('Error: swarm-swarm_sim_world.py -r <seed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
@@ -66,29 +66,30 @@ def read_cmd_args(argv, config_data):
             config_data.seed_value = int(arg)
         elif opt in ("-n", "--maxrounds"):
             config_data.max_round = int(arg)
-        elif opt in "-m":
+        elif opt == "-m":
             config_data.multiple_sim = int(arg)
-        elif opt in "-v":
+        elif opt == "-v":
             config_data.visualization = int(arg)
-        elif opt in "-d":
+        elif opt == "-d":
             config_data.local_time = str(arg)
+        elif opt == "-b":
+            config_data.folder_name = str(arg)
 
 
-def create_direction_for_data(config_data):
+def create_folder_for_data(config_data):
     if config_data.multiple_sim == 1:
-        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                                     "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-                                     str(config_data.seed_value)
+        # config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        #                              "_" + config_data.solution.rsplit('.', 1)[0]
 
-        config_data.direction_name = "./outputs/mulitple/" + config_data.direction_name
+        config_data.folder_name =  config_data.folder_name + "/" +  str(config_data.seed_value)
 
     else:
-        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
                                      str(config_data.seed_value)
-        config_data.direction_name = "./outputs/" + config_data.direction_name
-    if not os.path.exists(config_data.direction_name):
-        os.makedirs(config_data.direction_name)
+        config_data.folder_name = "./outputs/" + config_data.folder_name
+    if not os.path.exists(config_data.folder_name):
+        os.makedirs(config_data.folder_name)
 
 
 def run_solution(swarm_sim_world):
@@ -102,7 +103,8 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.direction_name)
+    plot_generator("rounds.csv" ,config_data.folder_name, 4, "Round")
+    #plot_generator("particle.csv", config_data.folder_name, 1, "Particle")
 
 
 if __name__ == "__main__":
