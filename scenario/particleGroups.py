@@ -137,14 +137,14 @@ def star50(sim):
     sim.add_particle(2, -10)
     sim.add_particle(-8, 10)
     sim.add_particle(-8, -10)
-
-def block100(sim):
-    for i in range(0,10):
-        for j in range(0,20):
+def block100(sim, start=(0,0,0), amount=6):
+    amount = int(amount /2)
+    for i in range(0,amount):
+        for j in range(0,amount):
             if j%2 == 0:
-                sim.add_particle(i-5,j)
+                sim.add_particle(-i + start[0], j + start[1])
             else:
-                sim.add_particle(i - 5.5, j)
+                sim.add_particle(-i + 0.5 + start[0], j +start[1])
 
 def hexagon(world, centre, r_max=2, exclude_centre=False):
     """

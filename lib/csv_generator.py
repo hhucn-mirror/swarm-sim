@@ -89,7 +89,8 @@ class CsvParticleData:
 
 
 class CsvRoundData:
-    def __init__(self, task=0, scenario=0, solution=0, seed=20, directory="outputs/"):
+    def __init__(self, world, task=0, scenario=0, solution=0, seed=20, directory="outputs/"):
+        self.world = world
         self.task = task
         self.scenario = scenario
         self.solution = solution
@@ -150,6 +151,10 @@ class CsvRoundData:
         self.to_tile_steps = np.nan
         self.leader_coating_steps = np.nan
         self.out_of_cave_steps = np.nan
+        self.checking = np.nan
+        self.finished = np.nan
+        self.layer = np.nan
+        self.valid = np.nan
 
         self.writer_round.writerow(['',
                                     'scenario', 'solution', 'Seed', 'Round Number',
@@ -159,7 +164,8 @@ class CsvRoundData:
                                     'Particle Steps', 'Particle Steps Sum',
                                     'Particles Taken', 'Particles Taken Sum',
                                     'Tile Counter', 'Coating', 'Cave Coating','Scanning',
-                                    'Cave Scanning', 'Taking', 'To Tile', 'Leader Coating', 'Out of Cave'
+                                    'Cave Scanning', 'Taking', 'To Tile', 'Leader Coating', 'Out of Cave',
+                                    'Checking', 'Finished',  'Layer', 'Valid'
                                     ])
 
     def update_particle_num(self, particle):
@@ -198,6 +204,18 @@ class CsvRoundData:
 
     def update_leader_coating(self):
         self.leader_coating_steps =  1
+
+    def update_checking(self):
+        self.checking = 1
+
+    def update_finished(self):
+        self.finished = 1
+
+    def update_layer(self):
+        self.layer = 1
+
+    def update_valid(self, value):
+        self.valid = value
 
 
     def update_metrics(self, steps=0,
@@ -256,7 +274,8 @@ class CsvRoundData:
                         self.steps, self.steps_sum,
                         self.particles_taken, self.particles_taken_sum,
                         self.tile_num, self.coating_steps,  self.cave_coating_steps, self.scanning_steps, self.cave_scanning_steps,
-                        self.taking_steps, self.to_tile_steps, self.leader_coating_steps, self.out_of_cave_steps]
+                        self.taking_steps, self.to_tile_steps, self.leader_coating_steps, self.out_of_cave_steps, self.checking,
+                        self.finished, self.layer, self.valid]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = sim_round
         self.steps = 0
@@ -289,6 +308,10 @@ class CsvRoundData:
         self.leader_coating_steps = np.nan
         self.out_of_cave_steps = np.nan
         self.cave_coating_steps = np.nan
+        self.checking = np.nan
+        self.finished = np.nan
+        self.layer = np.nan
+        self.valid = np.nan
 
     def aggregate_metrics(self):
         self.csv_file.close()
@@ -305,14 +328,16 @@ class CsvRoundData:
                                'Particle Steps Min', 'Particle Steps Max',
                                'Particles Taken Sum', 'Particles Taken Avg',
                                'Particles Taken Min', 'Particles Taken Max',
-                               'Tile Counter', 'AVG Rounds per Particle',
+                               'Tile Counter',
                                'Total Outside Coating Steps', 'Total Cave Coating Steps', 'Total Leader Coating Steps',
                                'Total Coating Steps',
                                'Total Taking Steps',
                                'Total Cave Scanning', 'Total Outside Scanning', 'Total Scanning',
-                               'Total To Tile', 'Out of Cave', "Total States"])
+                               'Total To Tile', 'Out of Cave', "Total Steps", "Total Checking", "Total Finished",
+                               "Total Stages", "Total Layer", "Valid State", 'AVG Rounds per Particle',
+                               'AVG Steps per Particle'])
 
-        csv_interator = [self.scenario, self.solution, self.seed, self.particle_num, data['Round Number'].count(),
+        csv_interator = [self.scenario, self.solution, self.seed, len(self.world.particles), data['Round Number'].count(),
                          data['Success Counter'].max(),
 
                          data['Particles Dropped'].sum(), round(data['Particles Dropped'].mean(), 2),
@@ -325,17 +350,25 @@ class CsvRoundData:
                          data['Particles Taken'].min(),
                          data['Particles Taken'].max(),
                          self.tile_num,
-                         int(data['Round Number'].count() / self.particle_num),
                          data['Coating'].count(), data['Cave Coating'].count(), data['Leader Coating'].count(),
                          data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count(),
                          data['Taking'].count(), data['Cave Scanning'].count(), data['Scanning'].count(),
                          data['Cave Scanning'].count() + data['Scanning'].count(), data['To Tile'].count(),
                          data['Out of Cave'].count(),
                          data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count() +
-                         data['Taking'].count()+
-                         data['Cave Scanning'].count() + data['Scanning'].count()+ data['To Tile'].count() +
-                         data['Out of Cave'].count()
-                         ]
+                         data['Taking'].count() +
+                         data['Cave Scanning'].count() + data['Scanning'].count() + data['To Tile'].count() +
+                         data['Out of Cave'].count(), data['Checking'].count(), data['Finished'].count(),
+
+                         data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count() +
+                         data['Taking'].count() +
+                         data['Cave Scanning'].count() + data['Scanning'].count() + data['To Tile'].count() +
+                         data['Out of Cave'].count() + data['Checking'].count() + data['Finished'].count() + data[
+                             'Particles Dropped'].sum()
+                         + data['Particles Taken'].sum() + 1, data['Layer'].count(), data['Valid'].sum(),
+
+                         round(data['Round Number'].count() / len(self.world.particles),2),
+                         round(data['Particle Steps'].sum() / len(self.world.particles), 2)]
 
         writer_round.writerow(csv_interator)
         csv_file.close()
@@ -355,14 +388,15 @@ class CsvRoundData:
                                'Particle Steps Min', 'Particle Steps Max',
                                'Particles Taken Sum', 'Particles Taken Avg',
                                'Particles Taken Min', 'Particles Taken Max',
-                               'Tile Counter', 'AVG Rounds per Particle',
+                               'Tile Counter',
                                'Total Outside Coating Steps', 'Total Cave Coating Steps', 'Total Leader Coating Steps',
                                'Total Coating Steps',
                                'Total Taking Steps',
                                'Total Cave Scanning', 'Total Outside Scanning', 'Total Scanning',
-                               'Total To Tile', 'Out of Cave', "Total States"])
+                               'Total To Tile', 'Out of Cave', "Total Steps", "Total Checking", "Total Finished",
+                               "Total Stages", "Total Layer", "Valid State", 'AVG Rounds per Particle', 'AVG Steps per Particle'])
 
-        csv_interator = [self.scenario, self.solution, self.seed, self.particle_num, data['Round Number'].count(),
+        csv_interator = [self.scenario, self.solution, self.seed,len(self.world.particles), data['Round Number'].count(),
                          data['Success Counter'].max(),
 
                          data['Particles Dropped'].sum(), round(data['Particles Dropped'].mean(), 2),
@@ -375,17 +409,24 @@ class CsvRoundData:
                          data['Particles Taken'].min(),
                          data['Particles Taken'].max(),
                          self.tile_num,
-                         int(data['Round Number'].count() / self.particle_num),
                          data['Coating'].count(), data['Cave Coating'].count(), data['Leader Coating'].count(),
                          data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count(),
                          data['Taking'].count(), data['Cave Scanning'].count(), data['Scanning'].count(),
                          data['Cave Scanning'].count() + data['Scanning'].count(), data['To Tile'].count(),
                          data['Out of Cave'].count(),
-                         data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count()+
-                         data['Taking'].count()+
-                         data['Cave Scanning'].count() + data['Scanning'].count()+ data['To Tile'].count()+
-                         data['Out of Cave'].count()
-                         ]
+                         data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count() +
+                         data['Taking'].count() +
+                         data['Cave Scanning'].count() + data['Scanning'].count() + data['To Tile'].count() +
+                         data['Out of Cave'].count(), data['Checking'].count(), data['Finished'].count(),
+
+                         data['Coating'].count() + data['Cave Coating'].count() + data['Leader Coating'].count() +
+                         data['Taking'].count() +
+                         data['Cave Scanning'].count() + data['Scanning'].count() + data['To Tile'].count() +
+                         data['Out of Cave'].count() + data['Checking'].count() + data['Finished'].count() + data['Particles Dropped'].sum()
+                         +  data['Particles Taken'].sum()+1, data['Layer'].count(), data['Valid'].sum(),
+
+                         round(data['Round Number'].count() / len(self.world.particles), 2),
+                         round( data['Particle Steps'].sum() /len(self.world.particles), 2)]
 
         writer_round.writerow(csv_interator)
         csv_file.close()

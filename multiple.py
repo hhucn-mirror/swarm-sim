@@ -11,7 +11,15 @@ def main(argv):
     seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
-
+    #os.rmdir("scenario/__pycache__")
+    file_list = os.listdir("scenario")
+    scenarios = []
+    if "particleGroups.py" in file_list:
+        file_list.remove("particleGroups.py")
+    if "__pycache__" in file_list:
+        file_list.remove("__pycache__")
+    for file in file_list:
+        scenarios.append(file.split('.', 1)[0])
     try:
         scenario_file = config.get ("File", "scenario")
     except (configparser.NoOptionError) as noe:
@@ -50,11 +58,13 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    max_radius = 10
-    min_radius = 6
-    for radius in range(min_radius, max_radius):
-        process ="python3.6", "swarm-sim.py",'-b' +folder, "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(radius), "-v" + str(0)
+    #min_radius = 1
+    #max_radius = 5
+    #for radius in range(min_radius, max_radius):
+    for scenario in scenarios:
+        folder_name_sub = folder+"/"+scenario
+        process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
+                              "-r"+ str(4), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
@@ -68,10 +78,10 @@ def main(argv):
         cp.wait()
     fout = open(folder+"/all_aggregates.csv","w+")
     first=True
-    #for scenario in scenarios:
-    for radius in range(min_radius, max_radius):
-        #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
-        f = open(folder+"/"+str(radius)+"/aggregate_rounds.csv")
+    for scenario in scenarios:
+    #for radius in range(min_radius, max_radius):
+        f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+        #f = open(folder+"/"+str(radius)+"/aggregate_rounds.csv")
         if not first:
             f.__next__() # skip the header
         else:
@@ -80,7 +90,7 @@ def main(argv):
             fout.write(line)
         f.close() # not really needed
     fout.close()
-    plot_generator("all_aggregates.csv", folder, 3, "aggregate", "bar")
+    #plot_generator("all_aggregates.csv", folder, 4,0, "aggregate", "bar")
 
 
 if __name__ == "__main__":
