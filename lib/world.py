@@ -55,7 +55,7 @@ class World:
         self.config_data = config_data
         self.grid = config_data.grid
 
-        self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
+        self.csv_round = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
                                                     directory=config_data.folder_name)

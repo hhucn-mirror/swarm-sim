@@ -81,7 +81,7 @@ def create_folder_for_data(config_data):
         # config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
         #                              "_" + config_data.solution.rsplit('.', 1)[0]
 
-        config_data.folder_name =  config_data.folder_name + "/" +  str(config_data.seed_value)
+        config_data.folder_name =  config_data.folder_name + "/" +  str(config_data.scenario)
 
     else:
         config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
@@ -103,8 +103,8 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    plot_generator("rounds.csv" ,config_data.folder_name, 4, "Round")
-    #plot_generator("particle.csv", config_data.folder_name, 1, "Particle")
+    #plot_generator("rounds.csv" ,config_data.folder_name, 5, 4,"Round")
+    #plot_generator("particle.csv", config_data.folder_name, 2, 1,"Particle")
 
 
 if __name__ == "__main__":
