@@ -20,6 +20,7 @@ def main(argv):
         file_list.remove("__pycache__")
     for file in file_list:
         scenarios.append(file.split('.', 1)[0])
+    scenarios.sort()
     try:
         scenario_file = config.get ("File", "scenario")
     except (configparser.NoOptionError) as noe:
@@ -51,7 +52,7 @@ def main(argv):
             seed_end = int(arg)
         elif opt in ("-n", "--maxrounds"):
             max_round = int(arg)
-    folder = "./outputs/mulitple/" + str(n_time) + "_" + solution_file.rsplit('.', 1)[0]
+    folder = "./outputs/multiple/" + str(n_time) + "_" + solution_file.rsplit('.', 1)[0]
     if not os.path.exists(folder):
         os.makedirs(folder)
     out = open("./"+folder + "/multiprocess.txt", "w")
@@ -64,12 +65,12 @@ def main(argv):
     for scenario in scenarios:
         folder_name_sub = folder+"/"+scenario
         process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(4), "-v" + str(0)
+                              "-r"+ str(4), "-v" + str(1)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
         print("Process Nr. ", process_cnt, "started")
-        if len(child_processes) == os.cpu_count():
+        if len(child_processes) == 1:
             for cp in child_processes:
                 cp.wait()
             child_processes.clear()
