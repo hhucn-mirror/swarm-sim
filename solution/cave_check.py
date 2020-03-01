@@ -1,23 +1,23 @@
 previous_location =  None
 def solution(world):
     global previous_location
-    if world.get_actual_round() ==1:
-        leader = world.particles[0]
-        leader.previous_location = (1, 0.0, 0.0)
-        leader.create_location_on(leader.previous_location).set_color((1.0, 1.0, 0.0, 1.0))
-    # if len(world.particles) > 0:
+    # if world.get_actual_round() ==1:
     #     leader = world.particles[0]
     #     leader.previous_location = (1, 0.0, 0.0)
-    #     leader.create_location_on(direction_exit).set_color((1.0, 1.0, 0.0, 1.0))
-    #     # if not previous_location:
-    #     #     previous_location = leader.create_location_on((-0.5, 1.0, 0.0))
-    #     #     previous_location.set_color((1.0, 0.0, 1.0, 1.0))
-    #     if len(world.locations) > 1:
-    #         for location in world.locations[:]:
-    #                 world.remove_location(location.get_id())
-    #                 world.vis.remove_location(location)
-    #     leader.directions_list = world.grid.get_directions_list()
-    #     check_for_cave(leader)
+    #     leader.create_location_on(leader.previous_location).set_color((1.0, 1.0, 0.0, 1.0))
+    if len(world.particles) > 0:
+        leader = world.particles[0]
+        # leader.previous_location = (1, 0.0, 0.0)
+        # leader.create_location_on(direction_exit).set_color((1.0, 1.0, 0.0, 1.0))
+        # if not previous_location:
+        #     previous_location = leader.create_location_on((-0.5, 1.0, 0.0))
+        #     previous_location.set_color((1.0, 0.0, 1.0, 1.0))
+        if len(world.locations) > 1:
+            for location in world.locations[:]:
+                    world.remove_location(location.get_id())
+                    world.vis.remove_location(location)
+        leader.directions_list = world.grid.get_directions_list()
+        check_for_cave(leader)
 
 
 def check_for_cave(leader):
@@ -77,36 +77,69 @@ def get_cave_entry_and_exit(leader, sum_of_neighbors_numbers, free_location_neig
     exit_location_number = 5
     free_location_number = 1
     if free_location_neighborhood_counter == two_free_location_in_neighborhood:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == previous_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == entrance_number:
-                direction_entry = direction
-    elif free_location_neighborhood_counter == three_free_location_in_neighborhood:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == entrance_number:
-                direction_entry = direction
-            elif neighbor_direction_map_number[direction] == exit_location_number:
-                direction_exit = direction
-    elif free_location_neighborhood_counter == four_free_location_in_neighborhood \
-            and sum_of_neighbors_numbers == previous_location_number + exit_location_number + entrance_number + free_location_number:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == entrance_number:
-                direction_entry = direction
-            if neighbor_direction_map_number[direction] == free_location_number:
-                direction_exit = direction
-    elif free_location_neighborhood_counter == four_free_location_in_neighborhood \
-            and sum_of_neighbors_numbers == previous_location_number + exit_location_number + 2 * free_location_number:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == exit_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == free_location_number:
-                if leader.matter_in(direction) is False:
-                    direction_entry = direction
+        direction_entry, direction_exit = two_free_location_handler(direction_entry, direction_exit, entrance_number,
+                                                                    neighbor_direction_map_number,
+                                                                    previous_location_number)
+    elif free_location_neighborhood_counter == three_free_location_in_neighborhood :
+
+        direction_entry, direction_exit = three_free_location_handler(direction_entry, direction_exit, entrance_number,
+                                                                      exit_location_number, free_location_number,
+                                                                      neighbor_direction_map_number,
+                                                                      previous_location_number,
+                                                                      sum_of_neighbors_numbers)
+    elif free_location_neighborhood_counter == four_free_location_in_neighborhood :
+        direction_entry, direction_exit = four_free_location_handler(direction_entry, direction_exit, entrance_number,
+                                                                     exit_location_number, free_location_number,
+                                                                     neighbor_direction_map_number,
+                                                                     previous_location_number, sum_of_neighbors_numbers)
     if direction_entry is not None and direction_exit is not None:
         leader.create_location_in(direction_entry)
         leader.create_location_in(direction_exit).set_color((1.0, 1.0, 0.0, 1.0))
         previous_location = leader.create_location_on(leader.previous_location)
         if previous_location:
             previous_location.set_color((1.0, 0.0, 0.0, 1.0))
+    return direction_entry, direction_exit
+
+
+def four_free_location_handler(direction_entry, direction_exit, entrance_number, exit_location_number,
+                               free_location_number, neighbor_direction_map_number, previous_location_number,
+                               sum_of_neighbors_numbers):
+    for direction in neighbor_direction_map_number:
+        if neighbor_direction_map_number[direction] == entrance_number:
+            direction_entry = direction
+        if neighbor_direction_map_number[direction] == free_location_number \
+                and sum_of_neighbors_numbers == previous_location_number + exit_location_number + entrance_number + free_location_number:
+            direction_exit = direction
+        if neighbor_direction_map_number[
+            direction] == exit_location_number and sum_of_neighbors_numbers == previous_location_number + exit_location_number + 2 * free_location_number:
+            direction_exit = direction
+    return direction_entry, direction_exit
+
+
+def three_free_location_handler(direction_entry, direction_exit, entrance_number, exit_location_number,
+                                free_location_number, neighbor_direction_map_number, previous_location_number,
+                                sum_of_neighbors_numbers):
+    for direction in neighbor_direction_map_number:
+        if neighbor_direction_map_number[direction] == entrance_number or neighbor_direction_map_number[
+            direction] == free_location_number:
+            direction_entry = direction
+        elif neighbor_direction_map_number[direction] == exit_location_number \
+                and sum_of_neighbors_numbers == exit_location_number + 2 * free_location_number:
+            direction_exit = direction
+        elif neighbor_direction_map_number[direction] == previous_location_number \
+                and sum_of_neighbors_numbers == previous_location_number + 2 * free_location_number:
+            direction_exit = direction
+        elif neighbor_direction_map_number[direction] == exit_location_number \
+                and sum_of_neighbors_numbers == previous_location_number + exit_location_number + 2 * free_location_number:
+            direction_exit = direction
+    return direction_entry, direction_exit
+
+
+def two_free_location_handler(direction_entry, direction_exit, entrance_number, neighbor_direction_map_number,
+                              previous_location_number):
+    for direction in neighbor_direction_map_number:
+        if neighbor_direction_map_number[direction] == previous_location_number:
+            direction_exit = direction
+        elif neighbor_direction_map_number[direction] == entrance_number:
+            direction_entry = direction
     return direction_entry, direction_exit

@@ -142,7 +142,7 @@ def handle_cave_scanning(leader):
 
     if len(leader.neighbors) == dead_end:
         handling_dead_end(leader)
-    elif get_an_adjacent_obstacle_directions(leader, ignore_particle=True):
+    elif get_an_adjacent_obstacle_directions(leader):
         direction = obstacles_free_direction(leader)
         # if get_an_adjacent_tile_directions_scanning(leader):
         if leader.coordinates != leader.cave_exit and leader.coordinates != leader.cave_entrance \
@@ -189,31 +189,29 @@ def other_level_scanning(leader):
 
 
 def first_level_scanning(leader):
-    if get_an_adjacent_obstacle_directions(leader, ignore_particle=True):
+    if get_an_adjacent_obstacle_directions(leader, remove_particle=True):
         direction = obstacles_free_direction(leader)
-        if get_an_adjacent_tile_directions_scanning(leader) and leader.coordinates not in leader.free_coating_locations:
+        if leader.coordinates not in leader.free_coating_locations:
             leader.free_coating_locations.append(leader.coordinates)
     return direction
 
 
 def check_cave_entrance(leader):
-    sum_of_neighbors_numbers, free_location_neighborhood_counter, neighbor_direction_map_number = give_neighbors_numbers(
+    sum_of_neighbors_numbers, neighbor_direction_map_number = give_neighbors_numbers(
         leader)
-    direction_entry, direction_exit = get_cave_entry_and_exit(leader, sum_of_neighbors_numbers,
-                                                              free_location_neighborhood_counter,
+    direction_entry, direction_exit = get_cave_entry_and_exit( sum_of_neighbors_numbers,
                                                               neighbor_direction_map_number)
 
     return direction_entry, direction_exit
 
 
 def give_neighbors_numbers(leader):
-    free_location_neighborhood_counter = 0
     sum_of_neighbors_numbers = 0
     neighbor_direction_map_number = {}
     starting_number = 0
-    entrance_number = 2
+    entrance_number = 3
     previous_location_number = 10
-    exit_location_number = 5
+    free_location_beside_previous_visited = 5
     free_location_number = 1
     for idx in range(len(leader.directions_list)):
         direction = leader.directions_list[(idx) % len(leader.directions_list)]
@@ -234,73 +232,48 @@ def give_neighbors_numbers(leader):
                     or (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
                                                                                                    dire_right) \
                         and leader.matter_in(dire_right) is False):
-                number = exit_location_number
+                number = free_location_beside_previous_visited
             sum_of_neighbors_numbers += number
             neighbor_direction_map_number[direction] = number
-            free_location_neighborhood_counter += 1
-    return sum_of_neighbors_numbers, free_location_neighborhood_counter, neighbor_direction_map_number
+    return sum_of_neighbors_numbers, neighbor_direction_map_number
 
 
-def get_cave_entry_and_exit(leader, sum_of_neighbors_numbers, free_location_neighborhood_counter,
+def get_cave_entry_and_exit(sum_of_neighbors_numbers,
                             neighbor_direction_map_number):
     direction_entry = None
     direction_exit = None
-    two_free_location_in_neighborhood = 2
-    three_free_location_in_neighborhood = 3
-    four_free_location_in_neighborhood = 4
-    entrance_number = 2
+    entrance_number = 3
     previous_location_number = 10
-    exit_location_number = 5
+    free_location_beside_previous_visited = 5
     free_location_number = 1
-    if free_location_neighborhood_counter == two_free_location_in_neighborhood:
-         for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == previous_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == entrance_number:
-                direction_entry = direction
-    elif free_location_neighborhood_counter == three_free_location_in_neighborhood :
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == entrance_number or neighbor_direction_map_number[direction] == free_location_number:
-                direction_entry = direction
-            elif neighbor_direction_map_number[direction] == exit_location_number\
-                    and sum_of_neighbors_numbers == exit_location_number + 2*free_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == previous_location_number\
-                    and sum_of_neighbors_numbers ==  previous_location_number + 2*free_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == exit_location_number\
-                    and sum_of_neighbors_numbers ==  previous_location_number + exit_location_number + 2*free_location_number:
-                direction_exit = direction
-    elif free_location_neighborhood_counter == four_free_location_in_neighborhood \
-            and sum_of_neighbors_numbers == previous_location_number + exit_location_number + entrance_number + free_location_number:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == entrance_number:
-                direction_entry = direction
-            if neighbor_direction_map_number[direction] == free_location_number:
-                direction_exit = direction
-    elif free_location_neighborhood_counter == four_free_location_in_neighborhood \
-            and sum_of_neighbors_numbers == previous_location_number + exit_location_number + 2 * free_location_number:
-        for direction in neighbor_direction_map_number:
-            if neighbor_direction_map_number[direction] == exit_location_number:
-                direction_exit = direction
-            elif neighbor_direction_map_number[direction] == free_location_number:
-                if leader.matter_in(direction) is False:
+    for direction in neighbor_direction_map_number:
+
+        if neighbor_direction_map_number[direction] == previous_location_number \
+                and sum_of_neighbors_numbers == previous_location_number + 2 * free_location_number:
+            direction_exit = direction
+
+        elif neighbor_direction_map_number[direction] == entrance_number:
+            direction_entry = direction
+
+        elif neighbor_direction_map_number[direction] == free_location_beside_previous_visited \
+                and (sum_of_neighbors_numbers == previous_location_number + free_location_beside_previous_visited
+                                                                            + 2 * free_location_number \
+                     or sum_of_neighbors_numbers == free_location_beside_previous_visited + entrance_number
+                                                        + previous_location_number):
+            direction_exit = direction
+
+        elif neighbor_direction_map_number[direction] == free_location_number:
+                if sum_of_neighbors_numbers == previous_location_number + free_location_beside_previous_visited \
+                        + entrance_number + free_location_number:
+                    direction_exit = direction
+                elif previous_location_number + 2* free_location_number\
+                        or sum_of_neighbors_numbers == free_location_beside_previous_visited + 2 * free_location_number:
                     direction_entry = direction
+
     if direction_entry and direction_exit:
         return direction_entry, direction_exit
     else:
         return None, None
-
-def scan_adjacent_locations(leader):
-    index_direction = leader.directions_list.index(leader.obstacle_direction)
-    neighbors_string = ""
-    for idx in range(len(leader.directions_list)):
-        direction = leader.directions_list[(idx + index_direction) % len(leader.directions_list)]
-        if leader.matter_in(direction) is True:
-            neighbors_string = neighbors_string + "M"
-        else:
-            neighbors_string = neighbors_string + "L"
-    return index_direction, neighbors_string
 
 
 def get_neighbors(leader):
@@ -409,7 +382,7 @@ def handle_cave_entrance_while_coating(dir, direction_exit, leader):
 
 def handle_checking(leader):
     if one_layer_coating and bool(leader.free_coating_locations) and len(leader.free_coating_locations) == 1:
-        ideal_coating_leaders_turn(leader)
+        first_layer_coating_leaders_turn(leader)
 
     elif not leader.free_coating_locations and not leader.cave_free_coating_locations:
         # print("from checking -->  scanning")
@@ -435,10 +408,6 @@ def handle_checking(leader):
                 leader.aim = leader.cave_free_coating_locations.pop()
             else:
                 leader.aim = leader.free_coating_locations.pop()
-            # if leader.coordinates == leader.aim:
-            #     leader.state = "finished"
-            #     #print("Finished immediatly")
-            #     return
             leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
 
 
@@ -472,7 +441,7 @@ def no_free_location_go_scanning(leader):
     leader.state = "scanning"
 
 
-def ideal_coating_leaders_turn(leader):
+def first_layer_coating_leaders_turn(leader):
     leader.state = "leader_coating"
     if leader.cave_coating and leader.cave_free_coating_locations:
         leader.aim = leader.cave_free_coating_locations.pop()
@@ -579,13 +548,16 @@ def obstacles_free_direction(leader):
     return direction
 
 
-def get_an_adjacent_obstacle_directions(leader, ignore_particle=False):
+def get_an_adjacent_obstacle_directions(leader, remove_particle=False):
     leader.obstacle_direction = None
     for dir in leader.directions_list:
         if leader.matter_in(dir):
-            if ignore_particle and leader.get_matter_in(dir).type == "particle" \
+            if remove_particle and leader.get_matter_in(dir).type == "particle" \
                     and leader.get_matter_in(dir) in leader.uncoated_particles_list:
                 leader.uncoated_particles_list.remove(leader.get_matter_in(dir))
+            elif remove_particle and leader.matter_in(dir) and leader.get_matter_in(dir).type == "tile":
+                leader.obstacle_direction = dir
+                return True
             leader.obstacle_direction = dir
     if bool(leader.obstacle_direction):
         return True

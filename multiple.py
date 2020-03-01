@@ -65,12 +65,12 @@ def main(argv):
     for scenario in scenarios:
         folder_name_sub = folder+"/"+scenario
         process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(4), "-v" + str(1)
+                              "-r"+ str(4), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
         print("Process Nr. ", process_cnt, "started")
-        if len(child_processes) == 1:
+        if len(child_processes) == os.cpu_count():
             for cp in child_processes:
                 cp.wait()
             child_processes.clear()
