@@ -73,6 +73,7 @@ def main(argv):
         if len(child_processes) == os.cpu_count():
             for cp in child_processes:
                 cp.wait()
+                print("Process Nr. ", process_cnt, "finished")
             child_processes.clear()
 
     for cp in child_processes:

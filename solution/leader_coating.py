@@ -197,10 +197,10 @@ def first_level_scanning(leader):
 
 
 def check_cave_entrance(leader):
-    sum_of_neighbors_numbers, neighbor_direction_map_number = give_neighbors_numbers(
+    sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction = give_neighbors_numbers(
         leader)
     direction_entry, direction_exit = get_cave_entry_and_exit( sum_of_neighbors_numbers,
-                                                              neighbor_direction_map_number)
+                                                              neighbor_direction_map_number, neighbor_number_map_direction)
 
     return direction_entry, direction_exit
 
@@ -208,67 +208,72 @@ def check_cave_entrance(leader):
 def give_neighbors_numbers(leader):
     sum_of_neighbors_numbers = 0
     neighbor_direction_map_number = {}
-    starting_number = 0
-    entrance_number = 3
-    previous_location_number = 10
-    free_location_beside_previous_visited = 5
-    free_location_number = 1
+    neighbor_number_map_direction = {}
+
     for idx in range(len(leader.directions_list)):
         direction = leader.directions_list[(idx) % len(leader.directions_list)]
         if leader.matter_in(direction) is False:
             dire_left = leader.directions_list[(idx - 1) % len(leader.directions_list)]
             dire_right = leader.directions_list[(idx + 1) % len(leader.directions_list)]
-            number = starting_number
-            if leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is True:
-                number = entrance_number
-            elif leader.matter_in(dire_left) is True or leader.matter_in(dire_right) is True:
-                number = free_location_number
-            if leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                          direction):
-                number = previous_location_number
-            elif (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                             dire_left) \
-                  and leader.matter_in(dire_left) is False) \
-                    or (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                                   dire_right) \
-                        and leader.matter_in(dire_right) is False):
-                number = free_location_beside_previous_visited
+            number = get_location_number(dire_left, dire_right, leader, direction)
             sum_of_neighbors_numbers += number
             neighbor_direction_map_number[direction] = number
-    return sum_of_neighbors_numbers, neighbor_direction_map_number
+            neighbor_number_map_direction[number] = direction
+    return sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction
+
+ENTRANCE_LABEL = 3
+PREVIOUS_LOCATION_LABEL = 10
+BESIDE_PREVIOUS_LOCATION_LABEL = 5
+FREE_LOCATION_LABEL = 1
+
+def get_location_number(dire_left, dire_right, leader, direction):
+    number = 0
+    if leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is True:
+        number = ENTRANCE_LABEL
+
+    elif leader.matter_in(dire_left) is True and  leader.matter_in(dire_right) is False\
+            or leader.matter_in(dire_right) is True and  leader.matter_in(dire_left) is False:
+        number = FREE_LOCATION_LABEL
+
+    if leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
+                                                                                  direction):
+        number = PREVIOUS_LOCATION_LABEL
+
+    elif (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
+                                                                                     dire_left) \
+          and leader.matter_in(dire_left) is False) \
+            or (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
+                                                                                           dire_right) \
+                and leader.matter_in(dire_right) is False):
+        number = BESIDE_PREVIOUS_LOCATION_LABEL
+    return number
 
 
 def get_cave_entry_and_exit(sum_of_neighbors_numbers,
-                            neighbor_direction_map_number):
+                            neighbor_direction_map_number, neighbor_number_map_direction):
     direction_entry = None
     direction_exit = None
-    entrance_number = 3
-    previous_location_number = 10
-    free_location_beside_previous_visited = 5
-    free_location_number = 1
-    for direction in neighbor_direction_map_number:
 
-        if neighbor_direction_map_number[direction] == previous_location_number \
-                and sum_of_neighbors_numbers == previous_location_number + 2 * free_location_number:
-            direction_exit = direction
 
-        elif neighbor_direction_map_number[direction] == entrance_number:
-            direction_entry = direction
+    CC_1 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL \
+                        + ENTRANCE_LABEL + FREE_LOCATION_LABEL
+    CC_2 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
+    CC_3 = BESIDE_PREVIOUS_LOCATION_LABEL + ENTRANCE_LABEL \
+                                                        + PREVIOUS_LOCATION_LABEL
+    CC_4 = PREVIOUS_LOCATION_LABEL + 2* FREE_LOCATION_LABEL
 
-        elif neighbor_direction_map_number[direction] == free_location_beside_previous_visited \
-                and (sum_of_neighbors_numbers == previous_location_number + free_location_beside_previous_visited
-                                                                            + 2 * free_location_number \
-                     or sum_of_neighbors_numbers == free_location_beside_previous_visited + entrance_number
-                                                        + previous_location_number):
-            direction_exit = direction
-
-        elif neighbor_direction_map_number[direction] == free_location_number:
-                if sum_of_neighbors_numbers == previous_location_number + free_location_beside_previous_visited \
-                        + entrance_number + free_location_number:
-                    direction_exit = direction
-                elif previous_location_number + 2* free_location_number\
-                        or sum_of_neighbors_numbers == free_location_beside_previous_visited + 2 * free_location_number:
-                    direction_entry = direction
+    if sum_of_neighbors_numbers == CC_1:
+        direction_entry = neighbor_number_map_direction[ENTRANCE_LABEL]
+        direction_exit = neighbor_number_map_direction[FREE_LOCATION_LABEL]
+    elif sum_of_neighbors_numbers == CC_2:
+        direction_entry = neighbor_number_map_direction[FREE_LOCATION_LABEL]
+        direction_exit = neighbor_number_map_direction[BESIDE_PREVIOUS_LOCATION_LABEL]
+    elif sum_of_neighbors_numbers == CC_3:
+        direction_entry = neighbor_number_map_direction[ENTRANCE_LABEL]
+        direction_exit = neighbor_number_map_direction[BESIDE_PREVIOUS_LOCATION_LABEL]
+    elif sum_of_neighbors_numbers == CC_4:
+        direction_entry = neighbor_number_map_direction[FREE_LOCATION_LABEL]
+        direction_exit = neighbor_number_map_direction[PREVIOUS_LOCATION_LABEL]
 
     if direction_entry and direction_exit:
         return direction_entry, direction_exit
