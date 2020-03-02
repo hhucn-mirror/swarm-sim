@@ -6,6 +6,8 @@ import numpy as np
 
 from lib.oppnet.communication import send_message, Message
 from lib.oppnet.consensus_flocking.message_types.direction_message import DirectionMessageContent
+from lib.oppnet.consensus_flocking.message_types.relative_location_message import CardinalDirection, \
+    RelativeLocationMessageContent
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from lib.oppnet.routing import RoutingMap
@@ -48,6 +50,27 @@ class Particle(Particle):
         self.__previous_neighbourhood__ = None
         self.__current_neighbourhood__ = {}
         self.__neighbourhood_direction_counter__ = collections.Counter()
+
+        self.__received_queried_directions__ = {}
+        self.relative_flock_location = None
+        self.__max_cardinal_direction_hops__ = {}
+
+    def get_particles_in_cardinal_direction(self, cardinal_direction):
+        """
+        Returns a list of particles that are surrounding the particle in the :param cardinal_direction.
+        :param cardinal_direction: the cardinal direction (N, E, S, W) to check
+        :type cardinal_direction: CardinalDirection
+        :return: the list of particles that surround the particle in the given cardinal direction
+        :rtype: [Particle]
+        """
+        locations = CardinalDirection.get_locations_in_direction(self.coordinates, cardinal_direction)
+        particles = []
+        for location in locations:
+            try:
+                particles.append(self.world.particle_map_coordinates[location])
+            except KeyError:
+                pass
+        return particles
 
     def __init_message_stores__(self, ms_size, ms_strategy):
         """
@@ -135,6 +158,8 @@ class Particle(Particle):
             self.__update_contacts__(message)
             if isinstance(content, DirectionMessageContent):
                 self.__process_direction_message__(message, content)
+            elif isinstance(content, RelativeLocationMessageContent):
+                self.__process_relative_location_message(message, content)
             else:
                 logging.debug("round {}: opp_particle -> received an unknown content type.")
 
@@ -223,3 +248,69 @@ class Particle(Particle):
             except KeyError:
                 pass
         return shared_neighbours_directions
+
+    def query_relative_location(self):
+        """
+        Sends a message with RelativeLocationMessageContent to each surrounding particle, querying the amount of hops
+        in each cardinal direction for a message to reach the outer ring of a flock.
+        :return: nothing
+        """
+        cardinal_directions = CardinalDirection.get_cardinal_directions_list()
+        for cardinal_direction in cardinal_directions:
+            particles = self.get_particles_in_cardinal_direction(cardinal_direction)
+            if len(particles) > 0:
+                self.__send_relative_location_queries__(cardinal_direction, particles)
+            else:
+                self.__max_cardinal_direction_hops__[cardinal_direction] = 0
+
+    def __send_relative_location_queries__(self, cardinal_direction, particles):
+        """
+        Sends a RelativeLocationMessageContent query message with :param cardinal_direction to all Particles in
+        :param particles.
+
+        :param cardinal_direction: the queried direction
+        :type cardinal_direction: CardinalDirection
+        :param particles: receiving particle list
+        :type particles: [Particle]
+        :return: nothing
+        """
+        query_content = RelativeLocationMessageContent([cardinal_direction])
+        for particle in particles:
+            message = Message(self, particle, content=query_content)
+            send_message(self, particle, message)
+
+    def __process_relative_location_message(self, message, content):
+        """
+        Processes a RelativeLocationMessageContent. If it's a query, the particle will try to answer it immediately,
+        otherwise store it to answer as soon as it receives a reply for the queried directions itself.
+        :param message: the message to process
+        :type message: Message
+        :param content: the content of the message
+        :type content: RelativeLocationMessageContent
+        :return: nothing
+        """
+        if not content.is_response:
+            for direction in content.queried_directions:
+                if direction in self.__max_cardinal_direction_hops__:
+                    self.__send_relative_location_response__(direction)
+                else:
+                    self.__received_queried_directions__[message.get_original_sender()] = content.queried_directions
+        else:
+            for direction in content.queried_directions:
+                self.__max_cardinal_direction_hops__[direction] = content.hops_per_direction[direction]
+                self.__send_relative_location_response__(direction)
+            self.relative_flock_location = content.get_relative_location()
+
+    def __send_relative_location_response__(self, queried_direction):
+        """
+        Sends a RelativeLocationMessageContent response for :param queried_direction. This will set the hops inside
+        the content to the maximum it knows itself + 1.
+        :param queried_direction: the direction the response is about
+        :type queried_direction: CardinalDirection
+        :return: nothing
+        """
+        content = RelativeLocationMessageContent([queried_direction], True)
+        content.set_direction_hops(queried_direction, self.__max_cardinal_direction_hops__[queried_direction]) + 1
+        for receiver, queried_directions in self.__received_queried_directions__.items():
+            if queried_direction in queried_directions:
+                send_message(self, receiver, Message(self, receiver, content=content))
