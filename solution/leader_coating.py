@@ -87,7 +87,7 @@ def handle_scanning(leader):
         leader.move_to(direction)
         leader.world.csv_round.update_scanning()
         if leader.coordinates in leader.free_coating_locations:
-            leader.state = "checking"
+            leader.state="checking"
             delete_cave_entrances(leader)
             if leader.first_level:
                 # print("1st_level_scanning --> checking")
@@ -146,7 +146,7 @@ def handle_cave_scanning(leader):
         direction = obstacles_free_direction(leader)
         # if get_an_adjacent_tile_directions_scanning(leader):
         if leader.coordinates != leader.cave_exit and leader.coordinates != leader.cave_entrance \
-                and leader.coordinates != leader.cave_1st_location and not one_layer_coating :
+                and leader.coordinates != leader.cave_1st_location and not one_layer_coating:
             leader.cave_free_coating_locations.append(leader.coordinates)
         if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
             leader.free_coating_locations.append(leader.coordinates)
@@ -199,8 +199,9 @@ def first_level_scanning(leader):
 def check_cave_entrance(leader):
     sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction = give_neighbors_numbers(
         leader)
-    direction_entry, direction_exit = get_cave_entry_and_exit( sum_of_neighbors_numbers,
-                                                              neighbor_direction_map_number, neighbor_number_map_direction)
+    direction_entry, direction_exit = get_cave_entry_and_exit(sum_of_neighbors_numbers,
+                                                              neighbor_direction_map_number,
+                                                              neighbor_number_map_direction)
 
     return direction_entry, direction_exit
 
@@ -221,18 +222,20 @@ def give_neighbors_numbers(leader):
             neighbor_number_map_direction[number] = direction
     return sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction
 
+
 ENTRANCE_LABEL = 3
 PREVIOUS_LOCATION_LABEL = 10
 BESIDE_PREVIOUS_LOCATION_LABEL = 5
 FREE_LOCATION_LABEL = 1
+
 
 def get_location_number(dire_left, dire_right, leader, direction):
     number = 0
     if leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is True:
         number = ENTRANCE_LABEL
 
-    elif leader.matter_in(dire_left) is True and  leader.matter_in(dire_right) is False\
-            or leader.matter_in(dire_right) is True and  leader.matter_in(dire_left) is False:
+    elif leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is False \
+            or leader.matter_in(dire_right) is True and leader.matter_in(dire_left) is False:
         number = FREE_LOCATION_LABEL
 
     if leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
@@ -254,13 +257,12 @@ def get_cave_entry_and_exit(sum_of_neighbors_numbers,
     direction_entry = None
     direction_exit = None
 
-
     CC_1 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL \
-                        + ENTRANCE_LABEL + FREE_LOCATION_LABEL
+           + ENTRANCE_LABEL + FREE_LOCATION_LABEL
     CC_2 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
     CC_3 = BESIDE_PREVIOUS_LOCATION_LABEL + ENTRANCE_LABEL \
-                                                        + PREVIOUS_LOCATION_LABEL
-    CC_4 = PREVIOUS_LOCATION_LABEL + 2* FREE_LOCATION_LABEL
+           + PREVIOUS_LOCATION_LABEL
+    CC_4 = PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
 
     if sum_of_neighbors_numbers == CC_1:
         direction_entry = neighbor_number_map_direction[ENTRANCE_LABEL]
@@ -355,7 +357,8 @@ def handle_coating(leader):
             return
         get_neighbors(leader)
         dir, direction_exit = check_cave_entrance(leader)
-        if dir and direction_exit and 3 <= len(leader.neighbors) < 5 and not leader.cave_found and not one_layer_coating:
+        if dir and direction_exit and 3 <= len(
+                leader.neighbors) < 5 and not leader.cave_found and not one_layer_coating:
             handle_cave_entrance_while_coating(dir, direction_exit, leader)
         if dir and direction_exit and 2 == len(leader.neighbors):
             print("Maybe Cave Entrance")
@@ -520,7 +523,7 @@ def get_sorted_list_of_locations_distances(leader):
     tmp_dict = {}
     sorted_list_of_locations_coordinates = []
     for location in leader.free_coating_locations:
-        min =  get_closest_tile_distance(location, leader.world)
+        min = get_closest_tile_distance(location, leader.world)
         distances.append(min)
         tmp_dict[location] = min
     distances.sort(reverse=True)
@@ -537,7 +540,7 @@ def obstacles_free_direction(leader):
         direction = leader.directions_list[(idx + index_direction) % len(leader.directions_list)]
         if leader.matter_in(
                 direction) is False and leader.previous_location == leader.world.grid.get_coordinates_in_direction(
-                leader.coordinates, direction):
+            leader.coordinates, direction):
             idx_2 = len(leader.directions_list)
             while idx_2 >= 0:
                 direction = leader.directions_list[(idx_2 + index_direction) % len(leader.directions_list)]
@@ -548,7 +551,7 @@ def obstacles_free_direction(leader):
                 idx_2 -= 1
         if leader.matter_in(
                 direction) is False and leader.previous_location != leader.world.grid.get_coordinates_in_direction(
-                leader.coordinates, direction):
+            leader.coordinates, direction):
             return direction
     return direction
 
