@@ -39,7 +39,11 @@ class RelativeLocationMessageContent:
     def set_direction_hops(self, cardinal_direction: CardinalDirection, hops):
         self.hops_per_direction[cardinal_direction] = hops
 
-    def get_relative_location(self):
-        x = self.hops_per_direction[CardinalDirection.West] - self.hops_per_direction[CardinalDirection.East]
-        y = self.hops_per_direction[CardinalDirection.South] - self.hops_per_direction[CardinalDirection.North]
+    @staticmethod
+    def get_relative_location(hops_per_direction):
+        try:
+            x = hops_per_direction[CardinalDirection.West] - hops_per_direction[CardinalDirection.East]
+            y = hops_per_direction[CardinalDirection.South] - hops_per_direction[CardinalDirection.North]
+        except KeyError:
+            return None
         return 1 / 2 * x, 1 / 2 * y, 0

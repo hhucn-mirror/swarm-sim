@@ -256,28 +256,50 @@ class Particle(Particle):
         :return: nothing
         """
         cardinal_directions = CardinalDirection.get_cardinal_directions_list()
+        queried_directions_per_particle = {}
         for cardinal_direction in cardinal_directions:
             particles = self.get_particles_in_cardinal_direction(cardinal_direction)
             if len(particles) > 0:
-                self.__send_relative_location_queries__(cardinal_direction, particles)
+                queried_directions_per_particle = self.__add_queried_direction__(cardinal_direction, particles,
+                                                                                 queried_directions_per_particle)
             else:
                 self.__max_cardinal_direction_hops__[cardinal_direction] = 0
+        self.__send_relative_location_queries__(queried_directions_per_particle)
 
-    def __send_relative_location_queries__(self, cardinal_direction, particles):
+    def __add_queried_direction__(self, cardinal_direction, particles, queried_directions_per_particle):
         """
-        Sends a RelativeLocationMessageContent query message with :param cardinal_direction to all Particles in
-        :param particles.
+        Adds :param particles to :param queried_directions_per_particle by appending :param cardinal_direction
+        to its values.
 
-        :param cardinal_direction: the queried direction
+        :param cardinal_direction: value to append
         :type cardinal_direction: CardinalDirection
-        :param particles: receiving particle list
+        :param particles: list of particles
         :type particles: [Particle]
+        :param queried_directions_per_particle: dictionary of particle, [CardinalDirection] pairs
+        :type queried_directions_per_particle: dict
+        :return: dictionary of particle, [CardinalDirection] pairs
+        :rtype: dict
+        """
+        for particle in particles:
+            if particle not in queried_directions_per_particle:
+                queried_directions_per_particle[particle] = [cardinal_direction]
+            else:
+                queried_directions_per_particle[particle].append(cardinal_direction)
+        return queried_directions_per_particle
+
+    def __send_relative_location_queries__(self, queried_directions_per_particle: dict):
+        """
+        Sends RelativeMessageContent to each particle in the keys of :param queried_directions_per_particle.
+        Expects queried_directions parameter of RelativeMessageContent as value of
+        :param queried_directions_per_particle.
+
+        :param queried_directions_per_particle: dict of particles to send a RelativeMessageContent message to
+        :type queried_directions_per_particle: dict
         :return: nothing
         """
-        query_content = RelativeLocationMessageContent([cardinal_direction])
-        for particle in particles:
-            message = Message(self, particle, content=query_content)
-            send_message(self, particle, message)
+        for particle, queried_locations in queried_directions_per_particle.items():
+            content = RelativeLocationMessageContent(queried_locations)
+            send_message(self, particle, Message(self, particle, content=content))
 
     def __process_relative_location_message(self, message, content):
         """
@@ -291,15 +313,20 @@ class Particle(Particle):
         """
         if not content.is_response:
             for direction in content.queried_directions:
+                self.__received_queried_directions__[message.get_original_sender()] = content.queried_directions
                 if direction in self.__max_cardinal_direction_hops__:
                     self.__send_relative_location_response__(direction)
-                else:
-                    self.__received_queried_directions__[message.get_original_sender()] = content.queried_directions
         else:
             for direction in content.queried_directions:
-                self.__max_cardinal_direction_hops__[direction] = content.hops_per_direction[direction]
-                self.__send_relative_location_response__(direction)
-            self.relative_flock_location = content.get_relative_location()
+                if direction not in self.__max_cardinal_direction_hops__:
+                    self.__max_cardinal_direction_hops__[direction] = content.hops_per_direction[direction]
+                    self.__send_relative_location_response__(direction)
+                else:
+                    logging.debug("round {}: particle #{} received non-queried hops for direction {}".format(
+                        self.world.get_actual_round(), self.number, str(direction)
+                    ))
+            self.relative_flock_location = RelativeLocationMessageContent.get_relative_location(
+                self.__max_cardinal_direction_hops__)
 
     def __send_relative_location_response__(self, queried_direction):
         """
@@ -311,6 +338,9 @@ class Particle(Particle):
         """
         content = RelativeLocationMessageContent([queried_direction], True)
         content.set_direction_hops(queried_direction, self.__max_cardinal_direction_hops__[queried_direction] + 1)
-        for receiver, queried_directions in self.__received_queried_directions__.items():
+        for receiver, queried_directions in list(self.__received_queried_directions__.items()):
             if queried_direction in queried_directions:
                 send_message(self, receiver, Message(self, receiver, content=content))
+                queried_directions.remove(queried_direction)
+                if len(queried_directions) == 0:
+                    del self.__received_queried_directions__[receiver]
