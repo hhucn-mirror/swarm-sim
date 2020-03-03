@@ -44,6 +44,7 @@ def own_p_max(own_distance, p_max, particle_number, nh_list):
     if own_distance is not math.inf:
         p_max.dist = own_distance
         p_max.ids = {particle_number}
+        p_max.directions = []
         higher_neighbors = 0
         for direction in direction_list:
             neighbor = nh_list[direction]
@@ -68,9 +69,11 @@ def global_p_max(particle):
             if particle.rcv_buf[rcv_direction].p_max_dist > particle.p_max.dist:
                 particle.p_max.dist = particle.rcv_buf[rcv_direction].p_max_dist
                 particle.p_max.ids = {particle.number}
+                particle.p_max.directions = [rcv_direction]
                 particle.p_max.lifetime = particle.rcv_buf[rcv_direction].p_max_lifetime
                 particle.own_p_max_lifetime = 0
             elif particle.rcv_buf[rcv_direction].p_max_dist == particle.p_max.dist:
                 if particle.p_max.lifetime < particle.rcv_buf[rcv_direction].p_max_lifetime:
                     particle.p_max.lifetime = particle.rcv_buf[rcv_direction].p_max_lifetime
+                particle.p_max.directions.append(rcv_direction)
     return False

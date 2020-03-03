@@ -2,6 +2,8 @@ from copy import deepcopy
 from lib.swarm_sim_header import *
 from solution import solution_header
 
+MAX_WAITING_ROUNDS = 15
+
 
 def read_and_clear(memory):
     """
@@ -115,17 +117,25 @@ def divide_neighbors(nh_list, neighbor_directions, own_distance):
     return own_distance_targets, p_max_targets
 
 
-def send_pmax_to_neighbors(particle):
+def send_p_max_to_neighbors(particle):
     """
     Sends information to all neighbors based on the particles own judgement
     :param particle: the sender particle
     :return: none
     """
     if particle.own_dist != math.inf:
-        p_max_targets = find_neighbor_particles(particle)
+        directions_with_particles = find_neighbor_particles(particle)
+        own_dist_targets = []
+        p_max_targets = []
+        for direction in directions_with_particles:
+            if direction in particle.p_max.directions:
+                own_dist_targets.append(direction)
+            else:
+                p_max_targets.append(direction)
         if particle.p_max.lifetime > 0:
             particle.p_max.lifetime -= 1
             send_p_max(particle, p_max_targets)
+            send_own_distance(particle, own_dist_targets)
         if particle.p_max.lifetime == 0:
             particle.p_max.reset()
 
@@ -142,8 +152,8 @@ def send_own_dist_to_neighbors(particle):
                                                    directions_with_particles,
                                                    particle.own_dist)
         send_own_distance(particle, own_distance_targets)
-        if particle.waiting_rounds > 15:
+        if particle.waiting_rounds > MAX_WAITING_ROUNDS:
             send_dummy_messages(particle, dummy_message_targets)
-            particle.waiting_rounds = 0
+            #particle.waiting_rounds = 0
         else:
             particle.waiting_rounds += 1

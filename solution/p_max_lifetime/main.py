@@ -46,7 +46,7 @@ def write_cycle(particle):
     particle.next_direction = coating_mod.coating_alg(particle)
     if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
         # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-        read_write_mod.send_pmax_to_neighbors(particle)
+        read_write_mod.send_p_max_to_neighbors(particle)
     else:
         read_write_mod.send_own_dist_to_neighbors(particle)
 
