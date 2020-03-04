@@ -12,6 +12,8 @@ def solution(world):
             handle_scanning(leader)
         elif leader.state == "cave_scanning":
             handle_cave_scanning(leader)
+        elif leader.state == "cave_pathing":
+            handle_cave_pathing(leader)
         elif leader.state == "toTile":
             handle_to_tile(leader)
         elif leader.state == "taking":
@@ -20,6 +22,8 @@ def solution(world):
             handle_coating(leader)
         elif leader.state == "get_out_from_cave":
             handle_get_out_from_cave(leader)
+        elif leader.state == "get_out_from_cave_pathing":
+            handle_get_out_from_cave_pathing(leader)
             world.csv_round.update_out_of_cave()
         elif leader.state == "leader_coating":
             handle_leader_coating(leader)
@@ -73,7 +77,7 @@ def handle_first_round(world):
 def handle_scanning(leader):
     direction, dire_exit = checking_for_a_cave(leader)
     if direction:
-        leader.state = "cave_scanning"
+        leader.state = "cave_pathing"
         leader.previous_location = leader.coordinates
         leader.move_to(direction)
         leader.world.csv_round.update_scanning()
@@ -87,8 +91,8 @@ def handle_scanning(leader):
         leader.move_to(direction)
         leader.world.csv_round.update_scanning()
         if leader.coordinates in leader.free_coating_locations:
-            leader.state="checking"
-            delete_cave_entrances(leader)
+            leader.state = "checking"
+            #delete_cave_entrances(leader)
             if leader.first_level:
                 # print("1st_level_scanning --> checking")
                 leader.first_level = False
@@ -110,43 +114,56 @@ def found_cave_while_scanning(leader, direction_entry, direction_exit):
     leader.cave_1st_location = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_entry)
     leader.cave_entrance = leader.coordinates
     leader.cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_exit)
-    if not one_layer_coating:
-        leader.cave_found = True
-        if leader.cave_entrance in leader.free_coating_locations:
-            leader.free_coating_locations.remove(leader.cave_entrance)
-        if leader.cave_exit in leader.free_coating_locations:
-            leader.free_coating_locations.remove(leader.cave_exit)
-        if leader.cave_1st_location in leader.free_coating_locations:
-            leader.free_coating_locations.remove(leader.cave_1st_location)
-        if leader.level > 1:
+
+
+
+dead_end = 5
+
+def handle_cave_pathing(leader):
+    get_neighbors(leader)
+    if len(leader.neighbors) == dead_end:
+        handling_dead_end(leader)
+    else:
+        sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction = give_neighbors_numbers(
+            leader)
+        if sum_of_neighbors_numbers != ENTRANCE_LABEL + PREVIOUS_LOCATION_LABEL:
+            leader.cave_free_coating_locations.clear()
+            leader.state = "cave_scanning"
+        else:
             if leader.cave_exit not in leader.cave_free_coating_locations:
                 leader.cave_free_coating_locations.append(leader.cave_exit)
             if leader.cave_entrance not in leader.cave_free_coating_locations:
                 leader.cave_free_coating_locations.append(leader.cave_entrance)
             if leader.cave_1st_location not in leader.cave_free_coating_locations:
                 leader.cave_free_coating_locations.append(leader.cave_1st_location)
-    else:
-        if leader.cave_entrance not in leader.free_coating_locations:
-            leader.free_coating_locations.append(leader.cave_entrance)
-        if leader.cave_exit not in leader.free_coating_locations:
-            leader.free_coating_locations.append(leader.cave_exit)
-        if leader.cave_1st_location not in leader.free_coating_locations:
-            leader.free_coating_locations.append(leader.cave_1st_location)
-
-
-dead_end = 5
+            if leader.coordinates not in leader.cave_free_coating_locations and not one_layer_coating:
+                leader.cave_free_coating_locations.append(leader.coordinates)
+            if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
+                leader.free_coating_locations.append(leader.coordinates)
+            direction = obstacles_free_direction(leader)
+            leader.previous_location = leader.coordinates
+            leader.move_to(direction)
 
 
 def handle_cave_scanning(leader):
     get_neighbors(leader)
-
     if len(leader.neighbors) == dead_end:
-        handling_dead_end(leader)
+        leader.aim = leader.cave_exit
+        # if leader.coordinates == leader.aim:
+        #     # print("from caving --> scanning")
+        #     leader.state = "scanning"
+        #     return
+        if leader.coordinates != leader.cave_exit and not one_layer_coating:
+            leader.cave_free_coating_locations.append(leader.coordinates)
+        if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
+            leader.free_coating_locations.append(leader.coordinates)
+        leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+        # print("from caving -->get out of the cave")
+        leader.state = "get_out_from_cave"
     elif get_an_adjacent_obstacle_directions(leader):
         direction = obstacles_free_direction(leader)
         # if get_an_adjacent_tile_directions_scanning(leader):
-        if leader.coordinates != leader.cave_exit and leader.coordinates != leader.cave_entrance \
-                and leader.coordinates != leader.cave_1st_location and not one_layer_coating:
+        if leader.coordinates != leader.cave_exit  and not one_layer_coating :
             leader.cave_free_coating_locations.append(leader.coordinates)
         if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
             leader.free_coating_locations.append(leader.coordinates)
@@ -155,14 +172,15 @@ def handle_cave_scanning(leader):
         leader.previous_location = leader.coordinates
         leader.move_to(direction)
         leader.world.csv_round.update_cave_scanning()
-        if leader.coordinates == leader.cave_exit \
-                or leader.coordinates == leader.cave_entrance \
-                or leader.coordinates == leader.cave_1st_location:
+        if leader.coordinates in leader.cave_free_coating_locations or leader.coordinates == leader.cave_1st_location\
+                or leader.coordinates == leader.cave_entrance :
+            if leader.coordinates in leader.cave_free_coating_locations:
+                leader.cave_free_coating_locations.remove(leader.coordinates)
             leader.aim = leader.cave_exit
-            if leader.coordinates == leader.aim:
-                # print("from caving --> scanning")
-                leader.state = "scanning"
-                return
+            # if leader.coordinates == leader.aim:
+            #     # print("from caving --> scanning")
+            #     leader.state = "scanning"
+            #     return
             leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
             # print("from caving -->get out of the cave")
             leader.state = "get_out_from_cave"
@@ -199,9 +217,8 @@ def first_level_scanning(leader):
 def check_cave_entrance(leader):
     sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction = give_neighbors_numbers(
         leader)
-    direction_entry, direction_exit = get_cave_entry_and_exit(sum_of_neighbors_numbers,
-                                                              neighbor_direction_map_number,
-                                                              neighbor_number_map_direction)
+    direction_entry, direction_exit = get_cave_entry_and_exit( sum_of_neighbors_numbers,
+                                                              neighbor_direction_map_number, neighbor_number_map_direction)
 
     return direction_entry, direction_exit
 
@@ -222,20 +239,18 @@ def give_neighbors_numbers(leader):
             neighbor_number_map_direction[number] = direction
     return sum_of_neighbors_numbers, neighbor_direction_map_number, neighbor_number_map_direction
 
-
 ENTRANCE_LABEL = 3
 PREVIOUS_LOCATION_LABEL = 10
 BESIDE_PREVIOUS_LOCATION_LABEL = 5
 FREE_LOCATION_LABEL = 1
-
 
 def get_location_number(dire_left, dire_right, leader, direction):
     number = 0
     if leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is True:
         number = ENTRANCE_LABEL
 
-    elif leader.matter_in(dire_left) is True and leader.matter_in(dire_right) is False \
-            or leader.matter_in(dire_right) is True and leader.matter_in(dire_left) is False:
+    elif leader.matter_in(dire_left) is True and  leader.matter_in(dire_right) is False\
+            or leader.matter_in(dire_right) is True and  leader.matter_in(dire_left) is False:
         number = FREE_LOCATION_LABEL
 
     if leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
@@ -257,12 +272,13 @@ def get_cave_entry_and_exit(sum_of_neighbors_numbers,
     direction_entry = None
     direction_exit = None
 
+
     CC_1 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL \
-           + ENTRANCE_LABEL + FREE_LOCATION_LABEL
+                        + ENTRANCE_LABEL + FREE_LOCATION_LABEL
     CC_2 = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
     CC_3 = BESIDE_PREVIOUS_LOCATION_LABEL + ENTRANCE_LABEL \
-           + PREVIOUS_LOCATION_LABEL
-    CC_4 = PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
+                                                        + PREVIOUS_LOCATION_LABEL
+    CC_4 = PREVIOUS_LOCATION_LABEL + 2* FREE_LOCATION_LABEL
 
     if sum_of_neighbors_numbers == CC_1:
         direction_entry = neighbor_number_map_direction[ENTRANCE_LABEL]
@@ -295,12 +311,16 @@ def get_neighbors(leader):
 def handling_dead_end(leader):
     leader.aim = leader.cave_exit
     leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    # if leader.coordinates not in leader.cave_free_coating_locations and not one_layer_coating:
+    #     leader.cave_free_coating_locations.append(leader.coordinates)
+    # if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
+    #     leader.free_coating_locations.append(leader.coordinates)
+    # print("from caving --> get out of the cave")
     if leader.coordinates not in leader.cave_free_coating_locations and not one_layer_coating:
         leader.cave_free_coating_locations.append(leader.coordinates)
     if one_layer_coating and leader.coordinates not in leader.free_coating_locations:
         leader.free_coating_locations.append(leader.coordinates)
-    # print("from caving --> get out of the cave")
-    leader.state = "get_out_from_cave"
+    leader.state = "get_out_from_cave_pathing"
 
 
 def handle_get_out_from_cave(leader):
@@ -308,17 +328,37 @@ def handle_get_out_from_cave(leader):
         leader.cave_coating = False
         leader.previous_location = leader.coordinates
         leader.move_to(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))
+        if leader.cave_entrance in leader.cave_free_coating_locations:
+            leader.cave_free_coating_locations.remove(leader.cave_entrance)
+        if leader.cave_exit in leader.cave_free_coating_locations:
+            leader.cave_free_coating_locations.remove(leader.cave_exit)
+        if leader.cave_1st_location in leader.cave_free_coating_locations:
+            leader.cave_free_coating_locations.remove(leader.cave_1st_location)
         if leader.scanning:
             # print("from  get out of the cave --> scanning")
+            #delete_cave_entrances(leader)
             leader.state = "scanning"
             return
         # print("from  get out of the cave --> checking")
         leader.state = "checking"
 
+def handle_get_out_from_cave_pathing(leader):
+    if reached_aim(leader.aim, leader):
+        leader.cave_coating = False
+        leader.previous_location = leader.coordinates
+        leader.move_to(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))
+        if leader.scanning:
+            # print("from  get out of the cave --> scanning")
+            delete_cave_entrances(leader)
+            leader.state = "scanning"
+            return
+        # print("from  get out of the cave --> checking")
+        leader.state = "checking"
 
 def handle_to_tile(leader):
     if reached_aim(leader.aim, leader):
         # print("from toTile --> 1st level scanning")
+        delete_cave_entrances(leader)
         leader.state = "scanning"
     else:
         leader.world.csv_round.update_to_tile()
@@ -332,6 +372,7 @@ def handle_taking(leader):
             leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
         else:
             leader.cave_coating = False
+            leader.free_coating_locations = get_sorted_list_of_locations_distances(leader)
             leader.aim = leader.free_coating_locations.pop()
             leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
 
@@ -344,6 +385,11 @@ def handle_taking(leader):
 def handle_coating(leader):
     if reached_aim(leader.aim, leader, False, True):
         leader.drop_particle_on(leader.aim)
+        get_neighbors(leader)
+        if 2 <= len(leader.neighbors) <= 4 and not one_layer_coating:
+            dir, direction_exit = check_cave_entrance(leader)
+            if dir and direction_exit:
+                handle_cave_entrance_while_coating(dir, direction_exit, leader)
         if leader.get_particle_in(leader.world.grid.get_nearest_direction(leader.coordinates,
                                                                           leader.aim)) in leader.uncoated_particles_list:
             leader.uncoated_particles_list.remove(
@@ -355,13 +401,7 @@ def handle_coating(leader):
             leader.state = "get_out_from_cave"
             # print("from dropping -->  to get out from cave")
             return
-        get_neighbors(leader)
-        dir, direction_exit = check_cave_entrance(leader)
-        if dir and direction_exit and 3 <= len(
-                leader.neighbors) < 5 and not leader.cave_found and not one_layer_coating:
-            handle_cave_entrance_while_coating(dir, direction_exit, leader)
-        if dir and direction_exit and 2 == len(leader.neighbors):
-            print("Maybe Cave Entrance")
+
         leader.state = "checking"
         # print("from dropping -->  checking")
     else:
@@ -375,11 +415,10 @@ def handle_cave_entrance_while_coating(dir, direction_exit, leader):
     # print("Im infront of cave")
     leader.cave_entrance = leader.coordinates
     leader.cave_1st_location = leader.world.grid.get_coordinates_in_direction(leader.coordinates, dir)
-    if leader.temporary_cave_exit:
-        leader.cave_exit = leader.temporary_cave_exit
-        leader.temporary_cave_exit = None
-    else:
-        leader.cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_exit)
+    # if leader.temporary_cave_exit:
+    #     leader.cave_exit = leader.temporary_cave_exit
+    #     leader.temporary_cave_exit = None
+    leader.cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_exit)
     if leader.cave_entrance in leader.free_coating_locations and not one_layer_coating:
         leader.free_coating_locations.remove(leader.cave_entrance)
     if leader.cave_exit in leader.free_coating_locations:
@@ -397,7 +436,6 @@ def handle_checking(leader):
         no_free_location_go_scanning(leader)
 
     elif leader.cave_free_coating_locations and not leader.cave_coating:
-
         not_enough_particle_check(leader)
     else:
         # print("from checking -->  fill_up_cave", leader.cave_free_coating_locations)
@@ -446,6 +484,7 @@ def no_free_location_go_scanning(leader):
         leader.scanning = True
     if not leader.cave_coating:
         leader.cave_found = False
+    delete_cave_entrances(leader)
     leader.state = "scanning"
 
 
@@ -523,7 +562,7 @@ def get_sorted_list_of_locations_distances(leader):
     tmp_dict = {}
     sorted_list_of_locations_coordinates = []
     for location in leader.free_coating_locations:
-        min = get_closest_tile_distance(location, leader.world)
+        min =  get_closest_tile_distance(location, leader.world)
         distances.append(min)
         tmp_dict[location] = min
     distances.sort(reverse=True)
@@ -540,7 +579,7 @@ def obstacles_free_direction(leader):
         direction = leader.directions_list[(idx + index_direction) % len(leader.directions_list)]
         if leader.matter_in(
                 direction) is False and leader.previous_location == leader.world.grid.get_coordinates_in_direction(
-            leader.coordinates, direction):
+                leader.coordinates, direction):
             idx_2 = len(leader.directions_list)
             while idx_2 >= 0:
                 direction = leader.directions_list[(idx_2 + index_direction) % len(leader.directions_list)]
@@ -551,7 +590,7 @@ def obstacles_free_direction(leader):
                 idx_2 -= 1
         if leader.matter_in(
                 direction) is False and leader.previous_location != leader.world.grid.get_coordinates_in_direction(
-            leader.coordinates, direction):
+                leader.coordinates, direction):
             return direction
     return direction
 
@@ -649,21 +688,27 @@ def get_closest_tile_distance(source, world):
             min = value
     return min
 
+FOUR_MATTERS = 4
 
 def reached_aim(aim, leader, leader_positioning=False, caving=False):
     if leader.aim_path:
-        if caving and not one_layer_coating:
-            get_neighbors(leader)
-            dir, direction_exit = check_cave_entrance(leader)
-            if dir and direction_exit and 2 == len(leader.neighbors):
-                print("Maybe Cave Entrance")
-                leader.temporary_cave_exit = leader.coordinates
+        get_neighbors(leader)
+        # if 2 <= len(leader.neighbors) <= 4 and not one_layer_coating and leader.state == "coating":
+        #     dir, direction_exit = check_cave_entrance(leader)
+        #     if dir and direction_exit:
+        #         handle_cave_entrance_while_coating(dir, direction_exit, leader)
         next_direction = leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim_path.pop(0))
         next_coords = leader.world.grid.get_coordinates_in_direction(leader.coordinates, next_direction)
         if aim == next_coords and leader_positioning is False:
             return True
         leader.previous_location = leader.coordinates
         leader.move_to(next_direction)
+        # get_neighbors(leader)
+        if leader.state == "get_out_from_cave_pathing" and len(leader.neighbors) == FOUR_MATTERS:
+            if leader.coordinates not in leader.cave_free_coating_locations:
+                leader.cave_free_coating_locations.insert(0, leader.coordinates)
+            if leader.coordinates in leader.free_coating_locations:
+                leader.free_coating_locations.remove(leader.coordinates)
         if leader_positioning and leader.coordinates == aim:
             return True
         return False
