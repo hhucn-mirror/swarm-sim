@@ -50,10 +50,10 @@ def process_event(event_type, message):
         sender.world.csv_round.update_metrics(messages_delivered_directly_unique=1,
                                               messages_received=1)
         # update particle metrics for both sender and receiver
-        sender.csv_particle_writer.write_particle(messages_delivered=1)
+        sender.csv_particle_writer.write_particle(messages_delivered_directly=1)
         receiver.csv_particle_writer.write_particle(messages_received=1)
         # update message data
-        sender.world.csv_round.csv_msg_writer.update_metrics(message, delivered_direct=1, delivered=1,
+        sender.world.csv_round.csv_msg_writer.update_metrics(message, delivered_direct=1,
                                                              delivery_round=sender.world.get_actual_round())
         # color receiver
         receiver.set_color(green)

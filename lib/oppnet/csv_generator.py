@@ -84,6 +84,7 @@ class CsvRoundData:
         self.steps_sum = steps
         self.particle_num = particle_num
         self.tile_num = tiles_num
+        self.success_counter = 0
 
         self.messages_sent = 0
         self.messages_forwarded = 0
@@ -106,8 +107,11 @@ class CsvRoundData:
                                     'Messages Delivered', 'Messages Delivered Directly',
                                     'Messages Received', 'Messages TTL Expired',
                                     'Messages Delivered Unique', 'Messages Delivered Directly Unique',
-                                    'Receiver Out Of Mem'
+                                    'Receiver Out Of Mem', 'Solution Success'
                                     ])
+
+    def success(self):
+        self.success_counter = self.success_counter + 1
 
     def get_messages_sent(self):
         return self.messages_sent
@@ -165,15 +169,16 @@ class CsvRoundData:
             self.receiver_out_of_mem = receiver_out_of_mem
         logging.debug("CSV: Ending writing_rounds")
 
-    def next_line(self, round):
-        csv_iterator = ['', round, self.seed, self.solution, self.particle_num,
+    def next_line(self, simulator_round):
+        csv_iterator = ['', simulator_round, self.seed, self.solution, self.particle_num,
                         self.steps, self.steps_sum,
                         self.messages_sent, self.messages_forwarded, self.messages_delivered,
                         self.messages_delivered_directly, self.messages_received,
                         self.message_ttl_expired, self.messages_delivered_unique,
-                        self.messages_delivered_directly_unique, self.receiver_out_of_mem]
+                        self.messages_delivered_directly_unique, self.receiver_out_of_mem,
+                        self.success_counter]
         self.writer_round.writerow(csv_iterator)
-        self.actual_round = round
+        self.actual_round = simulator_round
         self.steps = 0
         self.messages_sent = 0
         self.messages_forwarded = 0
@@ -184,6 +189,7 @@ class CsvRoundData:
         self.messages_delivered_unique = 0
         self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
+        self.success_counter = 0
 
     def aggregate_metrics(self):
         self.csv_file.close()

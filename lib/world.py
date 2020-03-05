@@ -168,7 +168,7 @@ class World:
 
     def set_successful_end(self):
         self.csv_round.success()
-        # self.set_end()
+        self.__end = True
         
     def get_max_round(self):
         """
