@@ -10,15 +10,15 @@ from multiprocessing import Pool, Queue, Process, Manager
 from queue import Empty
 
 NUMBER_OF_SEEDS = 50
-MIN_PARTICLE_COUNT = 100
-MAX_PARTICLE_COUNT = 100
-STEPSIZE_PARTICLE_COUNT = 50
+MIN_PARTICLE_COUNT = 80
+MAX_PARTICLE_COUNT = 80
+STEPSIZE_PARTICLE_COUNT = 20
 USE_PARTICLE_COUNT = True
 MAX_ROUNDS = 10000
 SCENARIOS = ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave",
              "giant_cave", "bottle", "small_bottle"]
             #["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle"]
-SOLUTIONS = ["base.main"]#, "base.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
+SOLUTIONS = ["base.main"]#, "base.main", "basebetter.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
 
 
