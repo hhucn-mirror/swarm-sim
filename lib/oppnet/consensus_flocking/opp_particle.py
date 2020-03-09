@@ -12,6 +12,7 @@ from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from lib.oppnet.routing import RoutingMap
 from lib.particle import Particle
+from lib.swarm_sim_header import vector_angle
 
 
 class Particle(Particle):
@@ -175,12 +176,19 @@ class Particle(Particle):
         self.__current_neighbourhood__[message.get_sender()] = content
         self.__neighbourhood_direction_counter__[content.get_direction()] += 1
 
-    def set_most_common_direction(self, weighted_choice=False):
+    def set_most_common_direction(self, weighted_choice=False, centralisation_force=False):
         """
         Sets the current_dir value of the particle's MobilityModel to the most common value it received from neighbours,
         with a weighted probability of 1/neighbourhood_size, i.e. the size of the current neighbourhood it received
         directions from. The other possibility is for the direction not to change with the inverse probability.
-        :param weighted_choice: boolean whether to use weighted choice or not.
+        Furthermore, if :param centralisation_force is set, then the angle between the vector pointing from the particle
+        to the flock's relative centre and the most common direction vector will be used as "countering-force"
+        to pull the particle towards the centre.
+
+        :param weighted_choice: whether to use weighted choice or not.
+        :type weighted_choice: bool
+        :param centralisation_force: whether to use a centralisation force or not
+        :type centralisation_force: bool
         :return: nothing
         """
         neighbourhood_size = len(self.__neighbourhood_direction_counter__)
@@ -191,8 +199,26 @@ class Particle(Particle):
                                         [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])
             else:
                 choice = most_common
-            self.mobility_model.current_dir = choice[0]
+            if centralisation_force:
+                self.mobility_model.current_dir = self.__get_choice_from_consensus_and_centralisation_force(choice)
+            else:
+                self.mobility_model.current_dir = choice[0]
             self.__neighbourhood_direction_counter__ = collections.Counter()
+
+    def __get_choice_from_consensus_and_centralisation_force(self, choice: tuple):
+        """
+        Takes the choice tuple and combines it with a no movement vector as population in random.choices. Takes the
+        inverse of the angle between the particles relative location vector and :param choice as a probability for
+        no movement and the relative number of picks for :param choice
+        :param choice: a tuple of direction vector and the number of times it was picked
+        :type choice: tuple
+        :return: a random weighted choice
+        :rtype: tuple
+        """
+        alpha = vector_angle(np.asarray(self.relative_flock_location), choice[0])
+        population = [choice[0], False]
+        probabilities = [choice[1] / len(self.__neighbourhood_direction_counter__), alpha / np.pi]
+        return random.choices(population, probabilities, k=1)[0]
 
     def set_random_weighted_direction(self):
         """

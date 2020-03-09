@@ -1,5 +1,7 @@
 import sys
 
+import numpy as np
+
 # colors
 black = (0, 0, 0, 1)
 gray = (128, 128, 128, 1)
@@ -125,3 +127,12 @@ def get_hexagon_coordinates(centre, r_max, exclude_centre=False):
         iteration = iteration + 1
         displacement = displacement + 0.5
     return locations
+
+
+def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
+    phi = np.arccos(u.dot(v) / (np.linalg.norm(u) * np.linalg.norm(v)))
+    if beta:
+        phi = 2 * np.pi - phi
+    if degrees:
+        return np.rad2deg(phi)
+    return phi
