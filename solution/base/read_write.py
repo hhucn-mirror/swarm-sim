@@ -18,6 +18,19 @@ def read_and_clear(memory):
     return {}
 
 
+def check_for_new_target_tile(particle):
+    for rcv_direction in particle.rcv_buf:
+        if isinstance(particle.rcv_buf[rcv_direction], solution_header.TargetTileInfo):
+            particle.dest_t = particle.rcv_buf[rcv_direction].target
+
+
+def send_target_tile(particle, target_direction):
+    dist_package = solution_header.TargetTileInfo(particle.dest_t)
+    target_particle = particle.get_particle_in(target_direction)
+    # invert the direction so the receiver particle knows from where direction it got the package
+    particle.write_to_with(target_particle, key=get_the_invert(target_direction), data=deepcopy(dist_package))
+
+
 def send_own_distance(particle, targets):
     """
     Sends a message in all target directions containing only the particles own_dist
@@ -91,9 +104,8 @@ def send_pmax_to_neighbors(particle):
     :param particle: the sender particle
     :return: none
     """
-    if particle.own_dist != math.inf:
-        directions_with_particles = find_neighbor_particles(particle)
-        send_p_max(particle, directions_with_particles)
+    directions_with_particles = find_neighbor_particles(particle)
+    send_p_max(particle, directions_with_particles)
 
 
 def send_own_dist_to_neighbors(particle):
@@ -102,6 +114,5 @@ def send_own_dist_to_neighbors(particle):
     :param particle: the sender particle
     :return: none
     """
-    if particle.own_dist != math.inf:
-        directions_with_particles = find_neighbor_particles(particle)
-        send_own_distance(particle, directions_with_particles)
+    directions_with_particles = find_neighbor_particles(particle)
+    send_own_distance(particle, directions_with_particles)

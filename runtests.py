@@ -9,16 +9,28 @@ import importlib
 from multiprocessing import Pool, Queue, Process, Manager
 from queue import Empty
 
+NUMBER_OF_PROCESSES = 3
+
 NUMBER_OF_SEEDS = 50
-MIN_PARTICLE_COUNT = 80
-MAX_PARTICLE_COUNT = 80
+SEEDS = [1005452923949099817, 104729571718011065, 1151522834903635200, 135691580820658646, 1500385114400036822,
+         1757090061937575188, 1784647508577935808, 2039726448634163130, 2166279188521729848, 2382258227726526776,
+         239895843343948783, 2465231629035308954, 3023534726851758369, 3042134290703503464, 3195374428520842592,
+         3605860666315517243, 3871570327581174452, 4145153237065709152, 4728114858318564273, 4814746228620134542,
+         4833615556434205377, 5073531332002539401, 5095606951029691221, 5141005627055929417, 5200664720089049428,
+         5257365277667067163, 5576987183874749062, 5671404872469712192, 5894081778140307249, 6047742730548401955,
+         6188382242110290117, 6406019102658191314, 6579115118694624540, 6734093137683196141, 6989065390847802654,
+         706135037950337258, 729212062188970625, 743915707375033600, 7619309402902287165, 7641818786393216428,
+         7674667646562244311, 82162779224662555, 8279579456414977604, 8311339547884988640, 8445994089275729783,
+         846607075699250924, 8756480475294688387, 9168466799227518454, 9190667985687051790, 9216123937619767538]
+MIN_PARTICLE_COUNT = 20
+MAX_PARTICLE_COUNT = 200
 STEPSIZE_PARTICLE_COUNT = 20
 USE_PARTICLE_COUNT = True
 MAX_ROUNDS = 10000
 SCENARIOS = ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave",
              "giant_cave", "bottle", "small_bottle"]
             #["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle"]
-SOLUTIONS = ["base.main"]#, "base.main", "basebetter.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
+SOLUTIONS = ["p_max_lifetime.main"]#, "base.main", "basebetter.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
 
 
@@ -94,10 +106,10 @@ if __name__ == "__main__":
     taskqueue = taskmanager.Queue()
     solutions_scenarios = ((solution, scenario) for scenario in SCENARIOS for solution in SOLUTIONS)
     if USE_PARTICLE_COUNT:
-        args = ((solution, scenario, random.randint(0, sys.maxsize), particle_count, taskqueue)
+        args = ((solution, scenario, seed, particle_count, taskqueue)
                 for scenario in SCENARIOS
                 for solution in SOLUTIONS
-                for _ in range(NUMBER_OF_SEEDS)
+                for seed in SEEDS
                 for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT))
     else:
         args = ((solution, scenario, random.randint(0, sys.maxsize), -1, taskqueue)
@@ -110,7 +122,7 @@ if __name__ == "__main__":
     progress_process = Process(target=progress_counter_func, args=(taskqueue, test_count))
     progress_process.daemon = True
     progress_process.start()
-    with Pool(processes=3) as pool:
+    with Pool(processes=NUMBER_OF_PROCESSES) as pool:
         print("starting")
         list(pool.map(run_test, args))
         print("tests done, starting evaluation")

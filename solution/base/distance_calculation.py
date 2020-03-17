@@ -25,7 +25,7 @@ def calculate_distances(particle):
             nh_list[direction].dist = calc_nh_dist(direction, nh_list, particle.own_dist)
             #if particle is beside a tile then this tile is the new target
             if nh_list[direction].type == "t":
-                particle.dest_t = particle.get_tile_in(direction)
+                particle.dest_t = particle.get_tile_in(direction).coordinates
     return nh_list
 
 
@@ -56,7 +56,7 @@ def get_nh_dist(direction, type, rcv_buf):
     """
     if type == "t":
         return 0
-    elif direction in rcv_buf:
+    elif direction in rcv_buf and isinstance(rcv_buf[direction], solution_header.OwnDistance):
         return rcv_buf[direction].particle_distance
     return math.inf
 

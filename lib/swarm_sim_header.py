@@ -14,6 +14,7 @@ direction_to_coords = [(0.5, 1, 0),
                        (-0.5, -1, 0),
                        (-1, 0, 0),
                        (-0.5, 1, 0)]
+simple_direction_map = {"NE": 0, "E": 1, "SE": 2, "SW": 3, "W": 4, "NW": 5}
 
 
 def eeprint(*args, sep=' ', end='\n'):
@@ -112,17 +113,18 @@ def generating_random_spraded_particles(world, max_size_particle):
         world.add_particle((x, y, 0.0))
 
 
-def move_to_dest_step_by_step(particle, destiny, directions, prev_dir=None):
+def move_to_dest_step_by_step(particle, destiny, prev_dir=None):
     """
 
     :param particle:
     :param destiny:
-    :param directions
     :param prev_dir
     :return: True if movement occured, False if not movment and a Matter if the next direction point has a matter on it
     """
+    if prev_dir is None:
+        prev_dir = []
     next_dir = get_next_direction_to(particle.coordinates[0], particle.coordinates[1],
-                                     destiny.coordinates[0], destiny.coordinates[1], directions)
+                                     destiny[0], destiny[1])
     if next_dir in prev_dir:
         return None
     if particle.tile_in(next_dir) or particle.particle_in(next_dir):
@@ -146,7 +148,7 @@ def direction_coordinates_to_string(direction, directions):
     return next(key for key, value in directions.items() if value == direction)
 
 
-def get_next_direction_to(src_x, src_y, dest_x, dest_y, directions):
+def get_next_direction_to(src_x, src_y, dest_x, dest_y):
     """
     :param src_x: x coordinate of the source
     :param src_y: y coordinate of the source
@@ -156,17 +158,17 @@ def get_next_direction_to(src_x, src_y, dest_x, dest_y, directions):
     """
     next_dir = -1
     if (src_x < dest_x or src_x == dest_x) and src_y < dest_y:
-        next_dir = directions["NE"]
+        next_dir = simple_direction_map["NE"]
     elif src_y < dest_y and src_x > dest_x:
-        next_dir = directions["NW"]
+        next_dir = simple_direction_map["NW"]
     elif src_y > dest_y and src_x < dest_x:
-        next_dir = directions["SE"]
+        next_dir = simple_direction_map["SE"]
     elif (src_x > dest_x or src_x == dest_x) and src_y > dest_y:
-        next_dir = directions["SW"]
+        next_dir = simple_direction_map["SW"]
     elif src_y == dest_y and src_x > dest_x:
-        next_dir = directions["W"]
+        next_dir = simple_direction_map["W"]
     elif src_y == dest_y and src_x < dest_x:
-        next_dir = directions["E"]
+        next_dir = simple_direction_map["E"]
     return next_dir
 
 

@@ -83,3 +83,11 @@ class PMaxInfo:
         self.directions = []
         self.black_list.clear()
         self.lifetime = 0
+
+
+class TargetTileInfo:
+    def __init__(self, target):
+        self.target = target
+
+    def __str__(self):
+        return str(self.target)

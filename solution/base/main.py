@@ -16,7 +16,7 @@ def solution(sim):
     for particle in sim.particles:
         if sim.get_actual_round() == 1:
             coating_mod.initialize_particle(particle)
-            particle.dest_t=random.choice(sim.get_tiles_list())
+            particle.dest_t=random.choice(sim.get_tiles_list()).coordinates
 
         if sim.get_actual_round() % (cycle_no * 10) == 1:
             if len(particle.prev_direction) > 0:
@@ -26,7 +26,7 @@ def solution(sim):
             if particle.wait:
                 particle.wait = False
             else:
-                move_cycle(particle, sim)
+                move_cycle(particle)
 
         elif sim.get_actual_round() % cycle_no == 2 and not particle.wait:
             read_cycle(particle)
@@ -44,11 +44,17 @@ def write_cycle(particle):
     :return: none
     """
     particle.next_direction = coating_mod.coating_alg(particle)
-    if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
-        # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-        read_write_mod.send_pmax_to_neighbors(particle)
+    if particle.own_dist != math.inf:
+        if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
+            # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
+            read_write_mod.send_p_max_to_neighbors(particle)
+        else:
+            read_write_mod.send_own_dist_to_neighbors(particle)
     else:
-        read_write_mod.send_own_dist_to_neighbors(particle)
+        next_dir = get_next_direction_to(particle.coordinates[0], particle.coordinates[1],
+                                         particle.dest_t[0], particle.dest_t[1])
+        if particle.particle_in(next_dir):
+            read_write_mod.send_target_tile(particle, next_dir)
 
 
 def read_cycle(particle):
@@ -62,11 +68,13 @@ def read_cycle(particle):
     particle.rcv_buf = read_write_mod.read_and_clear(particle.read_whole_memory())
     particle.nh_list = distance_calc_mod.calculate_distances(particle)
     p_max_calc_mod.find_p_max(particle)
+    if particle.own_dist is math.inf:
+        read_write_mod.check_for_new_target_tile(particle)
     particle.rcv_buf_dbg = copy.deepcopy(particle.rcv_buf)
     particle.rcv_buf.clear()
 
 
-def move_cycle(particle, sim):
+def move_cycle(particle):
     """
     Lets the current particle move.
     :param particle: the particle whose turn it is
@@ -75,7 +83,7 @@ def move_cycle(particle, sim):
     if particle.next_direction is False and particle.own_dist > 1:
         if debug and debug_movement:
             print("moving closer to target tile")
-        move_to_target_tile(particle, sim)
+        move_to_target_tile(particle)
     elif particle.next_direction is not False and not particle.particle_in(particle.next_direction) \
             and not particle.tile_in(particle.next_direction):
         move_to_next_dir(particle)
@@ -100,14 +108,14 @@ def move_to_next_dir(particle):
     particle.wait = True
 
 
-def move_to_target_tile(particle, sim):
+def move_to_target_tile(particle):
     """
     Moves the particle in the global direction of it's target tile.
     This method uses information from the world class.
     :param particle: the particle whose turn it is
     :return: none
     """
-    hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, sim.grid.directions, particle.prev_direction)
+    hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
     if hit_a_matter or hit_a_matter is None:
         # reset_attributes(particle)
         if hit_a_matter is not None:
