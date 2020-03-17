@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-ONE_LAYER_COATING = False
+ONE_LAYER_COATING = True
 
 ENTRANCE_LABEL = 3
 PREVIOUS_LOCATION_LABEL = 10
@@ -353,7 +353,9 @@ def handle_coating(leader):
                                                                           leader.aim)) in leader.uncoated_particles_list:
             leader.uncoated_particles_list.remove(
                 (leader.get_particle_in(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))))
-        if leader.free_coating_locations and leader.uncoated_particles_list:
+        if ONE_LAYER_COATING and bool(leader.free_coating_locations) and len(leader.free_coating_locations) == 1:
+            one_layer_leader_coating(leader)
+        elif leader.free_coating_locations and leader.uncoated_particles_list:
             enough_particle_to_coat(leader)
         else:
             leader.state = "checking"
@@ -390,6 +392,14 @@ def handle_checking(leader):
             leader.world.csv_round.update_leader_coating()
 
 
+def one_layer_leader_coating(leader):
+    leader.state = "leader_coating"
+    leader.aim = leader.free_coating_locations.pop()
+    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    for particle in leader.uncoated_particles_list:
+        leader.world.particles.remove(particle)
+
+
 def it_is_leader_turn_to_coat(leader):
     leader.state = "leader_coating"
     leader.aim = leader.free_coating_locations.pop()
@@ -421,6 +431,7 @@ def not_enough_particle_check(leader):
     if quantity_of_uncoated_particles < free_location_counter:
         return True
     return False
+
 
 def no_free_location_go_scanning(leader):
     leader.level += 1
@@ -470,20 +481,19 @@ def handle_finished(world):
     if particle_distance_list and locations_distance_list:
         if max(particle_distance_list) < min(locations_distance_list):
             # print ("Valid state")
-            if leader.level == 1:
+            if leader.level == 1 or ONE_LAYER_COATING:
                 leader.world.csv_round.update_valid(1)  # Ideal without Layer
             else:
                 leader.world.csv_round.update_valid(3)  # Ideal Layered
             leader.world.csv_round.update_layer()
             world.set_successful_end()
         elif max(particle_distance_list) == min(locations_distance_list):
-            if leader.level == 1:
+            if leader.level == 1 or ONE_LAYER_COATING:
                 leader.world.csv_round.update_valid(2)  # Legal without Layer
             else:
                 leader.world.csv_round.update_valid(4)  # Legal Layered
             world.set_successful_end()
         else:
-            # print("Invalid State")
             world.set_unsuccessful_end()
 
 
