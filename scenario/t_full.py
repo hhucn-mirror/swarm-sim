@@ -14,3 +14,5 @@ def scenario(world):
 	world.add_tile((8.0, -2.0, 0), color=(0.3, 0.3, 0.8, 1.0))
 	world.add_tile((9.0, -0.0, 0), color=(0.3, 0.3, 0.8, 1.0))
 	world.add_tile((9.5, -1.0, 0), color=(0.3, 0.3, 0.8, 1.0))
+	world.add_tile((10.0, -2.0, 0), color=(0.3, 0.3, 0.8, 1.0))
+	world.add_tile((9.0, -2.0, 0), color=(0.3, 0.3, 0.8, 1.0))
