@@ -390,8 +390,6 @@ def leader_one_layer_coating(leader):
     leader.state = "leader_coating"
     leader.aim = leader.uncoated_locations.pop()
     leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-    for particle in leader.uncoated_particles:
-        leader.world.particles.remove(particle)
 
 
 def it_is_leader_turn_to_coat(leader):
@@ -445,6 +443,8 @@ def handle_leader_coating(leader):
 def handle_finished(world):
     particle_distance_list = []
     locations_distance_list = []
+    for particle in leader.uncoated_particles:
+        leader.world.particles.remove(leader.world.particle_map_coordinates[particle])
     for particle in world.particles:
         for direction in world.grid.get_directions_list():
             if not particle.matter_in(direction):

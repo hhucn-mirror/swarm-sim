@@ -60,45 +60,45 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    min_radius = 1
-    max_radius = 5
+    min_radius = 17
+    max_radius = 1
     #
     for scenario in scenarios:
         folder_name = folder  + "/" + scenario
-        for radius in range(min_radius, max_radius):
-            folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
-            process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
-                                  "-r"+ str(radius), "-v" + str(0)
-            p = subprocess.Popen(process, stdout=out, stderr=out)
-            child_processes.append(p)
-            process_cnt += 1
-            #print("Process Nr. ", process_cnt, "started")
-            #p.wait()
-            #child_processes.clear()
-            if len(child_processes) == os.cpu_count():
-                while len(child_processes) == os.cpu_count():
-                    for cp in child_processes:
-                        if cp.poll() != None:
-                            #print("finished")
-                            child_processes.remove(cp)
-                            break
-        for cp in child_processes:
-            cp.wait()
-        fout = open(folder_name+"/aggregate_rounds.csv","w+")
-        first=True
-        #for scenario in scenarios:
-        for radius in range(min_radius, max_radius):
-            #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
-            f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
-            if not first:
-                f.__next__() # skip the header
-            else:
-                first=False
-            for line in f:
-                fout.write(line)
-            f.close() # not really needed
-        fout.close()
-    fout = open(folder+ "/aggregate.csv", "w+")
+        # for radius in range(min_radius, max_radius):
+        #     folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
+        process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name, "-m 1", "-d"+str(n_time),\
+                              "-r"+ str(5), "-v" + str(0)
+        p = subprocess.Popen(process, stdout=out, stderr=out)
+        child_processes.append(p)
+        process_cnt += 1
+        #print("Process Nr. ", process_cnt, "started")
+        #p.wait()
+        #child_processes.clear()
+        if len(child_processes) == os.cpu_count():
+            while len(child_processes) == os.cpu_count():
+                for cp in child_processes:
+                    if cp.poll() != None:
+                        #print("finished")
+                        child_processes.remove(cp)
+                        break
+    for cp in child_processes:
+        cp.wait()
+    fout = open(folder+"/aggregate_rounds.csv","w+")
+    #first=True
+    #for scenario in scenarios:
+    #     for radius in range(min_radius, max_radius):
+    #         #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+    #         f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+    #         if not first:
+    #             f.__next__() # skip the header
+    #         else:
+    #             first=False
+    #         for line in f:
+    #             fout.write(line)
+    #         f.close() # not really needed
+    #     fout.close()
+    # fout = open(folder+ "/aggregate.csv", "w+")
     first = True
     for scenario in scenarios:
             f = open(folder+"/"+scenario+"/aggregate_rounds.csv")
