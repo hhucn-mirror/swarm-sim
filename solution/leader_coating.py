@@ -21,29 +21,28 @@ CC_4 = PREVIOUS_LOCATION_LABEL + 2* FREE_LOCATION_LABEL
 
 leader = None
 
-def next_leader(world, uncoated_object, active_particles):
+def next_leader(world, object_list, subject_list):
     global leader
-    leader, distance, closest_tile_coordinates = get_leader_distance_to_object(world, uncoated_object, active_particles)
+    leader, distance, closest_tile_coordinates = get_leader_distance_to_object(world, object_list, subject_list)
     leader.set_color((0.0, 1, 0.0, 1.0))
     setattr(leader, "directions_list", world.grid.get_directions_list())
     setattr(leader, "uncoated_locations", [])
     setattr(leader, "cave_uncoated_locations", [])
     setattr(leader, "path_uncoated_locations", [])
-    setattr(leader, "uncoated_particles", active_particles.copy())
-    if leader.coordinates in leader.uncoated_particles:
-        if isinstance(leader.uncoated_particles, dict):
-            del leader.uncoated_particles[leader.coordinates]
+    setattr(leader, "subject_list", subject_list.copy())
+    if leader.coordinates in leader.subject_list:
+        if isinstance(leader.subject_list, dict):
+            del leader.subject_list[leader.coordinates]
         else:
-            leader.uncoated_particles.remove(leader.coordinates)
-    leader.uncoated_particles = get_sorted_list_of_particles_distances(leader, leader.uncoated_particles)
-    setattr(leader, "uncoated_object", [])
+            leader.subject_list.remove(leader.coordinates)
+    leader.subject_list = get_sorted_list_of_particles_distances(leader, leader.subject_list)
+    setattr(leader, "object_list", [])
     setattr(leader, "aim", ())
     setattr(leader, "previous_location", leader.aim)
-    setattr(leader, "aim_path", [])
-    setattr(leader, "neighbors", {})
-    setattr(leader, "obstacle_direction", False)
-    setattr(leader, "cave_exit", [])
-    setattr(leader, "dead_end_location", None)
+    setattr(leader, "path_to_aim_list", [])
+    setattr(leader, "neighbors_dict", {})
+    setattr(leader, "direction_to_a_neighbor_obstacle", False)
+    setattr(leader, "cave_exit_storage", [])
     setattr(leader, "first_layer", True)
     setattr(leader, "state_storage", [])
     setattr(leader, "state", "toTile")
@@ -52,7 +51,7 @@ def next_leader(world, uncoated_object, active_particles):
     else:
         setattr(leader, "state", "toTile")
         leader.aim = closest_tile_coordinates
-        leader.aim_path = find_way_to_aim(leader.coordinates, closest_tile_coordinates, leader.world)
+        leader.path_to_aim_list = find_way_to_aim(leader.coordinates, closest_tile_coordinates, leader.world)
     return leader
 
 
@@ -93,10 +92,10 @@ def handle_scanning(leader):
 
 
 def found_cave_entrance_go_for_cave_discovery(leader, direction_entrance, direction_exit):
-    cave_exit = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_exit)
-    leader.cave_exit.append(cave_exit)
+    cave_exit_storage = leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_exit)
+    leader.cave_exit_storage.append(cave_exit_storage)
     leader.state = "cave_discovery"
-    leader.path_uncoated_locations.append(cave_exit)
+    leader.path_uncoated_locations.append(cave_exit_storage)
     leader.path_uncoated_locations.append(leader.coordinates)
     leader.previous_location = leader.coordinates
     leader.move_to(direction_entrance)
@@ -120,12 +119,14 @@ def finished_scanning(leader):
     if leader.first_layer:
         leader.first_layer = False
     handle_scanned_locations(leader)
-    if leader.uncoated_particles and leader.uncoated_locations:
+    if leader.subject_list and leader.uncoated_locations:
         #go_taking_particles(leader)
         if not beaming(leader) and leader.uncoated_locations:
+            delete_cave_entrances(leader)
             it_is_leader_turn_to_coat(leader)
             #leader.state = "finished"
         else:
+            delete_cave_entrances(leader)
             leader.state="scanning"
 
     else:
@@ -136,24 +137,28 @@ def beaming(leader):
     leader.uncoated_locations = list(dict.fromkeys(leader.uncoated_locations))
     while leader.uncoated_locations:
         uncoated_location = leader.uncoated_locations.pop()
-        if leader.coordinates==uncoated_location and leader.uncoated_particles:
+        if leader.coordinates==uncoated_location and leader.subject_list:
             direction = obstacles_direction(leader)
             leader.move_to(direction)
-        elif not leader.uncoated_particles:
+        elif not leader.subject_list:
             return False
             #handle_finished(leader)
 
-        if leader.uncoated_particles:
-            leader.take_particle_on(leader.uncoated_particles.pop())
+        if leader.subject_list:
+            leader.take_particle_on(leader.subject_list.pop())
             leader.drop_particle_on(uncoated_location)
-            leader.uncoated_object.append(uncoated_location)
-    if leader.uncoated_particles:
-        #leader=next_leader(leader.world, leader.uncoated_object , leader.uncoated_particles)
+            leader.object_list.append(uncoated_location)
+    if ONE_LAYER_COATING:
         delete_cave_entrances(leader)
-        leader.state="scanning"
-        return True
+        handle_finished(leader)
     else:
-        return False
+        if leader.subject_list:
+            #leader=next_leader(leader.world, leader.object_list , leader.subject_list)
+            delete_cave_entrances(leader)
+            leader.state="scanning"
+            return True
+        else:
+            return False
 
 
 def handle_scanned_locations(leader):
@@ -188,7 +193,7 @@ def handle_not_enough_particles(leader, number_of_not_using_caves_locations):
 
 def checking_for_a_cave(leader):
     get_neighbors(leader)
-    if len(leader.neighbors) == FIVE_MATTERS:
+    if len(leader.neighbors_dict) == FIVE_MATTERS:
         return None, None
     direction_entrance, direction_exit = check_cave_entrance(leader)
     return direction_entrance, direction_exit
@@ -198,11 +203,11 @@ def handle_cave_discovery(leader):
     if leader.coordinates not in leader.path_uncoated_locations:
         leader.path_uncoated_locations.append(leader.coordinates)
     get_neighbors(leader)
-    if len(leader.neighbors) == FIVE_MATTERS:
+    if len(leader.neighbors_dict) == FIVE_MATTERS:
         handling_dead_end(leader)
     else:
-        if len(leader.neighbors) < FOUR_MATTERS:
-            if len(leader.neighbors) == THREE_MATTERS:
+        if len(leader.neighbors_dict) < FOUR_MATTERS:
+            if len(leader.neighbors_dict) == THREE_MATTERS:
                 sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(
                     leader)
                 if sum_of_neighbors_labels == CC_4:
@@ -214,6 +219,7 @@ def handle_cave_discovery(leader):
         else:
             store_location_in_path_list(leader)
 
+
 def store_location_in_path_list(leader):
     direction = obstacles_direction(leader)
     leader.previous_location = leader.coordinates
@@ -221,7 +227,6 @@ def store_location_in_path_list(leader):
 
 
 def go_cave_scanning(leader):
-    leader.first_caving = True
     leader.state = "cave_scanning"
 
 
@@ -236,20 +241,19 @@ def go_cave_escaping(leader):
         leader.cave_uncoated_locations.remove(leader.coordinates)
         if leader.coordinates not in leader.path_uncoated_locations:
             leader.path_uncoated_locations.append(leader.coordinates)
-    leader.aim = leader.cave_exit.pop()
-    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    leader.aim = leader.cave_exit_storage.pop()
+    leader.path_to_aim_list = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
     leader.state = "cave_escaping"
 
 
 def cave_scanning(leader):
     get_neighbors(leader)
     direction_entrance, direction_exit = checking_for_a_cave(leader)
-    if direction_entrance and direction_exit and not leader.first_caving:
+    if direction_entrance and direction_exit:
         leader.state_storage.append("cave_scanning")
         found_cave_entrance_go_for_cave_discovery(leader, direction_entrance, direction_exit)
     else:
-        leader.first_caving=False
-        if len(leader.neighbors) == FIVE_MATTERS:
+        if len(leader.neighbors_dict) == FIVE_MATTERS:
             direction = leader.world.grid.get_nearest_direction(leader.coordinates, leader.previous_location)
         elif get_an_adjacent_obstacle_directions(leader):
             direction = obstacles_direction(leader)
@@ -263,11 +267,11 @@ def cave_scanning(leader):
 
 def delete_cave_entrances(leader):
     if not ONE_LAYER_COATING:
-        if leader.cave_exit and leader.cave_exit in leader.uncoated_locations:
-            leader.uncoated_locations.remove(leader.cave_exit)
+        if leader.cave_exit_storage and leader.cave_exit_storage in leader.uncoated_locations:
+            leader.uncoated_locations.remove(leader.cave_exit_storage)
     leader.path_uncoated_locations.clear()
     leader.cave_uncoated_locations.clear()
-    leader.cave_exit.clear()
+    leader.cave_exit_storage.clear()
 
 
 def other_level_scanning(leader):
@@ -346,12 +350,12 @@ def get_cave_entry_and_exit(sum_of_neighbors_labels, neighbor_number_map_directi
 
 
 def get_neighbors(leader):
-    leader.neighbors = {}
-    leader.obstacle_direction = None
+    leader.neighbors_dict = {}
+    leader.direction_to_a_neighbor_obstacle = None
     for dir in leader.directions_list:
         if leader.matter_in(dir):
-            leader.neighbors[dir] = leader.get_matter_in(dir)
-            leader.obstacle_direction = dir
+            leader.neighbors_dict[dir] = leader.get_matter_in(dir)
+            leader.direction_to_a_neighbor_obstacle = dir
 
 
 def adjacent_tile(leader):
@@ -362,10 +366,8 @@ def adjacent_tile(leader):
 
 
 def handling_dead_end(leader):
-    leader.aim = leader.cave_exit.pop()
-    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
-    if not adjacent_tile(leader):
-        leader.dead_end_location = leader.coordinates
+    leader.aim = leader.cave_exit_storage.pop()
+    leader.path_to_aim_list = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
     if bool(leader.state_storage) == False:
         leader.cave_uncoated_locations.extend(leader.path_uncoated_locations)
         leader.path_uncoated_locations.clear()
@@ -385,7 +387,7 @@ def handle_cave_escaping(leader):
 
 def handle_to_tile(leader):
     if reached_aim(leader.aim, leader):
-        if leader.uncoated_particles:
+        if leader.subject_list:
             leader.state = "scanning"
         else:
             leader.state = "finished"
@@ -403,7 +405,7 @@ def handle_taking(leader):
 def go_coating(leader):
     leader.take_particle_on(leader.aim)
     leader.aim = leader.uncoated_locations.pop()
-    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    leader.path_to_aim_list = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
     leader.state = "coating"
 
 
@@ -411,12 +413,12 @@ def handle_coating(leader):
     if reached_aim(leader.aim, leader):
         leader.drop_particle_on(leader.aim)
         get_neighbors(leader)
-        if leader.uncoated_locations and leader.uncoated_particles:
+        if leader.uncoated_locations and leader.subject_list:
             if ONE_LAYER_COATING and len(leader.uncoated_locations) == 1:
                 it_is_leader_turn_to_coat(leader)
             else:
                 go_taking_particles(leader)
-        elif not leader.uncoated_locations and leader.uncoated_particles and not ONE_LAYER_COATING:
+        elif not leader.uncoated_locations and leader.subject_list and not ONE_LAYER_COATING:
             go_scanning(leader)
         else:
             it_is_leader_turn_to_coat(leader)
@@ -425,28 +427,28 @@ def handle_coating(leader):
 def it_is_leader_turn_to_coat(leader):
     leader.state = "leader_coating"
     leader.aim = leader.uncoated_locations.pop()
-    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    leader.path_to_aim_list = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
 
 
 def go_taking_particles(leader):
     leader.scanning = False
-    leader.aim = leader.uncoated_particles.pop(0)
-    leader.aim_path = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
+    leader.aim = leader.subject_list.pop(0)
+    leader.path_to_aim_list = find_way_to_aim(leader.coordinates, leader.aim, leader.world)
     leader.previous_location = leader.coordinates
     leader.state = "taking"
 
 
 def not_enough_particles(leader):
-    quantity_of_uncoated_particles = len(leader.uncoated_particles) + 1  # for the leader
+    quantity_of_subject_list = len(leader.subject_list) + 1  # for the leader
     location_counter = len(leader.uncoated_locations)
     if leader.path_uncoated_locations:
         location_counter += len(leader.path_uncoated_locations)
     if leader.cave_uncoated_locations:
         location_counter += len(leader.cave_uncoated_locations)
-    if quantity_of_uncoated_particles < location_counter:
-        if quantity_of_uncoated_particles < location_counter:
-            if quantity_of_uncoated_particles >= location_counter - len(leader.cave_uncoated_locations):
-                return quantity_of_uncoated_particles - location_counter
+    if quantity_of_subject_list < location_counter:
+        if quantity_of_subject_list < location_counter:
+            if quantity_of_subject_list >= location_counter - len(leader.cave_uncoated_locations):
+                return quantity_of_subject_list - location_counter
             else:
                 return True
     return False
@@ -473,7 +475,7 @@ def handle_leader_coating(leader):
 def handle_finished(leader):
     particle_distance_list = []
     locations_distance_list = []
-    for particle in leader.uncoated_particles:
+    for particle in leader.subject_list:
         leader.world.particles.remove(leader.world.particle_map_coordinates[particle])
     if leader.world.particles:
         listi = leader.world.particles
@@ -532,7 +534,7 @@ def get_sorted_list_of_locations_distances(leader, location_list):
 
 
 def obstacles_direction(leader):
-    index_direction = leader.directions_list.index(leader.obstacle_direction)
+    index_direction = leader.directions_list.index(leader.direction_to_a_neighbor_obstacle)
     for idx in range(len(leader.directions_list)):
         direction = leader.directions_list[(idx + index_direction) % len(leader.directions_list)]
         if leader.matter_in(
@@ -554,17 +556,17 @@ def obstacles_direction(leader):
 
 
 def get_an_adjacent_obstacle_directions(leader, remove_particle=False):
-    leader.obstacle_direction = None
+    leader.direction_to_a_neighbor_obstacle = None
     for dir in leader.directions_list:
         if leader.matter_in(dir):
             if remove_particle and leader.get_matter_in(dir).type == "particle" \
-                    and leader.get_matter_in(dir) in leader.uncoated_particles:
-                leader.uncoated_particles.remove(leader.get_matter_in(dir))
+                    and leader.get_matter_in(dir) in leader.subject_list:
+                leader.subject_list.remove(leader.get_matter_in(dir))
             elif remove_particle and leader.matter_in(dir) and leader.get_matter_in(dir).type == "tile":
-                leader.obstacle_direction = dir
+                leader.direction_to_a_neighbor_obstacle = dir
                 return True
-            leader.obstacle_direction = dir
-    if bool(leader.obstacle_direction):
+            leader.direction_to_a_neighbor_obstacle = dir
+    if bool(leader.direction_to_a_neighbor_obstacle):
         return True
     return False
 
@@ -640,9 +642,9 @@ def get_distance_to_closest_tile(source, world):
 
 
 def reached_aim(aim, leader):
-    if leader.aim_path:
+    if leader.path_to_aim_list:
         get_neighbors(leader)
-        next_direction = leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim_path.pop(0))
+        next_direction = leader.world.grid.get_nearest_direction(leader.coordinates, leader.path_to_aim_list.pop(0))
         next_coords = leader.world.grid.get_coordinates_in_direction(leader.coordinates, next_direction)
         if aim == next_coords and leader.state != "leader_coating":
             return True
