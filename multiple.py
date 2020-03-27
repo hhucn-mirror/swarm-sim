@@ -60,7 +60,7 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    min_radius = 17
+    min_radius = 0
     max_radius = 19
     #
     for scenario in scenarios:

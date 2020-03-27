@@ -126,8 +126,7 @@ def finished_scanning(leader):
             it_is_leader_turn_to_coat(leader)
             #leader.state = "finished"
         else:
-            delete_cave_entrances(leader)
-            leader.state="scanning"
+            go_scanning(leader)
 
     else:
         it_is_leader_turn_to_coat(leader)
@@ -145,7 +144,7 @@ def beaming(leader):
             #handle_finished(leader)
 
         if leader.subject_list:
-            leader.take_particle_on(leader.subject_list.pop())
+            leader.take_particle_on(leader.subject_list.pop(0))
             leader.drop_particle_on(uncoated_location)
             leader.object_list.append(uncoated_location)
     if ONE_LAYER_COATING:
@@ -154,8 +153,6 @@ def beaming(leader):
     else:
         if leader.subject_list:
             #leader=next_leader(leader.world, leader.object_list , leader.subject_list)
-            delete_cave_entrances(leader)
-            leader.state="scanning"
             return True
         else:
             return False
@@ -495,6 +492,9 @@ def handle_finished(leader):
 def check_valid_type(locations_distance_list, particle_distance_list, world):
     if max(particle_distance_list) <= min(locations_distance_list):
         leader.world.csv_round.update_valid(1)
+        world.set_successful_end()
+    elif max(particle_distance_list) - min(locations_distance_list) == 1:
+        leader.world.csv_round.update_valid(2)
         world.set_successful_end()
     else:
         leader.world.csv_round.update_valid(0)
