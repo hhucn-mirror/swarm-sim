@@ -10,7 +10,7 @@ from lib.visualization.programs.grid_program import GridProgram
 import numpy as np
 import os
 import datetime
-
+import lib.svg_generator as svggen
 
 class OGLWidget(QtOpenGL.QGLWidget):
 
@@ -475,13 +475,16 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # if the screenshot folder exists save it, else print an error.
         if os.path.exists("screenshots") and os.path.isdir("screenshots"):
             now = datetime.datetime.now()
-            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.png"
+            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.svg"
                            % (now.year, now.month, now.day, now.hour, now.minute, now.second))
-            i.save(filename, "PNG")
+            # i.save(filename)
+            svggen.create_svg(self.world, filename)
 
             # checks if the file exists. If not, some unknown error occured in the Image library.
             if not os.path.exists(filename) or not os.path.isfile(filename):
                 eprint("Error: screenshot couldn't be saved due to unknown reasons.")
+
+
 
         else:
             eprint("Error: couldn't create the screenshot folder.")

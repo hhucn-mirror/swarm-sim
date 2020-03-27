@@ -3,7 +3,7 @@ from datetime import datetime
 from multiprocessing import Pool
 import os
 import configparser
-from lib.gnuplot_generator import plot_generator
+#from lib.gnuplot_generator import plot_generator
 
 
 def main(argv):
@@ -68,7 +68,7 @@ def main(argv):
         # for radius in range(min_radius, max_radius):
         #     folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
         process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name, "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(5), "-v" + str(0)
+                              "-r"+ str(18), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1

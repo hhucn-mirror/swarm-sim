@@ -7,7 +7,7 @@ import sys
 import time
 import random
 from lib import world, config, vis3d
-from lib.gnuplot_generator import plot_generator
+#from lib.gnuplot_generator import plot_generator
 
 
 def swarm_sim(argv):
