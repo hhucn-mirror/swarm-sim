@@ -1,12 +1,15 @@
 """This is the main module of the Opportunistic Robotics Network Simulator"""
-import importlib
 import getopt
+import importlib
 import logging
 import os
+import random
 import sys
 import time
-import random
-from lib import world, config, vis3d
+
+from lib import world, config
+
+
 #from lib.gnuplot_generator import plot_generator
 
 

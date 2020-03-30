@@ -157,7 +157,8 @@ def hexagon(world, centre, r_max=2, exclude_centre=False):
     :type r_max: int
     :return: list of locations
     :rtype: list
-    """ 
+    """
+   # pass
     if not exclude_centre:
         world.add_particle(centre)
     displacement = - r_max + 0.5

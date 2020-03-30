@@ -60,13 +60,14 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    min_radius = 0
-    max_radius = 19
+    min_radius = 1
+    max_radius = 6
     #
     for scenario in scenarios:
         folder_name = folder  + "/" + scenario
         for radius in range(min_radius, max_radius):
-            folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
+            #folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
+            folder_name_sub = folder_name + "/" + str(radius)
             process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
                                   "-r"+ str(radius), "-v" + str(0)
             p = subprocess.Popen(process, stdout=out, stderr=out)
@@ -89,7 +90,8 @@ def main(argv):
         #for scenario in scenarios:
         for radius in range(min_radius, max_radius):
             #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
-            f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+            #f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+            f = open(folder_name+"/"+str(radius)+"/aggregate_rounds.csv")
             if not first:
                 f.__next__() # skip the header
             else:

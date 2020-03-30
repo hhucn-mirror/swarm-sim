@@ -57,11 +57,12 @@ def panders_plotter(file, directory, name):
         # plt.ylabel('AVG Steps per Particle')
         # plt.savefig(directory + '/' +'forParticleSteps' + '.pdf')
 
-        for key, grp in csv_object.groupby(['Particles']):
+        for key, grp in csv_object.groupby(['Scenario']):
             #key = key + "("+str(grp['Tiles'].values)+")"
-            print(grp['Particles'].values)
-            rounds=int(round(grp['Rounds'].mean(),2))
-            grp.plot(ax=ax, kind='bar', x=grp['Particles'].values[0],  y=rounds, label=key)
+            #print(grp['Particles'].values)
+            #rounds=int(round(grp['Rounds'].mean(),2))
+            #grp.plot(ax=ax, kind='bar', x=grp['Particles'].values[0],  y=rounds, label=key)
+            grp.plot(ax=ax, kind='line', x='Particles',  y='Steps', label=key)
         plt.ylabel('Steps')
         plt.savefig(directory + '/' +'wo_cave' + '.pdf')
 
@@ -133,5 +134,5 @@ def panders_plotter(file, directory, name):
 
 
 #plot_generator("all_aggregates.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 4,0, "Multi_Layer: 60 Particles", "bar")
-#panders_plotter("wo_cave.csv", "../outputs/multiple/2020-03-19_18:04:1_leader_coating", "bar")
+#panders_plotter("aggregate.csv", "../outputs/multiple/2020-03-27_17:37:4_leader_coating", "bar")
 #panders_plotter("test.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 1,0, "Multi_Layer: 60 Particles", "bar")

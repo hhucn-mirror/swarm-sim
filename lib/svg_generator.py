@@ -123,7 +123,7 @@ def draw_world(
     #     x = shift + world_size_x - 1
     #     draw_line(x, y2 * squish, x - 0.5 * (y3 - y2), y3 * squish)
 
-    # draw circles at intersection points
+    #draw circles at intersection points
     # for y in range(world_size_y + 1):
     #     shift = 0.0 if y % 2 == 0 else 0.5
     #     for x in range(world_size_x):
@@ -197,10 +197,10 @@ def calculate_bounds(tile_coordinates, particle_coordinates, location_coordinate
     maximum_x_coordinate = max(max([coords[0] for coords in tile_coordinates] if tile_coordinates else [0]),
                                max([coords[0] for coords in particle_coordinates] if particle_coordinates else [0]),
                                max([coords[0] for coords in location_coordinates] if location_coordinates else [0]))
-    minimum_y_coordinate = min(min([coords[1] for coords in tile_coordinates] if tile_coordinates else [1]),
-                               min([coords[1] for coords in particle_coordinates] if particle_coordinates else [1]),
-                               min([coords[1] for coords in location_coordinates] if location_coordinates else [1]))
-    maximum_y_coordinate = max(max([coords[1] for coords in tile_coordinates] if tile_coordinates else [1]),
-                               max([coords[1] for coords in particle_coordinates] if particle_coordinates else [1]),
-                               max([coords[1] for coords in location_coordinates] if location_coordinates else [1]))
+    minimum_y_coordinate = min(min([coords[1] for coords in tile_coordinates] if tile_coordinates else [0]),
+                               min([coords[1] for coords in particle_coordinates] if particle_coordinates else [0]),
+                               min([coords[1] for coords in location_coordinates] if location_coordinates else [0]))
+    maximum_y_coordinate = max(max([coords[1] for coords in tile_coordinates] if tile_coordinates else [0]),
+                               max([coords[1] for coords in particle_coordinates] if particle_coordinates else [0]),
+                               max([coords[1] for coords in location_coordinates] if location_coordinates else [0]))
     return minimum_x_coordinate, maximum_x_coordinate, minimum_y_coordinate, maximum_y_coordinate
