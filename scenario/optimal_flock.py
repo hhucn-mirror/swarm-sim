@@ -4,7 +4,7 @@ from lib.world import World
 
 def scenario(world: World):
     radius = world.config_data.flock_radius
-    centre = (-10, -10)
+    centre = (0, 0)
 
     hexagon = get_hexagon_coordinates(centre, radius)
     for l in hexagon:

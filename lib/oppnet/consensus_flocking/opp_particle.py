@@ -51,6 +51,8 @@ class Particle(Particle):
         self.__previous_neighbourhood__ = None
         self.__current_neighbourhood__ = {}
         self.__neighbourhood_direction_counter__ = collections.Counter()
+        # initialise with current_direction
+        self.__neighbourhood_direction_counter__[self.mobility_model.current_dir] += 1
 
         self.__received_queried_directions__ = {}
         self.relative_flock_location = None
@@ -192,18 +194,24 @@ class Particle(Particle):
         :return: nothing
         """
         neighbourhood_size = len(self.__neighbourhood_direction_counter__)
-        if neighbourhood_size > 0:
-            most_common = self.__neighbourhood_direction_counter__.most_common(1)[0][0]
-            if weighted_choice:
-                choice = random.choices([most_common, self.mobility_model.current_dir],
-                                        [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])
-            else:
-                choice = most_common
-            if centralisation_force:
-                self.mobility_model.current_dir = self.__get_choice_from_consensus_and_centralisation_force(choice)
-            else:
-                self.mobility_model.current_dir = choice[0]
-            self.__neighbourhood_direction_counter__ = collections.Counter()
+        choice = self.__neighbourhood_direction_counter__.most_common(1)[0][0]
+        if weighted_choice:
+            choice = random.choices([choice, self.mobility_model.current_dir],
+                                    [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])[0]
+        print("round {}: particle #{} most common: {}".format(self.world.get_actual_round(), self.number,
+                                                              choice))
+        if centralisation_force and self.relative_flock_location:
+            choice = self.__get_choice_from_consensus_and_centralisation_force(choice)
+            if choice and self.mobility_model.current_dir != choice:
+                logging.info("round {}: particle #{} changing direction from {} to {}"
+                             .format(self.world.get_actual_round(), self.number,
+                                     self.mobility_model.current_dir, choice))
+
+        self.mobility_model.current_dir = choice
+
+        self.__neighbourhood_direction_counter__ = collections.Counter()
+        # initialise with current direction
+        self.__neighbourhood_direction_counter__[choice] += 1
 
     def __get_choice_from_consensus_and_centralisation_force(self, choice: tuple):
         """
@@ -215,9 +223,13 @@ class Particle(Particle):
         :return: a random weighted choice
         :rtype: tuple
         """
-        alpha = vector_angle(np.asarray(self.relative_flock_location), choice[0])
+        try:
+            u, v = np.asarray(self.relative_flock_location[0:2]), np.asarray(choice[0][0:2])
+        except TypeError:
+            return None
+        alpha = vector_angle(u, v)
         population = [choice[0], False]
-        probabilities = [choice[1] / len(self.__neighbourhood_direction_counter__), alpha / np.pi]
+        probabilities = [choice[1] / len(self.__neighbourhood_direction_counter__), abs(alpha) / np.pi]
         return random.choices(population, probabilities, k=1)[0]
 
     def set_random_weighted_direction(self):

@@ -130,7 +130,11 @@ def get_hexagon_coordinates(centre, r_max, exclude_centre=False):
 
 
 def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
-    phi = np.arccos(u.dot(v) / (np.linalg.norm(u) * np.linalg.norm(v)))
+    denominator = np.linalg.norm(u) * np.linalg.norm(v)
+    if denominator == 0:
+        phi = 1 / 2 * np.pi
+    else:
+        phi = np.arccos(u.dot(v) / denominator)
     if beta:
         phi = 2 * np.pi - phi
     if degrees:
