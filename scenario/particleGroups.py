@@ -137,6 +137,7 @@ def star50(sim):
     sim.add_particle(2, -10)
     sim.add_particle(-8, 10)
     sim.add_particle(-8, -10)
+
 def block100(sim, start=(0,0,0), amount=6):
     amount = int(amount /2)
     for i in range(0,amount):
@@ -146,33 +147,15 @@ def block100(sim, start=(0,0,0), amount=6):
             else:
                 sim.add_particle(-i + 0.5 + start[0], j +start[1])
 
-def hexagon(world, centre, r_max=2, exclude_centre=False):
-    """
-    Returns all locations of a 2d-hexagon with centre :param centre: and radius :param r_max:.
-    :param exclude_centre: should the centre coordinate be included
-    :type exclude_centre: boolean
-    :param centre: the centre location of the hexagon
-    :type centre: tuple
-    :param r_max: radius of the hexagon
-    :type r_max: int
-    :return: list of locations
-    :rtype: list
-    """
-   # pass
-    if not exclude_centre:
-        world.add_particle(centre)
-    displacement = - r_max + 0.5
-    iteration = 0
-    for y in range(1, r_max + 1):
-        world.add_particle((centre[0] + y, centre[1], 0))
-        world.add_particle(((centre[0] - y), centre[1], 0))
-        for x in range(0, (2 * r_max) - iteration):
-            world.add_particle((centre[0] + displacement + x, centre[1] + y, 0))
-            world.add_particle((centre[0] + displacement + x, centre[1] - y, 0))
-        iteration = iteration + 1
-        displacement = displacement + 0.5
 
-
+def hexagon(world, center, hop):
+    # n_sphere_border = world.grid.get_n_sphere(center, hop)
+    # for l in n_sphere_border:
+    #     world.add_particle(l)
+    current_position = (center[0]+hop,center[1], center[2])
+    for _ in range(hop):
+        world.add_particle(current_position)
+        current_position = world.grid.get_coordinates_in_direction(current_position, (-1, 0,0))
 def create_matter_in_line(world, start, direction, amount, matter_type='particle'):
     current_position = start
     for _ in range(amount):

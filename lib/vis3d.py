@@ -24,7 +24,7 @@ class Visualization:
         """
         self._world = world
         self._last_light_rotation = 0
-        self._rounds_per_second = 120
+        self._rounds_per_second = 500
         self._running = False
         self._app = None
         self._viewer = None

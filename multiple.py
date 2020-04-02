@@ -3,7 +3,6 @@ from datetime import datetime
 from multiprocessing import Pool
 import os
 import configparser
-from lib.gnuplot_generator import plot_generator
 
 
 def main(argv):
@@ -60,8 +59,15 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
+    #scenarios = ["a", "b", "c", "d"]
+    #scenarios = ["c1"]
+    #scenarios = [ "h3","h4", "h5", ]
+    #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
+    #scenarios = ["e","f","f1", "h", "h1", "h2", "h3"]
+
     min_radius = 1
-    max_radius = 6
+    max_radius = 150
+
     #
     for scenario in scenarios:
         folder_name = folder  + "/" + scenario

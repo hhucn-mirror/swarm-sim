@@ -153,7 +153,7 @@ class CsvRoundData:
         self.out_of_cave_steps = np.nan
         self.cave_pathing = np.nan
         self.finished = np.nan
-        self.layer = np.nan
+        self.layer =1
         self.valid = np.nan
 
         self.writer_round.writerow(['',
@@ -212,7 +212,7 @@ class CsvRoundData:
         self.finished = 1
 
     def update_layer(self):
-        self.layer = 1
+        self.layer =  self.layer + 1
 
     def update_valid(self, value):
         self.valid = value
@@ -310,7 +310,6 @@ class CsvRoundData:
         self.cave_coating_steps = np.nan
         self.cave_pathing = np.nan
         self.finished = np.nan
-        self.layer = np.nan
         self.valid = np.nan
 
     # def aggregate_metrics(self):
@@ -381,11 +380,11 @@ class CsvRoundData:
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
         writer_round.writerow(['Scenario','Particles', 'Tiles', 'Rounds','Steps',
-                                "Valid State", 'AVG Rounds per Particle', 'AVG Steps per Particle',
+                                "Valid State", "Layer",'AVG Rounds per Particle', 'AVG Steps per Particle',
                                 'AVG Rounds per Tile', 'AVG Steps per Tile'])
 
         csv_interator = [self.scenario, len(self.world.particles), self.tile_num, data['Round Number'].count(),  data['Particle Steps'].sum(),
-                         data['Valid'].sum(),
+                         data['Valid'].sum(), self.layer,
                          round(data['Round Number'].count() / len(self.world.particles), 2),
                          round( data['Particle Steps'].sum() /len(self.world.particles), 2),
                           round(data['Round Number'].count() / self.tile_num, 2),
