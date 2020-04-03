@@ -59,14 +59,14 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    #scenarios = ["a", "b", "c", "d"]
-    #scenarios = ["c1"]
+    scenarios = ["a", "b", "c", "d", "e", "f", "f1"]
+    #scenarios = ["c3a"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
-    #scenarios = ["e","f","f1", "h", "h1", "h2", "h3"]
+    #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
     min_radius = 1
-    max_radius = 150
+    max_radius = 101
 
     #
     for scenario in scenarios:

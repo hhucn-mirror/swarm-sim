@@ -99,31 +99,31 @@ def draw_world(
     svg.append(f'<g transform="scale({scale} {scale})">')
     svg.append('<g transform="translate(0.5, 0.5)">')
 
-    # def draw_line(ax, ay, bx, by):
-    #     style = f'stroke: rgb(0,0,0); stroke-width: {stroke_width}'
-    #     svg.append(Line(ax, ay, bx, by).to_svg(style))
-    #
-    # # draw horizontal lines
-    # for y in range(world_size_y + 1):
-    #     shift = 0.0 if y % 2 == 0 else 0.5
-    #     draw_line(shift, y * squish, shift + world_size_x - 1, y * squish)
-    #
-    # # draw diagonal lines which start at 0
-    # for x2 in range(world_size_x):
-    #     x3 = min(world_size_x - 0.5, x2 + 0.5 * world_size_y)
-    #     draw_line(x2, 0, x3, (x3 - x2) * 2 * squish)
-    #     x4 = max(0, x2 - 0.5 * world_size_y)
-    #     draw_line(x2, 0, x4, (x2 - x4) * 2 * squish)
-    #
-    # # draw diagonal lines that don't start at 0
-    # for y2 in range(1, world_size_y):
-    #     shift = 0.0 if y2 % 2 == 0 else 0.5
-    #     y3 = min(world_size_y, y2 + world_size_y)
-    #     draw_line(shift, y2 * squish, shift + 0.5 * (y3 - y2), y3 * squish)
-    #     x = shift + world_size_x - 1
-    #     draw_line(x, y2 * squish, x - 0.5 * (y3 - y2), y3 * squish)
+    def draw_line(ax, ay, bx, by):
+        style = f'stroke: rgb(0,0,0); stroke-width: {stroke_width}'
+        svg.append(Line(ax, ay, bx, by).to_svg(style))
 
-    #draw circles at intersection points
+    # draw horizontal lines
+    for y in range(world_size_y + 1):
+        shift = 0.0 if y % 2 == 0 else 0.5
+        draw_line(shift, y * squish, shift + world_size_x - 1, y * squish)
+
+    # draw diagonal lines which start at 0
+    for x2 in range(world_size_x):
+        x3 = min(world_size_x - 0.5, x2 + 0.5 * world_size_y)
+        draw_line(x2, 0, x3, (x3 - x2) * 2 * squish)
+        x4 = max(0, x2 - 0.5 * world_size_y)
+        draw_line(x2, 0, x4, (x2 - x4) * 2 * squish)
+
+    # draw diagonal lines that don't start at 0
+    for y2 in range(1, world_size_y):
+        shift = 0.0 if y2 % 2 == 0 else 0.5
+        y3 = min(world_size_y, y2 + world_size_y)
+        draw_line(shift, y2 * squish, shift + 0.5 * (y3 - y2), y3 * squish)
+        x = shift + world_size_x - 1
+        draw_line(x, y2 * squish, x - 0.5 * (y3 - y2), y3 * squish)
+
+    # draw circles at intersection points
     # for y in range(world_size_y + 1):
     #     shift = 0.0 if y % 2 == 0 else 0.5
     #     for x in range(world_size_x):
@@ -159,15 +159,15 @@ def create_svg(world, filename):
     location_coordinates = world.location_map_coordinates.keys()
     particle_coordinates = world.particle_map_coordinates.keys()
 
-    minimum_x_coordinate, \
-    maximum_x_coordinate, \
-    minimum_y_coordinate, \
-    maximum_y_coordinate = calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates)
+    minimum_x_coordinate, maximum_x_coordinate, minimum_y_coordinate, maximum_y_coordinate \
+        = calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates)
+    print(minimum_y_coordinate, minimum_x_coordinate, maximum_y_coordinate, maximum_x_coordinate)
     x_offset = int(minimum_x_coordinate - 4)
     y_offset = int(maximum_y_coordinate + 4)
     size_x = int(maximum_x_coordinate - x_offset + 4)
     size_y = int(y_offset - minimum_y_coordinate + 4)
     img_size = max(size_x, size_y)  # make a square image
+    print(img_size)
     tile_coordinates_in_image = []
     location_coordinates_in_image = []
     particle_coordinates_in_image = []
@@ -191,16 +191,24 @@ def create_svg(world, filename):
 
 
 def calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates):
-    minimum_x_coordinate = min(min([coords[0] for coords in tile_coordinates] if tile_coordinates else [0]),
-                               min([coords[0] for coords in particle_coordinates] if particle_coordinates else [0]),
-                               min( [coords[0] for coords in location_coordinates] if location_coordinates else [0]))
-    maximum_x_coordinate = max(max([coords[0] for coords in tile_coordinates] if tile_coordinates else [0]),
-                               max([coords[0] for coords in particle_coordinates] if particle_coordinates else [0]),
-                               max([coords[0] for coords in location_coordinates] if location_coordinates else [0]))
-    minimum_y_coordinate = min(min([coords[1] for coords in tile_coordinates] if tile_coordinates else [0]),
-                               min([coords[1] for coords in particle_coordinates] if particle_coordinates else [0]),
-                               min([coords[1] for coords in location_coordinates] if location_coordinates else [0]))
-    maximum_y_coordinate = max(max([coords[1] for coords in tile_coordinates] if tile_coordinates else [0]),
-                               max([coords[1] for coords in particle_coordinates] if particle_coordinates else [0]),
-                               max([coords[1] for coords in location_coordinates] if location_coordinates else [0]))
-    return minimum_x_coordinate, maximum_x_coordinate, minimum_y_coordinate, maximum_y_coordinate
+    minx = 0
+    miny = 0
+    maxx = 0
+    maxy = 0
+
+    all = []
+    all.extend(tile_coordinates)
+    all.extend(particle_coordinates)
+    all.extend(location_coordinates)
+
+    for coords in all:
+        if coords[0] < minx:
+            minx = coords[0]
+        if coords[0] > maxx:
+            maxx = coords[0]
+        if coords[1] < miny:
+            miny = coords[1]
+        if coords[1] > maxy:
+            maxy = coords[1]
+
+    return minx, maxx, miny, maxy

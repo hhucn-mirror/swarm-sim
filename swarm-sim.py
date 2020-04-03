@@ -79,7 +79,7 @@ def read_cmd_args(argv, config_data):
             config_data.folder_name = str(arg)
 
 
-def create_folder_for_data(config_data):
+def  create_folder_for_data(config_data):
     if config_data.multiple_sim == 1:
         # config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
         #                              "_" + config_data.solution.rsplit('.', 1)[0]

@@ -32,10 +32,7 @@ def get_coordinates_in_direction(coordinates, direction):
     :param direction: The direction. Options:  E, SE, SW, W, NW, or NE
     :return: The coordinates of the pointed directions
     """
-    if len(coordinates) == 2:
-        return coordinates[0] + direction[0], coordinates[1] + direction[1]
-    else:
-        return coordinates[0] + direction[0], coordinates[1] + direction[1], coordinates[2] + direction[2]
+    return coordinates[0] + direction[0], coordinates[1] + direction[1], coordinates[2] + direction[2]
 
 
 def get_multiple_steps_in_direction(start, direction, steps):

@@ -11,6 +11,8 @@ import threading
 import os
 import datetime
 
+from PyQt5.QtWidgets import QFileDialog
+
 from lib import csv_generator, particle, tile, location, vis3d
 from lib.swarm_sim_header import eprint
 
@@ -54,7 +56,6 @@ class World:
 
         self.config_data = config_data
         self.grid = config_data.grid
-
         self.csv_round = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
@@ -130,19 +131,11 @@ class World:
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)
 
-    def save_scenario(self):
+    def save_scenario(self, quick):
 
-        # create scenario folder, if it doesn't already exist.
-        if not os.path.exists("scenario") or not os.path.isdir("scenario"):
-            os.mkdir("scenario")
-
-        # if the scenario folder exists, try to create and save the new scenario file, if it fails print the error.
-        if os.path.exists("scenario") and os.path.isdir("scenario"):
-            now = datetime.datetime.now()
-            filename = str("scenario/%d-%d-%d_%d-%d-%d_scenario.py"
-                           % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+        def save_scenario(fn):
             try:
-                f = open(filename, "w+")
+                f = open(fn, "w+")
                 f.write("def scenario(world):\n")
                 for p in self.particle_map_coordinates.values():
                     f.write("\tworld.add_particle(%s, color=%s)\n" % (str(p.coordinates), str(p.get_color())))
@@ -153,13 +146,40 @@ class World:
                 f.flush()
                 f.close()
             except IOError as e:
-                eprint(e)
+                show_msg("Couldn't save scenario.\n%s" % e, 2)
 
-            # checks if the file exists. If not, some unknown error occured while saving.
-            if not os.path.exists(filename) or not os.path.isfile(filename):
-                eprint("Error: scenario couldn't be saved due to unknown reasons.")
+        # create scenario folder, if it doesn't already exist.
+        if not os.path.exists("scenario") or not os.path.isdir("scenario"):
+            os.mkdir("scenario")
+
+        if quick:
+            # if the scenario folder exists, try to create and save the new scenario file, if it fails print the error.
+            if os.path.exists("scenario") and os.path.isdir("scenario"):
+                now = datetime.datetime.now()
+                filename = str("scenario/%d-%d-%d_%d-%d-%d_scenario.py"
+                               % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+                save_scenario(filename)
+                # checks if the file exists. If not, some unknown error occured while saving.
+                if not os.path.exists(filename) or not os.path.isfile(filename):
+                    show_msg("Error: scenario couldn't be saved due to an unknown reason.", 1)
+            else:
+                show_msg("\"scenario\" folder couldn't be created.", 1)
         else:
-            eprint("\"scenario\" folder couldn't be created.")
+            directory = "."
+            if os.path.exists("scenario") and os.path.isdir("scenario"):
+                directory = "scenario"
+            path = QFileDialog().getSaveFileName(options=QFileDialog.Options(),
+                                                 filter="*.py",
+                                                 directory=directory)
+
+            if path[0] == '':
+                return
+
+            if path[0].endswith(".py"):
+                save_scenario(path[0])
+            else:
+                save_scenario(path[0]+".py")
+
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -169,12 +189,9 @@ class World:
         particle_csv.csv_file.close()
 
     def set_successful_end(self):
-        self.csv_round.success()
         self.__end = True
-        # self.set_end()
-
-    def set_successful_round(self):
         self.csv_round.success()
+        # self.set_end()
 
     def get_max_round(self):
         """
@@ -525,11 +542,7 @@ class World:
         :return: True: Successful added; False: Unsuccessful
         """
 
-        if isinstance(coordinates, int) or isinstance(coordinates, float):
-            coordinates = (coordinates, color, 0.0)
-            color = None
-
-        elif len(coordinates) == 2:
+        if len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if self.grid.are_valid_coordinates(coordinates):
