@@ -31,7 +31,7 @@ def main(argv):
     except (configparser.NoOptionError) as noe:
         solution_file = "solution.py"
 
-    n_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
+    n_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')[:-1]
     try:
         opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
     except getopt.GetoptError:
@@ -59,14 +59,14 @@ def main(argv):
     child_processes = []
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]
-    scenarios = ["a", "b", "c", "d", "e", "f", "f1"]
-    #scenarios = ["c3a"]
+    #scenarios = ["a", "b", "c", "d", "e", "f"]
+    scenarios = ["c_c"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
-    min_radius = 1
-    max_radius = 101
+    min_radius = 50
+    max_radius = 51
 
     #
     for scenario in scenarios:
@@ -74,8 +74,8 @@ def main(argv):
         for radius in range(min_radius, max_radius):
             #folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
             folder_name_sub = folder_name + "/" + str(radius)
-            process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m 1", "-d"+str(n_time),\
-                                  "-r"+ str(radius), "-v" + str(0)
+            process ="python3.6", "swarm-sim.py",'-w' + scenario,'-b' +folder_name_sub, "-m1", "-d "+str(n_time),\
+                                  "-r "+ str(radius), "-v" + str(0)
             p = subprocess.Popen(process, stdout=out, stderr=out)
             child_processes.append(p)
             process_cnt += 1

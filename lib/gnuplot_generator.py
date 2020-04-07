@@ -56,15 +56,31 @@ def panders_plotter(file, directory, name):
         #     ax = grp.plot(ax=ax, kind='line', x='Particles', y='AVG Steps per Tile', label=key)
         # plt.ylabel('AVG Steps per Particle')
         # plt.savefig(directory + '/' +'forParticleSteps' + '.pdf')
+        #print(csv_object[['Layer']])
 
         for key, grp in csv_object.groupby(['Scenario']):
+            layer = 0
+
             #key = key + "("+str(grp['Tiles'].values)+")"
             #print(grp['Particles'].values)
             #rounds=int(round(grp['Rounds'].mean(),2))
             #grp.plot(ax=ax, kind='bar', x=grp['Particles'].values[0],  y=rounds, label=key)
-            grp.plot(ax=ax, kind='line', x='Particles',  y='Valid State', label=key)
-        plt.ylabel('Steps')
-        plt.savefig(directory + '/' + "Steps" + '.pdf')
+            grp['bla'] = grp['Layer'].diff()
+            df_filtered = grp[grp['bla'] != 0]
+            for a, b in df_filtered.groupby(['Scenario']):
+                grp.plot(ax=ax, kind='line', x='Particles', y='Steps', label=key)
+                b.plot.scatter(ax=ax, x='Particles', y='Steps')
+                ax.grid()
+            plt.ylabel('Steps')
+            plt.savefig(directory + '/' + key + '.pdf')
+            plt.savefig(directory + '/' + key + '.png')
+
+            # for l  in grp['Layer'].values:
+            #     if int(l)>layer:
+            #         index= csv_object.index(grp['Layer'].values[l])
+            #         print(l, index)
+            #         layer = l
+
 
 
 # def double_bar(data, directory, start, x_index, name, plot_type):
@@ -134,5 +150,7 @@ def panders_plotter(file, directory, name):
 
 
 #plot_generator("all_aggregates.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 4,0, "Multi_Layer: 60 Particles", "bar")
-#panders_plotter("aggregate.csv", "../outputs/multiple/2020-04-01_15:40:2_leader_coating", "bar")
+
+if __name__ == "__main__":
+    panders_plotter("aggregate.csv", "~/Dropbox/PHD/PHDSwarm/swarm-sim/swarm-sim/outputs/multiple/2020-04-06_16:45:3_leader_coating", "bar")
 #panders_plotter("test.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 1,0, "Multi_Layer: 60 Particles", "bar")
