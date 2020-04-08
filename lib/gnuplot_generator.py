@@ -151,6 +151,6 @@ def panders_plotter(file, directory, name):
 
 #plot_generator("all_aggregates.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 4,0, "Multi_Layer: 60 Particles", "bar")
 
-if __name__ == "__main__":
-    panders_plotter("aggregate.csv", "~/Dropbox/PHD/PHDSwarm/swarm-sim/swarm-sim/outputs/multiple/2020-04-06_16:45:3_leader_coating", "bar")
+
+panders_plotter("aggregate.csv", "../outputs/multiple/c", "bar")
 #panders_plotter("test.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 1,0, "Multi_Layer: 60 Particles", "bar")

@@ -58,19 +58,19 @@ def main(argv):
     out = open("./"+folder + "/multiprocess.txt", "w")
     child_processes = []
     process_cnt=0
-    #scenarios = ["tube_10", "tube_20"]
+    #scenarios = ["tube_10", "tube_20"]import
     #scenarios = ["a", "b", "c", "d", "e", "f"]
-    scenarios = ["c_c"]
+    scenarios = ["c"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
-    min_radius = 50
-    max_radius = 51
+    min_radius = 1
+    max_radius = 258
 
     #
     for scenario in scenarios:
-        folder_name = folder  + "/" + scenario
+        folder_name = folder  + "/" + scenarioy
         for radius in range(min_radius, max_radius):
             #folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
             folder_name_sub = folder_name + "/" + str(radius)
@@ -82,8 +82,8 @@ def main(argv):
             #print("Process Nr. ", process_cnt, "started")
             #p.wait()
             #child_processes.clear()
-            if len(child_processes) == os.cpu_count():
-                while len(child_processes) == os.cpu_count():
+            if len(child_processes) == 2:
+                while len(child_processes) == 2:
                     for cp in child_processes:
                         if cp.poll() != None:
                             #print("finished")

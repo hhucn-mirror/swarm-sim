@@ -35,9 +35,9 @@ NOT_DEAD_END_CAVE = 0
 
 leader = None
 
-def next_leader(world, coated_locations, subject_locations):
+def next_leader(world, object_list, subject_locations):
     global leader
-    leader, distance, closest_tile_coordinates = get_leader_distance_to_object(world, coated_locations, subject_locations)
+    leader, distance, closest_tile_coordinates = get_leader_distance_to_object(world, object_list, subject_locations)
     leader.set_color((0.0, 1, 0.0, 1.0))
     setattr(leader, "directions_list", world.grid.get_directions_list())
     setattr(leader, "uncoated_locations", [])
@@ -51,8 +51,7 @@ def next_leader(world, coated_locations, subject_locations):
         else:
             leader.subject_locations.remove(leader.coordinates)
     leader.subject_locations = get_sorted_list_of_particles_distances(leader, leader.subject_locations)
-    leader.subject_locations = []
-    setattr(leader, "coated_locations", [])
+    setattr(leader, "object_list", [])
     setattr(leader, "aim", ())
     setattr(leader, "previous_location", leader.aim)
     setattr(leader, "previous_storage", [])
@@ -65,9 +64,6 @@ def next_leader(world, coated_locations, subject_locations):
     setattr(leader, "state_storage", [])
     setattr(leader, "entrance_storage", None)
     setattr(leader, "state", "toTile")
-    setattr(leader, "layer", 0)
-    if world.config_data.seed_value >1:
-        leader.subject_locations.append(particle_generator(world).coordinates)
     if distance == 1:
         setattr(leader, "state", "scanning")
     else:
@@ -128,8 +124,6 @@ def handle_scanning(leader):
     if leader.coordinates in leader.uncoated_locations or finished:
         finished_scanning(leader)
 
-def particle_generator(world):
-    return world.add_particle((3-leader.layer, 0, 0,) )
 
 def beaming(leader):
     leader.uncoated_locations = list(dict.fromkeys(leader.uncoated_locations))
@@ -147,7 +141,7 @@ def beaming(leader):
             #shortest_path = get_shortest_path(subject_location, uncoated_location, leader.world)
             # leader.world.csv_round.update_metrics(steps=len(shortest_path)-1)
             leader.drop_particle_on(uncoated_location)
-            leader.coated_locations.append(uncoated_location)
+            leader.object_list.append(uncoated_location)
         else:
             leader.aim = uncoated_location
             return
@@ -182,7 +176,7 @@ def handle_scanned_locations(leader):
 
 
 def enough_particles(leader):
-    subjects_cardinality = leader.world.config_data.seed_value - particle_cnt +1
+    subjects_cardinality = len(leader.subject_locations) + 1  # for the leader
 
     locations_cardinality = len(leader.uncoated_locations)
     paths_cardinality = 0
@@ -245,7 +239,7 @@ def finished_scanning(leader):
         #     it_is_leader_turn_to_coat(leader)
         # else:
         #     go_scanning(leader)
-    elif leader.uncoated_locations:
+    else:
         it_is_leader_turn_to_coat(leader)
 
 
@@ -491,17 +485,12 @@ def handle_coating(leader):
     if reached_aim(leader.aim, leader):
         leader.drop_particle_on(leader.aim)
         get_neighbors(leader)
-        global particle_cnt
-        if not leader.subject_locations and leader.world.config_data.seed_value>2 and  particle_cnt < leader.world.config_data.seed_value:
-            leader.subject_locations.append(particle_generator(leader.world).coordinates)
-            particle_cnt += 1
         if leader.uncoated_locations and leader.subject_locations:
             if ONE_LAYER_COATING and len(leader.uncoated_locations) == 1:
                 it_is_leader_turn_to_coat(leader)
             else:
                 go_taking_particles(leader)
-        elif (not leader.uncoated_locations and leader.subject_locations and not ONE_LAYER_COATING)\
-                or (not leader.uncoated_locations and not leader.subject_locations and not ONE_LAYER_COATING):
+        elif not leader.uncoated_locations and leader.subject_locations and not ONE_LAYER_COATING:
             go_scanning(leader)
         else:
             leader.aim = None
@@ -514,7 +503,6 @@ def it_is_leader_turn_to_coat(leader):
         leader.aim = leader.uncoated_locations.pop()
     leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
 
-particle_cnt=2
 
 def go_taking_particles(leader):
     leader.scanning = False
@@ -526,7 +514,6 @@ def go_taking_particles(leader):
 
 def go_scanning(leader):
     delete_cave_entrances(leader)
-    leader.layer+=1
     leader.world.csv_round.update_layer()
     leader.state = "scanning"
 
