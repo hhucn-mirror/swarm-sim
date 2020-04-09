@@ -189,7 +189,7 @@ class World:
         particle_csv.csv_file.close()
 
     def set_successful_end(self):
-        self.__end = True
+        #self.__end = True
         self.csv_round.success()
         # self.set_end()
 

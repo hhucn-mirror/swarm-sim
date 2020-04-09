@@ -60,17 +60,17 @@ def main(argv):
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]import
     #scenarios = ["a", "b", "c", "d", "e", "f"]
-    scenarios = ["c"]
+    scenarios = ["c", "h"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
     min_radius = 1
-    max_radius = 258
+    max_radius = 50
 
     #
     for scenario in scenarios:
-        folder_name = folder  + "/" + scenarioy
+        folder_name = folder  + "/" + scenario
         for radius in range(min_radius, max_radius):
             #folder_name_sub = folder_name+"/"+str(3*(radius*radius + radius)+1)
             folder_name_sub = folder_name + "/" + str(radius)

@@ -5,20 +5,27 @@ ONE_LAYER_COATING = False
 CAVING = True
 ORDERING = True
 
-ENTRANCE_LABEL = 3
-PREVIOUS_LOCATION_LABEL = 11
-BESIDE_PREVIOUS_LOCATION_LABEL = 5
-FREE_LOCATION_LABEL = 13
-FREE_L = 17
+ENTRANCE_LABEL = 1
+PREVIOUS_LOCATION_LABEL = 20
+BESIDE_PREVIOUS_LOCATION_LABEL = 30
+FREE_LOCATION_LABEL = 4
+FREE_L = 2000
 FOUR_MATTERS = 4
 FIVE_MATTERS = 5
 TWO_MATTERS = 2
 THREE_MATTERS = 3
+MATTER=23
 PL_BP_EL_FL = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL \
                     + ENTRANCE_LABEL + FREE_LOCATION_LABEL
 PL_BP_FL_FL = PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL + 2 * FREE_LOCATION_LABEL
 PL_BP_EL = BESIDE_PREVIOUS_LOCATION_LABEL + ENTRANCE_LABEL \
                                                     + PREVIOUS_LOCATION_LABEL
+
+PL_BP_EL_PL = 2*PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL \
+                    + ENTRANCE_LABEL
+
+PL_PL_EL = 2*PREVIOUS_LOCATION_LABEL + ENTRANCE_LABEL
+
 PL_FL_FL = PREVIOUS_LOCATION_LABEL + 2* FREE_LOCATION_LABEL
 
 PL_BP= PREVIOUS_LOCATION_LABEL + BESIDE_PREVIOUS_LOCATION_LABEL
@@ -50,11 +57,9 @@ def next_leader(world, object_list, subject_locations):
             del leader.subject_locations[leader.coordinates]
         else:
             leader.subject_locations.remove(leader.coordinates)
-    leader.subject_locations = get_sorted_list_of_particles_distances(leader, leader.subject_locations)
+    leader.subject_locations = get_sorted_list(leader.coordinates, leader.subject_locations, leader.world.grid.get_distance)
     setattr(leader, "object_list", [])
     setattr(leader, "aim", ())
-    setattr(leader, "previous_location", leader.aim)
-    setattr(leader, "previous_storage", [])
     setattr(leader, "shortest_path", [])
     setattr(leader, "neighbors_dict", {})
     setattr(leader, "direction_to_a_neighbor_obstacle", False)
@@ -100,17 +105,19 @@ def solution(world):
 
 
 def scanning(leader, uncoated_storage):
-    get_neighbors(leader)
+    new_list = leader.uncoated_locations + leader.path_locations + leader.cave_locations
+
+    sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(
+        leader.directions_list, leader.matter_in, leader.coordinates, new_list)
     finished=False
-    if not cave_entrance(leader):
-        if len(leader.neighbors_dict) == FIVE_MATTERS:
-            direction = leader.world.grid.get_nearest_direction(leader.coordinates, leader.previous_location)
+    if not cave_entrance(leader, sum_of_neighbors_labels, neighbor_number_map_direction ):
+        if  sum_of_neighbors_labels == PREVIOUS_LOCATION_LABEL:
+            direction = leader.world.grid.get_nearest_direction(leader.coordinates, neighbor_number_map_direction[PREVIOUS_LOCATION_LABEL])
         else:
             direction = other_level_scanning(leader)
         if leader.coordinates not in leader.uncoated_locations and leader.coordinates not in leader.cave_locations \
                 and leader.coordinates not in leader.path_locations  and leader.coordinates != leader.aim:
             uncoated_storage.append(leader.coordinates)
-        leader.previous_location = leader.coordinates
         if direction:
             leader.move_to(direction)
         elif leader.state != "cave_scanning":
@@ -250,16 +257,19 @@ def found_cave_entrance_go_for_cave_discovery(leader, direction_entrance):
     leader.cave_exit_storage.append(leader.coordinates)
     leader.directions_entrance = direction_entrance
     leader.state = "cave_discovery"
-    leader.previous_location = leader.coordinates
     leader.move_to(direction_entrance)
     leader.world.csv_round.update_cave_discovery()
 
 
-def cave_entrance(leader):
-    sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(
-        leader)
-    if sum_of_neighbors_labels == PL_BP_FL_FL or sum_of_neighbors_labels == PL_BP_EL:
-        direction_exit = neighbor_number_map_direction[BESIDE_PREVIOUS_LOCATION_LABEL]
+def cave_entrance(leader, sum_of_neighbors_labels, neighbor_number_map_direction ):
+
+    if sum_of_neighbors_labels == PL_BP_FL_FL or sum_of_neighbors_labels == PL_BP_EL \
+            or  sum_of_neighbors_labels ==  PL_BP_EL_PL  or sum_of_neighbors_labels ==  PL_PL_EL:
+        if BESIDE_PREVIOUS_LOCATION_LABEL in neighbor_number_map_direction:
+            direction_exit = neighbor_number_map_direction[BESIDE_PREVIOUS_LOCATION_LABEL]
+        elif PREVIOUS_LOCATION_LABEL in neighbor_number_map_direction:
+            direction_exit = neighbor_number_map_direction[PREVIOUS_LOCATION_LABEL]
+
         if leader.state != "cave_scanning":
             leader.entrance_storage = PL_BP_FL_FL
         own = leader.coordinates
@@ -280,25 +290,13 @@ def cave_entrance(leader):
 
 
 def handle_cave_discovery(leader):
-    get_neighbors(leader)
-    if len(leader.neighbors_dict) == FIVE_MATTERS:
+    new_list = leader.uncoated_locations + leader.path_locations + leader.cave_locations
+    sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(leader.directions_list, leader.matter_in,
+                                                                             leader.coordinates, new_list)
+    if sum_of_neighbors_labels == PREVIOUS_LOCATION_LABEL:
         handling_dead_end(leader)
     else:
-        sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(
-            leader)
-        if len(leader.neighbors_dict) < FOUR_MATTERS:
-            if len(leader.neighbors_dict) == THREE_MATTERS and (sum_of_neighbors_labels == PL_FL_FL or sum_of_neighbors_labels ==  PL_BP_FL):
-                direction = neighbor_number_map_direction[FREE_LOCATION_LABEL]
-                store_location_in_path_list(leader, direction)
-            elif len(leader.neighbors_dict) == THREE_MATTERS and sum_of_neighbors_labels == PL_BP_EL:
-                direction = neighbor_number_map_direction[ENTRANCE_LABEL]
-                store_location_in_path_list(leader, direction)
-            elif len(leader.neighbors_dict) == TWO_MATTERS and sum_of_neighbors_labels == PL_BP_FL_FL:
-                direction = neighbor_number_map_direction[FREE_LOCATION_LABEL]
-                store_location_in_path_list(leader, direction)
-            else:
-                go_cave_scanning(leader)
-        elif len(leader.neighbors_dict) == FOUR_MATTERS and sum_of_neighbors_labels == PL_BP:
+        if sum_of_neighbors_labels >= FREE_L:
             go_cave_scanning(leader)
         else:
             direction = next_direction(leader)
@@ -310,7 +308,6 @@ def store_location_in_path_list(leader, direction):
         leader.path_locations.append(leader.coordinates)
         if adjacent_tile(leader):
             leader.first_level_paths_cardinality.append(leader.coordinates)
-    leader.previous_location = leader.coordinates
     leader.move_to(direction)
 
 
@@ -343,9 +340,14 @@ def other_level_scanning(leader):
     return direction
 
 
+def get_direction_for(source, destiny):
+     new_direction = []
+     for i in range(len(source)):
+         new_direction.append(source[i] - destiny[i])
+     return tuple(new_direction)
+
 def check_cave_entrance(leader):
-    sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(
-        leader)
+    sum_of_neighbors_labels, neighbor_number_map_direction = label_neighbors(leader.directions_list, leader.matter_in, leader.coordinates, leader.uncoated_locations)
     if sum_of_neighbors_labels == PL_BP_FL_FL:
         direction_exit = neighbor_number_map_direction[BESIDE_PREVIOUS_LOCATION_LABEL]
         own=leader.coordinates
@@ -356,41 +358,53 @@ def check_cave_entrance(leader):
 
     return direction_entrance, direction_exit
 
+def get_coordinates_in_direction(position, direction):
+    """
+    calculates a new position from current position and direction
+    :param position: coordinates, (float, float, float) tuple, current position
+    :param direction: coordinates, (float, float, float) tuple, direction
+    :return: coordinates, (float, float, float) tuple, new position
+    """
+    new_pos = []
+    for i in range(len(position)):
+        new_pos.append(position[i]+direction[i])
+    return tuple(new_pos)
 
-def label_neighbors(leader):
+
+def label_neighbors(directions_list, matter_in, own_location=None, previous_location=None):
     sum_of_neighbors_labels = 0
     neighbor_number_map_direction = {}
-    for idx in range(len(leader.directions_list)):
-        facing_direction = leader.directions_list[idx % len(leader.directions_list)]
+    b_p_location = False
+    for idx in range(len(directions_list)):
+        facing_direction = directions_list[idx % len(directions_list)]
         if leader.matter_in(facing_direction) is False:
-            direction_left = leader.directions_list[(idx - 1) % len(leader.directions_list)]
-            direction_right = leader.directions_list[(idx + 1) % len(leader.directions_list)]
-            number = get_location_label(direction_left, direction_right, leader, facing_direction)
+            direction_left = leader.directions_list[(idx - 1) % len(directions_list)]
+            direction_right = leader.directions_list[(idx + 1) % len(directions_list)]
+            number = get_location_label(facing_direction, direction_left, direction_right, matter_in, own_location, previous_location )
             sum_of_neighbors_labels += number
             neighbor_number_map_direction[number] = facing_direction
     return sum_of_neighbors_labels,  neighbor_number_map_direction
 
 
-def get_location_label(direction_left, direction_right, leader, facing_direction):
+
+def get_location_label(facing_direction, direction_left, direction_right, matter_in, own_location=None, previous_location=None):
     number = 0
-    if leader.matter_in(direction_left) is True and leader.matter_in(direction_right) is True:
+    if matter_in(direction_left) is True and matter_in(direction_right) is True:
         number = ENTRANCE_LABEL
 
-    elif leader.matter_in(direction_left) is True and  leader.matter_in(direction_right) is False\
-            or leader.matter_in(direction_right) is True and  leader.matter_in(direction_left) is False:
+    elif matter_in(direction_left) is True and  matter_in(direction_right) is False\
+            or matter_in(direction_right) is True and  matter_in(direction_left) is False:
         number = FREE_LOCATION_LABEL
-
-    if leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                  facing_direction):
-        number = PREVIOUS_LOCATION_LABEL
-
-    elif (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                     direction_left)
-          and leader.matter_in(direction_left) is False) \
-            or (leader.previous_location == leader.world.grid.get_coordinates_in_direction(leader.coordinates,
-                                                                                           direction_right)
-                and leader.matter_in(direction_right) is False):
-        number = BESIDE_PREVIOUS_LOCATION_LABEL
+    if previous_location and own_location:
+        if get_coordinates_in_direction(own_location,facing_direction) in previous_location :
+            number = PREVIOUS_LOCATION_LABEL
+        elif  ( get_coordinates_in_direction(own_location,direction_left) in previous_location
+              and matter_in(direction_left) is False) \
+                or (get_coordinates_in_direction(own_location, direction_right) in previous_location
+                    and matter_in(direction_right) is False):
+            number = BESIDE_PREVIOUS_LOCATION_LABEL
+        elif matter_in(direction_left) is False and  matter_in(direction_right) is False:
+            number = FREE_L
     return number
 
 
@@ -447,7 +461,6 @@ def handling_dead_end(leader):
 
 def handle_cave_escaping(leader):
     if reached_aim(leader.aim, leader):
-        leader.previous_location = leader.coordinates
         leader.move_to(leader.world.grid.get_nearest_direction(leader.coordinates, leader.aim))
         if leader.state_storage:
             leader.state = leader.state_storage.pop()
@@ -459,7 +472,6 @@ def handle_cave_escaping(leader):
 def handle_to_tile(leader):
     if reached_aim(leader.aim, leader):
         if leader.subject_locations:
-            leader.previous_location = leader.coordinates
             leader.state = "scanning"
         else:
             leader.state = "finished"
@@ -506,9 +518,9 @@ def it_is_leader_turn_to_coat(leader):
 
 def go_taking_particles(leader):
     leader.scanning = False
+    leader.subject_locations = get_sorted_list(leader.coordinates, leader.subject_locations, leader.world.grid.get_distance)
     leader.aim = leader.subject_locations.pop(0)
     leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-    leader.previous_location = leader.coordinates
     leader.state = "taking"
 
 
@@ -560,61 +572,38 @@ def check_valid_type(locations_distance_list, particle_distance_list, world):
         world.set_unsuccessful_end()
 
 
-def get_sorted_list_of_particles_distances(leader, listi):
+def get_sorted_list(source_location, destiny_locations_list, get_distance, reverse=False):
     distances = []
     tmp_dict = {}
-    sorted_list_of_particles_coordinates = []
-    for particle in listi:
-        calculated_distance = leader.world.grid.get_distance(leader.coordinates, particle)
+    sorted_list = []
+    for destiny_location in destiny_locations_list:
+        calculated_distance = get_distance(source_location, destiny_location)
         distances.append(calculated_distance)
-        tmp_dict[particle] = calculated_distance
-    distances.sort()
+        tmp_dict[destiny_location] = calculated_distance
+    distances.sort(reverse=reverse)
     for distance in distances:
         for coords, dist in tmp_dict.items():
-            if distance == dist and coords not in sorted_list_of_particles_coordinates:
-                sorted_list_of_particles_coordinates.append(coords)
-    return sorted_list_of_particles_coordinates
-
-
-def get_sorted_list_of_locations_distances(leader, location_list):
-    distances = []
-    tmp_dict = {}
-    sorted_list_of_locations_coordinates = []
-    for location in location_list:
-        distance = get_distance_to_closest_tile(location, leader.world)
-        distances.append(distance)
-        tmp_dict[location] = distance
-    distances.sort(reverse=True)
-    for distance in distances:
-        for coords, dist in tmp_dict.items():
-            if distance == dist and coords not in sorted_list_of_locations_coordinates:
-                sorted_list_of_locations_coordinates.append(coords)
-    return sorted_list_of_locations_coordinates
+            if distance == dist and coords not in sorted_list:
+                sorted_list.append(coords)
+    return sorted_list
 
 
 def next_direction(leader, flagi = False):
+    new_list = leader.uncoated_locations + leader.path_locations + leader.cave_locations
     for idx in range(len(leader.directions_list)):
         facing_direction = leader.directions_list[idx % len(leader.directions_list)]
         direction_left = leader.directions_list[(idx - 1) % len(leader.directions_list)]
         direction_right = leader.directions_list[(idx + 1) % len(leader.directions_list)]
         if leader.matter_in(facing_direction) is True:
-            if not leader.matter_in(direction_right) and \
-                leader.previous_location != leader.world.grid.get_coordinates_in_direction(
-                    leader.coordinates, direction_right) and leader.world.grid.get_coordinates_in_direction(
-                leader.coordinates, direction_right) not in leader.uncoated_locations \
-                    and leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_right) not in leader.cave_locations \
-                    and leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_right) not in leader.path_locations \
+            if not leader.matter_in(direction_right) and leader.world.grid.get_coordinates_in_direction(
+                leader.coordinates, direction_right) not in new_list \
                     and not flagi:
                 return direction_right
-            elif not leader.matter_in(direction_left) and \
-                leader.previous_location != leader.world.grid.get_coordinates_in_direction(
-                    leader.coordinates, direction_left) and leader.world.grid.get_coordinates_in_direction(
-                    leader.coordinates, direction_left) not in leader.uncoated_locations \
-                    and leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_left) not in leader.cave_locations \
-                    and leader.world.grid.get_coordinates_in_direction(leader.coordinates, direction_left) not in leader.path_locations \
+            elif not leader.matter_in(direction_left) and leader.world.grid.get_coordinates_in_direction(
+                    leader.coordinates, direction_left) not in new_list \
                     and not flagi:
                 return direction_left
-        elif flagi and not leader.matter_in(facing_direction) and not  leader.matter_in(direction_right) and not leader.matter_in(direction_left):
+        elif flagi and not leader.matter_in(facing_direction) and not leader.matter_in(direction_right) and not leader.matter_in(direction_left):
             return facing_direction
 
 
@@ -716,7 +705,6 @@ def reached_aim(aim, leader):
             next_coords = leader.world.grid.get_coordinates_in_direction(leader.coordinates, next_direction)
             if aim == next_coords and leader.state != "leader_coating":
                 return True
-            leader.previous_location = leader.coordinates
             leader.move_to(next_direction)
             if leader.state == "leader_coating" and leader.coordinates == aim:
                 return True
