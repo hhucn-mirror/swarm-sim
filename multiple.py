@@ -60,13 +60,13 @@ def main(argv):
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]import
     #scenarios = ["a", "b", "c", "d", "e", "f"]
-    scenarios = ["c", "h"]
+    scenarios = ["c2"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
-    min_radius = 1
-    max_radius = 50
+    min_radius = 50
+    max_radius = 192
 
     #
     for scenario in scenarios:
@@ -91,33 +91,42 @@ def main(argv):
                             break
         for cp in child_processes:
             cp.wait()
-        fout = open(folder_name+"/aggregate_rounds.csv","w+")
-        first=True
-        #for scenario in scenarios:
-        for radius in range(min_radius, max_radius):
-            #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
-            #f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
-            f = open(folder_name+"/"+str(radius)+"/aggregate_rounds.csv")
-            if not first:
-                f.__next__() # skip the header
-            else:
-                first=False
-            for line in f:
-                fout.write(line)
-            f.close() # not really needed
+        try:
+            fout = open(folder_name+"/aggregate_rounds.csv","w+")
+            first=True
+            #for scenario in scenarios:
+            for radius in range(min_radius, max_radius):
+                #f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+                #f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+                try:
+                    f = open(folder_name+"/"+str(radius)+"/aggregate_rounds.csv")
+                    if not first:
+                        f.__next__() # skip the header
+                    else:
+                        first=False
+                    for line in f:
+                        fout.write(line)
+                    f.close() # not really neede
+                except:
+                    pass
+            fout.close()
+        except:
+            pass
+    try:
+        fout = open(folder+ "/aggregate.csv", "w+")
+        first = True
+        for scenario in scenarios:
+                f = open(folder+"/"+scenario+"/aggregate_rounds.csv")
+                if not first:
+                    f.__next__() # skip the header
+                else:
+                    first=False
+                for line in f:
+                    fout.write(line)
+                f.close() # not really needed
         fout.close()
-    fout = open(folder+ "/aggregate.csv", "w+")
-    first = True
-    for scenario in scenarios:
-            f = open(folder+"/"+scenario+"/aggregate_rounds.csv")
-            if not first:
-                f.__next__() # skip the header
-            else:
-                first=False
-            for line in f:
-                fout.write(line)
-            f.close() # not really needed
-    fout.close()
+    except:
+        pass
 
 
     #plot_generator("all_aggregates.csv", folder, 4,0, "aggregate", "bar")
