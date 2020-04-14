@@ -407,3 +407,27 @@ class CsvRoundData:
     #
     #     writer_round.writerow(csv_interator)
     #     csv_file.close()
+
+
+
+# try:
+#     fout = open("../outputs/multiple/2020_04_13_17_01_5_leader_coating/c2" + "/aggregate_rounds.csv", "w+")
+#     first = True
+#     # for scenario in scenarios:
+#     for radius in range(1, 207):
+#         # f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+#         # f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+#         try:
+#             f = open("../outputs/multiple/2020_04_13_17_01_5_leader_coating/c2"+ "/" + str(radius) + "/aggregate_rounds.csv")
+#             if not first:
+#                 f.__next__()  # skip the header
+#             else:
+#                 first = False
+#             for line in f:
+#                 fout.write(line)
+#             f.close()  # not really neede
+#         except:
+#             pass
+#     fout.close()
+# except:
+#     pass

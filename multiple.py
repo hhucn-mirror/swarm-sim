@@ -65,8 +65,8 @@ def main(argv):
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
-    min_radius = 50
-    max_radius = 192
+    min_radius = 146
+    max_radius = 261
 
     #
     for scenario in scenarios:
