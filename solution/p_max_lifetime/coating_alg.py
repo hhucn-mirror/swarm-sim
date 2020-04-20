@@ -32,6 +32,7 @@ def initialize_particle(particle):
     setattr(particle, "wait", False)
     setattr(particle, "waiting_rounds", 0)
     setattr(particle, "max_prev_dirs", 1)
+    setattr(particle, "willfail", False)
 
 
 def reset_attributes(particle):

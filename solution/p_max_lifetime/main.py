@@ -11,11 +11,18 @@ import solution.goal_test as goal_test
 
 cycle_no = 3
 
+FAILQUOTE = 0
+
 
 def solution(sim):
+    # if sim.get_actual_round() == 300:
+    #     for to_delete in list(filter(lambda x: x.willfail, sim.particles)):
+    #         to_delete.delete_particle()
     for particle in sim.particles:
         if sim.get_actual_round() == 1:
             coating_mod.initialize_particle(particle)
+            # if random.random() < FAILQUOTE:
+            #     particle.willfail = True
             particle.dest_t=random.choice(sim.get_tiles_list()).coordinates
 
         if sim.get_actual_round() % (cycle_no * 10) == 1:
