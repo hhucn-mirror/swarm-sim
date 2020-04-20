@@ -98,7 +98,7 @@ def find_neighbor_particles(particle):
     return directions_with_particles
 
 
-def send_pmax_to_neighbors(particle):
+def send_p_max_to_neighbors(particle):
     """
     Sends information to all neighbors based on the particles own judgement
     :param particle: the sender particle
