@@ -142,7 +142,7 @@ def draw_world(
         style = f'fill:rgb(77, 204, 77); stroke:rgb(77, 204, 77);stroke-width: {stroke_width}'
         svg.append(Ring(x + shift, y * squish, 0.2, 0.5 * squish).to_svg(style))
     for x, y in particles:
-        shift = 0.0 if y % 2 == 0 else -0.5
+        shift = 0.0 if y % 2 == 0 else 0.5
         style = f'fill:rgb(204, 77, 77); stroke:rgb(204, 77, 77);stroke-width: {stroke_width}'
         svg.append(Circle(x + shift, y * squish, 0.3).to_svg(style))
 
@@ -159,7 +159,6 @@ def create_svg(world, filename):
     tile_coordinates = world.tile_map_coordinates.keys()
     location_coordinates = world.location_map_coordinates.keys()
     particle_coordinates = world.particle_map_coordinates.keys()
-
     minimum_x_coordinate, \
     maximum_x_coordinate, \
     minimum_y_coordinate, \
@@ -178,7 +177,8 @@ def create_svg(world, filename):
         location_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
     for coordinates in particle_coordinates:
         particle_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
-
+    print(tile_coordinates_in_image)
+    print(particle_coordinates_in_image)
     draw_world(
         tiles=tile_coordinates_in_image,
         locations=location_coordinates_in_image,
@@ -192,16 +192,17 @@ def create_svg(world, filename):
 
 
 def calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates):
-    minimum_x_coordinate = min(min([coords[0] for coords in tile_coordinates]),
-                               min([coords[0] for coords in particle_coordinates]),
-                               min([coords[0] for coords in location_coordinates]))
-    maximum_x_coordinate = max(max([coords[0] for coords in tile_coordinates]),
-                               max([coords[0] for coords in particle_coordinates]),
-                               max([coords[0] for coords in location_coordinates]))
-    minimum_y_coordinate = min(min([coords[1] for coords in tile_coordinates]),
-                               min([coords[1] for coords in particle_coordinates]),
-                               min([coords[1] for coords in location_coordinates]))
-    maximum_y_coordinate = max(max([coords[1] for coords in tile_coordinates]),
-                               max([coords[1] for coords in particle_coordinates]),
-                               max([coords[1] for coords in location_coordinates]))
+    minimum_x_coordinate = min(min([coords[0] for coords in tile_coordinates], default=0),
+                               min([coords[0] for coords in particle_coordinates], default=0),
+                               min([coords[0] for coords in location_coordinates], default=0))
+    maximum_x_coordinate = max(max([coords[0] for coords in tile_coordinates], default=0),
+                               max([coords[0] for coords in particle_coordinates], default=0),
+                               max([coords[0] for coords in location_coordinates], default=0))
+    minimum_y_coordinate = min(min([coords[1] for coords in tile_coordinates], default=0),
+                               min([coords[1] for coords in particle_coordinates], default=0),
+                               min([coords[1] for coords in location_coordinates], default=0))
+    maximum_y_coordinate = max(max([coords[1] for coords in tile_coordinates], default=0),
+                               max([coords[1] for coords in particle_coordinates], default=0),
+                               max([coords[1] for coords in location_coordinates], default=0))
+
     return minimum_x_coordinate, maximum_x_coordinate, minimum_y_coordinate, maximum_y_coordinate
