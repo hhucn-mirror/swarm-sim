@@ -32,7 +32,11 @@ class Particle(Particle):
         if not mm_zone:
             mm_zone = world.config_data.mobility_model_zone
         if not mm_starting_dir:
-            mm_starting_dir = world.config_data.mobility_model_starting_dir
+            if world.config_data.mobility_model_starting_dir == 'random':
+                mm_starting_dir = MobilityModel.random_direction()
+                print("opp_particle -> initialised particle {} with direction {}".format(self.number, mm_starting_dir))
+            else:
+                mm_starting_dir = world.config_data.mobility_model_starting_dir
 
         self.__init_message_stores__(ms_size, ms_strategy)
         self.mobility_model = MobilityModel(self.coordinates, mm_mode, mm_length, mm_zone,
@@ -43,7 +47,7 @@ class Particle(Particle):
         self.signal_velocity = world.config_data.signal_velocity
 
         self.t_wait = t_wait
-        self.instruct_round = None
+        self.instruct_round = 0
         self.__instruction_number__ = None
         self.proposed_direction = None
 
@@ -108,6 +112,8 @@ class Particle(Particle):
         return self.current_instruct_message
 
     def __add_route__(self, contact: Particle, target: Particle, hops, is_leader=False):
+        if self.number == contact.number or self.number == target.number:
+            return
         logging.debug("round {}: opp_particle -> route: {} via {} to {} with {} hops".format(
             self.world.get_actual_round(), self.number, contact.number, target.number, hops))
         if is_leader:
@@ -368,10 +374,15 @@ class Particle(Particle):
     def __new_leader_found__(self, message: Message, sending_leader: Particle):
         self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
         self.__send_content_to_leader_via_contacts__(self, sending_leader, LeaderMessageType.discover)
+        logging.debug(
+            "round {}: opp_particle -> particle #{} found a new leader #{} with {} hops."
+                .format(self.world.get_actual_round(), self.number, sending_leader.number, message.get_hops()))
         self.__add_leader_state__(LeaderStateName.WaitingForDiscoverAck, {sending_leader},
                                   self.world.get_actual_round(), message.get_hops() * 2)
 
     def __process_instruct_as_leader__(self, message: Message):
+        logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
+            self.world.get_actual_round(), self.number, self.__instruction_number__))
         if not self.__is_committed_to_instruct__() and self.__update__instruct_round_as_leader__(message):
             sending_leader = message.get_content().get_sending_leader()
             self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader},
@@ -431,6 +442,8 @@ class Particle(Particle):
     def __process_propose_as_leader__(self, message: Message):
         content = message.get_content()
         sending_leader = content.get_sending_leader()
+        logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
+            self.world.get_actual_round(), self.number, self.__instruction_number__, sending_leader.number))
         self.forward_to_leader_via_contacts(message)
         if self.__is__waiting_for_commit__() or self.__is_committed_to_propose__() \
                 or LeaderStateName.SendInstruct in self.__leader_states__:
@@ -466,9 +479,9 @@ class Particle(Particle):
             self.multicast_leader_message(LeaderMessageType.instruct)
             self.reset_random_next_direction_proposal_round()
             self.mobility_model.set_mode(MobilityModelMode.Manual)
-            broadcast_message(self, Message(self, message.get_original_sender(), content=
-            LostMessageContent(LostMessageType.RejoinMessage,
-                               self.__get_estimate_centre_from_leader_contacts__())))
+            broadcast_message(self, Message(self, message.get_original_sender(),
+                                            content=LostMessageContent(LostMessageType.RejoinMessage,
+                                                                       self.__get_estimate_centre_from_leader_contacts__())))
         self.__process_lost_message_as_follower__(message)
 
     def __process_as_follower__(self, received_messages: [Message]):
@@ -494,14 +507,20 @@ class Particle(Particle):
                 sending_leader = message.get_content().get_sending_leader()
                 if sending_leader not in self.leader_contacts:
                     self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
+                    logging.debug(
+                        "round {}: opp_particle -> particle #{} found a new leader #{} with {} hops."
+                            .format(self.world.get_actual_round(), self.number, sending_leader.number,
+                                    message.get_hops()))
                 if message.get_original_sender() not in self.leader_contacts:
                     self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
-                                       is_leader=False)
+                                       is_leader=True)
             else:
                 self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
                                    is_leader=False)
 
     def __process_instruct_as_follower__(self, message: Message):
+        logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
+            self.world.get_actual_round(), self.number, self.__instruction_number__))
         self.__update__instruct_round_as_follower_(message)
         self.__flood_forward__(message)
 
@@ -564,7 +583,7 @@ class Particle(Particle):
             return next_dir
         return self.mobility_model.next_direction(self.coordinates)
 
-    def check_neighbourhood(self):
+    def check_current_neighbourhood(self):
         lost, new = self.__neighbourhood_difference__()
         if len(lost) != 0 or len(new) != 0:
             self.leader_contacts.remove_all_entries_with_particles(lost)

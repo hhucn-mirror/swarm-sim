@@ -25,7 +25,19 @@ def solution(world):
         routing.next_step(particles)
         update_particle_states(particles)
         send_direction_proposals(current_round)
-        move_to_next_direction(particles)
+        if current_round == 5:
+            print_all_routes(particles)
+        if current_round > t_wait * 3 + 1:
+            move_to_next_direction(particles)
+
+
+def print_all_routes(particles):
+    for particle in particles:
+        for target_particle, contacts in particle.leader_contacts.items():
+            for contact in contacts.values():
+                contact_particle = contact.get_contact_particle()
+                print("route: #{} reaches #{} via #{} with {} hops".format(particle.number, target_particle.number,
+                                                                           contact_particle.number, contact.get_hops()))
 
 
 def set_t_wait_values(particles, t_wait):
@@ -59,7 +71,7 @@ def initialise_neighbourhoods(particles):
 
 def check_neighbourhoods(particles):
     for particle in particles:
-        particle.check_neighbourhood()
+        particle.check_current_neighbourhood()
 
 
 def update_particle_states(particles):
