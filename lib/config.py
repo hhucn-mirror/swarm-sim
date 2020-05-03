@@ -78,6 +78,7 @@ class ConfigData:
         self.type = config.getboolean("World", "type")
         self.max_particles = config.getint("World", "max_particles")
         self.init_particle_count = config.getint("World", "init_particle_count")
+        self.particle_fail_quote = config.getint("World", "particle_fail_quote")
 
         self.memory_limitation = config.getboolean("Matter", "memory_limitation")
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
