@@ -86,6 +86,7 @@ def draw_world(
     world_size_y,
     padding,
     scale,
+    even_shift,
     stroke_width,
 ):
     # squish vertically to make triangles equilateral
@@ -133,16 +134,16 @@ def draw_world(
 
     # draw tiles
     for x, y in tiles:
-        shift = 0.0 if y % 2 == 0 else -0.5
+        shift = even_shift if y % 2 == 0 else 0.5
         style = f'fill:rgb(77, 77, 204); stroke:rgb(77, 77, 204);stroke-width: {stroke_width}'
         svg.append(NGon(x + shift, y * squish, 0.5, 6).to_svg(style))
         # draw green ring
     for x, y in locations:
-        shift = 0.0 if y % 2 == 0 else -0.5
+        shift = even_shift if y % 2 == 0 else 0.5
         style = f'fill:rgb(77, 204, 77); stroke:rgb(77, 204, 77);stroke-width: {stroke_width}'
         svg.append(Ring(x + shift, y * squish, 0.2, 0.5 * squish).to_svg(style))
     for x, y in particles:
-        shift = 0.0 if y % 2 == 0 else 0.5
+        shift = even_shift if y % 2 == 0 else 0.5
         style = f'fill:rgb(204, 77, 77); stroke:rgb(204, 77, 77);stroke-width: {stroke_width}'
         svg.append(Circle(x + shift, y * squish, 0.3).to_svg(style))
 
@@ -163,14 +164,15 @@ def create_svg(world, filename):
     maximum_x_coordinate, \
     minimum_y_coordinate, \
     maximum_y_coordinate = calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates)
-    x_offset = int(minimum_x_coordinate - 4)
-    y_offset = int(maximum_y_coordinate + 4)
-    size_x = int(maximum_x_coordinate - x_offset + 4)
-    size_y = int(y_offset - minimum_y_coordinate + 4)
+    size_x = int(maximum_x_coordinate - minimum_x_coordinate + 8)
+    size_y = int(maximum_y_coordinate - minimum_y_coordinate + 8)
     img_size = max(size_x, size_y) # make a square image
+    x_offset = int(minimum_x_coordinate - 4 - (img_size - size_x) / 2)
+    y_offset = int(maximum_y_coordinate + 4 + (img_size - size_y) / 2)
     tile_coordinates_in_image = []
     location_coordinates_in_image = []
     particle_coordinates_in_image = []
+    even_shift = 0 if (int(maximum_y_coordinate) % 2 == 0) else 1
     for coordinates in tile_coordinates:
         tile_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
     for coordinates in location_coordinates:
@@ -188,6 +190,7 @@ def create_svg(world, filename):
         scale=60,
         padding=0.5,
         stroke_width=0.02,
+        even_shift=even_shift,
         filename=filename)
 
 
