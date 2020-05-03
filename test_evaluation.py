@@ -5,24 +5,24 @@ import os
 import sys
 from glob import glob
 
-MAX_ROUNDS = 10000
-TARGET_FOLDER = "/Users/Gorden/Desktop/BA/Tests/better_20-100_all_scenarios"
+MAX_ROUNDS = 3000
+TARGET_FOLDER = "/Users/Gorden/Desktop/BA/Tests/robustness"
 SCENARIOS = ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave",
              "giant_cave", "bottle", "small_bottle"]
-# ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle"]
-SOLUTIONS = ["basebetter.main"]
+# ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle", "two_tiles"]
+SOLUTIONS = ["p_max_lifetime.main"]
 # ["base.main", "basebetter.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main", # "prevent_circle_walking.main"]
 
 
 def eval_test(solution_scenario, target_folder="./outputs"):
     solution = solution_scenario[0]
     scenario = solution_scenario[1]
-    files = glob(target_folder + "/mulitple/1337-01-11_13-37-42_" + scenario + "_" +
+    files = glob(target_folder + "/mulitple/*[0-9]_" + scenario + "_" +
                  solution.split(".")[0] + "/*/aggregate_rounds.csv")
     data_by_particle_count = {}
     for file in files:
         data = pandas.read_csv(file)
-        particle_count = data["Particle Counter"].values[0]
+        particle_count = data["Particle Counter"].values[0] + data["Particles Deleted Sum"].values[0]
         if data_by_particle_count.get(particle_count) is None:
             data_by_particle_count[particle_count] = []
         data_by_particle_count[particle_count].append(data)
