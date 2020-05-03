@@ -1,14 +1,13 @@
 from lib.swarm_sim_header import *
+from lib import particle as particle_class
 import math
-
 from solution import solution_header
 
 
-def initialize_particle(particle):
+def initialize_particle(particle: particle_class) -> None:
     """
     Adds all instance attributes to the particle and initializes them
-    :param particle: the particle to initialize
-    :return: none
+    @param particle: the particle to initialize
     """
     setattr(particle, "own_dist", math.inf)
     # nh: neighborhood
@@ -31,13 +30,13 @@ def initialize_particle(particle):
     setattr(particle, "wait", False)
     setattr(particle, "waiting_rounds", 0)
     setattr(particle, "max_prev_dirs", 1)
+    setattr(particle, "willfail", False)
 
 
-def reset_attributes(particle):
+def reset_attributes(particle: particle_class) -> None:
     """
     Resets particle variables that are based on the particles position
-    :param particle: the particle to reset
-    :return: none
+    @param particle: the particle to reset
     """
     if debug:
         print("resetting particle", particle.number)
@@ -49,31 +48,30 @@ def reset_attributes(particle):
     particle.waiting_rounds = 0
 
 
-def reset_p_max(particle):
+def reset_p_max(particle: particle_class) -> None:
     """
     resets all pmax related particle variables
-    :param particle: the particle to reset
-    :return: none
+    @param particle: the particle to reset
     """
     particle.p_max.reset()
 
 
-def coating_alg(particle):
+def coating_alg(particle: particle_class) -> int:
     """
-    Main coating algorithm function. checks if nh_list is not None and then calls actual calculation.
-    :param particle: the particle for which the next direction should be calculated
-    :return: the next direction the particle should move to
+    Main coating algorithm function. checks if nh_list is not None and then calls actual calculation
+    @return: the next direction the particle should move to
+    @param particle: the particle for which the next direction should be calculated
     """
     if particle.nh_list is not None:
         return find_next_free_location(particle)
     return False
 
 
-def find_next_free_location(particle):
+def find_next_free_location(particle: particle_class) -> int:
     """
     calculates the next move direction for a particle
-    :param particle: the particle for which the next direction should be calculated
-    :return: the next direction the particle should move to
+    @return: the next direction the particle should move to
+    @param particle: the particle for which the next direction should be calculated
     """
     # Check if particle has a global p_max and it is not equal to its own distance
     possible_directions = []
@@ -82,19 +80,9 @@ def find_next_free_location(particle):
         if (not (particle.particle_in(direction) or  # check if direction is free
                  particle.tile_in(direction) or
                  direction in particle.prev_direction) and  # check if the particle came from that direction
-                particle.nh_list[direction].dist < particle.p_max.dist and
-                not check_neighbor_can_move(particle.nh_list, direction, particle.own_dist)):
+                particle.nh_list[direction].dist < particle.p_max.dist):
             possible_directions.append((direction, particle.nh_list[direction].dist))
     if len(possible_directions) > 0:
         nearest_free_location = min(possible_directions, key=lambda x: x[1])
         return nearest_free_location[0]
-    return False
-
-
-def check_neighbor_can_move(nh_list, direction, own_distance):
-    if ((nh_list[direction_in_range(direction - 1)].type == "p" and
-        nh_list[direction_in_range(direction - 1)].dist > own_distance) or
-        (nh_list[direction_in_range(direction + 1)].type == "p" and
-         nh_list[direction_in_range(direction + 1)].dist > own_distance)):
-        return False # set to True to enable this function
     return False

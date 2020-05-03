@@ -1,7 +1,5 @@
-from lib import config
-import importlib
+from lib import world, particle as particle_class
 import copy
-import random
 from lib.swarm_sim_header import *
 import solution.basebetter.distance_calculation as distance_calc_mod
 import solution.basebetter.read_write as read_write_mod
@@ -12,12 +10,21 @@ import solution.goal_test as goal_test
 cycle_no = 3
 
 
-def solution(sim):
-    for particle in sim.particles:
-        if sim.get_actual_round() == 1:
-            coating_mod.initialize_particle(particle)
-            particle.dest_t=random.choice(sim.get_tiles_list()).coordinates
+def solution(sim: world) -> None:
+    """
+    Main solution function that is called each round
+    @param sim: the current world state
+    """
+    # code for deleting particles to test robustness
+    if sim.config_data.particle_fail_quote > 0 and sim.get_actual_round() == 300:
+        for to_delete in list(filter(lambda x: x.willfail, sim.particles)):
+            to_delete.delete_particle()
 
+    if sim.get_actual_round() == 1:
+        initialize_particles(sim)
+
+    for particle in sim.particles:
+        # resets all particles last movement direction every 10 cycles
         if sim.get_actual_round() % (cycle_no * 10) == 1:
             if len(particle.prev_direction) > 0:
                 particle.prev_direction.pop(0)
@@ -37,11 +44,22 @@ def solution(sim):
     goal_test.end_sim(sim)
 
 
-def write_cycle(particle):
+def initialize_particles(sim: world) -> None:
     """
-    lets the current particle send messages to its neighbors.
-    :param particle: the particle whose turn it is
-    :return: none
+    handles initialization for all particles in round 1
+    @param sim: the current world state
+    """
+    for particle in sim.particles:
+        coating_mod.initialize_particle(particle)
+        if random.random() < sim.config_data.particle_fail_quote:
+            particle.willfail = True
+        particle.dest_t = random.choice(sim.get_tiles_list()).coordinates
+
+
+def write_cycle(particle: particle_class) -> None:
+    """
+    lets the current particle send messages to its neighbors
+    @param particle: the particle whose turn it is
     """
     particle.next_direction = coating_mod.coating_alg(particle)
     if particle.own_dist != math.inf:
@@ -57,11 +75,10 @@ def write_cycle(particle):
             read_write_mod.send_target_tile(particle, next_dir)
 
 
-def read_cycle(particle):
+def read_cycle(particle: particle_class) -> None:
     """
-    Lets the current particle read messages from its neighbors and calculate distances for each neighbor location.
-    :param particle: the particle whose turn it is
-    :return:  none
+    Lets the current particle read messages from its neighbors and calculate distances for each neighbor location
+    @param particle: the particle whose turn it is
     """
     if debug and debug_read:
         print("reading memory of particle", particle.number)
@@ -74,11 +91,10 @@ def read_cycle(particle):
     particle.rcv_buf.clear()
 
 
-def move_cycle(particle):
+def move_cycle(particle: particle_class) -> None:
     """
-    Lets the current particle move.
-    :param particle: the particle whose turn it is
-    :return: none
+    Lets the current particle move
+    @param particle: the particle whose turn it is
     """
     if particle.next_direction is False and particle.own_dist > 1:
         if debug and debug_movement:
@@ -90,11 +106,10 @@ def move_cycle(particle):
     coating_mod.reset_p_max(particle)
 
 
-def move_to_next_dir(particle):
+def move_to_next_dir(particle: particle_class) -> None:
     """
-    Moves the particle to the next direction calculated by the algorithm.
-    :param particle: the particle whose turn it is
-    :return: none
+    Moves the particle to the next direction calculated by the algorithm
+    @param particle: the particle whose turn it is
     """
     if len(particle.prev_direction) >= particle.max_prev_dirs:
         particle.prev_direction.pop(0)
@@ -114,12 +129,11 @@ def move_to_next_dir(particle):
     particle.nh_list[direction_in_range(particle.prev_direction[-1] - 1)] = neighbor_right
 
 
-def move_to_target_tile(particle):
+def move_to_target_tile(particle: particle_class) -> None:
     """
-    Moves the particle in the global direction of it's target tile.
-    This method uses information from the world class.
-    :param particle: the particle whose turn it is
-    :return: none
+    Moves the particle in the global direction of it's target tile
+    This method uses information from the world class
+    @param particle: the particle whose turn it is
     """
     hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
     if hit_a_matter or hit_a_matter is None:
