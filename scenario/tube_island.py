@@ -31,5 +31,5 @@ def scenario(sim, particle_count):
     sim.add_tile((1.5, 7.0))
     sim.add_tile((3.5, 7.0))
     sim.add_tile((2.0, 8.0))
-    sim.add_location((0.0, 0.0))
+    #sim.add_location((0.0, 0.0))
     generating_random_spraded_particles(sim, particle_count)
