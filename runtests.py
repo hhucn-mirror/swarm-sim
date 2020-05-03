@@ -11,7 +11,7 @@ from queue import Empty
 
 NUMBER_OF_PROCESSES = 3
 
-NUMBER_OF_SEEDS = 50
+NUMBER_OF_SEEDS = -1
 SEEDS = [1005452923949099817, 104729571718011065, 1151522834903635200, 135691580820658646, 1500385114400036822,
          1757090061937575188, 1784647508577935808, 2039726448634163130, 2166279188521729848, 2382258227726526776,
          239895843343948783, 2465231629035308954, 3023534726851758369, 3042134290703503464, 3195374428520842592,
@@ -23,15 +23,42 @@ SEEDS = [1005452923949099817, 104729571718011065, 1151522834903635200, 135691580
          7674667646562244311, 82162779224662555, 8279579456414977604, 8311339547884988640, 8445994089275729783,
          846607075699250924, 8756480475294688387, 9168466799227518454, 9190667985687051790, 9216123937619767538]
 MIN_PARTICLE_COUNT = 20
-MAX_PARTICLE_COUNT = 200
+MAX_PARTICLE_COUNT = 100
 STEPSIZE_PARTICLE_COUNT = 20
 USE_PARTICLE_COUNT = True
-MAX_ROUNDS = 10000
-SCENARIOS = ["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave",
-             "giant_cave", "bottle", "small_bottle"]
-            #["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle"]
+MAX_ROUNDS = 3000
+SCENARIOS = ["two_tiles"]
+            #["single_tile_few_particles", "concave_shape", "simple_shape", "tube_island", "small_cave", "strange_cave", "giant_cave", "bottle", "small_bottle", "two_tiles"]
 SOLUTIONS = ["p_max_lifetime.main"]#, "base.main", "basebetter.main", "p_max_lifetime.main", "send_free_location_info.main", "only_move_if_best_match.main", "p_max_with_id.main",
              #"prevent_circle_walking.main"]
+
+
+def create_argument_vector():
+    if NUMBER_OF_SEEDS == -1:
+        if USE_PARTICLE_COUNT:
+            args = [(solution, scenario, seed, particle_count, taskqueue)
+                    for scenario in SCENARIOS
+                    for solution in SOLUTIONS
+                    for seed in SEEDS
+                    for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT)]
+        else:
+            args = [(solution, scenario, seed, -1, taskqueue)
+                    for scenario in SCENARIOS
+                    for solution in SOLUTIONS
+                    for seed in SEEDS]
+    else:
+        if USE_PARTICLE_COUNT:
+            args = [(solution, scenario, random.randint(0, sys.maxsize), particle_count, taskqueue)
+                    for scenario in SCENARIOS
+                    for solution in SOLUTIONS
+                    for _ in range(NUMBER_OF_SEEDS)
+                    for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT)]
+        else:
+            args = [(solution, scenario, random.randint(0, sys.maxsize), -1, taskqueue)
+                    for scenario in SCENARIOS
+                    for solution in SOLUTIONS
+                    for _ in range(NUMBER_OF_SEEDS)]
+    return args
 
 
 def progress_counter_func(taskqueue, test_count):
@@ -54,19 +81,19 @@ def run_test(args):
     particle_count = args[3]
     taskqueue = args[4]
     simulator.swarm_sim(["-r", str(seed), "-w", scenario, "-s", solution, "-v", "0",
-                         "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-42", "-m", "1", "-p", particle_count])
+                         "-n", str(MAX_ROUNDS), "-d", "1337-01-11_13-37-" + str(particle_count), "-m", "1", "-p", particle_count])
     taskqueue.put(seed)
 
 
 def eval_test(solution_scenario):
     solution = solution_scenario[0]
     scenario = solution_scenario[1]
-    files = glob("./outputs/mulitple/1337-01-11_13-37-42_" + scenario + "_" +
+    files = glob("./outputs/mulitple/*_" + scenario + "_" +
                  solution.split(".")[0] + "/*/aggregate_rounds.csv")
     data_by_particle_count = {}
     for file in files:
         data = pandas.read_csv(file)
-        particle_count = data["Particle Counter"].values[0]
+        particle_count = data["Particle Counter"].values[0] + data["Particles Deleted Sum"].values[0]
         if data_by_particle_count.get(particle_count) is None:
             data_by_particle_count[particle_count] = []
         data_by_particle_count[particle_count].append(data)
@@ -105,18 +132,7 @@ if __name__ == "__main__":
     taskmanager = Manager()
     taskqueue = taskmanager.Queue()
     solutions_scenarios = ((solution, scenario) for scenario in SCENARIOS for solution in SOLUTIONS)
-    if USE_PARTICLE_COUNT:
-        args = ((solution, scenario, seed, particle_count, taskqueue)
-                for scenario in SCENARIOS
-                for solution in SOLUTIONS
-                for seed in SEEDS
-                for particle_count in range(MIN_PARTICLE_COUNT, MAX_PARTICLE_COUNT + 1, STEPSIZE_PARTICLE_COUNT))
-    else:
-        args = ((solution, scenario, random.randint(0, sys.maxsize), -1, taskqueue)
-                for scenario in SCENARIOS
-                for solution in SOLUTIONS
-                for _ in range(NUMBER_OF_SEEDS))
-    args = list(args)
+    args = create_argument_vector()
     test_count = len(args)
     print("number of tests:", test_count)
     progress_process = Process(target=progress_counter_func, args=(taskqueue, test_count))
