@@ -47,7 +47,7 @@ class Particle(Particle):
         self.signal_velocity = world.config_data.signal_velocity
 
         self.t_wait = t_wait
-        self.instruct_round = 0
+        self.instruct_round = None
         self.__instruction_number__ = None
         self.proposed_direction = None
 
@@ -187,11 +187,14 @@ class Particle(Particle):
 
         if message_type == LeaderMessageType.instruct:
             self.instruct_round = self.t_wait + self.world.get_actual_round()
+            self.__instruction_number__ = self.world.get_actual_round()
 
         for hop in range(1, max_hops + 1):
             receivers = self.scan_for_particles_in(hop=hop)
+            number = self.__instruction_number__ if self.__instruction_number__ is not None \
+                else self.world.get_actual_round()
             content = LeaderMessageContent(self, self.proposed_direction, neighbours, self.t_wait - hop,
-                                           message_type, self.__instruction_number__)
+                                           message_type, number)
             multicast_message_content(self, receivers, content)
 
     def send_direction_proposal(self, proposed_direction=None):
@@ -204,7 +207,7 @@ class Particle(Particle):
             self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(),
                                       self.world.get_actual_round(), self.t_wait * 2)
             self.multicast_leader_message(LeaderMessageType.propose)
-        self.instruct_round = 0
+        self.instruct_round = None
 
     def __send_proposal_to_leaders__(self, proposed_direction):
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(self.leader_contacts.keys()),
@@ -233,10 +236,14 @@ class Particle(Particle):
 
     def __flood_forward__(self, received_message):
         received_content = received_message.get_content()
+        instruction_number = received_content.get_number()
+        if instruction_number is not None and (self.world.get_actual_round() - instruction_number) > self.t_wait:
+            # do not flood if the message is older than t_wait
+            return
         max_hops = self.routing_parameters.scan_radius
         neighbours = self.scan_for_particles_in(hop=max_hops)
         exclude = {received_message.get_sender(), received_message.get_content().get_sending_leader(),
-                   received_message.get_original_sender()}
+                   received_message.get_original_sender()}.union(received_content.get_receivers())
         all_receivers = set(neighbours).difference(exclude)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
@@ -382,7 +389,7 @@ class Particle(Particle):
 
     def __process_instruct_as_leader__(self, message: Message):
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
-            self.world.get_actual_round(), self.number, self.__instruction_number__))
+            self.world.get_actual_round(), self.number, message.get_content().get_number()))
         if not self.__is_committed_to_instruct__() and self.__update__instruct_round_as_leader__(message):
             sending_leader = message.get_content().get_sending_leader()
             self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader},
@@ -429,8 +436,6 @@ class Particle(Particle):
         if message.get_actual_receiver() == self:
             self.__send_content_to_leader_via_contacts__(self, content.get_sending_leader(),
                                                          LeaderMessageType.discover_ack)
-        if message.get_hops() < self.t_wait * 2:
-            self.__flood_forward__(message)
 
     def __process_discover_ack_as_leader__(self, message: Message):
         content = message.get_content()
@@ -493,7 +498,7 @@ class Particle(Particle):
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_follower__(message)
                 elif message_type == LeaderMessageType.discover:
-                    self.__flood_forward__(message)
+                    self.forward_to_leader_via_contacts(message, content.get_receivers().pop())
                 elif message_type in [LeaderMessageType.discover_ack, LeaderMessageType.commit]:
                     self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
                 else:
@@ -519,9 +524,9 @@ class Particle(Particle):
                                    is_leader=False)
 
     def __process_instruct_as_follower__(self, message: Message):
+        self.__update__instruct_round_as_follower_(message)
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
             self.world.get_actual_round(), self.number, self.__instruction_number__))
-        self.__update__instruct_round_as_follower_(message)
         self.__flood_forward__(message)
 
     def __update__instruct_round_as_follower_(self, received_message: Message):
@@ -571,10 +576,11 @@ class Particle(Particle):
     def next_moving_direction(self):
         if self.mobility_model.mode == MobilityModelMode.Manual:
             try:
-                if self.instruct_round != 0 and self.world.get_actual_round() >= self.instruct_round:
+                if self.world.get_actual_round() >= self.instruct_round:
                     self.mobility_model.current_dir = self.proposed_direction
             except TypeError:
-                pass
+                self.mobility_model.current_dir = None
+                return None
         elif self.mobility_model.mode == MobilityModelMode.POI:
             next_dir = self.mobility_model.next_direction(self.coordinates)
             if not next_dir:
