@@ -1,495 +1,359 @@
+import time
 from copy import deepcopy
 
 QUICK_COATING = False
+STEP_COUNTER = False
 
 ONE_LAYER_COATING = False
 
 CAVING = True
 ORDERING = True
 
-ENTRANCE = 100
-PREVIOUS = 11
-BESIDE_SUBJECT = 103
-FREE_LOCATION = 1000
-SUBJECT = 200
+TRAIL = 1000
+PREVIOUS = 10
+FREE = 103
+TOTAL_FREE = 10000
+OCCUPIED = 200
+
+ENTRANCE_1 = TOTAL_FREE + 2 * OCCUPIED + FREE + PREVIOUS + TRAIL
+
+TRAIL_1 = 4 * OCCUPIED + TRAIL + PREVIOUS
+TRAIL_2 = 3 * OCCUPIED + 1 * FREE + PREVIOUS + TRAIL
+TRAIL_3 = 2 * OCCUPIED + 3 * FREE + PREVIOUS
+TRAIL_4 = 3 * OCCUPIED + 2 * FREE + PREVIOUS
+
+DEAD_END = 5 * OCCUPIED + PREVIOUS
+
+CORNER = 4 * OCCUPIED + FREE + PREVIOUS
 
 
-S3_BS_P_E= 3*SUBJECT + BESIDE_SUBJECT + ENTRANCE + PREVIOUS
-S3_P_E2= 3*SUBJECT + 2*ENTRANCE + PREVIOUS
-S4_P_E= 4*SUBJECT + ENTRANCE +  PREVIOUS
-
-
-S2_BS3_P= 2*SUBJECT + 3*BESIDE_SUBJECT + PREVIOUS
-S3_BS2_P= 3*SUBJECT + 2*BESIDE_SUBJECT + PREVIOUS
-
-FL_S2_BS_P_E= FREE_LOCATION+ 2*SUBJECT + BESIDE_SUBJECT + PREVIOUS + ENTRANCE
-FL_S2_BS2_P= FREE_LOCATION+ 2*SUBJECT + 2*BESIDE_SUBJECT + PREVIOUS
-FL_S3_BS_P= FREE_LOCATION + 3*SUBJECT + BESIDE_SUBJECT + PREVIOUS
-
-S4_BS_P= 4*SUBJECT + BESIDE_SUBJECT + PREVIOUS
-S5_P= 5*SUBJECT + PREVIOUS
-
-
-leader = None
-
-def next_leader(world, coated_locations, subject_locations):
-    global leader
-    leader, distance, closest_tile_coordinates = get_leader_distance_to_object(world, coated_locations, subject_locations)
+def next_leader(world, object_index_dictionary, subject_index_dictionary):
+    leader, distance, closest_object_location = get_leader_distance_to_object(world, object_index_dictionary,
+                                                                              subject_index_dictionary)
     leader.set_color((0.0, 1, 0.0, 1.0))
-    setattr(leader, "directions_list", world.grid.get_directions_list())
-    setattr(leader, "uncoated_locations", [])
-    setattr(leader, "cave_locations", [])
-    setattr(leader, "tunnel_locations", [])
+    setattr(leader, "own_location", leader.coordinates)
     setattr(leader, "previous_location", ())
-    setattr(leader, "subject_locations", subject_locations.copy())
-    if leader.coordinates in leader.subject_locations:
+    setattr(leader, "subject_locations", subject_index_dictionary.copy())
+    if leader.own_location in leader.subject_locations:
         if isinstance(leader.subject_locations, dict):
-            del leader.subject_locations[leader.coordinates]
+            del leader.subject_locations[leader.own_location]
         else:
-            leader.subject_locations.remove(leader.coordinates)
-    leader.subject_locations = sorting_list(leader.coordinates, leader.subject_locations, leader.world.grid.get_distance)
-    setattr(leader, "coated_locations", [])
-    setattr(leader, "aim", ())
-    setattr(leader, "shortest_path", [])
-    setattr(leader, "cave_exit_storage", [])
-    setattr(leader, "dead_end_flag", False)
-    setattr(leader, "state_storage", [])
-    setattr(leader, "state", "toTile")
-    if distance == 1:
-        setattr(leader, "state", "scanning")
-    else:
-        setattr(leader, "state", "toTile")
-        leader.aim = closest_tile_coordinates
-        leader.shortest_path = get_shortest_path(leader.coordinates, closest_tile_coordinates, leader.world)
-    return leader
+            leader.subject_locations.remove(leader.own_location)
+    leader.subject_locations = sorting_list(leader.own_location, leader.subject_locations,
+                                            leader.world.grid.get_distance)
+
+    return leader, closest_object_location, distance
 
 
 def solution(world):
-    global leader
     if world.get_actual_round() == 1:
-        leader = next_leader(world, world.tile_map_coordinates, world.particle_map_coordinates)
-    if leader:
-        if leader.state == "toTile":
-            handle_go_to_object(leader)
-        elif leader.state == "scanning":
-            handle_scanning(leader)
-        elif leader.state == "cave_scanning":
-            handle_cave_scanning(leader)
-        elif leader.state == "cave_discovery":
-            handle_cave_discovery(leader)
-        elif leader.state == "taking":
-            handle_taking(leader)
-        elif leader.state == "coating":
-            handle_coating(leader)
-        elif leader.state == "cave_escaping":
-            handle_cave_escaping(leader)
-        elif leader.state == "leader_coating":
-            handle_leader_coating(leader)
-        elif leader.state == "finished":
-            handle_finished(leader)
-            world.csv_round.update_finished()
-
-
-def scanning(leader, uncoated_storage):
-    sum_of_neighbors_labels, neighbor_number_map_direction = get_neighbors(leader.directions_list,
-                                                                           leader.matter_in, 
-                                                                           get_direction_for(leader.coordinates, 
-                                                                           leader.previous_location))
-    finished=False
-    if (sum_of_neighbors_labels > FREE_LOCATION and
-        sum_of_neighbors_labels != FL_S2_BS_P_E) or \
-        sum_of_neighbors_labels == S4_BS_P or \
-        sum_of_neighbors_labels == S3_BS2_P:
-        
-        finished = wide_space_scanning(finished, leader, 
-                                       neighbor_number_map_direction, 
-                                       sum_of_neighbors_labels, uncoated_storage)
-    else:
-        
-        tunnel_entrance(leader, sum_of_neighbors_labels, neighbor_number_map_direction)
-        
-    return uncoated_storage, finished
-
-
-def wide_space_scanning(finished, leader, neighbor_number_map_direction, sum_of_neighbors_labels, uncoated_storage):
-    if leader.coordinates not in leader.uncoated_locations \
-            and leader.coordinates not in leader.tunnel_locations and leader.coordinates != leader.aim:
-        uncoated_storage.append(leader.coordinates)
-    direction = next_direction(leader.coordinates, sum_of_neighbors_labels, neighbor_number_map_direction,
-                               leader.uncoated_locations + leader.tunnel_locations)
-    if direction:
-        move_to(direction, leader)
-    else:
-        finished = True
-    leader.world.csv_round.update_scanning()
-    return finished
+        leader, object_location, distance = next_leader(world, world.tile_map_coordinates,
+                                                        world.particle_map_coordinates)
+        if leader:
+            uncoated_locations = []
+            if distance != 1:
+                leader.own_location = go_for(object_location, leader.own_location, leader)
+            while leader.subject_locations:
+                uncoated_locations = scan_outside(leader)
+                if QUICK_COATING:
+                     beaming(leader, uncoated_locations)
+                else:
+                    coat(leader, uncoated_locations)
+                world.csv_round.update_layer()
+            coat_yourself(leader, uncoated_locations)
 
 
 def move_to(direction, leader):
-    leader.previous_location = leader.coordinates
+    leader.previous_location = leader.own_location
     leader.move_to(direction)
+    refresh_screen(leader)
+    return leader.coordinates
 
 
-def handle_scanning(leader):
-    leader.uncoated_locations, finished  = scanning(leader, leader.uncoated_locations )
-    if leader.coordinates in leader.uncoated_locations or finished:
-        finished_scanning(leader)
-
-
-def beaming(leader):
-    leader.uncoated_locations = list(dict.fromkeys(leader.uncoated_locations))
-    while leader.uncoated_locations:
-        uncoated_location = leader.uncoated_locations.pop()
-        if leader.subject_locations:
-            if leader.coordinates == uncoated_location:
-                sumo, neigh = get_neighbors(leader.directions_list, leader.matter_in, get_direction_for(leader.coordinates, leader.previous_location) )
-                direction = next_direction(leader.coordinates, sumo, neigh, leader.previous_location)
-                move_to(direction, leader)
-                leader.world.csv_round.update_metrics(steps=-1)
-            subject_location =leader.subject_locations.pop(0)
-            # shortest_path = get_shortest_path(leader.coordinates, subject_location, leader.world)
-            # leader.world.csv_round.update_metrics(steps=len(shortest_path)-1)
-            leader.take_particle_on(subject_location)
-            #shortest_path = get_shortest_path(subject_location, uncoated_location, leader.world)
-            # leader.world.csv_round.update_metrics(steps=len(shortest_path)-1)
-            leader.drop_particle_on(uncoated_location)
-            leader.coated_locations.append(uncoated_location)
-        else:
-            leader.aim = uncoated_location
-            return
-    if ONE_LAYER_COATING:
-        delete_tunnel_entrances(leader)
-        handle_finished(leader)
-
-
-def handle_scanned_locations(leader):
-    if not ONE_LAYER_COATING:
-        if CAVING:
-            if enough_particles(leader):
-                if leader.dead_end_flag:
-                    if leader.tunnel_locations:
-                        leader.uncoated_locations.extend(leader.tunnel_locations)
-                    leader.dead_end_flag = False
-    else:
-        if leader.tunnel_locations:
-            leader.uncoated_locations.extend(leader.tunnel_locations)
-        leader.uncoated_locations = list(dict.fromkeys(leader.uncoated_locations))
-
-
-def enough_particles(leader):
-    subjects_cardinality = len(leader.subject_locations) + 1  # for the leader
-
-    locations_cardinality = len(leader.uncoated_locations)
-    tunnel_cardinality = 0
-    if leader.tunnel_locations:
-        tunnel_cardinality = len(leader.tunnel_locations)
-        print("tunnel cardinality ", tunnel_cardinality)
-    if subjects_cardinality < tunnel_cardinality:
-        reduce_tunnel_locations(leader, subjects_cardinality, tunnel_cardinality)
-
-        leader.uncoated_locations = leader.tunnel_locations
-        return False
-    elif tunnel_cardinality <= subjects_cardinality < locations_cardinality+tunnel_cardinality:
-        leader.uncoated_locations = leader.tunnel_locations + leader.uncoated_locations[0:subjects_cardinality-tunnel_cardinality]
-        return False
-
-    return True
-
-
-def reduce_tunnel_locations(leader, subjects_cardinality, tunnel_cardinality):
-    leader.uncoated_locations.clear()
-    i = 0
-    while i < tunnel_cardinality - subjects_cardinality:
-        if leader.tunnel_locations:
-            if i % 2 == 0:
-                leader.tunnel_locations.pop(0)
-            elif i % 2 == 1:
-                leader.tunnel_locations.pop()
-        i += 1
-
-
-def finished_scanning(leader):
-    handle_scanned_locations(leader)
-    leader.aim = None
-    if leader.subject_locations and leader.uncoated_locations:
-        if QUICK_COATING:
-            beaming(leader)
-            if not leader.subject_locations and (leader.uncoated_locations or leader.aim):
-                it_is_leader_turn_to_coat(leader)
+def scan_outside(leader):
+    trail_locations = []
+    uncoated_locations = []
+    dead_end = False
+    while leader.own_location not in uncoated_locations:
+        environment, neighborhood = scan_environment(
+            leader.matter_in,
+            get_direction_for(leader.own_location,
+                              leader.previous_location))
+        if trail_entrance(environment) and leader.own_location not in trail_locations:
+            direction = get_trail_direction_entrance(leader, environment, neighborhood)
+            trail_exit = leader.own_location
+            previous_location = leader.previous_location
+            trail_locations, inside_environment, neighborhood = scan_trail(leader, direction)
+            if inside_environment == DEAD_END:
+                dead_end = True
             else:
-                go_scanning(leader)
+                # If there is an a big area than
+                uncoated_locations = uncoated_locations + scan_inside(leader, inside_environment, neighborhood, trail_locations)
+            get_out(leader, trail_exit)
+            environment, neighborhood = get_environment_special_triangular(environment, leader, previous_location)
         else:
-            go_taking_particles(leader)
+            uncoated_locations.append(leader.own_location)
+        direction = neighborhood[FREE]
+        if direction:
+            leader.own_location = move_to(direction, leader)
+    if not_enough_subjects(len(leader.subject_locations) + 1, len(uncoated_locations), len(trail_locations)):
+        uncoated_locations = reduce_scanned_locations(leader.subject_locations, uncoated_locations, trail_locations, dead_end)
+    elif dead_end:
+        uncoated_locations = uncoated_locations + trail_locations
+    return uncoated_locations
+
+
+def get_environment_special_triangular(environment_type, leader, previous_location):
+    if environment_type == ENTRANCE_1:
+        environment, neighborhood = scan_environment(
+            leader.matter_in,
+            get_direction_for(leader.own_location,
+                              previous_location))
     else:
-        it_is_leader_turn_to_coat(leader)
+        environment, neighborhood = scan_environment(
+            leader.matter_in,
+            get_direction_for(leader.own_location,
+                              leader.previous_location))
+    return environment, neighborhood
 
 
-def found_tunnel_entrance_go_for_cave_discovery(leader, direction_entrance):
-    leader.tunnel_locations.append(leader.coordinates)
-    leader.cave_exit_storage.append(leader.coordinates)
-    leader.directions_entrance = direction_entrance
-    leader.state = "cave_discovery"
-    move_to(direction_entrance , leader)
-    leader.world.csv_round.update_cave_discovery()
+def not_enough_subjects(subjects_cardinality, uncoated_cardinality, trail_cardinality):
+    if subjects_cardinality < uncoated_cardinality + trail_cardinality:
+        return True
+    return False
 
 
-def tunnel_entrance(leader, sum_of_neighbors_labels, neighbor_number_map_direction ):
-
-    if sum_of_neighbors_labels != FL_S2_BS_P_E \
-            and sum_of_neighbors_labels != FL_S2_BS2_P  and sum_of_neighbors_labels != S3_BS2_P \
-            and leader.coordinates not in leader.uncoated_locations + leader.tunnel_locations:
-    
-        direction_entrance = handling_special_entrance(leader)
-    
-    elif sum_of_neighbors_labels == FL_S2_BS_P_E :
-    
-        for direction in neighbor_number_map_direction:
-            if neighbor_number_map_direction[direction] == ENTRANCE:
-                direction_entrance = direction
-
-    found_tunnel_entrance_go_for_cave_discovery(leader, direction_entrance)
-    return True
+def reduce_scanned_locations(subject_locations, uncoated_locations, trail_locations, dead_end):
+    subjects_cardinality = len(subject_locations) + 1  # for the leader
+    trail_cardinality = len(trail_locations)
+    if subjects_cardinality < trail_cardinality:
+        if not dead_end:
+            trail_locations.pop()
+        uncoated_locations = reduce_trail_locations(trail_locations, subjects_cardinality)
+    else:
+        uncoated_locations = uncoated_locations[0:subjects_cardinality - trail_cardinality] + trail_locations
+    return uncoated_locations
 
 
-def handling_special_entrance(leader):
-    direction_exit = get_exit_direction(leader)
-    own = leader.coordinates
-    leader.move_to(direction_exit)
-    if leader.coordinates in leader.uncoated_locations:
-        leader.uncoated_locations.remove(leader.coordinates)
+def reduce_trail_locations(trail_locations, subjects_cardinality):
+    i = 0
+    while  len(trail_locations) > subjects_cardinality and trail_locations:
+        if i % 2 == 0:
+            trail_locations.pop(0)
+        elif i % 2 == 1:
+            trail_locations.pop()
+        i += 1
+    return trail_locations
+
+
+def remove_trail_ending(uncoated_locations, trail_locations):
+    uncoated_locations.insert(0, trail_locations.pop())
+    trail_cardinality = len(trail_locations)
+    return trail_cardinality
+
+
+def trail_entrance(environment_type):
+    if environment_type == TRAIL_2 or environment_type == TRAIL_3 \
+            or environment_type == ENTRANCE_1:
+        return True
+
+
+def get_trail_direction_entrance(leader, environment, neighborhood):
+
+    if environment == TRAIL_2 or environment == TRAIL_3:
+        direction_to_trail_entrance = handle_special_case_between_trail_entrance(leader)
+    elif environment == ENTRANCE_1:
+        direction_to_trail_entrance = neighborhood[TRAIL]
+    return direction_to_trail_entrance
+
+
+def handle_special_case_between_trail_entrance(leader):
+    direction_exit_from_trail = get_exit_direction(leader)
+    own = leader.own_location
+    leader.move_to(direction_exit_from_trail)
+    leader.own_location = leader.coordinates
     leader.world.csv_round.update_metrics(steps=- 1)
-    direction_entrance = leader.world.grid.get_nearest_direction(leader.coordinates, own)
-    return direction_entrance
+    direction_to_trail_entrance = leader.world.grid.get_nearest_direction(leader.own_location, own)
+    return direction_to_trail_entrance
 
 
 def get_exit_direction(leader):
-    for idx in range(len(leader.directions_list)):
-        if get_coordinates_in_direction(leader.coordinates, leader.directions_list[
-            idx % len(leader.directions_list)]) == leader.previous_location:
-            direction_left = leader.directions_list[(idx + 1) % len(leader.directions_list)]
-            direction_right = leader.directions_list[(idx - 1) % len(leader.directions_list)]
+    direction_exit_from_trail = ()
+    directions_list = get_directions_list()
+    for idx in range(len(directions_list)):
+        if get_location_in_direction(leader.own_location,
+                                         directions_list[idx % len(directions_list)]) \
+                == leader.previous_location:
+            direction_left = directions_list[(idx + 1) % len(directions_list)]
+            direction_right = directions_list[(idx - 1) % len(directions_list)]
             if leader.matter_in(direction_right) is False:
-                direction_exit = direction_right
+                direction_exit_from_trail = direction_right
             else:
-                direction_exit = direction_left
-    return direction_exit
+                direction_exit_from_trail = direction_left
+    return direction_exit_from_trail
 
 
-def handle_cave_discovery(leader):
-    sum_of_neighbors_labels, neighbor_number_map_direction = get_neighbors(leader.directions_list, leader.matter_in,
-                                                                           get_direction_for(leader.coordinates,
-                                                                            leader.previous_location))
-    if leader.coordinates not in leader.tunnel_locations:
-        leader.tunnel_locations.append(leader.coordinates)
-    
-    if sum_of_neighbors_labels == S5_P:
-        handling_dead_end(leader)
-    else:
-        if sum_of_neighbors_labels >= FREE_LOCATION and sum_of_neighbors_labels != FL_S3_BS_P:
-            #If there is an a big area than
-            move_to(next_direction(leader.coordinates, sum_of_neighbors_labels, neighbor_number_map_direction, leader.uncoated_locations+leader.tunnel_locations), leader)
-            leader.state = "cave_scanning"
-        elif  sum_of_neighbors_labels == S4_BS_P:
-            
-            if leader.coordinates in leader.tunnel_locations:
-                leader.tunnel_locations.remove(leader.coordinates)
-            leader.state = "cave_scanning"
-        else:
-            
-            direction = get_next_direction_in_tunnel(leader, neighbor_number_map_direction, sum_of_neighbors_labels)
-            move_to(direction, leader)
+def scan_inside(leader, environment, neighborhood, trail_locations):
+    uncoated_locations = []
+    trail_locations = special_case_corner_triangular_graph(leader, environment, trail_locations)
+    leader.previous_location = leader.own_location
+    leader.move_to(neighborhood[FREE])
+    leader.own_location = leader.coordinates
+    while leader.own_location not in trail_locations:
+        environment, neighborhood = scan_environment(leader.matter_in, get_direction_for(leader.own_location,
+                                                                           leader.previous_location))
+
+        uncoated_locations.append(leader.own_location)
+        direction = neighborhood[FREE]
+        if direction:
+            leader.own_location = move_to(direction, leader)
+    return uncoated_locations
 
 
-def get_next_direction_in_tunnel(leader, neighbor_number_map_direction, sum_of_neighbors_labels):
-    for dir in neighbor_number_map_direction:
-        if get_coordinates_in_direction(leader.coordinates, dir) \
-                not in leader.tunnel_locations + leader.uncoated_locations:
-            if neighbor_number_map_direction[dir] == BESIDE_SUBJECT \
-                    and (sum_of_neighbors_labels == S3_BS2_P or sum_of_neighbors_labels == S2_BS3_P \
-                         or sum_of_neighbors_labels == FL_S3_BS_P):
-                direction = dir
-            elif neighbor_number_map_direction[dir] == ENTRANCE and (sum_of_neighbors_labels == S4_P_E \
-                                                                     or sum_of_neighbors_labels == S3_BS_P_E):
-                direction = dir
+def special_case_corner_triangular_graph(leader, environment_type, trail_locations):
+    if environment_type == CORNER:
+        if leader.own_location in trail_locations:
+            trail_locations.remove(leader.own_location)
+    return trail_locations
+
+
+def scan_trail(leader, direction):
+    trail_locations=[leader.own_location]
+    leader.own_location = move_to(direction, leader)
+    trail_locations.append(leader.own_location)
+    environment, neighborhood = scan_environment(leader.matter_in,
+                                   get_direction_for(leader.own_location, leader.previous_location))
+    environment_type = environment
+    while environment_type < TOTAL_FREE \
+            and environment_type != DEAD_END and environment_type != CORNER:
+        direction = get_next_direction_in_trail(leader, environment, neighborhood)
+        leader.own_location = move_to(direction, leader)
+        trail_locations.append(leader.own_location)
+        environment, neighborhood = scan_environment(leader.matter_in,
+                                       get_direction_for(leader.own_location, leader.previous_location))
+        environment_type = environment
+    return trail_locations, environment, neighborhood
+
+
+def get_next_direction_in_trail(leader, environment, neighborhood):
+    direction = ()
+    if environment == TRAIL_1 or environment == TRAIL_2:
+        direction = neighborhood[TRAIL]
+    elif environment == TRAIL_3 or environment == TRAIL_4:
+        direction = special_case_tg_in_trail(direction, leader, neighborhood[FREE])
+
     return direction
 
 
-def handle_cave_scanning(leader):
-    leader.cave_locations, finished = scanning(leader, leader.uncoated_locations)
-    if leader.coordinates in leader.uncoated_locations or leader.coordinates in leader.tunnel_locations or finished:
-        go_cave_escaping(leader)
-
-
-def delete_tunnel_entrances(leader):
-    if not ONE_LAYER_COATING:
-        if leader.cave_exit_storage and leader.cave_exit_storage in leader.uncoated_locations:
-            leader.uncoated_locations.remove(leader.cave_exit_storage)
-    leader.tunnel_locations.clear()
-    leader.cave_exit_storage.clear()
+def special_case_tg_in_trail(direction, leader, neighbor_direction):
+    exit_direction = get_exit_direction(leader)
+    if exit_direction != neighbor_direction:
+        direction = neighbor_direction
+    return direction
 
 
 def get_direction_for(source, destiny):
     if destiny and source:
-         new_direction = []
-         for i in range(len(source)):
-             new_direction.append(destiny[i] - source[i] )
-         return tuple(new_direction)
+        new_direction = []
+        for i in range(len(source)):
+            new_direction.append(destiny[i] - source[i])
+        return tuple(new_direction)
     else:
         return False
 
 
-def get_coordinates_in_direction(position, direction):
+def get_location_in_direction(position, direction):
     new_pos = []
     for i in range(len(position)):
-        new_pos.append(position[i]+direction[i])
+        new_pos.append(position[i] + direction[i])
     return tuple(new_pos)
 
 
-def get_neighbors(directions_list, matter_in, previous_direction):
+def scan_environment(matter_in, previous_direction):
     sum_of_neighbors_labels = 0
-    neighbor_number_map_direction = {}
+    directions_maps_neighbors = {}
+    neighborType_maps_direction = {}
+    directions_list = get_directions_list()
+
     for idx in range(len(directions_list)):
-        facing_direction = directions_list[idx % len(directions_list)]
-        direction_left = directions_list[(idx - 1) % len(directions_list)]
-        direction_right = directions_list[(idx + 1) % len(directions_list)]
-        type_number = label_neighbor(facing_direction, direction_left, direction_right, matter_in, previous_direction)
+        direction_view = directions_list[idx % len(directions_list)]
+        if direction_view == previous_direction:
+            type_number = PREVIOUS
+        else:
+            direction_left = directions_list[(idx - 1) % len(directions_list)]
+            direction_right = directions_list[(idx + 1) % len(directions_list)]
+            type_number = label_neighbor( matter_in(direction_view),matter_in(direction_left), matter_in(direction_right))
         sum_of_neighbors_labels += type_number
-        neighbor_number_map_direction[facing_direction] = type_number
-    return sum_of_neighbors_labels,  neighbor_number_map_direction
+        directions_maps_neighbors[direction_view] = type_number
+        neighborType_maps_direction[type_number] = direction_view
+    return  sum_of_neighbors_labels, neighborType_maps_direction
 
 
-
-def label_neighbor(facing_direction, direction_left, direction_right, matter_in, previous_direction):
-    number = 0
-    if matter_in(facing_direction) is False:
-        if facing_direction == previous_direction:
-            number = PREVIOUS
-        elif matter_in(direction_left) is True and matter_in(direction_right) is True:
-            number = ENTRANCE
-
-        elif matter_in(direction_left) is True and  matter_in(direction_right) is False\
-                or matter_in(direction_right) is True and  matter_in(direction_left) is False:
-                number = BESIDE_SUBJECT
-        elif matter_in(direction_left) is False and  matter_in(direction_right) is False:
-            number = FREE_LOCATION
+def label_neighbor(matter_in_view, matter_in_left, matter_in_right):
+    if matter_in_view is False:
+        if matter_in_left is True and matter_in_right is True:
+            return TRAIL
+        elif matter_in_left is True and matter_in_right is False \
+                or matter_in_right is True and matter_in_left is False:
+            return FREE
+        elif matter_in_left is False and matter_in_right is False:
+            return TOTAL_FREE
     else:
-        number =  SUBJECT
-    return number
+        return OCCUPIED
 
 
-def go_cave_escaping(leader):
-    leader.aim = leader.cave_exit_storage.pop()
-    leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-    leader.state = "cave_escaping"
+def get_out(leader, exit_location):
+    if leader.own_location != exit_location:
+        leader.own_location = go_for(exit_location, leader.own_location, leader)
+        leader.own_location = move_to(get_direction_for(leader.own_location, exit_location), leader)
+    return
 
 
-def handling_dead_end(leader):
-    leader.aim = leader.cave_exit_storage.pop()
-    leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-    leader.dead_end_flag = True
-    leader.state = "cave_escaping"
+def coat(leader, uncoated_locations):
+    while uncoated_locations and leader.subject_locations:
+        subject_location = leader.subject_locations.pop(0)
+        leader.own_location = go_for(subject_location, leader.own_location, leader)
+        leader.take_particle_on(subject_location)
+        uncoated_location = uncoated_locations.pop()
+        leader.own_location = go_for(uncoated_location, leader.own_location, leader)
+        leader.drop_particle_on(uncoated_location)
 
 
-def handle_cave_escaping(leader):
-    if reached_aim(leader.aim, leader):
-        move_to(get_direction_for(leader.coordinates, leader.aim), leader)
-        if leader.state_storage:
-            leader.state = leader.state_storage.pop()
-        else:
-            leader.state = "scanning"
-        return
+def coat_yourself(leader, uncoated_locations):
+    if not uncoated_locations:
+        uncoated_locations = scan_outside(leader)
+        leader.world.csv_round.update_layer()
 
+    aim = uncoated_locations.pop()
+    shortest_path = get_shortest_path(leader.own_location, aim, leader.world)
 
-def handle_go_to_object(leader):
-    if reached_aim(leader.aim, leader):
-        if leader.subject_locations:
-            leader.state = "scanning"
-        else:
-            leader.state = "finished"
-    else:
-        leader.world.csv_round.update_to_tile()
-
-
-def handle_taking(leader):
-    if reached_aim(leader.aim, leader):
-        go_coating(leader)
-    else:
-        leader.world.csv_round.update_taking()
-
-
-def go_coating(leader):
-    leader.take_particle_on(leader.aim)
-    leader.aim = leader.uncoated_locations.pop()
-    leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-    leader.state = "coating"
-
-
-def handle_coating(leader):
-    if reached_aim(leader.aim, leader):
-        leader.drop_particle_on(leader.aim)
-        if leader.uncoated_locations and leader.subject_locations:
-            if ONE_LAYER_COATING and len(leader.uncoated_locations) == 1:
-                it_is_leader_turn_to_coat(leader)
-            else:
-                go_taking_particles(leader)
-        elif not leader.uncoated_locations and leader.subject_locations and not ONE_LAYER_COATING:
-            go_scanning(leader)
-        else:
-            leader.aim = None
-            it_is_leader_turn_to_coat(leader)
-
-
-def it_is_leader_turn_to_coat(leader):
-    leader.state = "leader_coating"
-    if leader.aim is None:
-        leader.aim = leader.uncoated_locations.pop()
-    leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-
-
-def go_taking_particles(leader):
-    leader.scanning = False
-    #leader.subject_locations = sorting_list(leader.coordinates, leader.subject_locations, leader.world.grid.get_distance)
-    leader.aim = leader.subject_locations.pop(0)
-    leader.shortest_path = get_shortest_path(leader.coordinates, leader.aim, leader.world)
-    leader.state = "taking"
-
-
-def go_scanning(leader):
-    delete_tunnel_entrances(leader)
-    leader.world.csv_round.update_layer()
-    leader.state = "scanning"
-
-
-def handle_leader_coating(leader):
-    if leader.coordinates == leader.aim:
-        leader.state = "finished"
-        leader.world.csv_round.update_leader_coating()
-    elif leader.shortest_path:
-        next_location = leader.shortest_path.pop(0)
-        move_to(get_direction_for(leader.coordinates, next_location), leader)
+    while leader.own_location != aim:
+        next_location = shortest_path.pop(0)
+        leader.own_location = move_to(get_direction_for(leader.own_location, next_location), leader)
         # print("Finished")
+    finished(leader)
 
 
-def handle_finished(leader):
+def finished(leader):
     particle_distance_list = []
     locations_distance_list = []
-    coated_subjects = get_coated_subjects_list(leader)
-    create_locations(coated_subjects, leader, particle_distance_list)
+    coated_objects = get_coated_objects_list(leader)
+    create_locations(coated_objects, leader, particle_distance_list)
     for location in leader.world.locations:
-        locations_distance_list.append(get_distance_to_closest_tile(location.coordinates,leader.world))
+        locations_distance_list.append(get_distance_to_closest_tile(location.coordinates, leader.world))
     if particle_distance_list and locations_distance_list:
-        check_valid_type(locations_distance_list, particle_distance_list, leader.world)
+        check_valid_type(locations_distance_list, particle_distance_list, leader)
 
 
-def create_locations(coated_subjects, leader, particle_distance_list):
-    for particle in coated_subjects:
+def create_locations(coated_objects, leader, particle_distance_list):
+    for particle in coated_objects:
         for direction in leader.world.grid.get_directions_list():
             if not particle.matter_in(direction):
                 particle.create_location_in(direction)
         particle_distance_list.append(get_distance_to_closest_tile(particle.coordinates, leader.world))
 
 
-def get_coated_subjects_list(leader):
+def get_coated_objects_list(leader):
     for particle in leader.subject_locations:
         leader.world.particles.remove(leader.world.particle_map_coordinates[particle])
     if leader.world.particles:
@@ -499,15 +363,15 @@ def get_coated_subjects_list(leader):
     return listi
 
 
-def check_valid_type(locations_distance_list, particle_distance_list, world):
+def check_valid_type(locations_distance_list, particle_distance_list, leader):
     if max(particle_distance_list) <= min(locations_distance_list):
         leader.world.csv_round.update_valid(1)
-        print ("Valid")
-        leader.state="End"
-        world.set_successful_end()
+        print("Valid")
+        leader.state = "End"
+        leader.world.set_successful_end()
     else:
         leader.world.csv_round.update_valid(0)
-        world.set_unsuccessful_end()
+        leader.world.set_unsuccessful_end()
 
 
 def sorting_list(source_location, destiny_locations_list, get_distance, reverse=False):
@@ -526,71 +390,60 @@ def sorting_list(source_location, destiny_locations_list, get_distance, reverse=
     return sorted_list
 
 
-def next_direction(own_location,  sum_of_neighbors, type_maps_direction, previous_locations):
-    direction_list = []
-    if sum_of_neighbors >= FREE_LOCATION or sum_of_neighbors == S4_BS_P:
-        for direction in type_maps_direction:
-            if type_maps_direction[direction] == BESIDE_SUBJECT:
-                direction_list.append(direction)
-        for direction in direction_list:
-            if get_coordinates_in_direction(own_location, direction) not in previous_locations:
-                return direction
-        return None
-
-
 def get_leader_distance_to_object(world, objact_list, am_list):
-    closest_particle = None
-    min = None
-    for am_coordinates in am_list:
-         for object_coordinates in objact_list:
-            value = world.grid.get_distance(am_coordinates, object_coordinates)
-            if min is None or (value < min):
-                min = value
-                if am_coordinates in world.particle_map_coordinates:
-                    closest_subject = world.particle_map_coordinates[am_coordinates]
-                closest_object_coordinate = object_coordinates
-    return closest_subject, min, closest_object_coordinate
+    minimum_distance = None
+    closest_subject = None
+    closest_object_coordinate = []
+    for am_location in am_list:
+        for object_location in objact_list:
+            value = world.grid.get_distance(am_location, object_location)
+            if minimum_distance is None or (value < minimum_distance):
+                minimum_distance = value
+                if am_location in world.particle_map_coordinates:
+                    closest_subject = world.particle_map_coordinates[am_location]
+                closest_object_coordinate = object_location
+    return closest_subject, minimum_distance, closest_object_coordinate
 
 
-def get_shortest_path(lcoordinates, tcoordinates, world):
-    coord_lists = [[lcoordinates]]
-    visited_coordinates = [lcoordinates]
+def get_shortest_path(lown_location, town_location, world):
+    coord_lists = [[lown_location]]
+    visited_location = [lown_location]
     counter = 10000
-    while len(coord_lists) > 0 and counter >0:
+    while len(coord_lists) > 0 and counter > 0:
         current_list = coord_lists.pop(0)
         length = len(current_list)
-        if are_aim_coordinates_reachable(tcoordinates, current_list[length - 1], world):
-            if current_list[0] == lcoordinates:
+        if are_aim_location_reachable(town_location, current_list[length - 1]):
+            if current_list[0] == lown_location:
                 current_list.pop(0)
-            current_list.append(tcoordinates)
+            current_list.append(town_location)
             return current_list
         else:
-            around_last = get_all_surounding_coordinates(current_list[length - 1], world)
+            around_last = get_all_surounding_location(current_list[length - 1])
             for tmp in around_last:
-                if is_coord_unvisited_and_free(tmp, visited_coordinates, world):
+                if is_coord_unvisited_and_free(tmp, visited_location, world):
                     new_list = deepcopy(current_list)
                     new_list.append(tmp)
                     coord_lists.append(new_list)
-                    visited_coordinates.append(tmp)
-        counter -=1
+                    visited_location.append(tmp)
+        counter -= 1
     if counter <= 0:
-        leader.world.csv_round.update_valid(0)
-        print("Time Out Breadth Search ", " from ", lcoordinates, " to ", tcoordinates)
+        world.csv_round.update_valid(0)
+        print("Time Out Breadth Search ", " from ", lown_location, " to ", town_location)
         world.set_unsuccessful_end()
 
 
-def are_aim_coordinates_reachable(acoordinates, bcoordinates, world):
-    if acoordinates == bcoordinates:
+def are_aim_location_reachable(aown_location, bown_location):
+    if aown_location == bown_location:
         return True
-    around = get_all_surounding_coordinates(acoordinates, world)
+    around = get_all_surounding_location(aown_location)
     for tmp in around:
-        if tmp == bcoordinates:
+        if tmp == bown_location:
             return True
     return False
 
 
-def is_coord_unvisited_and_free(coord, visited_coordinates, world):
-    if coord in visited_coordinates:
+def is_coord_unvisited_and_free(coord, visited_location, world):
+    if coord in visited_location:
         return False
     if coord in world.get_particle_map_coordinates():
         return False
@@ -599,11 +452,21 @@ def is_coord_unvisited_and_free(coord, visited_coordinates, world):
     return True
 
 
-def get_all_surounding_coordinates(pcoordinates, world):
-    surrounding_coordinates = []
-    for direction in world.grid.get_directions_list():
-        surrounding_coordinates.append(world.grid.get_coordinates_in_direction(pcoordinates, direction))
-    return surrounding_coordinates
+def get_directions_list():
+    directions = [(0.5, 1, 0),
+                  (1, 0, 0),
+                  (0.5, -1, 0),
+                  (-0.5, -1, 0),
+                  (-1, 0, 0),
+                  (-0.5, 1, 0)]
+    return directions
+
+
+def get_all_surounding_location(pown_location):
+    environment_location = []
+    for direction in get_directions_list():
+        environment_location.append(get_location_in_direction(pown_location, direction))
+    return environment_location
 
 
 def get_distance_to_closest_tile(source, world):
@@ -615,10 +478,44 @@ def get_distance_to_closest_tile(source, world):
     return distance
 
 
-def reached_aim(aim, leader):
-    if leader.shortest_path:
-        next_location = leader.shortest_path.pop(0)
-        if next_location != aim :
-            move_to(get_direction_for(leader.coordinates, next_location), leader)
-            return False
-    return True
+def go_for(aim, own_location, leader):
+    shortest_path = get_shortest_path(own_location, aim, leader.world)
+    next_location = shortest_path.pop(0)
+    while next_location != aim:
+        own_location = move_to(get_direction_for(own_location, next_location), leader)
+        if shortest_path:
+            next_location = shortest_path.pop(0)
+    return own_location
+
+
+def refresh_screen(leader):
+    if leader.world.config_data.visualization:
+        round_start_timestamp = time.perf_counter()
+        leader.world.vis.run(round_start_timestamp)
+
+
+def beaming(leader, uncoated_locations):
+    while uncoated_locations and leader.subject_locations:
+        uncoated_location = uncoated_locations.pop()
+        if leader.own_location == uncoated_location:
+            environment, neighborhood = scan_environment(leader.matter_in,
+                                           get_direction_for(leader.own_location, leader.previous_location))
+            direction = neighborhood[FREE]
+            if (environment == 1006 or environment == 816) and not direction:
+                direction = neighborhood[FREE]
+            leader.own_location = move_to(direction, leader)
+            leader.world.csv_round.update_metrics(steps=-1)
+        subject_location = leader.subject_locations.pop(0)
+        leader.take_particle_on(subject_location)
+        if STEP_COUNTER:
+            shortest_path = get_shortest_path(leader.own_location, subject_location, leader.world)
+            shortest_path.pop()
+            leader.world.csv_round.update_metrics(steps=len(shortest_path)-1)
+            refresh_screen(leader)
+        leader.drop_particle_on(uncoated_location)
+        if STEP_COUNTER:
+            shortest_path = get_shortest_path(subject_location, uncoated_location, leader.world)
+            leader.world.csv_round.update_metrics(steps=len(shortest_path)-1)
+            refresh_screen(leader)
+
+

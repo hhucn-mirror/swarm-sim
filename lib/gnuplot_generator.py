@@ -64,14 +64,15 @@ def panders_plotter(file, directory, name):
             #key = key + "("+str(grp['Tiles'].values)+")"
             #print(grp['Particles'].values)
             #rounds=int(round(grp['Rounds'].mean(),2))
-            #grp.plot(ax=ax, kind='bar', x=grp['Particles'].values[0],  y=rounds, label=key)
-            grp['bla'] = grp['Layer'].diff()
-            df_filtered = grp[grp['bla'] != 0]
-            for a, b in df_filtered.groupby(['Scenario']):
-                grp.plot(ax=ax, kind='line', x='Particles', y='Steps', label=key)
-                b.plot.scatter(ax=ax, x='Particles', y='Steps')
-                ax.grid()
-            plt.ylabel('Steps')
+            grp.plot( kind='line', x='Particles',  y='Valid State', label=key)
+            # grp['bla'] = grp['Layer'].diff()
+            # df_filtered = grp[grp['bla'] != 0]
+            # for a, b in df_filtered.groupby(['Scenario']):
+            #     grp.plot(ax=ax, kind='line', x='Particles', y='Valid State', label=key)
+            #     b.plot.scatter(ax=ax, x='Particles', y='Steps')
+            #     ax.grid()
+            plt.ylabel('Validation')
+            plt.xlabel('Subjects')
             plt.savefig(directory + '/' + key + '.pdf')
             plt.savefig(directory + '/' + key + '.png')
 
@@ -152,5 +153,5 @@ def panders_plotter(file, directory, name):
 #plot_generator("all_aggregates.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 4,0, "Multi_Layer: 60 Particles", "bar")
 
 
-panders_plotter("aggregate.csv", "../outputs/multiple/c", "bar")
+panders_plotter("aggregate.csv", "../outputs/multiple/three", "bar")
 #panders_plotter("test.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 1,0, "Multi_Layer: 60 Particles", "bar")

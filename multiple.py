@@ -60,13 +60,13 @@ def main(argv):
     process_cnt=0
     #scenarios = ["tube_10", "tube_20"]import
     #scenarios = ["a", "b", "c", "d", "e", "f"]
-    scenarios = ["c2"]
+    scenarios = ["c"]
     #scenarios = [ "h3","h4", "h5", ]
     #scenarios = ["b","h", "h1", "h2", "h3", "h4", "h5", ]
     #scenarios = ["h4","h6", "c1", "c3", "c3a", "c3b"]
 
-    min_radius = 146
-    max_radius = 261
+    min_radius = 1
+    max_radius = 115
 
     #
     for scenario in scenarios:

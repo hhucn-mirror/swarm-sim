@@ -153,7 +153,7 @@ class CsvRoundData:
         self.out_of_cave_steps = np.nan
         self.cave_pathing = np.nan
         self.finished = np.nan
-        self.layer =1
+        self.layer =0
         self.valid = np.nan
 
         self.writer_round.writerow(['',
@@ -190,7 +190,7 @@ class CsvRoundData:
     def update_scanning(self):
         self.scanning_steps =  1
 
-    def update_cave_scanning(self):
+    def update_outside_scanning(self):
         self.cave_scanning_steps =  1
 
     def update_taking(self):
@@ -205,7 +205,7 @@ class CsvRoundData:
     def update_leader_coating(self):
         self.leader_coating_steps =  1
 
-    def update_cave_discovery(self):
+    def update_trail_discovery(self):
         self.cave_pathing = 1
 
     def update_finished(self):

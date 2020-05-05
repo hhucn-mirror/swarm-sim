@@ -29,6 +29,15 @@ def swarm_sim(argv):
     swarm_sim_world = world.World(config_data)
 
     round_start_timestamp = time.perf_counter()
+    round_start_timestamp = loop_solution(config_data, round_start_timestamp, swarm_sim_world)
+    if config_data.visualization:
+        swarm_sim_world.vis.run(round_start_timestamp)
+    logging.info('Finished')
+
+    generate_data(config_data, swarm_sim_world)
+
+
+def loop_solution(config_data, round_start_timestamp, swarm_sim_world):
     while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
             and swarm_sim_world.get_end() is False:
 
@@ -37,11 +46,7 @@ def swarm_sim(argv):
             round_start_timestamp = time.perf_counter()
 
         run_solution(swarm_sim_world)
-    if config_data.visualization:
-        swarm_sim_world.vis.run(round_start_timestamp)
-    logging.info('Finished')
-
-    generate_data(config_data, swarm_sim_world)
+    return round_start_timestamp
 
 
 def draw_scenario(config_data, swarm_sim_world):

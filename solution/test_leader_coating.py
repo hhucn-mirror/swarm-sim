@@ -283,7 +283,7 @@ def test_label_neighbor_previous():
     facing_direction = (1, 0, 0)
     direction_right = (0.5, 1, 0)
     direction_left = (-0.5, 1, 0)
-    assert coating.label_neighbor(facing_direction, direction_left, direction_right, s4_bs2, (1, 0, 0)) == PREVIOUS
+    assert coating.label_neighbor(facing_direction, direction_left, direction_right) == PREVIOUS
 
 
 
