@@ -207,7 +207,6 @@ class Particle(Particle):
             self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(),
                                       self.world.get_actual_round(), self.t_wait * 2)
             self.multicast_leader_message(LeaderMessageType.propose)
-        self.instruct_round = None
 
     def __send_proposal_to_leaders__(self, proposed_direction):
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(self.leader_contacts.keys()),
@@ -576,6 +575,8 @@ class Particle(Particle):
     def next_moving_direction(self):
         if self.mobility_model.mode == MobilityModelMode.Manual:
             try:
+                if self.__instruction_number__ >= self.instruct_round:
+                    return self.mobility_model.current_dir
                 if self.world.get_actual_round() >= self.instruct_round:
                     self.mobility_model.current_dir = self.proposed_direction
             except TypeError:

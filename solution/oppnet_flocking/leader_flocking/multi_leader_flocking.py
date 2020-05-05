@@ -28,7 +28,7 @@ def solution(world):
         if current_round == 5:
             print_all_routes(particles)
         if current_round > t_wait * 3 + 1:
-            move_to_next_direction(particles)
+            move_to_next_direction(particles, current_round)
 
 
 def print_all_routes(particles):
@@ -87,7 +87,7 @@ def send_direction_proposals(current_round):
             leader.send_direction_proposal()
 
 
-def move_to_next_direction(particles):
+def move_to_next_direction(particles, current_round):
     particle_directions = {}
     first_direction = particles[0].next_moving_direction()
     for particle in particles:
@@ -95,10 +95,11 @@ def move_to_next_direction(particles):
         if next_direction:
             particle_directions[particle] = next_direction
             if first_direction and next_direction != first_direction:
-                logging.error("multi_leader_flocking -> move_to_next_direction() " +
-                              "not all particles in the flock are moving to in the same direction!")
+                logging.error("round {}: multi_leader_flocking -> move_to_next_direction() " +
+                              "not all particles in the flock are moving to in the same direction!".format(
+                                  current_round))
     if particle_directions:
         if len(particle_directions) != len(particles):
-            logging.error("multi_leader_flocking -> move_to_next_direction() " +
-                          "not all particles returned a next_moving_direction()")
+            logging.error("round {}: multi_leader_flocking -> move_to_next_direction() " +
+                          "not all particles returned a next_moving_direction()".format(current_round))
         particles[0].world.move_particles(particle_directions)
