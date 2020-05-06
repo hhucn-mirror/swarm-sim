@@ -153,5 +153,5 @@ def panders_plotter(file, directory, name):
 #plot_generator("all_aggregates.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 4,0, "Multi_Layer: 60 Particles", "bar")
 
 
-panders_plotter("aggregate.csv", "../outputs/multiple/three", "bar")
+panders_plotter("aggregate.csv", "../outputs/multiple/problemcheck", "bar")
 #panders_plotter("test.csv", "../outputs/multiple/working_multi_layer_2020-02-29_14:34:1_leader_coating", 1,0, "Multi_Layer: 60 Particles", "bar")

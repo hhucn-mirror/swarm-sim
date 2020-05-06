@@ -1,7 +1,7 @@
 import time
 from copy import deepcopy
 
-QUICK_COATING = False
+QUICK_COATING = True
 STEP_COUNTER = False
 
 ONE_LAYER_COATING = False
@@ -77,8 +77,8 @@ def scan_outside(leader):
     while leader.own_location not in uncoated_locations:
         environment, neighborhood = scan_environment(
             leader.matter_in,
-            get_direction_for(leader.own_location,
-                              leader.previous_location))
+            leader.world.grid.get_nearest_direction(leader.own_location,
+                              leader.previous_location), leader.world.grid.get_directions_list())
         if trail_entrance(environment) and leader.own_location not in trail_locations:
             direction = get_trail_direction_entrance(leader, environment, neighborhood)
             trail_exit = leader.own_location
@@ -97,7 +97,8 @@ def scan_outside(leader):
         if direction:
             leader.own_location = move_to(direction, leader)
     if not_enough_subjects(len(leader.subject_locations) + 1, len(uncoated_locations), len(trail_locations)):
-        uncoated_locations = reduce_scanned_locations(leader.subject_locations, uncoated_locations, trail_locations, dead_end)
+        uncoated_locations = reduce_scanned_locations(leader.subject_locations, uncoated_locations, trail_locations,
+                                                      dead_end)
     elif dead_end:
         uncoated_locations = uncoated_locations + trail_locations
     return uncoated_locations
@@ -107,13 +108,13 @@ def get_environment_special_triangular(environment_type, leader, previous_locati
     if environment_type == ENTRANCE_1:
         environment, neighborhood = scan_environment(
             leader.matter_in,
-            get_direction_for(leader.own_location,
-                              previous_location))
+            leader.world.grid.get_nearest_direction(leader.own_location,
+                              previous_location), leader.world.grid.get_directions_list())
     else:
         environment, neighborhood = scan_environment(
             leader.matter_in,
-            get_direction_for(leader.own_location,
-                              leader.previous_location))
+            leader.world.grid.get_nearest_direction(leader.own_location,
+                              leader.previous_location), leader.world.grid.get_directions_list())
     return environment, neighborhood
 
 
@@ -179,9 +180,9 @@ def handle_special_case_between_trail_entrance(leader):
 
 def get_exit_direction(leader):
     direction_exit_from_trail = ()
-    directions_list = get_directions_list()
+    directions_list = leader.world.grid.get_directions_list()
     for idx in range(len(directions_list)):
-        if get_location_in_direction(leader.own_location,
+        if leader.world.grid.get_coordinates_in_direction(leader.own_location,
                                          directions_list[idx % len(directions_list)]) \
                 == leader.previous_location:
             direction_left = directions_list[(idx + 1) % len(directions_list)]
@@ -200,8 +201,8 @@ def scan_inside(leader, environment, neighborhood, trail_locations):
     leader.move_to(neighborhood[FREE])
     leader.own_location = leader.coordinates
     while leader.own_location not in trail_locations:
-        environment, neighborhood = scan_environment(leader.matter_in, get_direction_for(leader.own_location,
-                                                                           leader.previous_location))
+        environment, neighborhood = scan_environment(leader.matter_in, leader.world.grid.get_nearest_direction(leader.own_location,
+                                                                           leader.previous_location), leader.world.grid.get_directions_list())
 
         uncoated_locations.append(leader.own_location)
         direction = neighborhood[FREE]
@@ -222,7 +223,9 @@ def scan_trail(leader, direction):
     leader.own_location = move_to(direction, leader)
     trail_locations.append(leader.own_location)
     environment, neighborhood = scan_environment(leader.matter_in,
-                                   get_direction_for(leader.own_location, leader.previous_location))
+                                                 leader.world.grid.get_nearest_direction(leader.own_location,
+                                                                                         leader.previous_location),
+                                                 leader.world.grid.get_directions_list())
     environment_type = environment
     while environment_type < TOTAL_FREE \
             and environment_type != DEAD_END and environment_type != CORNER:
@@ -230,7 +233,9 @@ def scan_trail(leader, direction):
         leader.own_location = move_to(direction, leader)
         trail_locations.append(leader.own_location)
         environment, neighborhood = scan_environment(leader.matter_in,
-                                       get_direction_for(leader.own_location, leader.previous_location))
+                                       leader.world.grid.get_nearest_direction
+                                       (leader.own_location, leader.previous_location),
+                                                     leader.world.grid.get_directions_list())
         environment_type = environment
     return trail_locations, environment, neighborhood
 
@@ -262,18 +267,17 @@ def get_direction_for(source, destiny):
         return False
 
 
-def get_location_in_direction(position, direction):
-    new_pos = []
-    for i in range(len(position)):
-        new_pos.append(position[i] + direction[i])
-    return tuple(new_pos)
+# def get_location_in_direction(position, direction):
+#     new_pos = []
+#     for i in range(len(position)):
+#         new_pos.append(position[i] + direction[i])
+#     return tuple(new_pos)
 
 
-def scan_environment(matter_in, previous_direction):
+def scan_environment(matter_in, previous_direction, directions_list):
     sum_of_neighbors_labels = 0
     directions_maps_neighbors = {}
     neighborType_maps_direction = {}
-    directions_list = get_directions_list()
 
     for idx in range(len(directions_list)):
         direction_view = directions_list[idx % len(directions_list)]
@@ -305,7 +309,7 @@ def label_neighbor(matter_in_view, matter_in_left, matter_in_right):
 def get_out(leader, exit_location):
     if leader.own_location != exit_location:
         leader.own_location = go_for(exit_location, leader.own_location, leader)
-        leader.own_location = move_to(get_direction_for(leader.own_location, exit_location), leader)
+        leader.own_location = move_to(leader.world.grid.get_nearest_direction(leader.own_location, exit_location), leader)
     return
 
 
@@ -329,7 +333,7 @@ def coat_yourself(leader, uncoated_locations):
 
     while leader.own_location != aim:
         next_location = shortest_path.pop(0)
-        leader.own_location = move_to(get_direction_for(leader.own_location, next_location), leader)
+        leader.own_location = move_to(leader.world.grid.get_nearest_direction(leader.own_location, next_location), leader)
         # print("Finished")
     finished(leader)
 
@@ -412,13 +416,13 @@ def get_shortest_path(lown_location, town_location, world):
     while len(coord_lists) > 0 and counter > 0:
         current_list = coord_lists.pop(0)
         length = len(current_list)
-        if are_aim_location_reachable(town_location, current_list[length - 1]):
+        if are_aim_location_reachable(town_location, current_list[length - 1],world.grid.get_directions_list(), world.grid.get_coordinates_in_direction):
             if current_list[0] == lown_location:
                 current_list.pop(0)
             current_list.append(town_location)
             return current_list
         else:
-            around_last = get_all_surounding_location(current_list[length - 1])
+            around_last = get_all_surounding_location(current_list[length - 1], world.grid.get_directions_list(), world.grid.get_coordinates_in_direction)
             for tmp in around_last:
                 if is_coord_unvisited_and_free(tmp, visited_location, world):
                     new_list = deepcopy(current_list)
@@ -432,10 +436,10 @@ def get_shortest_path(lown_location, town_location, world):
         world.set_unsuccessful_end()
 
 
-def are_aim_location_reachable(aown_location, bown_location):
-    if aown_location == bown_location:
+def are_aim_location_reachable(own_location, bown_location, directions_list, get_location_for_direction):
+    if own_location == bown_location:
         return True
-    around = get_all_surounding_location(aown_location)
+    around = get_all_surounding_location(own_location, directions_list, get_location_for_direction)
     for tmp in around:
         if tmp == bown_location:
             return True
@@ -462,10 +466,10 @@ def get_directions_list():
     return directions
 
 
-def get_all_surounding_location(pown_location):
+def get_all_surounding_location(own_location, directions_list, get_location_in_direction):
     environment_location = []
-    for direction in get_directions_list():
-        environment_location.append(get_location_in_direction(pown_location, direction))
+    for direction in directions_list:
+        environment_location.append(get_location_in_direction(own_location, direction))
     return environment_location
 
 
@@ -482,7 +486,7 @@ def go_for(aim, own_location, leader):
     shortest_path = get_shortest_path(own_location, aim, leader.world)
     next_location = shortest_path.pop(0)
     while next_location != aim:
-        own_location = move_to(get_direction_for(own_location, next_location), leader)
+        own_location = move_to(leader.world.grid.get_nearest_direction(own_location, next_location), leader)
         if shortest_path:
             next_location = shortest_path.pop(0)
     return own_location
@@ -499,7 +503,9 @@ def beaming(leader, uncoated_locations):
         uncoated_location = uncoated_locations.pop()
         if leader.own_location == uncoated_location:
             environment, neighborhood = scan_environment(leader.matter_in,
-                                           get_direction_for(leader.own_location, leader.previous_location))
+                                                         leader.world.grid.get_nearest_direction
+                                                         (leader.own_location, leader.previous_location),
+                                                         leader.world.grid.get_directions_list())
             direction = neighborhood[FREE]
             if (environment == 1006 or environment == 816) and not direction:
                 direction = neighborhood[FREE]
