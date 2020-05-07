@@ -66,6 +66,8 @@ class World:
                                                          seed=config_data.seed_value,
                                                          directory=config_data.direction_name)
 
+        self.particle_color_map = {}
+
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
         else:
@@ -376,6 +378,7 @@ class World:
                     self.particles_created.append(self.new_particle)
                     self.particle_map_coordinates[self.new_particle.coordinates] = self.new_particle
                     self.particle_map_id[self.new_particle.get_id()] = self.new_particle
+                    self.particle_color_map[self.new_particle] = self.new_particle.get_color()
                     self.particles.append(self.new_particle)
                     self.csv_round.update_particle_num(len(self.particles))
                     self.init_particles.append(self.new_particle)
@@ -651,6 +654,14 @@ class World:
             particle.move_to(direction)
 
         return coordinates_list
+
+    def reset_particle_colors(self):
+        """
+        Resets the color parameter of every particle in the world to its original value.
+        :return: Nothing
+        """
+        for particle, color in self.particle_color_map.items():
+            particle.set_color(color)
 
     @staticmethod
     def __get_x__(coordinates):

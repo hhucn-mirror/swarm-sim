@@ -9,7 +9,6 @@ TODO:
 """
 
 import csv
-import logging
 import os
 
 import pandas as pd
@@ -139,7 +138,6 @@ class CsvRoundData:
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_delivered_unique=0, messages_delivered_directly_unique=0,
                        message_ttl_expired=0, receiver_out_of_mem=0):
-        logging.debug("CSV: Starting writing_rounds")
 
         self.steps_sum += steps
 
@@ -167,7 +165,6 @@ class CsvRoundData:
             self.messages_delivered_unique = messages_delivered_unique
             self.messages_delivered_directly_unique = messages_delivered_directly_unique
             self.receiver_out_of_mem = receiver_out_of_mem
-        logging.debug("CSV: Ending writing_rounds")
 
     def next_line(self, simulator_round):
         csv_iterator = ['', simulator_round, self.seed, self.solution, self.particle_num,

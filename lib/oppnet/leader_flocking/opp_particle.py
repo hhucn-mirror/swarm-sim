@@ -34,7 +34,8 @@ class Particle(Particle):
         if not mm_starting_dir:
             if world.config_data.mobility_model_starting_dir == 'random':
                 mm_starting_dir = MobilityModel.random_direction()
-                print("opp_particle -> initialised particle {} with direction {}".format(self.number, mm_starting_dir))
+                logging.debug("round {}: opp_particle -> initialised particle {} with direction {}".format(
+                    self.world.get_actual_round(), self.number, mm_starting_dir))
             else:
                 mm_starting_dir = world.config_data.mobility_model_starting_dir
 

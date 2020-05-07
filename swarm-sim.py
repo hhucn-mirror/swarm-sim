@@ -38,6 +38,7 @@ def swarm_sim(argv):
         if config_data.visualization:
             swarm_sim_world.vis.run(round_start_timestamp)
             round_start_timestamp = time.perf_counter()
+            swarm_sim_world.reset_particle_colors()
 
         run_solution(swarm_sim_world)
 

@@ -26,18 +26,21 @@ def solution(world):
         update_particle_states(particles)
         send_direction_proposals(current_round)
         if current_round == 5:
-            print_all_routes(particles)
+            print_all_routes(particles, current_round)
         if current_round > t_wait * 3 + 1:
             move_to_next_direction(particles, current_round)
 
 
-def print_all_routes(particles):
+def print_all_routes(particles, current_round):
     for particle in particles:
         for target_particle, contacts in particle.leader_contacts.items():
             for contact in contacts.values():
                 contact_particle = contact.get_contact_particle()
-                print("route: #{} reaches #{} via #{} with {} hops".format(particle.number, target_particle.number,
-                                                                           contact_particle.number, contact.get_hops()))
+                logging.debug("round: {} route: #{} reaches #{} via #{} with {} hops".format(current_round,
+                                                                                             particle.number,
+                                                                                             target_particle.number,
+                                                                                             contact_particle.number,
+                                                                                             contact.get_hops()))
 
 
 def set_t_wait_values(particles, t_wait):
@@ -61,7 +64,8 @@ def initialise_leaders(t_wait, leader_count):
         # leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
         leader.set_next_direction_proposal_round(left_bound * (index % 2 + 1))
         leader.multicast_leader_message(LeaderMessageType.discover)
-        print("leader {} next_direction_proposal: {}".format(leader.number, leader.next_direction_proposal_round))
+        logging.debug("round 1: leader {} next_direction_proposal: {}".format(leader.number,
+                                                                              leader.next_direction_proposal_round))
 
 
 def initialise_neighbourhoods(particles):
