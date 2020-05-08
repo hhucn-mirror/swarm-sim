@@ -10,6 +10,7 @@ from lib.oppnet.consensus_flocking.message_types.relative_location_message impor
     RelativeLocationMessageContent
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
+from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap
 from lib.particle import Particle
 from lib.swarm_sim_header import vector_angle
@@ -382,3 +383,6 @@ class Particle(Particle):
                 queried_directions.remove(queried_direction)
                 if len(queried_directions) == 0:
                     del self.__received_queried_directions__[receiver]
+
+    def get_coordinates_as_point(self):
+        return Point(self.coordinates[0], self.coordinates[1])

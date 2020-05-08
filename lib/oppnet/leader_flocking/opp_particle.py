@@ -10,6 +10,7 @@ from lib.oppnet.leader_flocking.message_types.leader_message import LeaderMessag
 from lib.oppnet.leader_flocking.message_types.lost_message import LostMessageContent, LostMessageType
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
+from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap, RoutingContact
 from lib.particle import Particle
 
@@ -616,3 +617,6 @@ class Particle(Particle):
             return round(x_sum / (len(self.leader_contacts) + 1)), round(y_sum / (len(self.leader_contacts) + 1))
         else:
             return self.coordinates[0], self.coordinates[1]
+
+    def get_coordinates_as_point(self):
+        return Point(self.coordinates[0], self.coordinates[1])

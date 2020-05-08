@@ -4,6 +4,7 @@ from enum import Enum
 from lib.oppnet.communication import store_message
 from lib.oppnet.meta import process_event, EventType
 from lib.oppnet.point import Point
+from lib.oppnet.util import get_distance
 from lib.swarm_sim_header import get_hexagon_coordinates
 
 
@@ -83,7 +84,7 @@ class Memory:
         if target in particle_map_id:
             vector = particle_map_id[target].coordinates
             particle_point = self.get_point_from_vector(vector)
-            distance_start_target = self.get_distance(position, particle_point)
+            distance_start_target = get_distance(position, particle_point)
         else:
             distance_start_target = math.inf
         return distance, distance_start_target
@@ -114,17 +115,3 @@ class Memory:
     @staticmethod
     def get_point_from_vector(vector):
         return Point(vector[0], vector[1])
-
-    @staticmethod
-    def get_distance(position1, position2):
-        x1, y1 = position1.getx(), position1.gety()
-        x2, y2 = position2.getx(), position2.gety()
-        x_diff = abs(x2 - x1)
-        y_diff = abs(y2 - y1)
-
-        if y1 == y2 and x1 != x2:
-            return x_diff
-        elif (x_diff - y_diff * 0.5) > 0:
-            return y_diff + (x_diff - y_diff * 0.5)
-        else:
-            return y_diff
