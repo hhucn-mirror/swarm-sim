@@ -1,10 +1,10 @@
 from lib import world, particle as particle_class
 import copy
 from lib.swarm_sim_header import *
-import solution.base.distance_calculation as distance_calc_mod
-import solution.base.read_write as read_write_mod
-import solution.base.p_max_calculation as p_max_calc_mod
-import solution.base.coating_alg as coating_mod
+import solution.distance_calculation as distance_calc_mod
+import solution.read_write as read_write_mod
+import solution.p_max_calculation as p_max_calc_mod
+import solution.coating_alg as coating_mod
 import solution.goal_test as goal_test
 
 cycle_no = 3
