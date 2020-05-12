@@ -12,8 +12,9 @@ from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap
+from lib.oppnet.util import get_distance_from_coordinates
 from lib.particle import Particle
-from lib.swarm_sim_header import vector_angle
+from lib.swarm_sim_header import vector_angle, get_coordinates_in_direction
 
 
 class Particle(Particle):
@@ -130,6 +131,32 @@ class Particle(Particle):
         for neighbour in neighbours:
             self.__current_neighbourhood__[neighbour] = None
         return neighbours
+
+    def try_and_fill_flock_holes(self):
+        self.scan_for_particles_in(hop=2)
+        free_neighbour_locations = self.get_free_surrounding_locations(hop=1)
+        new_ring = self.get_estimated_flock_ring()
+        if not new_ring:
+            return
+        new_location = None
+        for free_location in free_neighbour_locations:
+            tmp = get_distance_from_coordinates(free_location, (0, 0, 0))
+            if tmp < new_ring:
+                new_ring = tmp
+                new_location = free_location
+        if new_location:
+            direction = (new_location[0] - self.coordinates[0], new_location[1] - self.coordinates[1], 0)
+            self.move_to(direction)
+
+    def __get_all_surrounding_locations__(self):
+        """
+        Gives all the 1-hop locations around the particle.
+        :return: list of 1-hop locations around
+        """
+        locations = []
+        for direction in MobilityModel.directions:
+            locations.append(get_coordinates_in_direction(self.coordinates, direction))
+        return locations
 
     def __update_contacts__(self, message: Message):
         """
@@ -360,7 +387,7 @@ class Particle(Particle):
                 if direction not in self.__max_cardinal_direction_hops__:
                     self.__max_cardinal_direction_hops__[direction] = content.hops_per_direction[direction]
                     self.__send_relative_location_response__(direction)
-                else:
+                elif self.__max_cardinal_direction_hops__[direction] > content.hops_per_direction[direction]:
                     logging.debug("round {}: particle #{} received non-queried hops for direction {}".format(
                         self.world.get_actual_round(), self.number, str(direction)
                     ))
@@ -384,5 +411,20 @@ class Particle(Particle):
                 if len(queried_directions) == 0:
                     del self.__received_queried_directions__[receiver]
 
+    def get_estimated_flock_ring(self):
+        """
+        Estimates the flock ring number, i.e. the hop distance to the center of the flock.
+        :return: estimated flock ring number
+        """
+        try:
+            ring = get_distance_from_coordinates(self.relative_flock_location, (0, 0, 0))
+        except TypeError:
+            ring = None
+        return ring
+
     def get_coordinates_as_point(self):
+        """
+        Converts the particle's coordinates as Point object.
+        :return: coordinates as Point
+        """
         return Point(self.coordinates[0], self.coordinates[1])

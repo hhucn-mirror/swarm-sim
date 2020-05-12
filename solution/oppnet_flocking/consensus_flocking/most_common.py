@@ -2,6 +2,7 @@ import logging
 
 from lib.oppnet import routing
 from lib.oppnet.mobility_model import MobilityModel
+from lib.swarm_sim_header import red, black
 
 
 def solution(world):
@@ -9,17 +10,37 @@ def solution(world):
     particles = world.get_particle_list()
     # send direction every round
     send_current_directions(particles)
-    # route messages every round
-    if current_round > 1:
+    if current_round == 1:
+        query_relative_locations(particles)
+    # route messages every other round
+    else:
         routing.next_step(particles)
+        if current_round >= 10:
+            try_and_fill_flock_holes(particles)
     # move only after all messages should have propagated
-    if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
-        move_to_next_direction(particles)
+    # if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
+    #    move_to_next_direction(particles)
 
 
 def query_relative_locations(particles):
     for particle in particles:
         particle.query_relative_location()
+
+
+def try_and_fill_flock_holes(particles):
+    for particle in particles:
+        particle.try_and_fill_flock_holes()
+
+
+def log_relative_locations(particles):
+    for particle in particles:
+        relative = particle.relative_flock_location
+        actual = particle.coordinates
+
+        if actual != relative:
+            particle.set_color(red)
+        else:
+            particle.set_color(black)
 
 
 def send_current_directions(particles):
