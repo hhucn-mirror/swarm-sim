@@ -15,8 +15,11 @@ def solution(world):
     # route messages every other round
     else:
         routing.next_step(particles)
-        if current_round >= 10:
+        relative_location_propagated = current_round % world.config_data.flock_radius * 2
+        if relative_location_propagated == 0:
             try_and_fill_flock_holes(particles)
+        if relative_location_propagated == 1:
+            query_relative_locations(particles)
     # move only after all messages should have propagated
     # if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
     #    move_to_next_direction(particles)

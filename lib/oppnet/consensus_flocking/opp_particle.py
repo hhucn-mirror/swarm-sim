@@ -133,7 +133,11 @@ class Particle(Particle):
         return neighbours
 
     def try_and_fill_flock_holes(self):
-        self.scan_for_particles_in(hop=2)
+        """
+        Tries to find a free location in the surrounding 1-hop neighbourhood, which is closer to the centre
+        of the flock, and move there afterwards
+        :return:
+        """
         free_neighbour_locations = self.get_free_surrounding_locations(hop=1)
         new_ring = self.get_estimated_flock_ring()
         if not new_ring:
@@ -321,6 +325,7 @@ class Particle(Particle):
         in each cardinal direction for a message to reach the outer ring of a flock.
         :return: nothing
         """
+        self.__max_cardinal_direction_hops__ = {}
         cardinal_directions = CardinalDirection.get_cardinal_directions_list()
         queried_directions_per_particle = {}
         for cardinal_direction in cardinal_directions:
