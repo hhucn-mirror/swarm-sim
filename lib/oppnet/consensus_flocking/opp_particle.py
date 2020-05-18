@@ -9,12 +9,12 @@ from lib.oppnet.consensus_flocking.message_types.direction_message import Direct
 from lib.oppnet.consensus_flocking.message_types.relative_location_message import CardinalDirection, \
     RelativeLocationMessageContent
 from lib.oppnet.messagestore import MessageStore
-from lib.oppnet.mobility_model import MobilityModel
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap
 from lib.oppnet.util import get_distance_from_coordinates
 from lib.particle import Particle
-from lib.swarm_sim_header import vector_angle, get_coordinates_in_direction
+from lib.swarm_sim_header import vector_angle, get_coordinates_in_direction, free_locations_within_hops
 
 
 class Particle(Particle):
@@ -60,17 +60,20 @@ class Particle(Particle):
         self.relative_flock_location = None
         self.__max_cardinal_direction_hops__ = {}
 
-    def get_particles_in_cardinal_direction(self, cardinal_direction):
+    def get_particles_in_cardinal_direction_hop(self, cardinal_direction, hops):
         """
-        Returns a list of particles that are surrounding the particle in the :param cardinal_direction.
+        Returns a list of particles that are surrounding the particle in the :param cardinal_direction with a maximum
+        of :param hops.
+        :param hops: maximum number of hops checked around the particle
         :param cardinal_direction: the cardinal direction (N, E, S, W) to check
         :type cardinal_direction: CardinalDirection
         :return: the list of particles that surround the particle in the given cardinal direction
         :rtype: [Particle]
         """
-        locations = CardinalDirection.get_locations_in_direction(self.coordinates, cardinal_direction)
+        one_hop_locations = CardinalDirection.get_locations_in_direction_hops(self.coordinates, cardinal_direction,
+                                                                              hops)
         particles = []
-        for location in locations:
+        for location in one_hop_locations:
             try:
                 particles.append(self.world.particle_map_coordinates[location])
             except KeyError:
@@ -132,13 +135,16 @@ class Particle(Particle):
             self.__current_neighbourhood__[neighbour] = None
         return neighbours
 
+    def get_free_surrounding_locations_within_hops(self, hop=1):
+        return free_locations_within_hops(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+
     def try_and_fill_flock_holes(self):
         """
         Tries to find a free location in the surrounding 1-hop neighbourhood, which is closer to the centre
         of the flock, and move there afterwards
         :return:
         """
-        free_neighbour_locations = self.get_free_surrounding_locations(hop=1)
+        free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hop=2)
         new_ring = self.get_estimated_flock_ring()
         if not new_ring:
             return
@@ -149,8 +155,9 @@ class Particle(Particle):
                 new_ring = tmp
                 new_location = free_location
         if new_location:
-            direction = (new_location[0] - self.coordinates[0], new_location[1] - self.coordinates[1], 0)
-            self.move_to(direction)
+            self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=new_location))
+        else:
+            self.mobility_model.current_dir = None
 
     def __get_all_surrounding_locations__(self):
         """
@@ -329,11 +336,13 @@ class Particle(Particle):
         cardinal_directions = CardinalDirection.get_cardinal_directions_list()
         queried_directions_per_particle = {}
         for cardinal_direction in cardinal_directions:
-            particles = self.get_particles_in_cardinal_direction(cardinal_direction)
-            if len(particles) > 0:
-                queried_directions_per_particle = self.__add_queried_direction__(cardinal_direction, particles,
+            one_hop_particles = self.get_particles_in_cardinal_direction_hop(cardinal_direction, 1)
+            if len(one_hop_particles) > 0:
+                queried_directions_per_particle = self.__add_queried_direction__(cardinal_direction, one_hop_particles,
                                                                                  queried_directions_per_particle)
-            else:
+            # scan with maximum scan radius to detect whether the particle is actually at the edge of the flock
+            elif len(self.get_particles_in_cardinal_direction_hop(cardinal_direction,
+                                                                  self.routing_parameters.scan_radius)) == 0:
                 self.__max_cardinal_direction_hops__[cardinal_direction] = 0
         self.__send_relative_location_queries__(queried_directions_per_particle)
 

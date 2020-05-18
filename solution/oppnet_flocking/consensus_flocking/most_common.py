@@ -15,9 +15,10 @@ def solution(world):
     # route messages every other round
     else:
         routing.next_step(particles)
-        relative_location_propagated = current_round % world.config_data.flock_radius * 2
+        relative_location_propagated = current_round % (world.config_data.flock_radius * 2 + 10)
         if relative_location_propagated == 0:
             try_and_fill_flock_holes(particles)
+            move_to_next_direction(particles)
         if relative_location_propagated == 1:
             query_relative_locations(particles)
     # move only after all messages should have propagated
@@ -63,7 +64,7 @@ def set_random_direction(particles):
 def move_to_next_direction(particles):
     particle_directions = {}
     for particle in particles:
-        particle.set_most_common_direction(weighted_choice=False, centralisation_force=False)
+        # particle.set_most_common_direction(weighted_choice=False, centralisation_force=False)
         next_direction = particle.mobility_model.next_direction(particle.coordinates)
         if next_direction:
             particle_directions[particle] = next_direction

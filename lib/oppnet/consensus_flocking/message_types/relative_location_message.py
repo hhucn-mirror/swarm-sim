@@ -1,5 +1,51 @@
 from enum import Enum
 
+import numpy as np
+
+
+def get_locations_north_by_hops(location, hops=1):
+    (x, y, z) = location
+    locations = []
+    for hop in range(1, hops + 1):
+        x_range = np.append(
+            np.arange(x - 0.5, x - 0.5 * (hops + 1), -0.5),
+            np.arange(x + 0.5, x + 0.5 * (hops + 1), 0.5))
+        for x_coordinate in x_range:
+            locations.append((x_coordinate, y + hops))
+    return locations
+
+
+def get_locations_south_by_hops(location, hops=1):
+    (x, y, z) = location
+    locations = []
+    for hop in range(1, hops + 1):
+        x_range = np.append(
+            np.arange(x - 0.5, x - 0.5 * (hops + 1), -0.5),
+            np.arange(x + 0.5, x + 0.5 * (hops + 1), 0.5))
+        for x_coordinate in x_range:
+            locations.append((x_coordinate, y - hops))
+    return locations
+
+
+def get_locations_east_by_hops(location, hops=1):
+    (x, y, z) = location
+    locations = []
+    for hop in range(1, hops + 1):
+        locations.append((x + hops, y))
+        locations.append((x + hops - 0.5, y + 1))
+        locations.append((x + hops - 0.5, y - 1))
+    return locations
+
+
+def get_locations_west_by_hops(location, hops=1):
+    (x, y, z) = location
+    locations = []
+    for hop in range(1, hops + 1):
+        locations.append((x - hops, y))
+        locations.append((x - hops - 0.5, y + 1))
+        locations.append((x - hops - 0.5, y - 1))
+    return locations
+
 
 class CardinalDirection(Enum):
     North = 0,
@@ -22,6 +68,17 @@ class CardinalDirection(Enum):
             return [(x + 0.5, y - 1, z), (x - 0.5, y - 1, z)]
         elif cardinal_direction == CardinalDirection.West:
             return [(x - 1, y, z), (x - 0.5, y + 1, z), (x - 0.5, y - 1, z)]
+
+    @staticmethod
+    def get_locations_in_direction_hops(location, cardinal_direction, hops=1):
+        if cardinal_direction == CardinalDirection.North:
+            return get_locations_north_by_hops(location, hops)
+        elif cardinal_direction == CardinalDirection.East:
+            return get_locations_east_by_hops(location, hops)
+        elif cardinal_direction == CardinalDirection.South:
+            return get_locations_south_by_hops(location, hops)
+        else:
+            return get_locations_west_by_hops(location, hops)
 
 
 class RelativeLocationMessageContent:

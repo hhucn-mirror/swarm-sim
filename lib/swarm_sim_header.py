@@ -77,6 +77,15 @@ def free_locations(matter_map: dict, center, hop, grid):
     return result
 
 
+def free_locations_within_hops(matter_map: dict, center, hop, grid):
+    result = []
+    n_sphere_border = grid.get_n_sphere(center, hop)
+    for l in n_sphere_border:
+        if l not in matter_map:
+            result.append(l)
+    return result
+
+
 def scan_within(matter_map, center, hop, grid):
     result = []
     n_sphere_border = grid.get_n_sphere(center, hop)
