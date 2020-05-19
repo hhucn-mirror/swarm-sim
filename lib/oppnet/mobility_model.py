@@ -221,7 +221,7 @@ class MobilityModel:
         return next_dir
 
     def __poi__(self, current_x_y_z):
-        if current_x_y_z == self.poi or current_x_y_z == self.previous_coordinates:
+        if current_x_y_z == self.poi or (current_x_y_z == self.previous_coordinates and self.current_dir is not None):
             return False
 
         # southern movement

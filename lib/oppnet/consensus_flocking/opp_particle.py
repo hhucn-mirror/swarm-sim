@@ -37,7 +37,8 @@ class Particle(Particle):
         if not mm_starting_dir:
             if world.config_data.mobility_model_starting_dir == 'random':
                 mm_starting_dir = MobilityModel.random_direction()
-                print("opp_particle -> initialised particle {} with direction {}".format(self.number, mm_starting_dir))
+                logging.info(
+                    "opp_particle -> initialised particle {} with direction {}".format(self.number, mm_starting_dir))
             else:
                 mm_starting_dir = world.config_data.mobility_model_starting_dir
 
@@ -146,7 +147,7 @@ class Particle(Particle):
         """
         free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hop=2)
         new_ring = self.get_estimated_flock_ring()
-        if not new_ring:
+        if new_ring is None:
             return
         new_location = None
         for free_location in free_neighbour_locations:
@@ -237,8 +238,8 @@ class Particle(Particle):
         if weighted_choice:
             choice = random.choices([choice, self.mobility_model.current_dir],
                                     [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])[0]
-        print("round {}: particle #{} most common: {}".format(self.world.get_actual_round(), self.number,
-                                                              choice))
+        logging.info("round {}: particle #{} most common: {}".format(self.world.get_actual_round(),
+                                                                     self.number, choice))
         if centralisation_force and self.relative_flock_location:
             choice = self.__get_choice_from_consensus_and_centralisation_force(choice)
             if choice and self.mobility_model.current_dir != choice:

@@ -8,10 +8,10 @@ def get_locations_north_by_hops(location, hops=1):
     locations = []
     for hop in range(1, hops + 1):
         x_range = np.append(
-            np.arange(x - 0.5, x - 0.5 * (hops + 1), -0.5),
-            np.arange(x + 0.5, x + 0.5 * (hops + 1), 0.5))
+            np.arange(x - 0.5, x - 0.5 * (hop + 1), -0.5),
+            np.arange(x + 0.5, x + 0.5 * (hop + 1), 0.5))
         for x_coordinate in x_range:
-            locations.append((x_coordinate, y + hops))
+            locations.append((x_coordinate, y + hops, z))
     return locations
 
 
@@ -20,10 +20,10 @@ def get_locations_south_by_hops(location, hops=1):
     locations = []
     for hop in range(1, hops + 1):
         x_range = np.append(
-            np.arange(x - 0.5, x - 0.5 * (hops + 1), -0.5),
-            np.arange(x + 0.5, x + 0.5 * (hops + 1), 0.5))
+            np.arange(x - 0.5, x - 0.5 * (hop + 1), -0.5),
+            np.arange(x + 0.5, x + 0.5 * (hop + 1), 0.5))
         for x_coordinate in x_range:
-            locations.append((x_coordinate, y - hops))
+            locations.append((x_coordinate, y - hops, z))
     return locations
 
 
@@ -31,9 +31,9 @@ def get_locations_east_by_hops(location, hops=1):
     (x, y, z) = location
     locations = []
     for hop in range(1, hops + 1):
-        locations.append((x + hops, y))
-        locations.append((x + hops - 0.5, y + 1))
-        locations.append((x + hops - 0.5, y - 1))
+        locations.append((x + hop, y, z))
+        locations.append((x + hop - 0.5, y + 1, z))
+        locations.append((x + hop - 0.5, y - 1, z))
     return locations
 
 
@@ -41,9 +41,9 @@ def get_locations_west_by_hops(location, hops=1):
     (x, y, z) = location
     locations = []
     for hop in range(1, hops + 1):
-        locations.append((x - hops, y))
-        locations.append((x - hops - 0.5, y + 1))
-        locations.append((x - hops - 0.5, y - 1))
+        locations.append((x - hop, y, z))
+        locations.append((x - hop + 0.5, y + 1, z))
+        locations.append((x - hop + 0.5, y - 1, z))
     return locations
 
 
