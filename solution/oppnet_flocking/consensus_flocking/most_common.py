@@ -70,11 +70,8 @@ def set_random_direction(particles):
 def move_to_next_direction(particles):
     particle_directions = {}
     for particle in particles:
-        if particle_neighbourhood_shrunk(particle):
-            next_direction = MobilityModel.opposite_direction(particle.mobility_model.current_dir)
-        else:
-            # particle.set_most_common_direction(weighted_choice=False, centralisation_force=False)
-            next_direction = particle.mobility_model.next_direction(particle.coordinates)
+        # particle.set_most_common_direction(weighted_choice=False, centralisation_force=False)
+        next_direction = particle.mobility_model.next_direction(particle.coordinates)
         if next_direction:
             particle_directions[particle] = next_direction
         else:
@@ -82,7 +79,3 @@ def move_to_next_direction(particles):
                 particle.world.get_actual_round(), particle.number))
     if particle_directions:
         particles[0].world.move_particles(particle_directions)
-
-
-def particle_neighbourhood_shrunk(particle):
-    return len(particle.get_current_neighbourhood()) < len(particle.get_previous_neighbourhood())

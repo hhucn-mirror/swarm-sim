@@ -81,8 +81,12 @@ class MobilityModel:
         :return: None
         """
         self.mode = mode
+        if mode == MobilityModelMode.Random_Mode:
+            self.mode = random.choice(list(MobilityModelMode)[:-1])
         if mode == MobilityModelMode.Manual:
             self.current_dir = None
+        elif mode == MobilityModelMode.Random:
+            self.current_dir = self.random_direction()
 
     def next_direction(self, current_x_y_z):
         """
@@ -107,6 +111,13 @@ class MobilityModel:
             return self.__poi__(current_x_y_z)
         elif self.mode == MobilityModelMode.Manual:
             return self.current_dir
+
+    def turn_around(self):
+        """
+        Turn the mobility model in the opposite direction.
+        :return: None
+        """
+        self.current_dir = self.opposite_direction(self.current_dir)
 
     def __random__(self):
         """
@@ -203,6 +214,11 @@ class MobilityModel:
         return next_dir
 
     def __poi__(self, current_x_y_z):
+        """
+        Moves the particle to a Point of Interest, i.e. a location, step by step.
+        :param current_x_y_z: the particle's current location
+        :return: the next direction to move to, if possible
+        """
         if current_x_y_z == self.poi or (current_x_y_z == self.previous_coordinates and self.current_dir is not None):
             return False
 

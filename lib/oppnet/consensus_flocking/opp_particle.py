@@ -156,7 +156,7 @@ class Particle(Particle):
         free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hops=hops)
         new_ring = self.get_estimated_flock_ring()
         if new_ring is None:
-            return
+            self.try_and_find_flock()
         new_location = None
         for free_location in free_neighbour_locations:
             tmp = get_distance_from_coordinates(free_location, (0, 0, 0))
@@ -167,6 +167,26 @@ class Particle(Particle):
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=new_location))
         else:
             self.mobility_model.current_dir = None
+
+    def try_and_find_flock(self):
+        """
+        Called if relative location could not be determined. If the particle was previously connected to other
+        particles, return in the opposite direction. Else move randomly.
+        :return: None
+        """
+        self.update_current_neighbourhood()
+        if len(self.__current_neighbourhood__) < len(self.__previous_neighbourhood__):
+            # if the particle had neighbours previously and now less, go in the opposite direction
+            self.mobility_model.turn_around()
+        elif len(self.__current_neighbourhood__) == 0:
+            # scan with max scan radius if the particle hasn't had a neighbour
+            surrounding = self.scan_for_locations_within(self.routing_parameters.scan_radius)
+            if not surrounding:
+                self.mobility_model.set_mode(MobilityModelMode.Random)
+            else:
+                # if other particles found, move towards the first one found
+                self.mobility_model.set_mode(MobilityModelMode.POI)
+                self.mobility_model.poi = surrounding[0].coordinates
 
     def __get_all_surrounding_locations__(self):
         """
@@ -452,10 +472,8 @@ class Particle(Particle):
         """
         return Point(self.coordinates[0], self.coordinates[1])
 
-    @property
     def get_current_neighbourhood(self):
         return self.__current_neighbourhood__
 
-    @property
     def get_previous_neighbourhood(self):
         return self.__previous_neighbourhood__
