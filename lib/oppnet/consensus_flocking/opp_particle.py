@@ -125,27 +125,35 @@ class Particle(Particle):
         while len(self.send_store) > 0:
             self.forward_via_contact(self.send_store.pop())
 
-    def check_current_neighbourhood(self):
+    def update_current_neighbourhood(self):
         """
-        Resets the current_neighbourhood dictionary to only contain those particles within the scan radius.
+        Resets the current_neighbourhood dictionary to only contain those particles within the scan radius
+        and updates the previous neighbourhood
         :return: the list of current neighbours
         """
+        self.__previous_neighbourhood__ = self.__current_neighbourhood__
         self.__current_neighbourhood__ = {}
         neighbours = self.scan_for_particles_in(self.routing_parameters.scan_radius)
         for neighbour in neighbours:
             self.__current_neighbourhood__[neighbour] = None
         return neighbours
 
-    def get_free_surrounding_locations_within_hops(self, hop=1):
-        return free_locations_within_hops(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+    def get_free_surrounding_locations_within_hops(self, hops=1):
+        """
+        Returns the locations within the particles :param hops: neighbourhood.
+        :param hops: the maximum number of hops from the particle to consider.
+        :return: a list free locations
+        """
+        return free_locations_within_hops(self.world.particle_map_coordinates, self.coordinates, hops, self.world.grid)
 
-    def try_and_fill_flock_holes(self):
+    def try_and_fill_flock_holes(self, hops=2):
         """
-        Tries to find a free location in the surrounding 1-hop neighbourhood, which is closer to the centre
-        of the flock, and move there afterwards
-        :return:
+        Tries to find a free location within the surrounding neighbourhood with maximum :param hops,
+        which is closer to the estimated centre of the flock, and move there afterwards
+        :param hops: number of hops to scan within for free locations
+        :return: nothing
         """
-        free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hop=2)
+        free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hops=hops)
         new_ring = self.get_estimated_flock_ring()
         if new_ring is None:
             return
@@ -443,3 +451,11 @@ class Particle(Particle):
         :return: coordinates as Point
         """
         return Point(self.coordinates[0], self.coordinates[1])
+
+    @property
+    def get_current_neighbourhood(self):
+        return self.__current_neighbourhood__
+
+    @property
+    def get_previous_neighbourhood(self):
+        return self.__previous_neighbourhood__

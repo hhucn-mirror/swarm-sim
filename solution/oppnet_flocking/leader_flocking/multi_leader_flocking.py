@@ -75,7 +75,7 @@ def initialise_neighbourhoods(particles):
 
 def check_neighbourhoods(particles):
     for particle in particles:
-        particle.check_current_neighbourhood()
+        particle.update_current_neighbourhood()
 
 
 def update_particle_states(particles):

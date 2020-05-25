@@ -141,7 +141,7 @@ def __next_step_multi_leader_flocking__(particle):
 
 
 def __next_step_average_consensus_flocking__(particle):
-    particle.check_current_neighbourhood()
+    particle.update_current_neighbourhood()
     particle.send_all_to_forward()
     particle.process_received()
 

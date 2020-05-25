@@ -61,7 +61,7 @@ class MobilityModel:
         else:
             self.starting_dir = starting_dir
         self.route_length = random.randint(self.min_length, self.max_length)
-        self.return_dir = self.__return_direction()
+        self.return_dir = self.opposite_direction(self.starting_dir)
         self.current_dir = self.starting_dir
         self.previous_coordinates = start_coordinates
         self.poi = poi
@@ -83,24 +83,6 @@ class MobilityModel:
         self.mode = mode
         if mode == MobilityModelMode.Manual:
             self.current_dir = None
-
-    def __return_direction(self):
-        """
-        Calculates the return direction based on starting direction, i.e. the opposing direction.
-        :return: the opposing direction to starting_dir
-        """
-        if self.starting_dir == self.NE:
-            return self.SW
-        elif self.starting_dir == self.E:
-            return self.W
-        elif self.starting_dir == self.SE:
-            return self.NW
-        elif self.starting_dir == self.SW:
-            return self.NE
-        elif self.starting_dir == self.W:
-            return self.E
-        else:
-            return self.SE
 
     def next_direction(self, current_x_y_z):
         """
@@ -256,3 +238,26 @@ class MobilityModel:
         if directions is None:
             directions = MobilityModel.directions
         return random.choice(directions)
+
+    @staticmethod
+    def opposite_direction(direction):
+        """
+        Returns the direction opposite to :param direction or None if :param direction
+        is not a valid direction
+        :param direction: the starting direction
+        :return: the return direction or none
+        """
+        if direction == MobilityModel.NE:
+            return MobilityModel.SW
+        elif direction == MobilityModel.E:
+            return MobilityModel.W
+        elif direction == MobilityModel.SE:
+            return MobilityModel.NW
+        elif direction == MobilityModel.SW:
+            return MobilityModel.NE
+        elif direction == MobilityModel.W:
+            return MobilityModel.E
+        elif direction == MobilityModel.NW:
+            return MobilityModel.SE
+        else:
+            return None
