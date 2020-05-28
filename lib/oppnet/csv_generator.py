@@ -58,7 +58,7 @@ class CsvParticleData:
     def write_particle(self, steps=0, messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_ttl_expired=0, out_of_mem=0):
-        self.steps = self.steps + steps
+        self.steps += steps
         self.messages_sent += messages_sent
         self.messages_forwarded += messages_forwarded
         self.messages_delivered += messages_delivered
@@ -68,9 +68,37 @@ class CsvParticleData:
         self.out_of_mem += out_of_mem
 
 
+class CsvPredatorFile:
+    def __init__(self, directory):
+        self.file_name = directory + '/predator.csv'
+        file_exists = os.path.isfile(self.file_name)
+        if not file_exists:
+            self.csv_file = open(self.file_name, 'w', newline='')
+            self.writer = csv.writer(self.csv_file)
+            self.writer.writerow(['Predator ID', 'Predator Number', 'Predator Steps', 'Particles Caught'])
+
+    def write_particle(self, predator):
+        csv_iterator = [predator.csv_predator_writer.id, predator.csv_predator_writer.number,
+                        predator.csv_predator_writer.steps, predator.csv_predator_writer.particles_caught,
+                        ]
+        self.writer.writerow(csv_iterator)
+
+
+class CsvPredatorData:
+    def __init__(self, predator_id, predator_number):
+        self.id = predator_id
+        self.number = predator_number
+        self.steps = 0
+        self.particles_caught = 0
+
+    def write_particle(self, steps=0, particles_caught=0):
+        self.steps += steps
+        self.particles_caught += particles_caught
+
+
 class CsvRoundData:
     def __init__(self, sim, task=0, solution=0, seed=20,
-                 steps=0, tiles_num=0, particle_num=0, directory='outputs/'):
+                 steps=0, tiles_num=0, particle_num=0, predator_num=0, directory='outputs/'):
         self.sim = sim
         self.tiles_num = tiles_num
 
@@ -83,6 +111,7 @@ class CsvRoundData:
         self.steps_sum = steps
         self.particle_num = particle_num
         self.tile_num = tiles_num
+        self.predator_num = predator_num
         self.success_counter = 0
 
         self.messages_sent = 0
@@ -95,6 +124,8 @@ class CsvRoundData:
         self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
 
+        self.particles_caught = 0
+
         self.directory = directory
         self.file_name = '%s%s' % (self.directory, '/rounds.csv')
         self.csv_file = open(self.file_name, 'w', newline='')
@@ -106,7 +137,7 @@ class CsvRoundData:
                                     'Messages Delivered', 'Messages Delivered Directly',
                                     'Messages Received', 'Messages TTL Expired',
                                     'Messages Delivered Unique', 'Messages Delivered Directly Unique',
-                                    'Receiver Out Of Mem', 'Solution Success'
+                                    'Receiver Out Of Mem', 'Predator Counter', 'Particles Caught', 'Solution Success'
                                     ])
 
     def success(self):
@@ -130,14 +161,17 @@ class CsvRoundData:
     def update_tiles_num(self, tiles_num):
         self.tiles_num = tiles_num
 
-    def update_particle_num(self, particle):
-        self.particle_num = particle
+    def update_particle_num(self, particle_num):
+        self.particle_num = particle_num
+
+    def update_predator_num(self, predator_num):
+        self.predator_num = predator_num
 
     def update_metrics(self, steps=0,
                        messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_delivered_unique=0, messages_delivered_directly_unique=0,
-                       message_ttl_expired=0, receiver_out_of_mem=0):
+                       message_ttl_expired=0, receiver_out_of_mem=0, particles_caught=0):
 
         self.steps_sum += steps
 
@@ -152,6 +186,7 @@ class CsvRoundData:
             self.messages_delivered_unique += messages_delivered_unique
             self.messages_delivered_directly_unique += messages_delivered_directly_unique
             self.receiver_out_of_mem += receiver_out_of_mem
+            self.particles_caught += particles_caught
 
         elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
@@ -165,6 +200,7 @@ class CsvRoundData:
             self.messages_delivered_unique = messages_delivered_unique
             self.messages_delivered_directly_unique = messages_delivered_directly_unique
             self.receiver_out_of_mem = receiver_out_of_mem
+            self.particles_caught = particles_caught
 
     def next_line(self, simulator_round):
         csv_iterator = ['', simulator_round, self.seed, self.solution, self.particle_num,
@@ -173,7 +209,7 @@ class CsvRoundData:
                         self.messages_delivered_directly, self.messages_received,
                         self.message_ttl_expired, self.messages_delivered_unique,
                         self.messages_delivered_directly_unique, self.receiver_out_of_mem,
-                        self.success_counter]
+                        self.predator_num, self.particles_caught, self.success_counter]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = simulator_round
         self.steps = 0
@@ -186,6 +222,7 @@ class CsvRoundData:
         self.messages_delivered_unique = 0
         self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
+        self.particles_caught = 0
         self.success_counter = 0
 
     def aggregate_metrics(self):
@@ -201,27 +238,18 @@ class CsvRoundData:
                                'Messages Delivered Sum', 'Messages Delivered Directly Sum',
                                'Messages Received Sum', 'Messages TTL Expired',
                                'Messages Delivered Unique Sum', 'Messages Delivered Directly Unique Sum',
-                               'Receiver Out Of Mem Sum'
+                               'Receiver Out Of Mem Sum', 'Particles Caught Sum'
                                ])
 
-        csv_interator = [self.seed, data['Round Number'].count(),
-
-                         self.solution,
-
-                         data['Messages Sent'].sum(), data['Messages Forwarded'].sum(),
-                         data['Messages Delivered'].sum(), data['Messages Delivered Directly'].sum(),
-                         data['Messages Received'].sum(),
-
-
-                         data['Messages TTL Expired'].sum(),
-
-                         data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
-
-
-                         data['Receiver Out Of Mem'].sum()
-                         ]
-
-        writer_round.writerow(csv_interator)
+        csv_iterator = [self.seed, data['Round Number'].count(),
+                        self.solution,
+                        data['Messages Sent'].sum(), data['Messages Forwarded'].sum(),
+                        data['Messages Delivered'].sum(), data['Messages Delivered Directly'].sum(),
+                        data['Messages Received'].sum(), data['Messages TTL Expired'].sum(),
+                        data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
+                        data['Receiver Out Of Mem'].sum(), data['Particles Caught Sum'].sum()
+                        ]
+        writer_round.writerow(csv_iterator)
         csv_file.close()
 
 

@@ -12,13 +12,18 @@ import random
 import threading
 import time
 
-from lib import tile, location, vis3d
+from lib import vis3d
+from lib.location import Location
 from lib.oppnet.memory import Memory
+from lib.oppnet.predator import Predator
 from lib.particle import Particle
 from lib.swarm_sim_header import eprint, get_coordinates_in_direction
+from lib.tile import Tile
 
 
 class World:
+    matter_classes = [Particle, Tile, Location, Predator]
+
     def __init__(self, config_data):
         """
         Initializing the world constructor
@@ -27,15 +32,13 @@ class World:
         self.__round_counter = 1
         self.__end = False
 
-        self.init_particles = []
         self.particle_id_counter = 0
         self.particles = []
         self.particle_map_coordinates = {}
         self.particle_map_id = {}
         self.particles_created = []
-        self.particle_rm = []
+        self.particles_rm = []
         self.__particle_deleted = False
-        self.new_particle = None
 
         self.tiles = []
         self.tile_map_coordinates = {}
@@ -54,6 +57,13 @@ class World:
         self.locations_rm = []
         self.__location_deleted = False
         self.new_location = None
+
+        self.predators = []
+        self.predator_map_coordinates = {}
+        self.predator_map_id = {}
+        self.predators_created = []
+        self.predators_rm = []
+        self.__predator_deleted = False
 
         self.config_data = config_data
         self.grid = config_data.grid
@@ -96,15 +106,13 @@ class World:
         self.__round_counter = 1
         self.__end = False
 
-        self.init_particles = []
         self.particle_id_counter = 0
         self.particles = []
         self.particles_created = []
-        self.particle_rm = []
+        self.particles_rm = []
         self.particle_map_coordinates = {}
         self.particle_map_id = {}
         self.__particle_deleted = False
-        self.new_particle = None
 
         self.tiles = []
         self.tiles_created = []
@@ -112,7 +120,6 @@ class World:
         self.tile_map_coordinates = {}
         self.tile_map_id = {}
         self.__tile_deleted = False
-        self.new_tile = None
 
         self.locations = []
         self.locations_created = []
@@ -120,7 +127,13 @@ class World:
         self.location_map_id = {}
         self.locations_rm = []
         self.__location_deleted = False
-        self.new_location = None
+
+        self.predators = []
+        self.predator_map_coordinates = {}
+        self.predator_map_id = {}
+        self.predators_created = []
+        self.predators_rm = []
+        self.__predator_deleted = False
 
         if self.config_data.visualization:
             self.vis.reset()
@@ -157,9 +170,8 @@ class World:
             except IOError as e:
                 eprint(e)
         else:
-           eprint("\"scenario\" folder doesn't exist. "
-                  "Please create it in the running directory before saving scenarios.")
-
+            eprint("\"scenario\" folder doesn't exist. "
+                   "Please create it in the running directory before saving scenarios.")
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -280,6 +292,30 @@ class World:
         """
         return self.tile_map_id
 
+    def get_predators_list(self):
+        """
+        Returns the actual number of tiles in the world
+
+        :return: a list of all the tiles in the world
+        """
+        return self.predators
+
+    def get_predator_map_coordinates(self):
+        """
+        Get a dictionary with all tiles mapped with their actual coordinates
+
+        :return: a dictionary with particles and their coordinates
+        """
+        return self.predator_map_coordinates
+
+    def get_predator_map_id(self):
+        """
+        Get a dictionary with all particles mapped with their own ids
+
+        :return: a dictionary with particles and their own ids
+        """
+        return self.predator_map_id
+
     def get_amount_of_locations(self):
         """
         Returns the actual number of locations in the world
@@ -365,33 +401,17 @@ class World:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if len(self.particles) < self.config_data.max_particles:
-            if self.grid.are_valid_coordinates(coordinates):
-                if coordinates not in self.get_particle_map_coordinates():
-                    if color is None:
-                        color = self.config_data.particle_color
-                    self.particle_id_counter += 1
-                    self.new_particle = self.particle_mod.Particle(self, coordinates=coordinates, color=color,
-                                                                   particle_counter=self.particle_id_counter,
-                                                                   csv_generator=self.csv_generator)
-                    if self.vis is not None:
-                        self.vis.particle_changed(self.new_particle)
-                    self.particles_created.append(self.new_particle)
-                    self.particle_map_coordinates[self.new_particle.coordinates] = self.new_particle
-                    self.particle_map_id[self.new_particle.get_id()] = self.new_particle
-                    self.particle_color_map[self.new_particle] = self.new_particle.get_color()
-                    self.particles.append(self.new_particle)
-                    self.csv_round.update_particle_num(len(self.particles))
-                    self.init_particles.append(self.new_particle)
-                    self.new_particle.created = True
-                    logging.info("Created particle at %s", self.new_particle.coordinates)
-                    return self.new_particle
-
-                else:
-                    logging.info("there is already a particle on %s" % str(coordinates))
-                    return False
-            else:
-                logging.info("%s is not a valid location!" % str(coordinates))
-                return False
+            if color is None:
+                color = self.config_data.particle_color
+            particle = self.particle_mod.Particle(self, coordinates=coordinates, color=color,
+                                                  particle_counter=self.particle_id_counter,
+                                                  csv_generator=self.csv_generator)
+            return_value = self.add_matter(particle, coordinates)
+            if return_value:
+                self.particles_created.append(particle)
+                self.particle_color_map[particle] = color
+                self.particle_id_counter += 1
+            return return_value
         else:
             logging.info("Max of particles reached and no more particles can be created")
             return False
@@ -403,20 +423,7 @@ class World:
         :param particle_id: particle id
         :return: True: Successful removed; False: Unsuccessful
         """
-        rm_particle = self.particle_map_id[particle_id]
-        if rm_particle:
-            self.particles.remove(rm_particle)
-            del self.particle_map_coordinates[rm_particle.coordinates]
-            del self.particle_map_id[particle_id]
-            self.particle_rm.append(rm_particle)
-            if self.vis is not None:
-                self.vis.remove_particle(rm_particle)
-            self.csv_round.update_particle_num(len(self.particles))
-            self.csv_round.update_metrics(particle_deleted=1)
-            self.__particle_deleted = True
-            return True
-        else:
-            return False
+        self.remove_matter(particle_id, Particle)
 
     def remove_particle_on(self, coordinates):
         """
@@ -425,10 +432,7 @@ class World:
         :param coordinates: A tuple that includes the x and y coordinates
         :return: True: Successful removed; False: Unsuccessful
         """
-        if coordinates in self.particle_map_coordinates:
-            return self.remove_particle(self.particle_map_coordinates[coordinates].get_id())
-        else:
-            return False
+        return self.remove_matter_on(coordinates, Particle)
 
     def add_tile(self, coordinates, color=None):
         """
@@ -437,31 +441,9 @@ class World:
         :param coordinates: the coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccessful
         """
-
-        if len(coordinates) == 2:
-            coordinates = (coordinates[0], coordinates[1], 0.0)
-
-        if self.grid.are_valid_coordinates(coordinates):
-            if coordinates not in self.tile_map_coordinates:
-                if color is None:
-                    color = self.config_data.tile_color
-                self.new_tile = tile.Tile(self, coordinates, color)
-                self.tiles.append(self.new_tile)
-                if self.vis is not None:
-                    self.vis.tile_changed(self.new_tile)
-                self.csv_round.update_tiles_num(len(self.tiles))
-                self.tile_map_coordinates[self.new_tile.coordinates] = self.new_tile
-                self.tile_map_id[self.new_tile.get_id()] = self.new_tile
-                logging.info("Created tile with tile id %s on coordinates %s",
-                             str(self.new_tile.get_id()), str(coordinates))
-                return self.new_tile
-
-            else:
-                logging.info("there is already a tile on %s " % str(coordinates))
-                return False
-        else:
-            logging.info("%s is not a valid location!" % str(coordinates))
-            return False
+        if color is None:
+            color = self.config_data.tile_color
+        return self.add_matter(Tile(self, coordinates, color), coordinates)
 
     def remove_tile(self, tile_id):
         """
@@ -470,26 +452,7 @@ class World:
         :param tile_id: The tiles id that should be removed
         :return:  True: Successful removed; False: Unsuccessful
         """
-        if tile_id in self.tile_map_id:
-            rm_tile = self.tile_map_id[tile_id]
-            self.tiles.remove(rm_tile)
-            self.tiles_rm.append(rm_tile)
-            if self.vis is not None:
-                self.vis.remove_tile(rm_tile)
-            logging.info("Deleted tile with tile id %s on %s", str(rm_tile.get_id()), str(rm_tile.coordinates))
-            try:  # cher: added so the program does not crashed if it does not find any entries in the map
-                del self.tile_map_id[rm_tile.get_id()]
-            except KeyError:
-                pass
-            try:  # cher: added so the program does not crashed if it does not find any entries in the map
-                del self.tile_map_coordinates[rm_tile.coordinates]
-            except KeyError:
-                pass
-            self.csv_round.update_tiles_num(len(self.tiles))
-            self.__tile_deleted = True
-            return True
-        else:
-            return False
+        return self.remove_matter(tile_id, Tile)
 
     def remove_tile_on(self, coordinates):
         """
@@ -498,11 +461,7 @@ class World:
         :param coordinates: A tuple that includes the x and y coordinates
         :return: True: Successful removed; False: Unsuccessful
         """
-        if coordinates in self.tile_map_coordinates:
-            return self.remove_tile(self.tile_map_coordinates[coordinates].get_id())
-
-        else:
-            return False
+        self.remove_matter_on(coordinates, Tile)
 
     def add_location(self, coordinates, color=None):
         """
@@ -512,31 +471,9 @@ class World:
         :param coordinates: the coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccessful
         """
-
-        if len(coordinates) == 2:
-            coordinates = (coordinates[0], coordinates[1], 0.0)
-
-        if self.grid.are_valid_coordinates(coordinates):
-            if coordinates not in self.location_map_coordinates:
-                if color is None:
-                    color = self.config_data.location_color
-                self.new_location = location.Location(self, coordinates, color)
-                self.locations.append(self.new_location)
-                if self.vis is not None:
-                    self.vis.location_changed(self.new_location)
-                self.location_map_coordinates[self.new_location.coordinates] = self.new_location
-                self.location_map_id[self.new_location.get_id()] = self.new_location
-                self.csv_round.update_locations_num(len(self.locations))
-                logging.info("Created location with id %s on coordinates %s",
-                             str(self.new_location.get_id()), str(self.new_location.coordinates))
-                self.new_location.created = True
-                return self.new_location
-            else:
-                logging.info("there is already a location on %s" % str(coordinates))
-                return False
-        else:
-            logging.info("%s is not a valid location!" % str(coordinates))
-            return False
+        if color is None:
+            color = self.config_data.location_color
+        return self.add_matter(Location(self, coordinates, color), coordinates)
 
     def remove_location(self, location_id):
         """
@@ -545,28 +482,7 @@ class World:
         :param location_id: The locations id that should be removed
         :return:  True: Successful removed; False: Unsuccessful
         """
-        if location_id in self.location_map_id:
-            rm_location = self.location_map_id[location_id]
-            if rm_location in self.locations:
-                self.locations.remove(rm_location)
-            if self.vis is not None:
-                self.vis.remove_location(rm_location)
-            self.locations_rm.append(rm_location)
-            logging.info("Deleted location with location id %s on %s", str(location_id), str(rm_location.coordinates))
-            try:
-                del self.location_map_coordinates[rm_location.coordinates]
-            except KeyError:
-                pass
-            try:
-                del self.location_map_id[location_id]
-            except KeyError:
-                pass
-            self.csv_round.update_locations_num(len(self.locations))
-            self.csv_round.update_metrics(location_deleted=1)
-            self.__location_deleted = True
-            return True
-        else:
-            return False
+        return self.remove_matter(location_id, Location)
 
     def remove_location_on(self, coordinates):
         """
@@ -575,8 +491,107 @@ class World:
         :param coordinates: A tuple that includes the x and y coordinates
         :return: True: Successful removed; False: Unsuccessful
         """
-        if coordinates in self.location_map_coordinates:
-            return self.remove_location(self.location_map_coordinates[coordinates].get_id())
+        return self.remove_matter_on(coordinates, Location)
+
+    def add_predator(self, coordinates, color=None):
+        if color is None:
+            color = self.config_data.predator_color
+        return self.add_matter(Predator(self, coordinates, color, csv_generator=self.csv_generator), coordinates)
+
+    def add_matter(self, matter, coordinates):
+        """
+        Add a tile to the world database
+
+        :param matter: Matter
+        :param coordinates: the coordinates on which the tile should be added
+        :return: True: Successful added; False: Unsuccessful
+        """
+        matter_type = type(matter)
+        bases = matter_type.__bases__
+        if matter_type not in self.matter_classes and bases[0] not in self.matter_classes:
+            eprint('world.py -> add_matter() class {} with bases {} of matter param not supported'.format(
+                matter_type, bases[0]))
+            return
+
+        if len(coordinates) == 2:
+            coordinates = (coordinates[0], coordinates[1], 0.0)
+
+        map_coordinates = self._get_map_coordinates_for_matter(matter)
+        matters_list = self._get_matter_list(matter)
+
+        if self.grid.are_valid_coordinates(coordinates):
+            if coordinates not in map_coordinates:
+                matters_list.append(matter)
+                if self.vis is not None:
+                    self._get_matter_changed_function(matter)(matter)
+                map_coordinates[matter.coordinates] = matter
+                self._get_map_id_for_matter(matter)[matter.get_id()] = matter
+                self._get_csv_update_num_function_for_matter(matter)(len(matters_list))
+                logging.info("Created {} with id {} on coordinates {}".format(
+                    type(matter), matter.get_id(), matter.coordinates))
+                matter.created = True
+                return matter
+            else:
+                logging.info("there is already a location on {}".format(matter.coordinates))
+                return False
+        else:
+            logging.info("{} is not a valid location!".format(matter.coordinates))
+            return False
+
+    def remove_matter(self, matter_id, matter_class):
+        """
+        Removes a matter with a given tile_id from to the world database
+
+        :param matter_id: The matter id that should be removed
+        :param matter_class: The matter subclass
+        :return:  True: Successful removed; False: Unsuccessful
+        """
+        map_id = self._get_map_id_for_matter(matter_class)
+        map_coordinates = self._get_map_coordinates_for_matter(matter_class)
+        matter_list = self._get_matter_list(matter_class)
+        if matter_id in map_id:
+            removed_matter = map_id[matter_id]
+            if removed_matter in matter_list:
+                matter_list.remove(removed_matter)
+            if self.vis is not None:
+                self.vis.remove_location(removed_matter)
+            self._get_matter_list_rm(matter_class).append(removed_matter)
+            logging.info("Deleted matter with id {} on {}".format(matter_id, removed_matter.coordinates))
+            try:
+                del map_coordinates[removed_matter.coordinates]
+            except KeyError:
+                pass
+            try:
+                del map_id[matter_id]
+            except KeyError:
+                pass
+            self._get_csv_update_num_function_for_matter(matter_class)(len(matter_list))
+            self._update_deleted_metrics_(matter_class)
+            return True
+        else:
+            return False
+
+    def _update_deleted_metrics_(self, matter):
+        if isinstance(matter, Particle) or matter == Particle:
+            self.csv_round.update_metrics(particles_deleted=1)
+        elif isinstance(matter, Location) or matter == Location:
+            self.csv_round.update_metrics(location_deleted=1)
+        elif isinstance(matter, Tile) or matter == Tile:
+            self.csv_round.update_metrics(tile_deleted=1)
+        else:
+            return None
+
+    def remove_matter_on(self, coordinates, matter_class):
+        """
+        Removes a matter on a give coordinates from to the world database
+
+        :param coordinates: A tuple that includes the x and y coordinates
+        :param matter_class: The matter subclass
+        :return: True: Successful removed; False: Unsuccessful
+        """
+        map_coordinates = self._get_map_coordinates_for_matter(matter_class)
+        if coordinates in map_coordinates:
+            return self.remove_matter(map_coordinates[coordinates].get_id(), matter_class)
         else:
             return False
 
@@ -662,6 +677,125 @@ class World:
         """
         for particle, color in self.particle_color_map.items():
             particle.set_color(color)
+
+    def _get_matter_list(self, matter):
+        """
+            Returns the corresponding list of matter for the class of :param matter.
+            :param matter: Matter object or Matter subclass
+            :return: function
+            """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.predators
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.particles
+        elif isinstance(matter, Location) or matter == Location:
+            return self.locations
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.tiles
+        else:
+            return None
+
+    def _get_matter_list_rm(self, matter):
+        """
+            Returns the corresponding list of removed matter for the class of :param matter.
+            :param matter: Matter object or Matter subclass
+            :return: function
+            """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.predators_rm
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.particles_rm
+        elif isinstance(matter, Location) or matter == Location:
+            return self.locations_rm
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.tiles_rm
+        else:
+            return None
+
+    def _get_matter_changed_function(self, matter):
+        """
+            Returns the corresponding matter changed function in vis for the class of :param matter.
+            :param matter: Matter object or Matter subclass
+            :return: function
+            """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.vis.predator_changed
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.vis.particle_changed
+        elif isinstance(matter, Location) or matter == Location:
+            return self.vis.location_changed
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.vis.tile_changed
+        else:
+            return None
+
+    def _get_matter_removed_function(self, matter):
+        """
+            Returns the corresponding matter changed function in vis for the class of :param matter.
+            :param matter: Matter object or Matter subclass
+            :return: function
+            """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.vis.predator_changed
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.vis.particle_changed
+        elif isinstance(matter, Location) or matter == Location:
+            return self.vis.location_changed
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.vis.tile_changed
+        else:
+            return None
+
+    def _get_map_coordinates_for_matter(self, matter):
+        """
+        Returns the corresponding map_coordinates dictionary for the class of :param matter.
+        :param matter: Matter object or Matter subclass
+        :return: dict
+        """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.predator_map_coordinates
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.particle_map_coordinates
+        elif isinstance(matter, Location) or matter == Location:
+            return self.location_map_coordinates
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.tile_map_coordinates
+        else:
+            return None
+
+    def _get_map_id_for_matter(self, matter):
+        """
+        Returns the corresponding map_id dictionary for the class of :param matter.
+        :param matter: Matter object or Matter subclass
+        :return: dict
+        """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.predator_map_id
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.particle_map_id
+        elif isinstance(matter, Location) or matter == Location:
+            return self.location_map_id
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.tile_map_id
+        else:
+            return None
+
+    def _get_csv_update_num_function_for_matter(self, matter):
+        """
+            Returns the corresponding matter updated number function in csv_generator for the class of :param matter.
+            :param matter: Matter object
+            :return: function
+            """
+        if isinstance(matter, Predator) or matter == Predator:
+            return self.csv_round.update_predator_num
+        elif isinstance(matter, Particle) or matter == Particle:
+            return self.csv_round.update_particle_num
+        elif isinstance(matter, Location) or matter == Location:
+            return self.csv_round.update_locations_num
+        elif isinstance(matter, Tile) or matter == Tile:
+            return self.csv_round.update_tiles_num
+        else:
+            return None
 
     @staticmethod
     def __get_x__(coordinates):

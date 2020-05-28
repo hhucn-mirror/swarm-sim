@@ -1,11 +1,11 @@
 import importlib
+import time
 from threading import Thread
 
 from PyQt5.QtWidgets import QApplication, QSplitter, QWidget
 
 from lib.swarm_sim_header import eprint
 from lib.visualization.OGLWidget import OGLWidget
-import time
 from lib.visualization.camera import Camera
 from lib.visualization.utils import LoadingWindow
 
@@ -264,6 +264,31 @@ class Visualization:
         self._viewer.location_update_flag = True
         self._viewer.location_offset_data[location] = (location.coordinates, location.color)
 
+    def remove_predator(self, predator):
+        """
+        removes a predator from the visualization.
+        it wont be deleted immediately! not until the next round.
+        if you want an immediate deletion of the predator, then call this function, then, update_data and after that
+        glDraw of the OpenGLWidget.
+
+        :param predator: the predator (not the id, the instance) to be deleted
+        :return:
+        """
+        self._viewer.predator_update_flag = True
+        if predator in self._viewer.predator_offset_data:
+            del self._viewer.predator_offset_data[predator]
+
+    def predator_changed(self, predator):
+        """
+        updates the offset, color and carry data of the predator in the visualization.
+        it wont be an immediate update. it will update in the beginning of the next "run" call / after current round.
+        :param predator: the predator that has changed (the instance)
+        :return:
+        """
+        self._viewer.predator_update_flag = True
+        self._viewer.predator_offset_data[predator] = (predator.coordinates, predator.color,
+                                                       1.0 if predator.get_carried_status() else 0.0)
+
     def update_visualization_data(self):
         self._viewer.update_data()
 
@@ -418,7 +443,14 @@ class Visualization:
         self._viewer.programs["location"].set_model_scaling(scaling)
         self._viewer.glDraw()
 
+    def get_predator_scaling(self):
+        return self._viewer.programs["predator"].get_model_scaling()
+
+    def set_predator_scaling(self, scaling):
+        self._viewer.programs["predator"].set_model_scaling(scaling)
+        self._viewer.glDraw()
+
     def set_on_cursor_click_matter_type(self, matter_type):
-        if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':
+        if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location' or matter_type == 'predator':
             self._viewer.cursor_type = matter_type
             self._viewer.update_cursor_data()

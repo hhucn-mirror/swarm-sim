@@ -22,6 +22,9 @@ def scenario(world: World):
     for location in hexagon:
         world.add_particle(coordinates=location, color=particle_color)
 
+    for location in get_hexagon_coordinates((radius * 2 + 1, 0), radius, True):
+        world.add_predator(coordinates=location, color=world.config_data.predator_color)
+
 
 def remove_random_locations(hexagon: list, number_of_locations_to_remove):
     """

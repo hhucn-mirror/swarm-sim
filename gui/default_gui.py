@@ -1,15 +1,13 @@
-from PyQt5.QtGui import QColor, QIntValidator, QFont
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QIntValidator
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
                              QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QComboBox)
-from PyQt5.QtCore import Qt
-from OpenGL.GL import glGetFloatv, GL_LINE_WIDTH_RANGE
 
 from lib.swarm_sim_header import eprint
 from lib.vis3d import Visualization
 
 
 def create_gui(world, vis: Visualization):
-
     tabbar = QTabWidget()
     tabbar.setMinimumWidth(200)
     tabbar.addTab(sim_tab(vis, world), "Simulation")
@@ -168,13 +166,15 @@ def matter_tab(vis):
     layout.addStretch(1)
     layout.addLayout(get_tile_scaler(vis))
     layout.addStretch(1)
+    layout.addLayout(get_predator_scaler(vis))
+    layout.addStretch(1)
     tab.setLayout(layout)
     return tab
 
 
 def get_matter_combo(vis):
     combo = QComboBox()
-    combo.addItems(["particle", "tile", "location"])
+    combo.addItems(["particle", "tile", "location", "predator"])
     combo.setCurrentIndex(1)
 
     def on_change(value):
@@ -327,6 +327,54 @@ def get_location_scaler(vis):
     vbox.addLayout(hbox3)
 
     return vbox
+
+
+def get_predator_scaler(vis):
+    def x_scaler_change(value):
+        current_scaling = vis.get_predator_scaling()
+        print(current_scaling)
+        new_scaling = (value / 10.0, current_scaling[1], current_scaling[2])
+        print(new_scaling)
+        vis.set_predator_scaling(new_scaling)
+
+    def y_scaler_change(value):
+        current_scaling = vis.get_predator_scaling()
+        new_scaling = (current_scaling[0], value / 10.0, current_scaling[2])
+        vis.set_predator_scaling(new_scaling)
+
+    def z_scaler_change(value):
+        current_scaling = vis.get_predator_scaling()
+        new_scaling = (current_scaling[0], current_scaling[1], value / 10.0)
+        vis.set_predator_scaling(new_scaling)
+
+    current_scaling = vis.get_predator_scaling()
+    x_desc = QLabel("x scale:")
+    y_desc = QLabel("y scale:")
+    z_desc = QLabel("z scale:")
+    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, z_scaler_change)
+
+    hbox1 = QHBoxLayout()
+    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
+    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
+
+    hbox2 = QHBoxLayout()
+    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
+    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
+
+    hbox3 = QHBoxLayout()
+    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
+    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(QLabel("predator scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addLayout(hbox1)
+    vbox.addLayout(hbox2)
+    vbox.addLayout(hbox3)
+
+    return vbox
+
 
 def get_fov_slider(vis: Visualization):
     hbox = QVBoxLayout()

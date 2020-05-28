@@ -1,15 +1,14 @@
-import inspect
+import time
 
 import OpenGL.GL as GL
+import numpy as np
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 
 from lib.swarm_sim_header import eprint
+from lib.visualization.programs.grid_program import GridProgram
 from lib.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
-from lib.visualization.programs.grid_program import GridProgram
-import numpy as np
-import time
 
 
 class OGLWidget(QtOpenGL.QGLWidget):
@@ -55,6 +54,8 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.tile_update_flag = False
         self.location_offset_data = {}
         self.location_update_flag = False
+        self.predator_offset_data = {}
+        self.predator_update_flag = False
 
     def update_scene(self):
         """
@@ -112,6 +113,18 @@ class OGLWidget(QtOpenGL.QGLWidget):
                 self.programs["location"].update_offsets(tmp[0].tolist())
                 self.programs["location"].update_colors(tmp[1].tolist())
 
+        if self.predator_update_flag:
+            self.predator_update_flag = False
+            tmp = np.array(list(self.predator_offset_data.values())).transpose()
+            if len(tmp) == 0:
+                self.programs["predator"].update_offsets([])
+                self.programs["predator"].update_colors([])
+                self.programs["predator"].update_carried([])
+            else:
+                self.programs["predator"].update_offsets(tmp[0].tolist())
+                self.programs["predator"].update_colors(tmp[1].tolist())
+                self.programs["predator"].update_carried(tmp[2].tolist())
+
     def initializeGL(self):
         """
         This method is called when the OpenGL context was successfully created by the PyQt5 library.
@@ -139,6 +152,10 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
         self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["location"].set_model_scaling(self.world.config_data.location_scaling)
+
+        self.programs["predator"] = OffsetColorCarryProgram(self.world.config_data.predator_model_file)
+        self.programs["predator"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["predator"].set_model_scaling(self.world.config_data.predator_scaling)
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
@@ -184,6 +201,12 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["cursor_location"].set_model_scaling((1.1, 1.1, 1.1))
         self.programs["cursor_location"].update_offsets([0.0, 0.0, 0.0])
         self.programs["cursor_location"].update_colors(self.world.config_data.cursor_color)
+
+        self.programs["cursor_predator"] = OffsetColorProgram(self.world.config_data.predator_model_file)
+        self.programs["cursor_predator"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_predator"].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs["cursor_predator"].update_offsets([0.0, 0.0, 0.0])
+        self.programs["cursor_predator"].update_colors(self.world.config_data.cursor_color)
 
     def resizeGL(self, width, height):
         """
@@ -262,6 +285,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # draw
         self.programs["particle"].draw()
         self.programs["location"].draw()
+        self.programs["predator"].draw()
         self.programs["tile"].draw()
         self.programs["grid"].draw()
 
@@ -291,16 +315,21 @@ class OGLWidget(QtOpenGL.QGLWidget):
                     self.world.remove_tile_on(nl)
                 else:
                     self.world.add_tile(nl)
-            if self.cursor_type == 'particle':
+            elif self.cursor_type == 'particle':
                 if nl in self.world.particle_map_coordinates:
                     self.world.remove_particle_on(nl)
                 else:
                     self.world.add_particle(nl)
-            if self.cursor_type == 'location':
+            elif self.cursor_type == 'location':
                 if nl in self.world.location_map_coordinates:
                     self.world.remove_location_on(nl)
                 else:
                     self.world.add_location(nl)
+            elif self.cursor_type == 'predator':
+                if nl in self.world.predator_map_coordinates:
+                    self.world.remove_predator(nl)
+                else:
+                    self.world.add_predator(nl)
             self.update_data()
             self.glDraw()
         else:
