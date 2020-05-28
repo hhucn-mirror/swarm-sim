@@ -473,8 +473,10 @@ class Particle(Particle):
         """
         return Point(self.coordinates[0], self.coordinates[1])
 
+    @property
     def get_current_neighbourhood(self):
         return self.__current_neighbourhood__
 
+    @property
     def get_previous_neighbourhood(self):
         return self.__previous_neighbourhood__
