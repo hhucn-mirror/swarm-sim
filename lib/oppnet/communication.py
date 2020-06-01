@@ -303,10 +303,12 @@ def generate_random_messages(particle_list, amount, world, ttl_range=None):
         if ttl_range is not tuple:
             ttl_range = (1, round(world.get_max_round() / 10))
     else:
-        ttl_range = (world.message_ttl, world.message_ttl)
+        ttl_range = (world.config_data.message_ttl, world.config_data.message_ttl)
     for sender in particle_list:
         for _ in range(0, amount):
             receiver = random.choice([particle for particle in particle_list if particle != sender])
-            messages.append(Message(sender, receiver, start_round=world.get_actual_round(),
-                                    ttl=random.randint(ttl_range[0], ttl_range[1])))
+            message = Message(sender, receiver, start_round=world.get_actual_round(),
+                              ttl=random.randint(ttl_range[0], ttl_range[1]))
+            sender.send_store.append(message)
+            messages.append(message)
     return messages

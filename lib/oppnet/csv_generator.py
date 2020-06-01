@@ -47,6 +47,7 @@ class CsvParticleData:
         self.id = particle_id
         self.number = particle_number
         self.steps = 0
+        self.particle_write = 0
         self.messages_sent = 0
         self.messages_forwarded = 0
         self.messages_delivered = 0
@@ -55,10 +56,11 @@ class CsvParticleData:
         self.messages_ttl_expired = 0
         self.out_of_mem = 0
 
-    def write_particle(self, steps=0, messages_sent=0, messages_forwarded=0,
+    def write_particle(self, steps=0, particle_write=0, messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_ttl_expired=0, out_of_mem=0):
         self.steps += steps
+        self.particle_write += particle_write
         self.messages_sent += messages_sent
         self.messages_forwarded += messages_forwarded
         self.messages_delivered += messages_delivered
@@ -114,6 +116,10 @@ class CsvRoundData:
         self.predator_num = predator_num
         self.success_counter = 0
 
+        self.memory_write = 0
+        self.memory_read = 0
+        self.particle_write = 0
+        self.particle_read = 0
         self.messages_sent = 0
         self.messages_forwarded = 0
         self.messages_delivered = 0
@@ -167,7 +173,7 @@ class CsvRoundData:
     def update_predator_num(self, predator_num):
         self.predator_num = predator_num
 
-    def update_metrics(self, steps=0,
+    def update_metrics(self, steps=0, memory_write=0, memory_read=0, particle_write=0, particle_read=0,
                        messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_delivered_unique=0, messages_delivered_directly_unique=0,
@@ -177,6 +183,9 @@ class CsvRoundData:
 
         if self.actual_round == self.sim.get_actual_round():
             self.steps += steps
+            self.memory_write += memory_write
+            self.memory_read += memory_read
+            self.particle_write += particle_write
             self.messages_sent += messages_sent
             self.messages_forwarded += messages_forwarded
             self.messages_delivered += messages_delivered
@@ -191,6 +200,10 @@ class CsvRoundData:
         elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
             self.steps = steps
+            self.memory_write = memory_write
+            self.memory_read = memory_read
+            self.particle_write = particle_write
+            self.particle_read = particle_read
             self.messages_sent = messages_sent
             self.messages_forwarded = messages_forwarded
             self.messages_delivered = messages_delivered

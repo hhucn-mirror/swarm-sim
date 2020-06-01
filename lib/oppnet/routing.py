@@ -3,6 +3,8 @@ from enum import Enum
 from lib.oppnet.communication import send_message
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
 
+PROB_KEY = 'PROB_KEY'
+
 
 class Algorithm(Enum):
     """
@@ -13,6 +15,7 @@ class Algorithm(Enum):
     One_Leader_Flocking = 2
     Multi_Leader_Flocking = 3
     Average_Consensus_Flocking = 4
+    Prophet = 5
 
 
 class MANeTRole(Enum):
@@ -25,7 +28,8 @@ class MANeTRole(Enum):
 
 class RoutingParameters:
 
-    def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0):
+    def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0,
+                 l_encounter=.75, gamma=.99, beta=.25, p_init=.75):
         """
         Constructor
         :param algorithm: The routing algorithm to be used.
@@ -36,6 +40,14 @@ class RoutingParameters:
         :type manet_role: :class:`~routing.MANeTRole`
         :param manet_group: Group the particle belongs to.
         :type manet_group: int
+        :param l_encounter: the encounter impact for any particle in PRoPHET
+        :type l_encounter: float
+        :param gamma: age scaling for PRoPHET
+        :type gamma: float
+        :param beta: the encounter impact for the receiving particle in PRoPHET
+        :type beta: float
+        :param p_init: initial estimated delivery probability in PRoPHET
+        :type p_init: float
         """
         if type(algorithm) == str:
             self.algorithm = Algorithm[algorithm]
@@ -46,6 +58,10 @@ class RoutingParameters:
         if manet_role is None:
             self.manet_role = MANeTRole.Node
         self.scan_radius = scan_radius
+        self.l_encounter = l_encounter
+        self.gamma = gamma
+        self.beta = beta
+        self.p_init = p_init
 
     @staticmethod
     def same_manet_group(particle1, particle2):
@@ -85,6 +101,8 @@ def next_step(particles, scan_radius=None):
             __next_step_multi_leader_flocking__(particle)
         elif routing_params.algorithm == Algorithm.Average_Consensus_Flocking:
             __next_step_average_consensus_flocking__(particle)
+        elif routing_params.algorithm == Algorithm.Prophet:
+            __next_step_prophet__(particle)
 
 
 def __next_step_epidemic__(sender, nearby=None):
@@ -144,6 +162,85 @@ def __next_step_average_consensus_flocking__(particle):
     particle.update_current_neighbourhood()
     particle.send_all_to_forward()
     particle.process_received()
+
+
+def __next_step_prophet__(particle):
+    """
+    Executes the next PRoPHET routing step for :param particle.
+    :param particle: The particle which routing model should be executed.
+    :type particle: :class:`~particle.Particle`
+    """
+    routing_params = particle.routing_parameters
+    nearby = particle.scan_for_particles_within(hop=routing_params.scan_radius)
+    probabilities = __age_delivery_probability__(particle)
+    if nearby:
+        for encounter in nearby:
+            (current_probability, last_encounter_round) = probabilities[encounter.get_id()]
+            current_probability = __update_estimated_probability__(current_probability, routing_params)
+            probabilities = __try_and_transfer_messages__(particle, probabilities, current_probability, encounter)
+
+    particle.write_to_with(target=particle, key=PROB_KEY, data=probabilities)
+
+
+def __age_delivery_probability__(particle):
+    """
+    Ages the estimated delivery probability for each entry in the probability dictionary of :param particle.
+    :param particle: the particle of which probabilities to update
+    :type particle: :class:`~particle.Particle`
+    :return: the particles updated delivery probabilities
+    :rtype:  dict
+    """
+    probabilities = particle.read_from_with(target=particle, key=PROB_KEY)
+    current_round = particle.world.get_actual_round()
+    for receiver_id, (probability, last_encounter_round) in probabilities.items():
+        probability = probability * pow(particle.routing_parameters.gamma, (current_round - last_encounter_round))
+        probabilities[receiver_id] = (probability, last_encounter_round)
+    return probabilities
+
+
+def __update_estimated_probability__(current_probability, routing_params):
+    """
+    Updates the estimated delivery probability for an encountered particle.
+    :param current_probability: the current estimated delivery probability
+    :type current_probability: float
+    :param routing_params: the routing parameters of the :param particle
+    :type routing_params: :class:`~routing.RoutingParameters`
+    :return: the updated estimated delivery probability
+    :rtype: float
+    """
+    return current_probability + (1 - current_probability) * routing_params.l_encounter
+
+
+def __try_and_transfer_messages__(particle, probabilities, particle_probability_for_encounter, encounter):
+    """
+    Transfers messages from :param particle to :param encounter if the latter has at least an equally high
+    estimated probability to deliver them.
+    :param particle: the particle to transfer the messages from
+    :type particle: :class:`~particle.Particle`
+    :param probabilities: the estimated delivery probabilities dictionary from :param particle
+    :type probabilities: dict
+    :param particle_probability_for_encounter: the estimated delivery probability from :param particle
+    to :param encounter
+    :type particle_probability_for_encounter: float
+    :param encounter: the particle encountered by :param particle
+    :type encounter: :class:`~particle.Particle`
+    :return: the updated estimated delivery probabilities of :param particle
+    :rtype: dict
+    """
+    probabilities_encounter = particle.read_from_with(target=encounter, key=PROB_KEY)
+    for message in list(particle.send_store):
+        receiver_id = message.get_actual_receiver().get_id()
+        # get both estimated delivery probabilities for the particle and its encounter
+        (particle_probability_for_receiver, last_encounter_receiver) = probabilities.get(receiver_id)
+        (encounter_probability_for_receiver, _) = probabilities_encounter.get(receiver_id)
+        # if the encounter is at least as likely to deliver the message, then transfer it
+        if encounter_probability_for_receiver >= particle_probability_for_receiver:
+            send_message(particle, encounter, message)
+        # regardless update probability for particle with receiver_id
+        particle_probability_for_receiver += (1 - particle_probability_for_receiver) * \
+            particle_probability_for_encounter * encounter_probability_for_receiver * particle.routing_parameters.beta
+        probabilities[receiver_id] = (particle_probability_for_receiver, last_encounter_receiver)
+    return probabilities
 
 
 class RoutingContact:

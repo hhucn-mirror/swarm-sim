@@ -91,7 +91,12 @@ class ConfigData:
         self.message_store_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
         routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
         scan_radius = config.getint("Routing", "scan_radius")
-        self.routing_parameters = RoutingParameters(routing_algorithm, scan_radius)
+        l_encounter = config.getfloat("Routing", "l_encounter")
+        gamma = config.getfloat("Routing", "gamma")
+        beta = config.getfloat("Routing", "beta")
+        p_init = config.getfloat("Routing", "p_init")
+        self.routing_parameters = RoutingParameters(routing_algorithm, scan_radius, l_encounter=l_encounter,
+                                                    gamma=gamma, beta=beta, p_init=p_init)
 
         self.message_ttl = config.getint("Routing", "message_ttl")
         self.signal_velocity = config.getint("Routing", "signal_velocity")

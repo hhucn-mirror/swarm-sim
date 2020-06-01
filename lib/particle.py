@@ -95,7 +95,8 @@ class Particle(matter.Matter):
                 del self.world.particle_map_coordinates[self.coordinates]
             self.coordinates = direction_coord
             self.world.particle_map_coordinates[self.coordinates] = self
-            self.world.vis.particle_changed(self)
+            if self.world.vis:
+                self.world.vis.particle_changed(self)
             logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
             self.world.csv_round.update_metrics(steps=1)
             self.csv_particle_writer.write_particle(steps=1)
@@ -137,13 +138,10 @@ class Particle(matter.Matter):
         and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
             if target.type == "particle":
                 self.world.csv_round.update_metrics(particle_read=1)
-                self.csv_particle_writer.write_particle(particle_read=1)
             elif target.type == "tile":
                 self.world.csv_round.update_metrics(tile_read=1)
-                self.csv_particle_writer.write_particle(tile_read=1)
             elif target.type == "location":
                 self.world.csv_round.update_metrics(location_read=1)
-                self.csv_particle_writer.write_particle(location_read=1)
             return tmp_memory
         return None
 
