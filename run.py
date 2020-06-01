@@ -53,19 +53,23 @@ class ConfigData():
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
 #        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
 
-        self.scan_radius = config.getint("Routing", "scan_radius")
-
         self.dir_name = None #TODO
         self.mm_limit = config.getint("Matter", "mm_limitation") #TODO
         self.mm_size = config.getint("Matter", "particle_mm_size") #TODO
         self.seed = config.getint("Simulator", "seedvalue") #TODO
 
+        self.scan_radius = config.getint("Routing", "scan_radius")
         self.ms_size = config.getint("Routing", "ms_size")
         self.ms_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
         self.delivery_delay = config.getint("Routing", "delivery_delay")
         self.routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
-        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
         self.message_ttl = config.getint("Routing", "message_ttl")
+        self.l_encounter = config.getfloat("Routing", "l_encounter")
+        self.gamma = config.getfloat("Routing", "gamma")
+        self.beta = config.getfloat("Routing", "beta")
+        self.p_init = config.getfloat("Routing", "p_init")
+        self.mobility_model_mode = Mode(config.getint("MobilityModel", "mode"))
+
 
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
@@ -109,7 +113,7 @@ def swarm_sim( argv ):
                "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                str(config_data.seedvalue)
 
-        config_data.dir_name = "./outputs/mulitple/"+ config_data.dir_name
+        config_data.dir_name = "./outputs/multiple/" + config_data.dir_name
 
     else:
         config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \

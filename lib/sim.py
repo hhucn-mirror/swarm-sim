@@ -110,8 +110,6 @@ class Sim:
                                                           steps=0, directory=config_data.dir_name)
 
         self.memory = Memory(MemoryMode.Delta)
-        self.plotdata_x = []
-        self.plotdata_y = []
         mod = importlib.import_module('scenario.' + config_data.scenario.rsplit('.', 1)[0])
         mod.scenario(self)
         if config_data.random_order:
@@ -128,17 +126,15 @@ class Sim:
             window.run()
         else:
             while self.get_actual_round() <= self.get_max_round() and self.__end is False:
-                self.memory.try_deliver_messages(self)
-                self.solution_mod.solution(self)
+                if self.config_data.delivery_delay == 0:
+                    self.solution_mod.solution(self)
+                    self.memory.try_deliver_messages(self)
+                else:
+                    self.memory.try_deliver_messages(self)
+                    self.solution_mod.solution(self)
                 # update csv
                 self.csv_round_writer.next_line(self.get_actual_round())
                 self.__round_counter = self.__round_counter + 1
-        #                if len(self.memory.memory) > 0:
-        #                    self.plotdata_x.append(self.get_actual_round())
-        #                    self.plotdata_y.append(len(self.memory.memory[0]))
-        #                else:
-        #                    self.plotdata_x.append(self.get_actual_round())
-        #                    self.plotdata_y.append(0)
 
         # creating gnu plots
         self.csv_round_writer.aggregate_metrics()
@@ -146,10 +142,6 @@ class Sim:
         for particle in self.init_particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
-#        generate_gnuplot(self.directory)
-
-        # plt.plot(self.plotdata_x, self.plotdata_y)
-        # plt.show()
         return
 
     def success_termination(self):

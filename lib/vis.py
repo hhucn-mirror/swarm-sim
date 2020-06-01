@@ -447,13 +447,6 @@ class VisWindow(pyglet.window.Window):
                 mod.solution(self.sim)
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
-                    if len(self.sim.memory.memory) > 0:
-                        self.sim.plotdata_x.append(self.sim.get_actual_round())
-                        test = list(self.sim.memory.memory.values())
-                        self.sim.plotdata_y.append(len(list(test)[0]))
-                    else:
-                        self.sim.plotdata_x.append(self.sim.get_actual_round())
-                        self.sim.plotdata_y.append(0)
                     self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
                     self.sim.inc_round_cnter()  # increase simulation round counter by one.
             self.dispatch_events()

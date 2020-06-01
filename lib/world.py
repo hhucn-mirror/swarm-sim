@@ -348,13 +348,11 @@ class World:
         if self.check_coords(x, y) == True:
             if (x, y) not in self.tile_map_coords:
                 self.new_tile = tile.Tile(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
-                print("Before adding ", len(self.tiles))
                 self.tiles.append(self.new_tile)
                 self.csv_round_writer.update_tiles_num(len(self.tiles))
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("Afer adding ", len(self.tiles), self.new_tile.coords)
                 logging.info("Created tile with tile id %s on coords %s", str(self.new_tile.get_id()),
                              str(self.new_tile.coords))
                 self.new_tile.touch()

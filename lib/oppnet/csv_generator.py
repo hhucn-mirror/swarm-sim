@@ -84,6 +84,9 @@ class CsvRoundData:
         self.steps_sum = steps
         self.particle_num = particle_num
 
+        self.memory_write = 0
+        self.particle_write = 0
+
         self.messages_sent = 0
         self.messages_forwarded = 0
         self.messages_delivered = 0
@@ -99,7 +102,7 @@ class CsvRoundData:
         self.csv_file = open(self.file_name, 'w', newline='')
         self.writer_round = csv.writer(self.csv_file)
         self.writer_round.writerow(['',
-                                    'Round Number', 'Seed', 'solution', 'Particle Counter',
+                                    'Round Number', 'Seed', 'solution', 'Particle Counter', 'Particle Memory Write',
                                     'Particle Steps', 'Particle Steps Sum',
                                     'Messages Sent', 'Messages Forwarded',
                                     'Messages Delivered', 'Messages Delivered Directly',
@@ -129,7 +132,7 @@ class CsvRoundData:
     def update_particle_num(self, particle):
         self.particle_num = particle
 
-    def update_metrics(self, steps=0,
+    def update_metrics(self, steps=0, memory_write=0, particle_write=0,
                        messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_delivered_unique=0, messages_delivered_directly_unique=0,
@@ -140,6 +143,8 @@ class CsvRoundData:
 
         if self.actual_round == self.sim.get_actual_round():
             self.steps += steps
+            self.memory_write += memory_write
+            self.particle_write += particle_write
             self.messages_sent += messages_sent
             self.messages_forwarded += messages_forwarded
             self.messages_delivered += messages_delivered
@@ -153,6 +158,8 @@ class CsvRoundData:
         elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
             self.steps = steps
+            self.memory_write = memory_write
+            self.particle_write = particle_write
             self.messages_sent = messages_sent
             self.messages_forwarded = messages_forwarded
             self.messages_delivered = messages_delivered

@@ -307,7 +307,7 @@ class Particle(matter.Matter):
                 wrote= matter.write_memory_with(key, data)
             if  wrote==True:
                 if matter.type == "particle":
-                    self.sim.csv_round_writer.update_metrics( particle_write=1)
+                    self.sim.csv_round_writer.update_metrics(particle_write=1)
                     self.csv_particle_writer.write_particle(particle_write=1)
                 elif matter.type == "tile":
                     self.sim.csv_round_writer.update_metrics( tile_write=1)
