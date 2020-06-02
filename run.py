@@ -53,7 +53,7 @@ def swarm_sim( argv ):
     multiple_sim=0
     local_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:p:q:", ["solution=", "scenario="])
+        opts, args = getopt.getopt(argv, "h:s:w:r:n:m:d:v:p:q:", ["solution=", "scenario="])
     except getopt.GetoptError:
         print('Error: run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
@@ -78,7 +78,7 @@ def swarm_sim( argv ):
         elif opt in ("-p"):
             config_data.param_lambda = int(arg)
         elif opt in ("-q"):
-            config_data.param_delta = int(arg)
+            config_data.param_delta = str(arg)
 
 
     #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -87,11 +87,7 @@ def swarm_sim( argv ):
 
     if multiple_sim == 1:
         config_data.multiple = True
-        config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-               "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-               str(config_data.seedvalue) + "_" + str(config_data.param_lambda) + "_" + str(config_data.param_delta)
-
-        config_data.dir_name = "./outputs/mulitple/"+ config_data.dir_name
+        config_data.dir_name = config_data.param_delta
 
     else:
         config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \

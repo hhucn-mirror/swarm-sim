@@ -13,7 +13,7 @@ import csv
 import pandas as pd
 import logging
 import os
-
+import numpy as np
 
 class CsvParticleFile:
     def __init__(self, directory ):
@@ -372,65 +372,24 @@ class CsvRoundData:
         csv_file = open(file_name, 'w', newline='')
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario','Solution', 'Seed', 'Rounds Total',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
+        writer_round.writerow([ 'Seed', 'Rounds Total',
+                                'Success',
                                 'Particle Counter',
-                                'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
-                                'Partilcle Steps Total',  'Particle Steps Avg',
+
+                                'Particle Steps Total',  'Particle Steps Avg',
                                 'Particle Steps Min', 'Particle Steps Max',
-                                'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
-                                'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
-                                'Tile Counter',
-                                'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
-                                'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
-                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max',
                                 'Steps NE (0)', 'Steps E  (1)', 'Steps SE (2)',
                                 'Steps SW (3)', 'Steps W  (4)', 'Steps NW (5)',
-                                'Goal: First Tile', 'Goal: Half of Tiles', 'Goal: All Tiles'
+                                'FirstHit', 'HalfLine', 'FullLine'
                                ])
 
-        csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
+        csv_interator = [ self.seed, data['Round Number'].count(),
 
                          data['Success Counter'].sum(),
-                         data['Success Counter'].sum()/ data['Round Number'].sum(),
-
-                         data['Success Counter'].mean(), data['Success Counter'].min(),
-                         data['Success Counter'].max(),
-
-                         data['Success Round'].min(),
-                         data['Success Round'].max(),
-
                          self.particle_num,
-
-                         data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
-                         data['Particle Read'].max(),
-
-                         data['Particle Steps'].sum(), data['Particle Steps'].mean(),
+                           data['Particle Steps'].sum(), data['Particle Steps'].mean(),
                          data['Particle Steps'].min(), data['Particle Steps'].max(),
 
-                         data['Particle Write'].sum(), data['Particle Write'].mean(), data['Particle Write'].min(),
-                         data['Particle Write'].max(),
-
-                         data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
-                         data['Memory Read'].max(),
-
-                         data['Memory Write'].sum(), data['Memory Write'].mean(), data['Memory Write'].min(),
-                         data['Memory Write'].max(),
-
-
-                         self.tile_num,
-
-                         data['Tile Read'].sum(), data['Tile Read'].mean(),  data['Tile Read'].min(),
-                         data['Tile Read'].max(),
-
-                         data['Tiles Taken'].sum(), data['Tiles Taken'].mean(), data['Tiles Taken'].min(),
-                         data['Tiles Taken'].max(),
-
-                         data['Tile Write'].sum(), data['Tile Write'].mean(), data['Tile Write'].min(),
-                         data['Tile Write'].max(),
 
                          data['Steps NE (0)'].sum(), data['Steps E  (1)'].sum(), data['Steps SE (2)'].sum(),
                          data['Steps SW (3)'].sum(), data['Steps W  (4)'].sum(), data['Steps NW (5)'].sum(),
@@ -441,123 +400,92 @@ class CsvRoundData:
         csv_file.close()
 
 
-    def all_aggregate_metrics(self):
-        self.csv_file.close()
-        data = pd.read_csv(self.file_name)
-        file_name = self.directory+"/aggregate_rounds.csv"
-        csv_file = open(file_name, 'w', newline='')
-        writer_round = csv.writer(csv_file)
-        """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario','Solution', 'Seed', 'Rounds Total',
-                                 'Particle Counter',
-                                'Success Rate Sum', 'Success Ratio',
-                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
-                                'Success Round Min', 'Success Round Max',
-                                'Particle Counter',
-                                'Particles Created Sum', 'Particles Created Avg',
-                                'Particles Created Min', 'Particles Created Max',
-                                'Particles Deleted Sum', 'Particles Deleted Avg',
-                                'Particles Deleted Min', 'Particles Deleted Max',
-                                'Particles Dropped Sum', 'Particles Dropped Avg',
-                                'Particles Dropped Min', 'Particles Dropped Max',
-                                'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
-                                'Partilcle Steps Total',  'Particle Steps Avg',
-                                'Particle Steps Min', 'Particle Steps Max',
-                                'Particles Taken Sum', 'Particles Taken Avg',
-                                'Particles Taken Min', 'Particles Taken Max',
-                                'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Location Counter',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max',
-                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
-                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
-                                'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
-                                'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
-                                'Tile Counter',
-                                'Tiles Created Sum', 'Tiles Created Avg', 'Tiles Created Min', 'Tiles Created Max',
-                                'Tiles Deleted Sum', 'Tiles Deleted Avg', 'Tiles Deleted Min', 'Tiles Deleted Max',
-                                'Tiles Dropped Sum', 'Tiles Dropped Avg', 'Tiles Dropped Min', 'Tiles Dropped Max',
-                                'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
-                                'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
-                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max'])
+def changing(directory,  particle_num):
 
-        csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
+    data = pd.read_csv( directory+"/aggregate_rounds.csv")
+    file_name = directory+"/changed.csv"
+    data= data.replace(5000, np.NaN)
+    # data.to_csv(directory+'/test.csv')
+    # for val in range(len(data)):
+    #     if data['Rounds Total'].values[val] ==  5000:
+    #         print ("Found ", data['Rounds Total'].values[val])
+    #         data['Rounds Total'].values[val]=1
+    # # csv_file = open(file_name, 'w', newline='')
+    # writer_round = csv.writer(csv_file)
+    """Average Min Max for all other metrics"""
+    #writer_round.writerow(
+    data.to_csv(directory + '/test.csv')
+def all_aggregate_metrics(directory,  particle_num):
 
-                          self.particle_num,
-                         data['Success Counter'].sum(),
-                         data['Success Counter'].sum()/ data['Round Number'].sum(),
+    data = pd.read_csv( directory+"/aggregate_rounds.csv")
+    file_name = directory+"/all_aggregate_rounds.csv"
+    csv_file = open(file_name, 'w', newline='')
+    writer_round = csv.writer(csv_file)
+    """Average Min Max for all other metrics"""
+    writer_round.writerow([
+                             'Particle Counter',
+                           'Rounds Avg',
+                           'Rounds Std','Rounds Sem','Rounds Mad', "AVG per Particle", "SD per Particle","Sem per Particle","Mad per Particle",
 
-                         data['Success Counter'].mean(), data['Success Counter'].min(),
-                         data['Success Counter'].max(),
+                            'Rounds Max',
+                            'Rounds Min',
+                            'Particle Steps Total',  'Particle Steps Avg', 'Particle Steps Std',
+                            'Particle Steps Min', 'Particle Steps Max',
 
-                         data['Success Round'].min(),
-                         data['Success Round'].max(),
+                           'Success Rate Sum', 'Success Avg',
+                           'Success Rate Std', 'Success Rate Min', 'Success Rate Max'
 
-                         self.particle_num,
-                         data['Particles Created'].sum(), data['Particles Created'].mean(),
-                         data['Particles Created'].min(), data['Particles Created'].max(),
-
-                         data['Particles Deleted'].sum(), data['Particles Deleted'].mean(),
-                         data['Particles Deleted'].min(), data['Particles Deleted'].max(),
-
-                         data['Particles Dropped'].sum(), data['Particles Dropped'].mean(),
-                         data['Particles Dropped'].min(), data['Particles Dropped'].max(),
-
-                         data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
-                         data['Particle Read'].max(),
-
-                         data['Particle Steps'].sum(), data['Particle Steps'].mean(),
-                         data['Particle Steps'].min(), data['Particle Steps'].max(),
-
-                         data['Particles Taken'].sum(), data['Particles Taken'].mean(), data['Particles Taken'].min(),
-                         data['Particles Taken'].max(),
-
-                         data['Particle Write'].sum(), data['Particle Write'].mean(), data['Particle Write'].min(),
-                         data['Particle Write'].max(),
+    ])
 
 
-                         self.locations_num,
-                         data['Location Created'].sum(), data['Location Created'].mean(),
-                         data['Location Created'].min(), data['Location Created'].max(),
+    csv_interator = [particle_num,
+                     data['Rounds Total'].mean(),
+                     data['Rounds Total'].std(),
+                     data['Rounds Total'].sem(),
+                     data['Rounds Total'].mad(),
+                     data['Rounds Total'].mean()/particle_num,
+                     data['Rounds Total'].std() / particle_num,
+                     data['Rounds Total'].sem()/particle_num,
+                     data['Rounds Total'].mad() / particle_num,
+                     data['Rounds Total'].min(),
+                     data['Rounds Total'].max(),
 
-                         data['Location Deleted'].sum(), data['Location Deleted'].mean(),
-                         data['Location Deleted'].min(), data['Location Deleted'].max(),
-
-                         data['Location Read'].sum(), data['Location Read'].mean(), data['Location Read'].min(),
-                         data['Location Read'].max(),
-
-                         data['Location Write'].sum(), data['Location Write'].mean(), data['Location Write'].min(),
-                         data['Location Write'].max(),
-
-                         data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
-                         data['Memory Read'].max(),
-
-                         data['Memory Write'].sum(), data['Memory Write'].mean(), data['Memory Write'].min(),
-                         data['Memory Write'].max(),
-
-
-                         self.tile_num,
-                         data['Tiles Created'].sum(), data['Tiles Created'].mean(), data['Tiles Created'].min(),
-                         data['Tiles Created'].max(),
-
-                         data['Tiles Deleted'].sum(), data['Tiles Deleted'].mean(), data['Tiles Deleted'].min(),
-                         data['Tiles Deleted'].max(),
-
-                         data['Tiles Dropped'].sum(), data['Tiles Dropped'].mean(), data['Tiles Dropped'].min(),
-                         data['Tiles Dropped'].max(),
-
-                         data['Tile Read'].sum(), data['Tile Read'].mean(),  data['Tile Read'].min(),
-                         data['Tile Read'].max(),
-
-                         data['Tiles Taken'].sum(), data['Tiles Taken'].mean(), data['Tiles Taken'].min(),
-                         data['Tiles Taken'].max(),
-
-                         data['Tile Write'].sum(), data['Tile Write'].mean(), data['Tile Write'].min(),
-                         data['Tile Write'].max()]
+                     data['Particle Steps Total'].sum(), data['Particle Steps Total'].mean(),
+                     data['Particle Steps Total'].std(),
+                     data['Particle Steps Total'].min(), data['Particle Steps Total'].max(),
 
 
 
-        writer_round.writerow(csv_interator)
-        csv_file.close()
+                     data['Success'].sum(),
+                     data['Success'].mean(),
+
+                     data['Success'].std(), data['Success'].min(),
+                     data['Success'].max(),
+                     ]
+
+
+
+
+    writer_round.writerow(csv_interator)
+    csv_file.close()
+
+
+def get_change(current, previous):
+    if current == previous:
+        return 100.0
+    try:
+        return (abs(current - previous) / previous) * 100.0
+    except ZeroDivisionError:
+        return 0
+
+def da():
+    df = pd.read_csv("./outputs/multiple/charged/all_aggregates.csv")
+
+
+    bla = { "Particle Numbers": df['Particle Counter'].values, "PCAR": abs(df['Rounds Avg'].pct_change())*100,
+            "PCEAR":abs(df['Rounds Std'].pct_change()) *100, "PCARPA": abs(df['AVG per Particle'].pct_change())*100,
+            "PCAERPA": abs(df['SD per Particle'].pct_change())*100, }
+
+    d= pd.DataFrame(bla)
+    d.to_csv("./outputs/multiple/charged/new.csv")
+    #csv_file.close()

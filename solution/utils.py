@@ -59,8 +59,8 @@ def inv_dir(dir):
 # Deletes all the light-entries in the particles' memory to make a fresh start
 def delete_light_information(sim):
     for particle in sim.get_particle_list():
-        if particle.read_memory_with("light") is not None:
-            particle.delete_memeory_with("light")
+        if particle.light == 1:
+            particle.light=0
             particle.set_color(black)
 
 
@@ -101,11 +101,11 @@ def light_propagation(sim, x, y, dirval):
     potential_particle = particle_dict.get(coords, None)
 
     #This threshold can be expanded if the simulations becomes bigger
-    if -50 < x < 50 and -50 < y < 50:
+    if -25 < x < 25 and -25 < y < 25:
         if potential_tile is None and potential_particle is None:
             light_propagation(sim, x, y, dirval)
         elif potential_particle is not None:
-            potential_particle.write_memory_with("light", 1)
+            potential_particle.light=1
             potential_particle.set_color(red)
 
 

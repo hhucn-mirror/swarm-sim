@@ -11,7 +11,7 @@ import random
 import math
 import logging
 from lib import csv_generator, particle, tile, location, vis
-from lib.gnuplot_generator import generate_gnuplot
+#from lib.gnuplot_generator import generate_gnuplot
 
 
 x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
@@ -132,7 +132,7 @@ class Sim:
         for particle in self.init_particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
-        generate_gnuplot(self.directory)
+        #generate_gnuplot(self.directory)
         return
 
     def success_termination(self):
