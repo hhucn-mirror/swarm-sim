@@ -2,6 +2,9 @@ import logging
 import random
 from enum import Enum
 
+from lib.oppnet.communication import broadcast_message, Message
+from lib.oppnet.message_types.predator_signal import PredatorSignal
+from lib.oppnet.message_types.relative_location_message import CardinalDirection
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.particle import Particle
 from lib.swarm_sim_header import scan_within_per_hop, get_coordinates_in_direction
@@ -21,6 +24,7 @@ class Predator(Particle):
         if not mm_mode:
             mm_mode = MobilityModelMode.POI
         self.mobility_model = MobilityModel(self.coordinates, mm_mode)
+        self.signal_velocity = world.config_data.signal_velocity
 
     def move_to(self, direction):
         """
@@ -45,11 +49,16 @@ class Predator(Particle):
         return False
 
     def chase(self):
+        """
+        Moves the predator depending on chase_mode.
+        :return: the result of move_to()
+        """
         if self.chase_mode == ChaseMode.FocusParticle:
             next_direction = self.chase_nearest_particle()
         else:
             next_direction = self.chase_nearby_flock()
         if next_direction:
+            self.broadcast_warning()
             return self.move_to(next_direction)
         else:
             return False
@@ -72,8 +81,23 @@ class Predator(Particle):
             return None
 
     def chase_nearby_flock(self):
+        """
+        Tries to find a nearby flock within the scan_radius of the predator and move towards its center.
+        :return: the next direction to move to
+        """
         try:
-            self.mobility_model.poi = self.world.get_nearby_flock_center_by_coordinates(self.coordinates, self.scan_radius)
+            self.mobility_model.poi = self.world.get_nearby_flock_center_by_coordinates(self.coordinates,
+                                                                                        self.scan_radius)
             return self.mobility_model.next_direction(self.coordinates)
         except IndexError:
             return None
+
+    def broadcast_warning(self):
+        """
+        Broadcasts a message which warns particles about the predator.
+        :return: nothing
+        """
+        approach_direction = CardinalDirection.get_direction_between_locations(self.mobility_model.poi,
+                                                                               self.coordinates)
+        message = Message(self, None, content=PredatorSignal(approach_direction))
+        broadcast_message(self, message)

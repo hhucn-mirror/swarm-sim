@@ -5,8 +5,8 @@ import random
 import numpy as np
 
 from lib.oppnet.communication import send_message, Message
-from lib.oppnet.consensus_flocking.message_types.direction_message import DirectionMessageContent
-from lib.oppnet.consensus_flocking.message_types.relative_location_message import CardinalDirection, \
+from lib.oppnet.message_types.direction_message import DirectionMessageContent
+from lib.oppnet.message_types.relative_location_message import CardinalDirection, \
     RelativeLocationMessageContent
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode

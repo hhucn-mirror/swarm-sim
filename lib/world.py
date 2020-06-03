@@ -33,21 +33,45 @@ class Flock:
         self._min_coordinates = None
 
     def add_particle(self, particle: Particle):
+        """
+        Adds :param particle to its set of particles.
+        :param particle: the particle to add
+        :type particle: Particle
+        """
         self._particles.add(particle)
 
     def remove_particle(self, particle: Particle):
+        """
+        Removes :param particle from its set of particles.
+        :param particle: the particle to remove
+        :type particle: Particle
+        """
         self._particles.remove(particle)
 
     def extend_particles(self, particles):
+        """
+        Updates the set of particles with :param particles
+        :param particles: iterable of Particles to update with
+        :type particles: Iterable
+        """
         self._particles.update(particles)
 
     def get_estimated_center(self):
-        self._init_min_max_coordinates()
+        """
+        Gets the estimated center of the flock by interpreting minimum and maximum coordinates as the corners
+        of a square.
+        :return: the estimated flock center as x,y tuple
+        :rtype: tuple
+        """
+        self._set_min_max_coordinates()
         estimated_x = (self._max_coordinates[0] + self._min_coordinates[0]) / 2
         estimated_y = (self._max_coordinates[1] + self._min_coordinates[1]) / 2
         return estimated_x, estimated_y
 
-    def _init_min_max_coordinates(self):
+    def _set_min_max_coordinates(self):
+        """
+        Finds the the maximum and minimum coordinates in the particle set.
+        """
         coordinates = [particle.coordinates for particle in self._particles]
         self._max_coordinates = np.amax(coordinates, axis=0)
         self._min_coordinates = np.amin(coordinates, axis=0)

@@ -80,6 +80,20 @@ class CardinalDirection(Enum):
         else:
             return get_locations_west_by_hops(location, hops)
 
+    @staticmethod
+    def get_direction_between_locations(location_1, location_2):
+        x_diff, y_diff = location_1[0] - location_2[0], location_1[1] - location_2[1]
+        if x_diff > y_diff:
+            if x_diff > 0:
+                return CardinalDirection.East
+            else:
+                return CardinalDirection.West
+        else:
+            if y_diff > 0:
+                return CardinalDirection.South
+            else:
+                return CardinalDirection.North
+
 
 class RelativeLocationMessageContent:
     def __init__(self, queried_directions: [CardinalDirection], is_response=False):

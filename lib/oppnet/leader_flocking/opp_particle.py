@@ -6,8 +6,8 @@ import numpy as np
 
 from lib.oppnet.communication import multicast_message_content, send_message, Message, broadcast_message
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState
-from lib.oppnet.leader_flocking.message_types.leader_message import LeaderMessageContent, LeaderMessageType
-from lib.oppnet.leader_flocking.message_types.lost_message import LostMessageContent, LostMessageType
+from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
+from lib.oppnet.message_types import LostMessageContent, LostMessageType
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point

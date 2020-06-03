@@ -2,7 +2,7 @@ import random
 
 from lib.oppnet import routing
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
-from lib.oppnet.leader_flocking.message_types.leader_message import LeaderMessageType
+from lib.oppnet.message_types import LeaderMessageType
 from lib.swarm_sim_header import red
 
 
