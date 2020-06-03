@@ -38,6 +38,7 @@ class MobilityModel:
         :param length: the length of a route as interval, e.g. for Random_Walk
         :param zone: the zone as square with 4 values: top-left x, top-left y, bottom-right x, bottom-right y
         :param starting_dir: initial direction
+        :param poi: Point of Interest to navigate to in Mode POI
         """
         start_x, start_y, _ = start_coordinates
         if mode == MobilityModelMode.Random_Mode:
@@ -65,6 +66,8 @@ class MobilityModel:
         self.current_dir = self.starting_dir
         self.previous_coordinates = start_coordinates
         self.poi = poi
+        self.direction_history = [start_coordinates]
+        self._direction_history_index = None
 
     def set(self, particle):
         """
@@ -95,22 +98,27 @@ class MobilityModel:
         :return: the next direction
         """
         self.previous_coordinates = current_x_y_z
+        self._direction_history_index = None
         if self.mode == MobilityModelMode.Back_And_Forth:
-            return self.__back_and_forth__()
+            new_direction = self.__back_and_forth__()
         elif self.mode == MobilityModelMode.Random_Walk:
-            return self.__random_walk__()
+            new_direction = self.__random_walk__()
         elif self.mode == MobilityModelMode.Circle:
-            return self.__circle__()
+            new_direction = self.__circle__()
         elif self.mode == MobilityModelMode.Random:
-            return self.__random__()
+            new_direction = self.__random__()
         elif self.mode == MobilityModelMode.Static:
-            return False
+            new_direction = False
         elif self.mode == MobilityModelMode.Zonal:
-            return self.__zonal__(current_x_y_z)
+            new_direction = self.__zonal__(current_x_y_z)
         elif self.mode == MobilityModelMode.POI:
-            return self.__poi__(current_x_y_z)
+            new_direction = self.__poi__(current_x_y_z)
         elif self.mode == MobilityModelMode.Manual:
-            return self.current_dir
+            new_direction = self.current_dir
+        else:
+            new_direction = None
+        self.direction_history.append(new_direction)
+        return new_direction
 
     def turn_around(self):
         """
@@ -118,6 +126,19 @@ class MobilityModel:
         :return: None
         """
         self.current_dir = self.opposite_direction(self.current_dir)
+
+    def track_back(self):
+        """
+        Tracks back the list of directions traced with the model. Will raise an IndexError if there's nothing to
+        track back.
+        :return: the next traceback direction
+        """
+        if self._direction_history_index is None:
+            self._direction_history_index = len(self.direction_history) - 1
+        next_direction = self.opposite_direction(self.direction_history[self._direction_history_index])
+        self._direction_history_index -= 1
+        self.direction_history.append(next_direction)
+        return next_direction
 
     def __random__(self):
         """
