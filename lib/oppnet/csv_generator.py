@@ -260,7 +260,7 @@ class CsvRoundData:
                         data['Messages Delivered'].sum(), data['Messages Delivered Directly'].sum(),
                         data['Messages Received'].sum(), data['Messages TTL Expired'].sum(),
                         data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
-                        data['Receiver Out Of Mem'].sum(), data['Particles Caught Sum'].sum()
+                        data['Receiver Out Of Mem'].sum(), data['Particles Caught'].sum()
                         ]
         writer_round.writerow(csv_iterator)
         csv_file.close()

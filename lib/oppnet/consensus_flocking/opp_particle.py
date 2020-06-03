@@ -206,6 +206,7 @@ class Particle(Particle):
         :return: nothing
         """
         self.contacts.add_contact(message.get_sender(), message.get_original_sender(), message.get_hops())
+        self.world.update_flock_id_for_particles([message.get_sender(), message.get_original_sender(), self])
 
     def forward_via_contact(self, message: Message):
         """

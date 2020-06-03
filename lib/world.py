@@ -6,7 +6,9 @@ It also have the the coordination system and stated the maximum of the x and y c
 """
 import collections
 import importlib
+import itertools
 import logging
+import numpy as np
 import os
 import random
 import threading
@@ -17,8 +19,38 @@ from lib.location import Location
 from lib.oppnet.memory import Memory
 from lib.oppnet.predator import Predator
 from lib.particle import Particle
-from lib.swarm_sim_header import eprint, get_coordinates_in_direction
+from lib.swarm_sim_header import eprint, get_coordinates_in_direction, scan_within
 from lib.tile import Tile
+
+
+class Flock:
+    instance_id = itertools.count()
+
+    def __init__(self, particles):
+        self._particles = set(particles)
+        self.id = next(Flock.instance_id)
+        self._max_coordinates = None
+        self._min_coordinates = None
+
+    def add_particle(self, particle: Particle):
+        self._particles.add(particle)
+
+    def remove_particle(self, particle: Particle):
+        self._particles.remove(particle)
+
+    def extend_particles(self, particles):
+        self._particles.update(particles)
+
+    def get_estimated_center(self):
+        self._init_min_max_coordinates()
+        estimated_x = (self._max_coordinates[0] + self._min_coordinates[0]) / 2
+        estimated_y = (self._max_coordinates[1] + self._min_coordinates[1]) / 2
+        return estimated_x, estimated_y
+
+    def _init_min_max_coordinates(self):
+        coordinates = [particle.coordinates for particle in self._particles]
+        self._max_coordinates = np.amax(coordinates, axis=0)
+        self._min_coordinates = np.amin(coordinates, axis=0)
 
 
 class World:
@@ -39,6 +71,7 @@ class World:
         self.particles_created = []
         self.particles_rm = []
         self.__particle_deleted = False
+        self.particle_color_map = {}
 
         self.tiles = []
         self.tile_map_coordinates = {}
@@ -76,7 +109,8 @@ class World:
                                                          seed=config_data.seed_value,
                                                          directory=config_data.direction_name)
 
-        self.particle_color_map = {}
+        self._particle_flocks_ids = {}
+        self._flocks = []
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -113,6 +147,7 @@ class World:
         self.particle_map_coordinates = {}
         self.particle_map_id = {}
         self.__particle_deleted = False
+        self.particle_color_map = {}
 
         self.tiles = []
         self.tiles_created = []
@@ -134,6 +169,9 @@ class World:
         self.predators_created = []
         self.predators_rm = []
         self.__predator_deleted = False
+
+        self._particle_flocks_ids = {}
+        self._flocks = []
 
         if self.config_data.visualization:
             self.vis.reset()
@@ -796,6 +834,73 @@ class World:
             return self.csv_round.update_tiles_num
         else:
             return None
+
+    def get_nearby_flock_center_by_coordinates(self, coordinates, max_hops):
+        particles = scan_within(self.particle_map_coordinates, coordinates, max_hops, self.grid)
+        flock_ids = self.get_particles_flock_ids(particles)
+        estimated_flock_center = self._flocks[random.choice(flock_ids)].get_estimated_center()
+        return self.grid.get_nearest_valid_coordinates(estimated_flock_center)
+
+    def update_flock_id_for_particles(self, particles: [Particle], new_flock_id=None):
+        """
+        Sets the value of all items in :param particles in the particle_flock_ids dictionary to :param new_flock_id,
+        if it is set. Else it's set to the most common value for particles existing as keys in the particle_flock_ids
+        dictionary. If no entries exist, entries with the increment of the flock_id_counter will be created for all
+        items in :param particles.
+        :param particles: particles to update
+        :type particles: list
+        :param new_flock_id: the new flock id
+        :type new_flock_id: int
+        :return: the new flock_id
+        :rtype: int
+        """
+        if not new_flock_id:
+            flock_ids = self.get_particles_flock_ids(particles)
+            if flock_ids:
+                new_flock_id = self.get_most_common(flock_ids)
+            else:
+                return self._add_new_flock_(particles)
+        self.move_particles_to_flock(new_flock_id, particles)
+        return new_flock_id
+
+    def _add_new_flock_(self, particles):
+        new_flock = Flock(particles)
+        self._flocks.append(new_flock)
+        for particle in particles:
+            self._particle_flocks_ids[particle] = new_flock.id
+        return new_flock.id
+
+    def move_particles_to_flock(self, new_flock_id, particles):
+        """
+        Moves :param particles to flock with :param new_flock_id.
+        :param new_flock_id: new flock id
+        :type new_flock_id: int
+        :param particles: particles to move
+        :type particles: list
+        """
+        for particle in particles:
+            try:
+                self._flocks[self._particle_flocks_ids[particle]].remove_particle(particle)
+            except KeyError:
+                pass
+            finally:
+                self._particle_flocks_ids[particle] = new_flock_id
+        self._flocks[new_flock_id].extend_particles(particles)
+
+    def get_particles_flock_ids(self, particles: [Particle]):
+        """
+        Returns a list of ids for each particle in :param particles.
+        :param particles: list of particles
+        :type particles: list
+        :return: list of ids
+        :rtype: list
+        """
+        return [self._particle_flocks_ids[particle] for particle in particles if particle in self._particle_flocks_ids]
+
+    @staticmethod
+    def get_most_common(items):
+        [(most_common, _)] = collections.Counter(items).most_common(1)
+        return most_common
 
     @staticmethod
     def __get_x__(coordinates):

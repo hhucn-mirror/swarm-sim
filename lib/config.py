@@ -7,6 +7,7 @@ from datetime import datetime
 from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import MobilityModelMode
+from lib.oppnet.predator import ChaseMode
 from lib.oppnet.routing import Algorithm, RoutingParameters
 
 
@@ -118,6 +119,9 @@ class ConfigData:
         self.flock_radius = config.getint("Flocking", "flock_radius")
         self.leader_count = config.getint("Flocking", "leader_count")
         self.commit_quorum = config.getfloat("Flocking", "commit_quorum")
+        # predator config
+        self.predator_scan_radius = config.getint("Flocking", "predator_scan_radius")
+        self.predator_chase_mode = ChaseMode(config.getint("Flocking", "predator_chase_mode"))
 
         try:
             self.scenario = config.get("File", "scenario")
