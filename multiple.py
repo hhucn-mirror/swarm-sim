@@ -31,8 +31,8 @@ def main(argv):
     max_round = 5000
     seed_start = 1
     seed_end = 10
-    param_lambda_min = 31
-    param_lambda_max = 35
+    param_lambda_min = 64
+    param_lambda_max = 64
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -83,7 +83,7 @@ def main(argv):
             folder_name_sub = folder_name + "/" + str(seed)
             process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d "+str(nTime),\
                                   "-r "+ str(seed), "-v " + str(0), "-p " + str(param_lambda), "-q"  + folder_name_sub,\
-                                    "-s" + "phototaxing_n_particles_algorithm_fsv_updated"
+                                    "-s" + "battery_powered"
             p = subprocess.Popen(process, stdout=out, stderr=out)
             round += 1
             round_cnt += 1
