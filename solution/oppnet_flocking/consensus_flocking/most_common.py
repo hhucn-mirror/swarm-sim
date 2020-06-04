@@ -29,7 +29,7 @@ def solution(world):
 
 def update_particle_neighbourhoods(particles):
     for particle in particles:
-        particle.update_current_neighbourhood()
+        particle.update_current_neighborhood()
 
 
 def query_relative_locations(particles):
@@ -55,7 +55,7 @@ def log_relative_locations(particles):
 
 def send_current_directions(particles):
     for particle in particles:
-        particle.update_current_neighbourhood()
+        particle.update_current_neighborhood()
         particle.send_direction_message()
 
 

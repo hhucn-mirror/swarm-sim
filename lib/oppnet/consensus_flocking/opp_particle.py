@@ -4,15 +4,16 @@ import random
 
 import numpy as np
 
-from lib.oppnet.communication import send_message, Message
+from lib.oppnet.communication import send_message, Message, multicast_message_content
 from lib.oppnet.message_types.direction_message import DirectionMessageContent
+from lib.oppnet.message_types.predator_signal import PredatorSignal
 from lib.oppnet.message_types.relative_location_message import CardinalDirection, \
     RelativeLocationMessageContent
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap
-from lib.oppnet.util import get_distance_from_coordinates
+from lib.oppnet.util import get_distance_from_coordinates, get_direction_between_coordinates
 from lib.particle import Particle
 from lib.swarm_sim_header import vector_angle, get_coordinates_in_direction, free_locations_within_hops
 
@@ -52,13 +53,14 @@ class Particle(Particle):
         self.current_instruct_message = None
         self.contacts = RoutingMap()
         self.__previous_neighbourhood__ = None
-        self.__current_neighbourhood__ = {}
+        self.__current_neighborhood__ = {}
         self.__neighbourhood_direction_counter__ = collections.Counter()
         # initialise with current_direction
         self.__neighbourhood_direction_counter__[self.mobility_model.current_dir] += 1
 
         self.__received_queried_directions__ = {}
         self.relative_flock_location = None
+        self.relative_cardinal_location = None
         self.__max_cardinal_direction_hops__ = {}
 
     def get_particles_in_cardinal_direction_hop(self, cardinal_direction, hops):
@@ -112,8 +114,8 @@ class Particle(Particle):
         Sends a DirectionMessageContent with the current_dir of the particle's mobility_model and its current neighbours
         :return: nothing
         """
-        content = DirectionMessageContent(self.mobility_model.current_dir, list(self.__current_neighbourhood__.keys()))
-        for neighbour in self.__current_neighbourhood__.keys():
+        content = DirectionMessageContent(self.mobility_model.current_dir, list(self.__current_neighborhood__.keys()))
+        for neighbour in self.__current_neighborhood__.keys():
             message = Message(self, neighbour, self.world.get_actual_round(), content=content)
             send_message(self, neighbour, message)
 
@@ -125,17 +127,17 @@ class Particle(Particle):
         while len(self.send_store) > 0:
             self.forward_via_contact(self.send_store.pop())
 
-    def update_current_neighbourhood(self):
+    def update_current_neighborhood(self):
         """
         Resets the current_neighbourhood dictionary to only contain those particles within the scan radius
         and updates the previous neighbourhood
         :return: the list of current neighbours
         """
-        self.__previous_neighbourhood__ = self.__current_neighbourhood__
-        self.__current_neighbourhood__ = {}
+        self.__previous_neighbourhood__ = self.__current_neighborhood__
+        self.__current_neighborhood__ = {}
         neighbours = self.scan_for_particles_in(self.routing_parameters.scan_radius)
         for neighbour in neighbours:
-            self.__current_neighbourhood__[neighbour] = None
+            self.__current_neighborhood__[neighbour] = None
         return neighbours
 
     def get_free_surrounding_locations_within_hops(self, hops=1):
@@ -175,11 +177,11 @@ class Particle(Particle):
         particles, return in the opposite direction. Else move randomly.
         :return: None
         """
-        self.update_current_neighbourhood()
-        if len(self.__current_neighbourhood__) < len(self.__previous_neighbourhood__):
+        self.update_current_neighborhood()
+        if len(self.__current_neighborhood__) < len(self.__previous_neighbourhood__):
             # if the particle had neighbours previously and now less, go in the opposite direction
             self.mobility_model.turn_around()
-        elif len(self.__current_neighbourhood__) == 0:
+        elif len(self.__current_neighborhood__) == 0:
             # scan with max scan radius if the particle hasn't had a neighbour
             surrounding = self.scan_for_locations_within(self.routing_parameters.scan_radius)
             if not surrounding:
@@ -233,6 +235,8 @@ class Particle(Particle):
                 self.__process_direction_message__(message, content)
             elif isinstance(content, RelativeLocationMessageContent):
                 self.__process_relative_location_message(message, content)
+            elif isinstance(content, PredatorSignal):
+                self.__process_predator_signal(message, content)
             else:
                 logging.debug("round {}: opp_particle -> received an unknown content type.")
 
@@ -243,9 +247,9 @@ class Particle(Particle):
         :param content: the content of the message.
         :return: nothing
         """
-        if message.get_sender() not in self.__current_neighbourhood__:
+        if message.get_sender() not in self.__current_neighborhood__:
             logging.debug("round {}: opp_particle -> received direction from a non-neighbour.")
-        self.__current_neighbourhood__[message.get_sender()] = content
+        self.__current_neighborhood__[message.get_sender()] = content
         self.__neighbourhood_direction_counter__[content.get_direction()] += 1
 
     def set_most_common_direction(self, weighted_choice=False, centralisation_force=False):
@@ -349,9 +353,9 @@ class Particle(Particle):
         :return: a collections.Counter of shared neighbour directions.
         """
         shared_neighbours_directions = collections.Counter()
-        for neighbours_neighbour in self.__current_neighbourhood__[neighbour].get_neighbourhood():
+        for neighbours_neighbour in self.__current_neighborhood__[neighbour].get_neighbourhood():
             try:
-                direction = self.__current_neighbourhood__[neighbours_neighbour].get_direction()
+                direction = self.__current_neighborhood__[neighbours_neighbour].get_direction()
                 shared_neighbours_directions[direction] += 1
             except KeyError:
                 pass
@@ -438,6 +442,9 @@ class Particle(Particle):
                     ))
             self.relative_flock_location = RelativeLocationMessageContent.get_relative_location(
                 self.__max_cardinal_direction_hops__)
+            if self.relative_flock_location:
+                self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
+                                                                                    (0, 0, 0))
 
     def __send_relative_location_response__(self, queried_direction):
         """
@@ -455,6 +462,27 @@ class Particle(Particle):
                 queried_directions.remove(queried_direction)
                 if len(queried_directions) == 0:
                     del self.__received_queried_directions__[receiver]
+
+    def __process_predator_signal(self, message, content: PredatorSignal):
+        # set an escape direction opposite to the predator, away from the flock center
+        escape_direction = self.__get_predator_escape_direction(content.approaching_direction)
+        self.mobility_model.set_mode(MobilityModelMode.Manual)
+        self.mobility_model.current_dir = escape_direction
+        # forward to all neighbors not in the receiver list
+        neighbors = set(self.__current_neighborhood__.keys())
+        new_receivers = content.receivers.difference(neighbors)
+        if new_receivers:
+            content.update_receivers(neighbors)
+            multicast_message_content(self, new_receivers, content)
+
+    def __get_predator_escape_direction(self, approaching_direction: CardinalDirection):
+        if approaching_direction.value[0] != 0:
+            if self.relative_cardinal_location[1] != 0:
+                return approaching_direction.value[0] * -0.5, self.relative_cardinal_location[1], 0
+            else:
+                return approaching_direction.value[0] * -1, self.relative_cardinal_location[1], 0
+        else:
+            return np.copysign(0.5, self.relative_cardinal_location[0]), approaching_direction.value[1] * -1, 0
 
     def get_estimated_flock_ring(self):
         """
@@ -475,8 +503,8 @@ class Particle(Particle):
         return Point(self.coordinates[0], self.coordinates[1])
 
     @property
-    def get_current_neighbourhood(self):
-        return self.__current_neighbourhood__
+    def get_current_neighborhood(self):
+        return self.__current_neighborhood__
 
     @property
     def get_previous_neighbourhood(self):

@@ -1,3 +1,5 @@
+from math import copysign
+
 from lib.oppnet.leader_flocking.opp_particle import Particle
 from lib.oppnet.point import Point
 
@@ -91,3 +93,18 @@ def get_distance_from_coordinates(coordinates1: tuple, coordinates2: tuple):
         return y_diff + (x_diff - y_diff * 0.5)
     else:
         return y_diff
+
+
+def get_direction_between_coordinates(coordinates1, coordinates2):
+    x_diff, y_diff = coordinates1[0] - coordinates2[0], coordinates1[1] - coordinates2[1]
+    # north
+    if y_diff != 0:
+        y_diff = copysign(1, y_diff)
+    else:
+        y_diff = 0
+    if x_diff != 0:
+        x_diff = copysign(1 - (abs(y_diff) * 0.5), x_diff)
+    else:
+        x_diff = 0
+    return x_diff, y_diff, 0
+

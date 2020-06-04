@@ -19,7 +19,7 @@ def solution(world):
 
 def send_current_directions(particles):
     for particle in particles:
-        particle.update_current_neighbourhood()
+        particle.update_current_neighborhood()
         particle.send_direction_message()
 
 

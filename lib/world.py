@@ -907,6 +907,8 @@ class World:
                 self._flocks[self._particle_flocks_ids[particle]].remove_particle(particle)
             except KeyError:
                 pass
+            except IndexError:
+                pass
             finally:
                 self._particle_flocks_ids[particle] = new_flock_id
         self._flocks[new_flock_id].extend_particles(particles)

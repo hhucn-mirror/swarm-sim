@@ -5,6 +5,7 @@ from enum import Enum
 from lib.oppnet.communication import broadcast_message, Message
 from lib.oppnet.message_types.predator_signal import PredatorSignal
 from lib.oppnet.message_types.relative_location_message import CardinalDirection
+from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.particle import Particle
 from lib.swarm_sim_header import scan_within_per_hop, get_coordinates_in_direction
@@ -25,6 +26,7 @@ class Predator(Particle):
             mm_mode = MobilityModelMode.POI
         self.mobility_model = MobilityModel(self.coordinates, mm_mode)
         self.signal_velocity = world.config_data.signal_velocity
+        self.__init_message_stores__(world.config_data.message_store_size, world.config_data.message_store_strategy)
 
     def move_to(self, direction):
         """
@@ -47,6 +49,16 @@ class Predator(Particle):
             return True
 
         return False
+
+    def __init_message_stores__(self, ms_size, ms_strategy):
+        """
+        Initialises the particles two MessageStores for forwarding and receiving.
+        :param ms_size: the size of the two stores
+        :param ms_strategy: the strategy to implement for buffer-management.
+        :return: nothing
+        """
+        self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
+        self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
 
     def chase(self):
         """
@@ -73,9 +85,9 @@ class Predator(Particle):
                                                 self.scan_radius, self.world.grid)
         if nearest_particles:
             if len(nearest_particles[0]) > 0:
-                self.mobility_model.poi = random.choice(nearest_particles[0])
+                self.mobility_model.poi = random.choice(nearest_particles[0]).coordinates
             else:
-                self.mobility_model.poi = nearest_particles[0][0]
+                self.mobility_model.poi = nearest_particles[0][0].coordinates
             return self.mobility_model.next_direction(self.coordinates)
         else:
             return None
@@ -97,7 +109,7 @@ class Predator(Particle):
         Broadcasts a message which warns particles about the predator.
         :return: nothing
         """
-        approach_direction = CardinalDirection.get_direction_between_locations(self.mobility_model.poi,
-                                                                               self.coordinates)
+        approach_direction = CardinalDirection.get_direction_between_locations(self.coordinates,
+                                                                               self.mobility_model.poi)
         message = Message(self, None, content=PredatorSignal(approach_direction))
         broadcast_message(self, message)

@@ -95,6 +95,15 @@ def scan_within(matter_map, center, hop, grid):
     return result
 
 
+def scan_within_per_hop(matter_map, center, max_hop, grid):
+    result = []
+    for hop in range(0, max_hop + 1):
+        within_hop = scan_in(matter_map, center, hop, grid)
+        if within_hop:
+            result.append(within_hop)
+    return result
+
+
 def create_matter_in_line(world, start, direction, amount, matter_type='particle'):
     current_position = start
     for _ in range(amount):

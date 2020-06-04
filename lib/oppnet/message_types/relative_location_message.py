@@ -48,10 +48,10 @@ def get_locations_west_by_hops(location, hops=1):
 
 
 class CardinalDirection(Enum):
-    North = 0,
-    East = 1,
-    South = 2,
-    West = 4
+    North = 0, 1,
+    East = 1, 0,
+    South = 0, -1,
+    West = -1, 0
 
     @staticmethod
     def get_cardinal_directions_list():
@@ -93,6 +93,10 @@ class CardinalDirection(Enum):
                 return CardinalDirection.South
             else:
                 return CardinalDirection.North
+
+    def get_opposite_direction(self):
+        opposite_value = tuple(np.multiply(self.value, -1))
+        return CardinalDirection(opposite_value)
 
 
 class RelativeLocationMessageContent:
