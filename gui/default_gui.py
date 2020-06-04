@@ -2,23 +2,25 @@ from PyQt5.QtGui import QColor, QIntValidator
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
                              QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QGroupBox, QComboBox, QStyle)
 from PyQt5.QtCore import Qt
-
+from lib.vis3d import Visualization
 from lib.visualization.utils import show_msg
+from lib.world import World
 
-start_stop_button = None
-world = None
-vis = None
-simtab = None
+# global variables for all te functions..
+world: World
+vis: Visualization
+simulation_tab: QTabBar
+start_stop_button: QPushButton
 
 
-def create_gui(w, v):
-    global world, vis, simtab
+def create_gui(w: World, v: Visualization):
+    global world, vis, simulation_tab
     world = w
     vis = v
     tabbar = QTabWidget()
     tabbar.setMinimumWidth(200)
-    simtab = sim_tab()
-    tabbar.addTab(simtab, "Simulation")
+    simulation_tab = sim_tab()
+    tabbar.addTab(simulation_tab, "Simulation")
     tabbar.addTab(vis_tab(), "Visualization")
     tabbar.addTab(grid_tab(), "Grid")
     tabbar.addTab(matter_tab(), "Matter")
@@ -27,8 +29,8 @@ def create_gui(w, v):
 
 
 def set_disable_sim(disable_flag):
-    global simtab
-    simtab.setDisabled(disable_flag)
+    global simulation_tab
+    simulation_tab.setDisabled(disable_flag)
 
 
 def key_handler(key, w, v):
@@ -122,8 +124,10 @@ def sim_tab():
 
     # WARNING: VECTOR SCREENSHOTS ONLY FOR TRIANGULARGRID IMPLEMENTED!
     vector_screenshot = QPushButton("export as vector graphics (svg)")
+
     def eas():
         vis.take_vector_screenshot()
+
     vector_screenshot.clicked.connect(eas)
     screenshot_buttons = QHBoxLayout()
     screenshot_buttons.addWidget(quick_screenshot)
@@ -133,7 +137,6 @@ def sim_tab():
     vbox.addWidget(vector_screenshot)
     screenshot_box = QGroupBox("screenshot")
     screenshot_box.setLayout(vbox)
-
 
     # recording buttons
     start_recording_button = QPushButton("start")
@@ -158,12 +161,14 @@ def sim_tab():
             recording_box.setTitle("Recording (running)")
             start_recording_button.setText("stop")
             vis.start_recording()
+
     start_recording_button.clicked.connect(startstoprec)
 
     def del_rec():
         if vis.is_recording():
             startstoprec()
         vis.delete_recording()
+
     del_recording_button.clicked.connect(del_rec)
     export_recording_button.clicked.connect(vis.export_recording)
 
@@ -181,8 +186,11 @@ def sim_tab():
     quick_scenario_button = QPushButton("quick")
     save_as_scenario_button = QPushButton("save as")
 
-    def qs_scenario(): world.save_scenario(True)
-    def sas_scenario(): world.save_scenario(False)
+    def qs_scenario():
+        world.save_scenario(True)
+
+    def sas_scenario():
+        world.save_scenario(False)
 
     quick_scenario_button.clicked.connect(qs_scenario)
     save_as_scenario_button.clicked.connect(sas_scenario)
@@ -222,10 +230,13 @@ def get_new_matter_color_picker():
 
     def cp():
         cd = QColorDialog()
+        cd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        cd.setOptions(QColorDialog.ShowAlphaChannel)
         cd.setCurrentColor(QColor.fromRgbF(*vis.get_added_matter_color()))
         cd.exec()
         if cd.result() == 1:
             vis.set_added_matter_color((cd.selectedColor().getRgbF()))
+
     cp_button.clicked.connect(cp)
     return cp_button
 
@@ -291,6 +302,13 @@ def vis_tab():
     sens_slider_box.setLayout(vbox)
     layout.addWidget(sens_slider_box)
 
+    anim_box = QGroupBox("animation")
+    vbox = QVBoxLayout()
+    vbox.addWidget(get_animation_checkbox())
+    vbox.addLayout(get_auto_animation())
+    anim_box.setLayout(vbox)
+    layout.addWidget(anim_box)
+
     misc_box = QGroupBox("miscellaneous")
     vbox = QVBoxLayout()
     vbox.addLayout(get_antialiasing_combobox())
@@ -300,10 +318,48 @@ def vis_tab():
     vbox.addWidget(reset_position_button)
     misc_box.setLayout(vbox)
     layout.addWidget(misc_box)
+
     layout.addStretch(0)
     tab.setLayout(layout)
     return tab
 
+
+def get_animation_checkbox():
+    chkbx = QCheckBox("enable")
+    chkbx.setChecked(vis.get_animation())
+
+    def chkbx_click():
+        vis.set_animation(chkbx.isChecked())
+    chkbx.clicked.connect(chkbx_click)
+
+    return chkbx
+
+
+def get_auto_animation():
+
+    mss_label = QLabel("speed (%d steps per round):" % vis.get_manual_animation_speed())
+
+    def mss_change(value):
+        vis.set_manual_animation_speed(1000-value)
+        mss_label.setText("speed (%d step%s):" % (vis.get_manual_animation_speed(), '' if 1000-value == 1 else 's'))
+    mss = create_slider(1, 100, 999, 0, 1000-vis.get_manual_animation_speed(), mss_change, Qt.Horizontal)
+    mss.setDisabled(vis.get_auto_animation())
+    mss_label.setDisabled(vis.get_auto_animation())
+
+    chkbx = QCheckBox("automatic speed adjustment")
+    chkbx.setChecked(vis.get_auto_animation())
+
+    def chkbx_click():
+        mss.setDisabled(chkbx.isChecked())
+        mss_label.setDisabled(chkbx.isChecked())
+        vis.set_auto_animation(chkbx.isChecked())
+    chkbx.clicked.connect(chkbx_click)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(chkbx)
+    vbox.addWidget(mss_label)
+    vbox.addWidget(mss)
+    return vbox
 
 def grid_tab():
     tab = QTabBar()
@@ -335,17 +391,17 @@ def get_scaler(mattertype):
 
         def x_scaler_change(value):
             cs = vis.get_particle_scaling()
-            new_scaling = (value/10.0, cs[1], cs[2])
+            new_scaling = (value / 10.0, cs[1], cs[2])
             vis.set_particle_scaling(new_scaling)
 
         def y_scaler_change(value):
             cs = vis.get_particle_scaling()
-            new_scaling = (cs[0], value/10.0, cs[2])
+            new_scaling = (cs[0], value / 10.0, cs[2])
             vis.set_particle_scaling(new_scaling)
 
         def z_scaler_change(value):
             cs = vis.get_particle_scaling()
-            new_scaling = (cs[0], cs[1], value/10.0)
+            new_scaling = (cs[0], cs[1], value / 10.0)
             vis.set_particle_scaling(new_scaling)
     elif mattertype == "tile":
         current_scaling = vis.get_tile_scaling()
@@ -385,9 +441,9 @@ def get_scaler(mattertype):
     x_desc = QLabel("x scale:")
     y_desc = QLabel("y scale:")
     z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, z_scaler_change)
+    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, current_scaling[0] * 10, z_scaler_change)
 
     hbox1 = QHBoxLayout()
     hbox1.addWidget(x_desc)
@@ -429,9 +485,9 @@ def get_drag_sens_slider():
     hbox.addWidget(desc)
 
     def set_ds(value):
-        vis.set_drag_sensitivity(5100-value)
+        vis.set_drag_sensitivity(5100 - value)
 
-    hbox.addWidget(create_slider(500, 2, 5000, 100, 5100-vis.get_drag_sensitivity(), set_ds),
+    hbox.addWidget(create_slider(500, 2, 5000, 100, 5100 - vis.get_drag_sensitivity(), set_ds),
                    alignment=Qt.AlignBaseline)
     return hbox
 
@@ -442,9 +498,9 @@ def get_zoom_sens_slider():
     hbox.addWidget(desc)
 
     def set_zs(value):
-        vis.set_zoom_sensitivity(1001-value)
+        vis.set_zoom_sensitivity(1001 - value)
 
-    hbox.addWidget(create_slider(100, 2, 1000, 1, 1001-vis.get_zoom_sensitivity(), set_zs))
+    hbox.addWidget(create_slider(100, 2, 1000, 1, 1001 - vis.get_zoom_sensitivity(), set_zs))
     return hbox
 
 
@@ -454,9 +510,9 @@ def get_rota_sens_slider():
     hbox.addWidget(desc)
 
     def set_rs(value):
-        vis.set_rotation_sensitivity(11-value)
+        vis.set_rotation_sensitivity(11 - value)
 
-    hbox.addWidget(create_slider(1, 2, 10, 1, 11-vis.get_rotation_sensitivity(), set_rs))
+    hbox.addWidget(create_slider(1, 2, 10, 1, 11 - vis.get_rotation_sensitivity(), set_rs))
     return hbox
 
 
@@ -493,12 +549,12 @@ def get_projection_switch():
 
 
 def get_color_picker():
-
     bg_button = QPushButton("background")
 
     def bg():
         qcd = QColorDialog()
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_background_color()))
+        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.exec()
         if qcd.result() == 1:
             vis.set_background_color((qcd.selectedColor().getRgbF()[:3]))
@@ -510,6 +566,7 @@ def get_color_picker():
     def lines():
         qcd = QColorDialog()
         qcd.setOption(QColorDialog.ShowAlphaChannel)
+        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_line_color()))
         qcd.exec()
         if qcd.result() == 1:
@@ -522,6 +579,7 @@ def get_color_picker():
     def locs():
         qcd = QColorDialog()
         qcd.setOption(QColorDialog.ShowAlphaChannel)
+        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_coordinates_color()))
         qcd.exec()
         if qcd.result() == 1:
@@ -534,6 +592,7 @@ def get_color_picker():
     def brd():
         qcd = QColorDialog()
         qcd.setOption(QColorDialog.ShowAlphaChannel)
+        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_border_color()))
         qcd.exec()
         if qcd.result() == 1:
@@ -604,13 +663,13 @@ def get_vis_show_checkboxes():
 
 
 def get_show_checkboxes():
-
     lines_cb = QCheckBox()
     lines_cb.setText("show lines")
     lines_cb.setChecked(vis.get_show_lines())
 
     def lines_clicked():
         vis.set_show_lines(lines_cb.isChecked())
+
     lines_cb.clicked.connect(lines_clicked)
 
     coords_cb = QCheckBox()
@@ -641,28 +700,28 @@ def get_show_checkboxes():
 
 def get_grid_lines_scale_slider():
     vbox = QVBoxLayout()
-    desc = QLabel("grid lines scale (%d%%):" % int(vis.get_grid_line_scaling()[0]*100))
+    desc = QLabel("grid lines scale (%d%%):" % int(vis.get_grid_line_scaling()[0] * 100))
     vbox.addWidget(desc)
 
     def set_scale(value):
-        vis.set_grid_line_scaling([value/50.0, value/50.0, value/50.0])
-        desc.setText("grid lines scale (%d%%):" % (int(value*2.0)))
+        vis.set_grid_line_scaling([value / 50.0, value / 50.0, value / 50.0])
+        desc.setText("grid lines scale (%d%%):" % (int(value * 2.0)))
 
-    vbox.addWidget(create_slider(10, 2, 50, 10, int(vis.get_grid_line_scaling()[0]*50), set_scale),
+    vbox.addWidget(create_slider(10, 2, 50, 10, int(vis.get_grid_line_scaling()[0] * 50), set_scale),
                    alignment=Qt.AlignBaseline)
     return vbox
 
 
 def get_grid_coordinates_scale_slider():
     vbox = QVBoxLayout()
-    desc = QLabel("grid coordinates model scale (%d%%):" % int(vis.get_grid_coordinates_scaling()[0]*500))
+    desc = QLabel("grid coordinates model scale (%d%%):" % int(vis.get_grid_coordinates_scaling()[0] * 500))
     vbox.addWidget(desc)
 
     def set_scale(value):
-        vis.set_grid_coordinates_scaling([value/1000.0, value/1000.0, value/1000.0])
-        desc.setText("grid coordinates model scale (%d%%):" % (int(value/2.0)))
+        vis.set_grid_coordinates_scaling([value / 1000.0, value / 1000.0, value / 1000.0])
+        desc.setText("grid coordinates model scale (%d%%):" % (int(value / 2.0)))
 
-    vbox.addWidget(create_slider(10, 2, 200, 10, int(vis.get_grid_coordinates_scaling()[0]*1000.0), set_scale),
+    vbox.addWidget(create_slider(10, 2, 200, 10, int(vis.get_grid_coordinates_scaling()[0] * 1000.0), set_scale),
                    alignment=Qt.AlignBaseline)
     return vbox
 
