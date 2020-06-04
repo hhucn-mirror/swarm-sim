@@ -31,8 +31,8 @@ def main(argv):
     max_round = 5000
     seed_start = 1
     seed_end = 10
-    param_lambda_min = 2
-    param_lambda_max = 30
+    param_lambda_min = 31
+    param_lambda_max = 35
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -79,50 +79,50 @@ def main(argv):
     round_cnt=0
     for param_lambda in range(param_lambda_min, param_lambda_max + 1):
         folder_name = dir + "/" + str(param_lambda)
-        # for seed in range(seed_start, seed_end+1):
-        #     folder_name_sub = folder_name + "/" + str(seed)
-        #     process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d "+str(nTime),\
-        #                           "-r "+ str(seed), "-v " + str(0), "-p " + str(param_lambda), "-q"  + folder_name_sub,\
-        #                             "-s" + "phototaxing_n_particles_algorithm_fsv_updated"
-        #     p = subprocess.Popen(process, stdout=out, stderr=out)
-        #     round += 1
-        #     round_cnt += 1
-        #     print("Particle Number: " + str(param_lambda) + " | " + "Seed: " + str(seed) + " | " + " -- Round " + str(
-        #         round_cnt) + " started!")
-        #     child_processes.append(p)            # print("Process Nr. ", process_cnt, "started")
-        #     # p.wait()
-        #     # child_processes.clear()
-        #     if len(child_processes) == 3:
-        #         while len(child_processes) == 3:
-        #             for cp in child_processes:
-        #                 if cp.poll() != None:
-        #                     # print("finished")
-        #                     child_processes.remove(cp)
-        #                     break
-        # for cp in child_processes:
-        #     cp.wait()
-        #
-        # try:
-        #     fout = open(folder_name + "/aggregate_rounds.csv", "w+")
-        #     first = True
-        #     # for scenario in scenarios:
-        #     for seed in range(seed_start, seed_end + 1):
-        #         # f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
-        #         # f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
-        #         try:
-        #             f = open(folder_name + "/" + str(seed) + "/aggregate_rounds.csv")
-        #             if not first:
-        #                 f.__next__()  # skip the header
-        #             else:
-        #                 first = False
-        #             for line in f:
-        #                 fout.write(line)
-        #             f.close()  # not really neede
-        #         except:
-        #             pass
-        #     fout.close()
-        # except:
-        #     pass
+        for seed in range(seed_start, seed_end+1):
+            folder_name_sub = folder_name + "/" + str(seed)
+            process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d "+str(nTime),\
+                                  "-r "+ str(seed), "-v " + str(0), "-p " + str(param_lambda), "-q"  + folder_name_sub,\
+                                    "-s" + "phototaxing_n_particles_algorithm_fsv_updated"
+            p = subprocess.Popen(process, stdout=out, stderr=out)
+            round += 1
+            round_cnt += 1
+            print("Particle Number: " + str(param_lambda) + " | " + "Seed: " + str(seed) + " | " + " -- Round " + str(
+                round_cnt) + " started!")
+            child_processes.append(p)            # print("Process Nr. ", process_cnt, "started")
+            # p.wait()
+            # child_processes.clear()
+            if len(child_processes) == 4:
+                while len(child_processes) == 4:
+                    for cp in child_processes:
+                        if cp.poll() != None:
+                            # print("finished")
+                            child_processes.remove(cp)
+                            break
+        for cp in child_processes:
+            cp.wait()
+
+        try:
+            fout = open(folder_name + "/aggregate_rounds.csv", "w+")
+            first = True
+            # for scenario in scenarios:
+            for seed in range(seed_start, seed_end + 1):
+                # f = open(folder+"/"+str(scenario)+"/aggregate_rounds.csv")
+                # f = open(folder_name+"/"+str(3*(radius*radius + radius)+1)+"/aggregate_rounds.csv")
+                try:
+                    f = open(folder_name + "/" + str(seed) + "/aggregate_rounds.csv")
+                    if not first:
+                        f.__next__()  # skip the header
+                    else:
+                        first = False
+                    for line in f:
+                        fout.write(line)
+                    f.close()  # not really neede
+                except:
+                    pass
+            fout.close()
+        except:
+            pass
         cs.changing(folder_name, param_lambda)
         cs.all_aggregate_metrics(folder_name,param_lambda )
 
