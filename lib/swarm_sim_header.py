@@ -16,30 +16,6 @@ direction_to_coords = [(0.5, 1, 0),
                        (-0.5, 1, 0)]
 simple_direction_map = {"NE": 0, "E": 1, "SE": 2, "SW": 3, "W": 4, "NW": 5}
 
-
-def eeprint(*args, sep=' ', end='\n'):
-    """
-    prints error message to stderr, stops the program with error code -1
-    :param args: like in print()
-    :param sep: like in print()
-    :param end: like in print()
-    :return:
-    """
-    print(*args, sep, end, file=sys.stderr)
-    exit(-1)
-
-
-def eprint(*args, sep=' ', end='\n'):
-    """
-    prints error message to stderr
-    :param args: like in print()
-    :param sep: like in print()
-    :param end: like in print()
-    :return:
-    """
-    print(*args, sep, end, file=sys.stderr)
-
-
 def get_coordinates_in_direction(coordinates, direction):
     """
     Returns the coordinates data of the pointed directions
@@ -101,13 +77,13 @@ def create_matter_in_line(world, start, direction, amount, matter_type='particle
 
 def generating_random_spraded_particles(world, max_size_particle):
     for _ in range(0, max_size_particle):
-        x = random.randrange(-world.get_world_x_size(), world.get_world_x_size())
-        y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
+        x = random.randrange(-world.get_x_size(), world.get_x_size())
+        y = random.randrange(-world.get_y_size(), world.get_y_size())
         if y % 2 == 1:
             x = x + 0.5
         while (x, y, 0.0) in world.tile_map_coordinates or (x, y, 0.0) in world.particle_map_coordinates:
-            x = random.randrange(-world.get_world_x_size(), world.get_world_x_size())
-            y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
+            x = random.randrange(-world.get_x_size(), world.get_x_size())
+            y = random.randrange(-world.get_y_size(), world.get_y_size())
             if y % 2 == 1:
                 x = x + 0.5
         world.add_particle((x, y, 0.0))
