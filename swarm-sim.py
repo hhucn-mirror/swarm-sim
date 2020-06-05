@@ -8,9 +8,8 @@ import sys
 import time
 
 from lib import world, config
-
-
-#from lib.gnuplot_generator import plot_generator
+# from lib.gnuplot_generator import plot_generator
+from lib.vis3d import ResetException
 
 
 def swarm_sim(argv):
@@ -22,38 +21,31 @@ def swarm_sim(argv):
 
     config_data = config.ConfigData()
     read_cmd_args(argv, config_data)
-
     create_folder_for_data(config_data)
-
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
 
-    round_start_timestamp = time.perf_counter()
-    round_start_timestamp = loop_solution(config_data, round_start_timestamp, swarm_sim_world)
-    if config_data.visualization:
-        swarm_sim_world.vis.run(round_start_timestamp)
-    logging.info('Finished')
+    main_loop(config_data, swarm_sim_world)
 
+    logging.info('Finished')
     generate_data(config_data, swarm_sim_world)
 
 
-def loop_solution(config_data, round_start_timestamp, swarm_sim_world):
+def main_loop(config_data, swarm_sim_world):
+    round_start_timestamp = time.perf_counter()
     while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
             and swarm_sim_world.get_end() is False:
+        try:
+            if config_data.visualization:
+                swarm_sim_world.vis.run(round_start_timestamp)
+                round_start_timestamp = time.perf_counter()
 
-        if config_data.visualization:
-            swarm_sim_world.vis.run(round_start_timestamp)
-            round_start_timestamp = time.perf_counter()
+            run_solution(swarm_sim_world)
+        except ResetException:
+            swarm_sim_world.reset()
 
-        run_solution(swarm_sim_world)
-    return round_start_timestamp
-
-
-def draw_scenario(config_data, swarm_sim_world):
-    mod = importlib.import_module('scenario.' + config_data.scenario)
-    mod.scenario(swarm_sim_world)
-    if config_data.particle_random_order:
-        random.shuffle(swarm_sim_world.particles)
+    if config_data.visualization:
+        swarm_sim_world.vis.run(round_start_timestamp)
 
 
 def read_cmd_args(argv, config_data):
@@ -89,7 +81,7 @@ def create_folder_for_data(config_data):
         # config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
         #                              "_" + config_data.solution.rsplit('.', 1)[0]
 
-        config_data.folder_name =  config_data.folder_name
+        config_data.folder_name = config_data.folder_name
 
     else:
         config_data.folder_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
@@ -111,8 +103,8 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    #plot_generator("rounds.csv" ,config_data.folder_name, 5, 4,"Round")
-    #plot_generator("particle.csv", config_data.folder_name, 2, 1,"Particle")
+    # plot_generator("rounds.csv" ,config_data.folder_name, 5, 4,"Round")
+    # plot_generator("particle.csv", config_data.folder_name, 2, 1,"Particle")
 
 
 if __name__ == "__main__":
