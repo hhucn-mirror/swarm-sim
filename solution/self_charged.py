@@ -17,18 +17,17 @@ def solution(sim):
     # Checking if the goal has been reached
     if sim.get_actual_round() ==1:
         for particle in sim.get_particle_list():
-            setattr(particle, "light", 1 )
+            setattr(particle, "light", 0 )
     check_all_goal_params(sim)
 
     ##########
-    #delete_light_information(sim)
-    #init_full_light_propagation(sim)
+    delete_light_information(sim)
+    init_full_light_propagation(sim)
     for particle in sim.get_particle_list():
-        delete_light_information(sim)
-        init_full_light_propagation(sim)
+
         phototaxing_fsv(particle)
 
-    print(sim.get_actual_round() )
+    print(sim.get_actual_round())
 # This is the phototaxing algorithm
 #
 def phototaxing_fsv( particle):

@@ -67,8 +67,8 @@ def scenario(sim):
     #     iteration = iteration + 1
     #     displacement = displacement + 0.5
     #sim.param_lambda=2
-    #hexagon(sim, (0.0, 0.0), sim.param_lambda)
-    hexagon(sim, (0.0, 0.0), 29)
+    hexagon(sim, (0.0, 0.0), sim.param_lambda)
+    #hexagon(sim, (0.0, 0.0), 128)
 
 def hexagon(world, center, amount):
     created = 1

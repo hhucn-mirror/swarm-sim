@@ -31,8 +31,8 @@ def main(argv):
     max_round = 5000
     seed_start = 1
     seed_end = 10
-    param_lambda_min = 64
-    param_lambda_max = 64
+    param_lambda_min = 128
+    param_lambda_max = 128
 
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
@@ -64,7 +64,7 @@ def main(argv):
         elif opt in ("-n", "--maxrounds"):
            max_round = int(arg)
     round=1
-    dir = "./outputs/multiple/battery"
+    dir = "./outputs/multiple/charged"
 
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -83,7 +83,7 @@ def main(argv):
             folder_name_sub = folder_name + "/" + str(seed)
             process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d "+str(nTime),\
                                   "-r "+ str(seed), "-v " + str(0), "-p " + str(param_lambda), "-q"  + folder_name_sub,\
-                                    "-s" + "battery_powered"
+                                    "-s" + "self_charged" #"battery_powered"
             p = subprocess.Popen(process, stdout=out, stderr=out)
             round += 1
             round_cnt += 1
