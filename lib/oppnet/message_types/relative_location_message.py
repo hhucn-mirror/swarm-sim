@@ -7,11 +7,9 @@ def get_locations_north_by_hops(location, hops=1):
     (x, y, z) = location
     locations = []
     for hop in range(1, hops + 1):
-        x_range = np.append(
-            np.arange(x - 0.5, x - 0.5 * (hop + 1), -0.5),
-            np.arange(x + 0.5, x + 0.5 * (hop + 1), 0.5))
+        x_range = np.arange(x - hop * 0.5, x + (hop + 1) * 0.5, 1.0)
         for x_coordinate in x_range:
-            locations.append((x_coordinate, y + hops, z))
+            locations.append((x_coordinate, y + hop, z))
     return locations
 
 
@@ -19,11 +17,9 @@ def get_locations_south_by_hops(location, hops=1):
     (x, y, z) = location
     locations = []
     for hop in range(1, hops + 1):
-        x_range = np.append(
-            np.arange(x - 0.5, x - 0.5 * (hop + 1), -0.5),
-            np.arange(x + 0.5, x + 0.5 * (hop + 1), 0.5))
+        x_range = np.arange(x - hop * 0.5, x + (hop + 1) * 0.5, 1.0)
         for x_coordinate in x_range:
-            locations.append((x_coordinate, y - hops, z))
+            locations.append((x_coordinate, y - hop, z))
     return locations
 
 
@@ -83,7 +79,7 @@ class CardinalDirection(Enum):
     @staticmethod
     def get_direction_between_locations(location_1, location_2):
         x_diff, y_diff = location_1[0] - location_2[0], location_1[1] - location_2[1]
-        if x_diff > y_diff:
+        if abs(x_diff) > abs(y_diff):
             if x_diff > 0:
                 return CardinalDirection.East
             else:
@@ -100,15 +96,12 @@ class CardinalDirection(Enum):
 
 
 class RelativeLocationMessageContent:
-    def __init__(self, queried_directions: [CardinalDirection], is_response=False):
+    def __init__(self, queried_directions: [CardinalDirection], is_response=False, hops_per_direction=None):
         self.queried_directions = queried_directions
-        self.hops_per_direction = \
-            {
-                CardinalDirection.North: None,
-                CardinalDirection.East: None,
-                CardinalDirection.South: None,
-                CardinalDirection.West: None
-            }
+        if hops_per_direction is not None:
+            self.hops_per_direction = hops_per_direction
+        else:
+            self.hops_per_direction = {}
         self.is_response = is_response
 
     def set_direction_hops(self, cardinal_direction: CardinalDirection, hops):

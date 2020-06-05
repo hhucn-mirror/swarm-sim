@@ -1,6 +1,7 @@
 import collections
 import logging
 import random
+from enum import Enum
 
 import numpy as np
 
@@ -16,6 +17,15 @@ from lib.oppnet.routing import RoutingMap
 from lib.oppnet.util import get_distance_from_coordinates, get_direction_between_coordinates
 from lib.particle import Particle
 from lib.swarm_sim_header import vector_angle, get_coordinates_in_direction, free_locations_within_hops
+
+
+class FlockMode(Enum):
+    Searching = 0,
+    QueryingLocation = 1,
+    FoundLocation = 2
+    Flocking = 3,
+    Dispersing = 4,
+    Regrouping = 5
 
 
 class Particle(Particle):
@@ -63,6 +73,8 @@ class Particle(Particle):
         self.relative_cardinal_location = None
         self.__max_cardinal_direction_hops__ = {}
 
+        self.flock_mode = FlockMode.Searching
+
     def get_particles_in_cardinal_direction_hop(self, cardinal_direction, hops):
         """
         Returns a list of particles that are surrounding the particle in the :param cardinal_direction with a maximum
@@ -73,10 +85,10 @@ class Particle(Particle):
         :return: the list of particles that surround the particle in the given cardinal direction
         :rtype: [Particle]
         """
-        one_hop_locations = CardinalDirection.get_locations_in_direction_hops(self.coordinates, cardinal_direction,
-                                                                              hops)
+        neighbor_locations = CardinalDirection.get_locations_in_direction_hops(self.coordinates, cardinal_direction,
+                                                                               hops)
         particles = []
-        for location in one_hop_locations:
+        for location in neighbor_locations:
             try:
                 particles.append(self.world.particle_map_coordinates[location])
             except KeyError:
@@ -155,6 +167,7 @@ class Particle(Particle):
         :param hops: number of hops to scan within for free locations
         :return: nothing
         """
+        is_edge = self._is_edge_of_flock_()
         free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hops=hops)
         new_ring = self.get_estimated_flock_ring()
         if new_ring is None:
@@ -166,10 +179,20 @@ class Particle(Particle):
             if tmp < new_ring:
                 new_ring = tmp
                 new_location = free_location
+            elif not is_edge and tmp == new_ring:
+                new_location = free_location
+                new_ring = tmp
         if new_location:
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=new_location))
         else:
             self.mobility_model.current_dir = None
+
+    def _is_edge_of_flock_(self):
+        for cardinal_direction in CardinalDirection.get_cardinal_directions_list():
+            if len(self.get_particles_in_cardinal_direction_hop(
+                    cardinal_direction, self.routing_parameters.scan_radius)) == 0:
+                return True
+        return False
 
     def try_and_find_flock(self):
         """
@@ -367,6 +390,7 @@ class Particle(Particle):
         in each cardinal direction for a message to reach the outer ring of a flock.
         :return: nothing
         """
+        self.flock_mode = FlockMode.QueryingLocation
         self.__max_cardinal_direction_hops__ = {}
         cardinal_directions = CardinalDirection.get_cardinal_directions_list()
         queried_directions_per_particle = {}
@@ -413,8 +437,28 @@ class Particle(Particle):
         :return: nothing
         """
         for particle, queried_locations in queried_directions_per_particle.items():
-            content = RelativeLocationMessageContent(queried_locations)
+            content = RelativeLocationMessageContent(queried_locations, False, self.__hops_per_direction_for_neighbor())
             send_message(self, particle, Message(self, particle, content=content))
+
+    def __hops_per_direction_for_neighbor(self, queried_directions=None):
+        """
+        Creates a hops per direction dictionary for all directions in :param queried_directions. If that is None,
+        it will create it for all entries in self.__max_cardinal_direction_hops__.
+        :param queried_directions: list of directions to include in the dictionary
+        :type queried_directions: list
+        :return: dictionary of direction, hops
+        :rtype: dict
+        """
+        hops_per_direction = {}
+        if not queried_directions:
+            for direction, hops in self.__max_cardinal_direction_hops__.items():
+                hops_per_direction[direction] = hops + 1
+        else:
+            for direction in queried_directions:
+                if direction in self.__max_cardinal_direction_hops__:
+                    hops = self.__max_cardinal_direction_hops__[direction]
+                    hops_per_direction[direction] = hops + 1
+        return hops_per_direction
 
     def __process_relative_location_message(self, message, content):
         """
@@ -427,47 +471,54 @@ class Particle(Particle):
         :return: nothing
         """
         if not content.is_response:
-            for direction in content.queried_directions:
-                self.__received_queried_directions__[message.get_original_sender()] = content.queried_directions
-                if direction in self.__max_cardinal_direction_hops__:
-                    self.__send_relative_location_response__(direction)
-        else:
-            for direction in content.queried_directions:
-                if direction not in self.__max_cardinal_direction_hops__:
-                    self.__max_cardinal_direction_hops__[direction] = content.hops_per_direction[direction]
-                    self.__send_relative_location_response__(direction)
-                elif self.__max_cardinal_direction_hops__[direction] > content.hops_per_direction[direction]:
-                    logging.debug("round {}: particle #{} received non-queried hops for direction {}".format(
-                        self.world.get_actual_round(), self.number, str(direction)
-                    ))
-            self.relative_flock_location = RelativeLocationMessageContent.get_relative_location(
-                self.__max_cardinal_direction_hops__)
-            if self.relative_flock_location:
-                self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
-                                                                                    (0, 0, 0))
+            self.__received_queried_directions__[message.get_original_sender()] = content.queried_directions
 
-    def __send_relative_location_response__(self, queried_direction):
+        for direction, hops in content.hops_per_direction.items():
+            if direction not in self.__max_cardinal_direction_hops__:
+                self.__max_cardinal_direction_hops__[direction] = hops
+            elif self.__max_cardinal_direction_hops__[direction] > hops:
+                logging.debug("round {}: particle #{} received non-queried hops for direction {}".format(
+                    self.world.get_actual_round(), self.number, str(direction)
+                ))
+        updated_location = RelativeLocationMessageContent.get_relative_location(self.__max_cardinal_direction_hops__)
+        if updated_location and self.relative_flock_location != updated_location:
+            self.relative_flock_location = updated_location
+            self.__send_relative_location_response__()
+            self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
+                                                                                (0, 0, 0))
+            self.flock_mode = FlockMode.FoundLocation
+
+    def __send_relative_location_response__(self):
         """
-        Sends a RelativeLocationMessageContent response for :param queried_direction. This will set the hops inside
+        Sends a RelativeLocationMessageContent response. This will set the hops inside
         the content to the maximum it knows itself + 1.
-        :param queried_direction: the direction the response is about
-        :type queried_direction: CardinalDirection
         :return: nothing
         """
-        content = RelativeLocationMessageContent([queried_direction], True)
-        content.set_direction_hops(queried_direction, self.__max_cardinal_direction_hops__[queried_direction] + 1)
         for receiver, queried_directions in list(self.__received_queried_directions__.items()):
-            if queried_direction in queried_directions:
-                send_message(self, receiver, Message(self, receiver, content=content))
-                queried_directions.remove(queried_direction)
-                if len(queried_directions) == 0:
+            content = RelativeLocationMessageContent([], True,
+                                                     self.__hops_per_direction_for_neighbor(queried_directions))
+            send_message(self, receiver, Message(self, receiver, content=content))
+            # remove the directions that are included in the response
+            for queried_direction in content.hops_per_direction.keys():
+                self.__received_queried_directions__[receiver].remove(queried_direction)
+                if len(self.__received_queried_directions__[receiver]) == 0:
                     del self.__received_queried_directions__[receiver]
 
     def __process_predator_signal(self, message, content: PredatorSignal):
-        # set an escape direction opposite to the predator, away from the flock center
-        escape_direction = self.__get_predator_escape_direction(content.approaching_direction)
-        self.mobility_model.set_mode(MobilityModelMode.Manual)
-        self.mobility_model.current_dir = escape_direction
+        """
+        Processes a PredatorSignal message.
+        :param message: the message to process
+        :type message: Message
+        :param content: the content of the message
+        :type content: PredatorSignal
+        """
+        if self.flock_mode != FlockMode.Dispersing and self.relative_cardinal_location:
+            # set an escape direction opposite to the predator, away from the flock center
+            escape_direction = self.__get_predator_escape_direction(message.get_original_sender().coordinates)
+            self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
+            self.mobility_model.current_dir = escape_direction
+            self.relative_cardinal_location = self.relative_flock_location = None
+        self.flock_mode = FlockMode.Dispersing
         # forward to all neighbors not in the receiver list
         neighbors = set(self.__current_neighborhood__.keys())
         new_receivers = content.receivers.difference(neighbors)
@@ -475,7 +526,16 @@ class Particle(Particle):
             content.update_receivers(neighbors)
             multicast_message_content(self, new_receivers, content)
 
-    def __get_predator_escape_direction(self, approaching_direction: CardinalDirection):
+    def __get_predator_escape_direction(self, predator_coordinates):
+        """
+        Returns a escape direction from a Predator approaching from :param approaching_direction. This will
+        be close to a 90 degree angle from the approaching_direction.
+        :param predator_coordinates: coordinates of the predator
+        :return: escape direction
+        :rtype: tuple
+        """
+        approaching_direction = CardinalDirection.get_direction_between_locations(predator_coordinates,
+                                                                                  self.coordinates)
         if approaching_direction.value[0] != 0:
             if self.relative_cardinal_location[1] != 0:
                 return approaching_direction.value[0] * -0.5, self.relative_cardinal_location[1], 0
@@ -494,6 +554,24 @@ class Particle(Particle):
         except TypeError:
             ring = None
         return ring
+
+    def get_next_direction(self):
+        next_direction = self.mobility_model.next_direction(self.coordinates)
+        # switch to finding the flock again
+        if self.flock_mode == FlockMode.Dispersing and not next_direction:
+            self.query_relative_location()
+            return None
+        elif self.flock_mode == FlockMode.QueryingLocation:
+            return None
+        elif self.flock_mode == FlockMode.FoundLocation:
+            self.try_and_fill_flock_holes()
+            self.query_relative_location()
+            return self.mobility_model.next_direction(self.coordinates)
+        return next_direction
+
+    def move_to(self, direction):
+        super().move_to(direction)
+        self.mobility_model.update_history()
 
     def get_coordinates_as_point(self):
         """

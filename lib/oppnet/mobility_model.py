@@ -14,7 +14,8 @@ class MobilityModelMode(Enum):
     Zonal = 5
     POI = 6
     Manual = 7
-    Random_Mode = 8
+    DisperseFlock = 8
+    Random_Mode = 9
 
 
 class MobilityModel:
@@ -30,7 +31,7 @@ class MobilityModel:
 
     directions = [NE, E, SE, SW, W, NW]
 
-    def __init__(self, start_coordinates, mode: MobilityModelMode, length=(5, 30), zone=(), starting_dir=None, poi=()):
+    def __init__(self, start_coordinates, mode: MobilityModelMode, length=15, zone=(), starting_dir=None, poi=()):
         """
         Constructor.
         :param start_coordinates: starting coordinates
@@ -48,20 +49,18 @@ class MobilityModel:
             self.min_y = zone[1]
             self.max_x = zone[2]
             self.max_y = zone[3]
-        else:
-            self.min_x = start_x - length[1]
-            self.min_y = start_y - length[1]
-            self.max_x = start_x + length[1]
-            self.max_y = start_y + length[1]
         self.mode = mode
         self.steps = 0
-        self.min_length = length[0]
-        self.max_length = length[1]
         if mode == MobilityModelMode.Random:
             self.starting_dir = self.random_direction()
         else:
             self.starting_dir = starting_dir
-        self.route_length = random.randint(self.min_length, self.max_length)
+        if isinstance(length, tuple):
+            self.route_length = random.randint(length[0], length[1])
+            self.max_length = length[1]
+        elif isinstance(length, int):
+            self.route_length = length
+            self.max_length = length
         self.return_dir = self.opposite_direction(self.starting_dir)
         self.current_dir = self.starting_dir
         self.previous_coordinates = start_coordinates
@@ -83,13 +82,19 @@ class MobilityModel:
         :type mode: MobilityModelMode
         :return: None
         """
+        if mode == self.mode:
+            return
         self.mode = mode
         if mode == MobilityModelMode.Random_Mode:
             self.mode = random.choice(list(MobilityModelMode)[:-1])
         if mode == MobilityModelMode.Manual:
             self.current_dir = None
-        elif mode == MobilityModelMode.Random:
+        elif mode == MobilityModelMode.Random or mode == MobilityModelMode.Random_Walk:
             self.current_dir = self.random_direction()
+        elif mode == MobilityModelMode.DisperseFlock:
+            self.steps = 0
+            self._direction_history_index = None
+            self.direction_history = []
 
     def next_direction(self, current_x_y_z):
         """
@@ -98,7 +103,6 @@ class MobilityModel:
         :return: the next direction
         """
         self.previous_coordinates = current_x_y_z
-        self._direction_history_index = None
         if self.mode == MobilityModelMode.Back_And_Forth:
             new_direction = self.__back_and_forth__()
         elif self.mode == MobilityModelMode.Random_Walk:
@@ -115,9 +119,11 @@ class MobilityModel:
             new_direction = self.__poi__(current_x_y_z)
         elif self.mode == MobilityModelMode.Manual:
             new_direction = self.current_dir
+        elif self.mode == MobilityModelMode.DisperseFlock:
+            new_direction = self.__disperse_flock__(current_x_y_z)
         else:
             new_direction = None
-        self.direction_history.append(new_direction)
+        self.current_dir = new_direction
         return new_direction
 
     def turn_around(self):
@@ -135,6 +141,8 @@ class MobilityModel:
         """
         if self._direction_history_index is None:
             self._direction_history_index = len(self.direction_history) - 1
+        if self._direction_history_index < 0:
+            return False
         next_direction = self.opposite_direction(self.direction_history[self._direction_history_index])
         self._direction_history_index -= 1
         self.direction_history.append(next_direction)
@@ -241,7 +249,7 @@ class MobilityModel:
         :return: the next direction to move to, if possible
         """
         if current_x_y_z == self.poi or (current_x_y_z == self.previous_coordinates and self.current_dir is not None):
-            return False
+            return None
 
         # southern movement
         if current_x_y_z[1] > self.poi[1]:
@@ -264,6 +272,19 @@ class MobilityModel:
             return self.E
         else:
             return self.W
+
+    def __disperse_flock__(self, current_x_y_z):
+        if self.steps < self.route_length:
+            self.steps += 1
+            return self.current_dir
+        elif self.steps < self.max_length * 2:
+            self.steps += 1
+            return self.random_direction()
+        else:
+            return self.track_back()
+
+    def update_history(self):
+        self.direction_history.append(self.current_dir)
 
     @staticmethod
     def random_direction(directions=None):
