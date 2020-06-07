@@ -63,7 +63,7 @@ def scan_in(matter_map: dict, center, hop, grid):
     result = []
     n_sphere_border = grid.get_n_sphere_border(center, hop)
     for l in n_sphere_border:
-        if l in matter_map:
+        if l in matter_map and l != center:
             result.append(matter_map[l])
     return result
 
@@ -90,7 +90,7 @@ def scan_within(matter_map, center, hop, grid):
     result = []
     n_sphere_border = grid.get_n_sphere(center, hop)
     for l in n_sphere_border:
-        if l in matter_map:
+        if l in matter_map and l != center:
             result.append(matter_map[l])
     return result
 

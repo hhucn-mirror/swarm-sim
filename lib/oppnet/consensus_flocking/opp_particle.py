@@ -147,7 +147,7 @@ class Particle(Particle):
         """
         self.__previous_neighbourhood__ = self.__current_neighborhood__
         self.__current_neighborhood__ = {}
-        neighbours = self.scan_for_particles_in(self.routing_parameters.scan_radius)
+        neighbours = self.scan_for_particles_within(self.routing_parameters.scan_radius)
         for neighbour in neighbours:
             self.__current_neighborhood__[neighbour] = None
         return neighbours

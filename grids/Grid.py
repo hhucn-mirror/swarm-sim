@@ -159,7 +159,7 @@ class Grid(ABC):
         current_ns = ns
         result.update(ns)
 
-        for _ in range(radius):
+        for _ in range(radius-1):
             tmp = set()
             for n in current_ns:
                 ns = self._get_adjacent_coordinates_not_in_set(n, result)

@@ -96,7 +96,7 @@ class Particle(Particle):
         self.__flock_member_type__ = flock_member_type
 
     def init_neighbourhood(self):
-        neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
+        neighbourhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
         self.__previous_neighbourhood__ = neighbourhood
 
     def get_all_received_messages(self):
@@ -185,7 +185,7 @@ class Particle(Particle):
     def multicast_leader_message(self, message_type: LeaderMessageType, neighbours=None):
         max_hops = self.routing_parameters.scan_radius
         if not neighbours:
-            neighbours = self.scan_for_particles_in(hop=max_hops)
+            neighbours = self.scan_for_particles_within(hop=max_hops)
 
         if message_type == LeaderMessageType.instruct:
             self.instruct_round = self.t_wait + self.world.get_actual_round()
@@ -228,7 +228,7 @@ class Particle(Particle):
                     contact_particle.number))
 
     def flood_message_content(self, message_content):
-        receivers = self.scan_for_particles_in(hop=self.routing_parameters.scan_radius)
+        receivers = self.scan_for_particles_within(hop=self.routing_parameters.scan_radius)
         multicast_message_content(self, receivers, message_content)
 
     def send_message_content_via_contacts(self, receiver, message_content):
@@ -242,7 +242,7 @@ class Particle(Particle):
             # do not flood if the message is older than t_wait
             return
         max_hops = self.routing_parameters.scan_radius
-        neighbours = self.scan_for_particles_in(hop=max_hops)
+        neighbours = self.scan_for_particles_within(hop=max_hops)
         exclude = {received_message.get_sender(), received_message.get_content().get_sending_leader(),
                    received_message.get_original_sender()}.union(received_content.get_receivers())
         all_receivers = set(neighbours).difference(exclude)
@@ -603,7 +603,7 @@ class Particle(Particle):
                           .format(self.world.get_actual_round(), self.number))
 
     def __neighbourhood_difference__(self):
-        neighbourhood = set(self.scan_for_particles_in(self.routing_parameters.scan_radius))
+        neighbourhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
         lost_neighbours = neighbourhood.difference(self.__previous_neighbourhood__)
         new_neighbours = self.__previous_neighbourhood__.difference(neighbourhood)
         self.__previous_neighbourhood__ = neighbourhood

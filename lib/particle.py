@@ -1060,6 +1060,12 @@ class Particle(matter.Matter):
             return False
 
     def set_color(self, color):
+        if not self.__exists__:
+            return
         super().set_color(color)
         if self.world.vis:
             self.world.vis.particle_changed(self)
+
+    @property
+    def __exists__(self):
+        return self in self.world.particles

@@ -122,7 +122,7 @@ class ConfigData:
         # predator config
         self.predator_scan_radius = config.getint("Flocking", "predator_scan_radius")
         self.predator_chase_mode = ChaseMode(config.getint("Flocking", "predator_chase_mode"))
-
+        self.predator_chase_rounds = config.getint("Flocking", "predator_chase_rounds")
         try:
             self.scenario = config.get("File", "scenario")
         except configparser.NoOptionError as noe:

@@ -485,7 +485,7 @@ class World:
         :param particle_id: particle id
         :return: True: Successful removed; False: Unsuccessful
         """
-        self.remove_matter(particle_id, Particle)
+        return self.remove_matter(particle_id, Particle)
 
     def remove_particle_on(self, coordinates):
         """
@@ -585,7 +585,7 @@ class World:
             if coordinates not in map_coordinates:
                 matters_list.append(matter)
                 if self.vis is not None:
-                    self._get_matter_changed_function(matter)(matter)
+                    self._get_vis_matter_changed_function(matter)(matter)
                 map_coordinates[matter.coordinates] = matter
                 self._get_map_id_for_matter(matter)[matter.get_id()] = matter
                 self._get_csv_update_num_function_for_matter(matter)(len(matters_list))
@@ -616,17 +616,25 @@ class World:
             if removed_matter in matter_list:
                 matter_list.remove(removed_matter)
             if self.vis is not None:
-                self.vis.remove_location(removed_matter)
+                self._get_vis_remove_matter_function(removed_matter)(removed_matter)
             self._get_matter_list_rm(matter_class).append(removed_matter)
             logging.info("Deleted matter with id {} on {}".format(matter_id, removed_matter.coordinates))
             try:
                 del map_coordinates[removed_matter.coordinates]
             except KeyError:
-                pass
+                logging.debug('world -> remove_matter() removal from coordinates map failed for not found id {}'.
+                              format(matter_id))
             try:
                 del map_id[matter_id]
             except KeyError:
-                pass
+                logging.debug('world -> remove_matter() removal from id map failed for not found id {}'.
+                              format(matter_id))
+            try:
+                if isinstance(removed_matter, Particle):
+                    del self.particle_color_map[removed_matter]
+            except KeyError:
+                logging.debug('world -> remove_matter() removal from particle color map failed for not found id {}'.
+                              format(matter_id))
             self._get_csv_update_num_function_for_matter(matter_class)(len(matter_list))
             self._update_deleted_metrics_(matter_class)
             return True
@@ -634,9 +642,7 @@ class World:
             return False
 
     def _update_deleted_metrics_(self, matter):
-        if isinstance(matter, Particle) or matter == Particle:
-            self.csv_round.update_metrics(particles_deleted=1)
-        elif isinstance(matter, Location) or matter == Location:
+        if isinstance(matter, Location) or matter == Location:
             self.csv_round.update_metrics(location_deleted=1)
         elif isinstance(matter, Tile) or matter == Tile:
             self.csv_round.update_metrics(tile_deleted=1)
@@ -774,7 +780,7 @@ class World:
         else:
             return None
 
-    def _get_matter_changed_function(self, matter):
+    def _get_vis_matter_changed_function(self, matter):
         """
             Returns the corresponding matter changed function in vis for the class of :param matter.
             :param matter: Matter object or Matter subclass
@@ -791,20 +797,20 @@ class World:
         else:
             return None
 
-    def _get_matter_removed_function(self, matter):
+    def _get_vis_remove_matter_function(self, matter):
         """
             Returns the corresponding matter changed function in vis for the class of :param matter.
             :param matter: Matter object or Matter subclass
             :return: function
             """
         if isinstance(matter, Predator) or matter == Predator:
-            return self.vis.predator_changed
+            return self.vis.remove_predator
         elif isinstance(matter, Particle) or matter == Particle:
-            return self.vis.particle_changed
+            return self.vis.remove_particle
         elif isinstance(matter, Location) or matter == Location:
-            return self.vis.location_changed
+            return self.vis.remove_location
         elif isinstance(matter, Tile) or matter == Tile:
-            return self.vis.tile_changed
+            return self.vis.remove_tile
         else:
             return None
 
@@ -902,12 +908,12 @@ class World:
         :param particles: particles to move
         :type particles: list
         """
+        if not self._flocks:
+            return
         for particle in particles:
             try:
                 self._flocks[self._particle_flocks_ids[particle]].remove_particle(particle)
             except KeyError:
-                pass
-            except IndexError:
                 pass
             finally:
                 self._particle_flocks_ids[particle] = new_flock_id
