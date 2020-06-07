@@ -69,35 +69,6 @@ class CsvParticleData:
         self.messages_ttl_expired += messages_ttl_expired
         self.out_of_mem += out_of_mem
 
-
-class CsvPredatorFile:
-    def __init__(self, directory):
-        self.file_name = directory + '/predator.csv'
-        file_exists = os.path.isfile(self.file_name)
-        if not file_exists:
-            self.csv_file = open(self.file_name, 'w', newline='')
-            self.writer = csv.writer(self.csv_file)
-            self.writer.writerow(['Predator ID', 'Predator Number', 'Predator Steps', 'Particles Caught'])
-
-    def write_particle(self, predator):
-        csv_iterator = [predator.csv_predator_writer.id, predator.csv_predator_writer.number,
-                        predator.csv_predator_writer.steps, predator.csv_predator_writer.particles_caught,
-                        ]
-        self.writer.writerow(csv_iterator)
-
-
-class CsvPredatorData:
-    def __init__(self, predator_id, predator_number):
-        self.id = predator_id
-        self.number = predator_number
-        self.steps = 0
-        self.particles_caught = 0
-
-    def write_particle(self, steps=0, particles_caught=0):
-        self.steps += steps
-        self.particles_caught += particles_caught
-
-
 class CsvRoundData:
     def __init__(self, sim, task=0, solution=0, seed=20,
                  steps=0, tiles_num=0, particle_num=0, predator_num=0, directory='outputs/'):
