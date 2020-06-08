@@ -481,12 +481,13 @@ class Particle(Particle):
                     self.world.get_actual_round(), self.number, str(direction)
                 ))
         updated_location = RelativeLocationMessageContent.get_relative_location(self.__max_cardinal_direction_hops__)
-        if updated_location and self.relative_flock_location != updated_location:
-            self.relative_flock_location = updated_location
-            self.__send_relative_location_response__()
-            self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
-                                                                                (0, 0, 0))
+        if updated_location:
             self.flock_mode = FlockMode.FoundLocation
+            if self.relative_flock_location != updated_location:
+                self.relative_flock_location = updated_location
+                self.__send_relative_location_response__()
+                self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
+                                                                                    (0, 0, 0))
 
     def __send_relative_location_response__(self):
         """
@@ -512,12 +513,15 @@ class Particle(Particle):
         :param content: the content of the message
         :type content: PredatorSignal
         """
-        if self.flock_mode != FlockMode.Dispersing and self.relative_cardinal_location:
+        if self.flock_mode != FlockMode.Dispersing:
             # set an escape direction opposite to the predator, away from the flock center
             escape_direction = self.__get_predator_escape_direction(message.get_original_sender().coordinates)
-            self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
-            self.mobility_model.current_dir = escape_direction
-            self.relative_cardinal_location = self.relative_flock_location = None
+        else:
+            # if escape direction already set, then update the direction
+            escape_direction = self.__update_predator_escape_direction(message.get_original_sender().coordinates)
+        self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
+        self.mobility_model.current_dir = escape_direction
+        self.relative_cardinal_location = self.relative_flock_location = None
         self.flock_mode = FlockMode.Dispersing
         # forward to all neighbors not in the receiver list
         neighbors = set(self.__current_neighborhood__.keys())
@@ -526,14 +530,60 @@ class Particle(Particle):
             content.update_receivers(neighbors)
             multicast_message_content(self, new_receivers, content)
 
+    def __update_predator_escape_direction(self, predator_coordinates):
+        """
+        Calculates an updated escape direction depending on the current escape direction.
+        :param predator_coordinates: the coordinates of the predator
+        :return: an updated escape direction
+        """
+        current_escape_direction = self.mobility_model.current_dir
+        new_escape_direction = self.__get_predator_escape_direction(predator_coordinates)
+        x_sum = new_escape_direction[0] + current_escape_direction[0]
+        y_sum = new_escape_direction[1] + current_escape_direction[1]
+        if not current_escape_direction:
+            return new_escape_direction
+        # x value will be equal for pairs (NE, SE) and (NW, SW) -> return E or W respectively
+        if current_escape_direction[0] == new_escape_direction[0]:
+            return current_escape_direction[0] * 2, 0, 0
+        elif current_escape_direction[1] == 0 and new_escape_direction[1] == 0:
+            # E and W -> any of SE, SW, NE, SW, but prefer newer value
+            return self.__weighted_direction_choice__(new_escape_direction)
+        elif current_escape_direction[1] == 0 or new_escape_direction[1] == 0:
+            # E and SE/NE or W and SW/NW -> E or W respectively
+            if abs(x_sum) == 1.5:
+                return x_sum % 1 * 2, y_sum, 0
+            # E and SW/NW or W and SE/NE
+            else:
+                return random.choice([(x_sum, -y_sum, 0), (-x_sum, y_sum, 0)])
+        # NE and NW or SE and SW -> E/W
+        elif current_escape_direction[1] == new_escape_direction[1]:
+            return random.choice([MobilityModel.E, MobilityModel.W])
+        # SE and NW or SW and NE -> E/W/SW/NE or E/W/SE/NW
+        else:
+            return MobilityModel.random_direction(exclude=[current_escape_direction, new_escape_direction])
+
+    @staticmethod
+    def __weighted_direction_choice__(preferred_direction, weight_scale=0.5):
+        population = [MobilityModel.NW, MobilityModel.SW, MobilityModel.NE, MobilityModel.SE]
+        if preferred_direction == MobilityModel.W:
+            weights = [0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale, 0.25, 0.25]
+        else:
+            weights = [0.25, 0.25, 0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale]
+        return random.choices(population, weights, k=1)
+
     def __get_predator_escape_direction(self, predator_coordinates):
         """
         Returns a escape direction from a Predator approaching from :param approaching_direction. This will
-        be close to a 90 degree angle from the approaching_direction.
+        be close to a 90 degree angle from the approaching_direction. If the particles's relative cardinal location
+        in the flock is not set, it will return a random direction.
         :param predator_coordinates: coordinates of the predator
         :return: escape direction
         :rtype: tuple
         """
+        if not self.relative_cardinal_location:
+            logging.debug('round {}: opp_particle -> __get_predator_escape_direction() relative_cardinal_location '
+                          'of particle {} not set!'.format(self.world.get_actual_round(), self.number))
+            return MobilityModel.random_direction()
         approaching_direction = CardinalDirection.get_direction_between_locations(predator_coordinates,
                                                                                   self.coordinates)
         if approaching_direction.value[0] != 0:
@@ -565,7 +615,6 @@ class Particle(Particle):
             return None
         elif self.flock_mode == FlockMode.FoundLocation:
             self.try_and_fill_flock_holes()
-            self.query_relative_location()
             return self.mobility_model.next_direction(self.coordinates)
         return next_direction
 

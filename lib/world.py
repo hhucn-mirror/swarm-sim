@@ -8,11 +8,12 @@ import collections
 import importlib
 import itertools
 import logging
-import numpy as np
 import os
 import random
 import threading
 import time
+
+import numpy as np
 
 from lib import vis3d
 from lib.location import Location
@@ -866,6 +867,13 @@ class World:
             return None
 
     def get_nearby_flock_center_by_coordinates(self, coordinates, max_hops):
+        """
+        Returns the nearest estimated center of a flock near :param coordinates with a maximum of :param max_hops
+        distance.
+        :param coordinates: the coordinates to search around
+        :param max_hops: the maximum distance from :param coordinates to a particle of a flock to look at
+        :return: the nearest estimated flock
+        """
         particles = scan_within(self.particle_map_coordinates, coordinates, max_hops, self.grid)
         flock_ids = self.get_particles_flock_ids(particles)
         estimated_flock_center = self._flocks[random.choice(flock_ids)].get_estimated_center()
@@ -915,9 +923,11 @@ class World:
                 self._flocks[self._particle_flocks_ids[particle]].remove_particle(particle)
             except KeyError:
                 pass
+            except IndexError:
+                pass
             finally:
+                self._flocks[new_flock_id].add_particle(particle)
                 self._particle_flocks_ids[particle] = new_flock_id
-        self._flocks[new_flock_id].extend_particles(particles)
 
     def get_particles_flock_ids(self, particles: [Particle]):
         """

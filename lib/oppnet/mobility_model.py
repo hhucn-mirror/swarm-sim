@@ -287,14 +287,17 @@ class MobilityModel:
         self.direction_history.append(self.current_dir)
 
     @staticmethod
-    def random_direction(directions=None):
+    def random_direction(directions=None, exclude=None):
         """
         A random direction from list :param directions:.
         :param directions: a list of directions.
+        :param exclude: a list of directions to exclude
         :return: a random next direction in directions, or complete random
         """
         if directions is None:
             directions = MobilityModel.directions
+        if exclude is not None:
+            directions = [direction for direction in directions if direction not in exclude]
         return random.choice(directions)
 
     @staticmethod

@@ -68,7 +68,7 @@ class Predator(Particle):
         Moves the predator depending on chase_mode.
         :return: the result of move_to()
         """
-        self.catch_predators()
+        self.catch_particles()
         # if the chase is paused, simply move by mobility model
         if self.mobility_model.mode != MobilityModelMode.POI:
             self.move_to(self.mobility_model.next_direction(self.coordinates))
@@ -82,7 +82,6 @@ class Predator(Particle):
             next_direction = self.chase_nearby_flock()
 
         if next_direction is not None:
-            self.broadcast_warning()
             return self.move_to(next_direction)
         # if maximum number of rounds for a chase is reached, use random_walk mobility model
         elif self.world.get_actual_round() > self.max_chase:
@@ -91,11 +90,11 @@ class Predator(Particle):
         else:
             return self.move_to(MobilityModel.random_direction())
 
-    def catch_predators(self):
+    def catch_particles(self):
         one_hop_particles = self.scan_for_particles_within(1)
         for particle in one_hop_particles:
             self.world.remove_particle(particle.get_id())
-            self.world.csv_round.update_metrics(particles_caught=1)
+        self.world.csv_round.update_metrics(particles_caught=len(one_hop_particles))
 
     def activate_chase(self):
         """
@@ -123,7 +122,7 @@ class Predator(Particle):
                 self.mobility_model.poi = nearest_particles[0][0].coordinates
             return self.mobility_model.next_direction(self.coordinates)
         else:
-            None
+            return None
 
     def chase_nearby_flock(self):
         """
@@ -135,6 +134,8 @@ class Predator(Particle):
                                                                                         self.scan_radius)
             return self.mobility_model.next_direction(self.coordinates)
         except IndexError:
+            return None
+        except ValueError:
             return None
 
     def broadcast_warning(self):
