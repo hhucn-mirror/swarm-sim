@@ -113,6 +113,8 @@ class Visualization:
         self._viewer.tile_update_flag = True
         self._viewer.location_offset_data = {}
         self._viewer.location_update_flag = True
+        self._viewer.predator_offset_data = {}
+        self._viewer.predator_update_flag = True
         self._viewer.update_data()
         self._camera.reset()
         self._viewer.update_scene()

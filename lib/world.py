@@ -197,6 +197,7 @@ class World:
 
         self._particle_flocks_ids = {}
         self._flocks = []
+        Flock.instance_id = itertools.count()
 
         if self.config_data.visualization:
             self.vis.reset()
@@ -685,7 +686,8 @@ class World:
                 # remove the particle from the set if the next coordinates are not valid
                 if not self.grid.are_valid_coordinates(direction_coord):
                     particle_set.remove(particle)
-                    del particle_map_coordinates[particle.coordinates]
+                    if particle.coordinates in particle_map_coordinates:
+                        del particle_map_coordinates[particle.coordinates]
                 # add it to the ordered dictionary
                 elif direction_coord not in particle_map_coordinates \
                         and particle not in ordered_particles:
