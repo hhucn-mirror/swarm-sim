@@ -107,7 +107,7 @@ class MobilityModel:
         """
         Determines the next direction of the model.
         :param current_x_y_z: the current x, y and z coordinates of the particle as tuple
-        :param blocked_neighbors: neighbor locations blocked by particles
+        :param blocked_neighbors: blocked neighbor locations
         :return: the next direction
         """
         if self.mode == MobilityModelMode.Back_And_Forth:
@@ -254,16 +254,18 @@ class MobilityModel:
         """
         Moves the particle to a Point of Interest, i.e. a location, step by step.
         :param current_x_y_z: the particle's current location
-        :param blocked_neighbors: neighbor locations blocked by particles
+        :param blocked_neighbors: blocked neighbor locations
         :return: the next direction to move to, if possible
         """
         if current_x_y_z == self.poi:
             return None
         # assume that the blocking neighbors will continue to block the path
         if blocked_neighbors and self.previous_coordinates == current_x_y_z and len(self.direction_history) > 0:
-            next_direction = self.__poi__(current_x_y_z)
-            directions = self.__get_preferred_directions__(next_direction)
-            new_direction = self.__first_unblocked__(directions, blocked_neighbors, current_x_y_z)
+            preferred_direction = self.__poi__(current_x_y_z)
+            new_coordinates = get_coordinates_in_direction(current_x_y_z, preferred_direction)
+            if new_coordinates not in blocked_neighbors:
+                return preferred_direction
+            new_direction = self.__get_preferred_directions__(blocked_neighbors, current_x_y_z)
         else:
             # southern movement
             if current_x_y_z[1] > self.poi[1]:
@@ -286,34 +288,22 @@ class MobilityModel:
                 return self.E
             else:
                 return self.W
-        return None if new_direction is None else self.__check_new_coordinates_(current_x_y_z, new_direction)
+        return None if new_direction is None else self.__check_new_coordinates_(new_direction)
 
-    def __get_preferred_directions__(self, preferred_direction):
-        if preferred_direction == self.W:
-            return [self.W, self.NW, self.SW, self.NE, self.SE, self.E]
-        elif preferred_direction == self.E:
-            return [self.E, self.NE, self.SE, self.NW, self.SW, self.W]
-        elif preferred_direction == self.NE:
-            return [self.NE, self.E, self.NW, self.SE, self.W, self.SW]
-        elif preferred_direction == self.NW:
-            return [self.NW, self.W, self.NE, self.SW, self.E, self.SE]
-        elif preferred_direction == self.SE:
-            return [self.SE, self.E, self.SW, self.NE, self.W, self.NW]
-        elif preferred_direction == self.SW:
-            return [self.SW, self.W, self.SE, self.NW, self.E, self.NE]
-        else:
-            return []
+    def __get_preferred_directions__(self, blocked_neighbors, current_x_y_z):
+        new_direction = None
+        minimum_distance = self._distance_to_poi
+        for direction in self.directions:
+            new_coordinates = get_coordinates_in_direction(current_x_y_z, direction)
+            if new_coordinates not in blocked_neighbors:
+                distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
+                if distance_to_poi <= minimum_distance:
+                    new_direction = direction
+        return new_direction
 
-    def __check_new_coordinates_(self, current_x_y_z, new_direction):
-        new_coordinates = get_coordinates_in_direction(current_x_y_z, new_direction)
-        distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
-        if distance_to_poi > self._distance_to_poi:
-            return None
+    def __check_new_coordinates_(self, new_direction):
         if self._distance_to_poi_unimproved_rounds >= 12:
-            if distance_to_poi == self._distance_to_poi:
-                return random.choices([new_direction, None], [1 / 6, 5 / 6], k=1)[0]
-            else:
-                return None
+            return random.choices([new_direction, None], [1 / 6, 5 / 6], k=1)[0]
         else:
             return new_direction
 
