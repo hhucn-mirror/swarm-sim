@@ -1,4 +1,5 @@
 import copy
+import logging
 import math
 import random
 
@@ -48,6 +49,8 @@ class Message:
                 self.sender.send_store.append(self)
             except OverflowError:
                 process_event(EventType.ReceiverOutOfMem, self)
+            except AttributeError:
+                logging.debug('communication -> Message() sender is None')
 
         Message.seq_number += 1
 

@@ -41,6 +41,8 @@ class Predator(Particle):
                 and direction_coord not in self.world.predator_map_coordinates:
             if self.coordinates in self.world.predator_map_coordinates:
                 del self.world.predator_map_coordinates[self.coordinates]
+            if direction_coord in self.world.particle_map_coordinates:
+                self.catch_particle(self.world.particle_map_coordinates[direction_coord])
             self.coordinates = direction_coord
             self.world.predator_map_coordinates[self.coordinates] = self
             if self.world.vis:
@@ -68,7 +70,6 @@ class Predator(Particle):
         Moves the predator depending on chase_mode.
         :return: the result of move_to()
         """
-        self.catch_particles()
         # if the chase is paused, simply move by mobility model
         if self.mobility_model.mode != MobilityModelMode.POI:
             self.move_to(self.mobility_model.next_direction(self.coordinates))
@@ -90,11 +91,9 @@ class Predator(Particle):
         else:
             return self.move_to(MobilityModel.random_direction())
 
-    def catch_particles(self):
-        one_hop_particles = self.scan_for_particles_within(1)
-        for particle in one_hop_particles:
-            self.world.remove_particle(particle.get_id())
-        self.world.csv_round.update_metrics(particles_caught=len(one_hop_particles))
+    def catch_particle(self, caught_particle):
+        self.world.remove_particle(caught_particle.get_id())
+        self.world.csv_round.update_metrics(particles_caught=1)
 
     def activate_chase(self):
         """

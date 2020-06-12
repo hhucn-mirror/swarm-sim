@@ -93,8 +93,6 @@ class MobilityModel:
             self.current_dir = self.random_direction()
         elif mode == MobilityModelMode.DisperseFlock:
             self.steps = 0
-            self._direction_history_index = None
-            self.direction_history = []
 
     def next_direction(self, current_x_y_z):
         """
@@ -102,7 +100,6 @@ class MobilityModel:
         :param current_x_y_z: the current x, y and z coordinates of the particle as tuple
         :return: the next direction
         """
-        self.previous_coordinates = current_x_y_z
         if self.mode == MobilityModelMode.Back_And_Forth:
             new_direction = self.__back_and_forth__()
         elif self.mode == MobilityModelMode.Random_Walk:
@@ -124,6 +121,7 @@ class MobilityModel:
         else:
             new_direction = None
         self.current_dir = new_direction
+        self.previous_coordinates = current_x_y_z
         return new_direction
 
     def turn_around(self):
@@ -142,7 +140,8 @@ class MobilityModel:
         if self._direction_history_index is None:
             self._direction_history_index = len(self.direction_history) - 1
         if self._direction_history_index < 0:
-            return False
+            self.set_mode(MobilityModelMode.Manual)
+            return None
         next_direction = self.opposite_direction(self.direction_history[self._direction_history_index])
         self._direction_history_index -= 1
         self.direction_history.append(next_direction)
@@ -248,8 +247,23 @@ class MobilityModel:
         :param current_x_y_z: the particle's current location
         :return: the next direction to move to, if possible
         """
-        if current_x_y_z == self.poi or (current_x_y_z == self.previous_coordinates and self.current_dir is not None):
+        if current_x_y_z == self.poi:
             return None
+        # if the particle has not moved, because it was blocked, try moving around the obstacle
+        if current_x_y_z == self.previous_coordinates:
+            if self.direction_history is None:
+                return None
+            previous = self.direction_history[-1]
+            if previous is None:
+                return None
+            if previous == self.W:
+                return self.random_direction([self.NW, self.SW])
+            elif previous == self.E:
+                return self.random_direction([self.NE, self.SE])
+            elif previous in [self.NW, self.SW]:
+                return self.W
+            elif previous in [self.NE, self.SE]:
+                return self.E
 
         # southern movement
         if current_x_y_z[1] > self.poi[1]:
@@ -277,11 +291,12 @@ class MobilityModel:
         if self.steps < self.route_length:
             self.steps += 1
             return self.current_dir
-        elif self.steps < self.max_length * 2:
+        elif self.steps < self.max_length:
             self.steps += 1
-            return self.random_direction()
+            return None
         else:
-            return self.track_back()
+            self.mode = MobilityModelMode.Manual
+            return None
 
     def update_history(self):
         self.direction_history.append(self.current_dir)
