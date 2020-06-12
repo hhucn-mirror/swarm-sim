@@ -95,6 +95,15 @@ def scan_within(matter_map, center, hop, grid):
     return result
 
 
+def taken_locations(matter_map, center, hop, grid):
+    result = []
+    n_sphere_border = grid.get_n_sphere(center, hop)
+    for l in n_sphere_border:
+        if l in matter_map and l != center:
+            result.append(l)
+    return result
+
+
 def scan_within_per_hop(matter_map, center, max_hop, grid):
     result = []
     for hop in range(0, max_hop + 1):
@@ -158,3 +167,23 @@ def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
     if degrees:
         return np.rad2deg(phi)
     return phi
+
+
+def get_distance_from_coordinates(coordinates1: tuple, coordinates2: tuple):
+    """
+    Calculates the hop distance between two coordinate tuples.
+    :param coordinates1: first coordinates
+    :param coordinates2: second coordinates
+    :return: hop distance between two coordinates
+    """
+    (x1, y1, _) = coordinates1
+    (x2, y2, _) = coordinates2
+    x_diff = abs(x2 - x1)
+    y_diff = abs(y2 - y1)
+
+    if y1 == y2 and x1 != x2:
+        return x_diff
+    elif (x_diff - y_diff * 0.5) > 0:
+        return y_diff + (x_diff - y_diff * 0.5)
+    else:
+        return y_diff

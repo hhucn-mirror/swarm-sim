@@ -11,6 +11,7 @@ TODO: Erase Memory
 import logging
 
 from lib import matter
+from lib.oppnet.mobility_model import MobilityModel
 from lib.swarm_sim_header import *
 
 
@@ -115,9 +116,9 @@ class Particle(matter.Matter):
 
     def check_within_border(self, direction, direction_coord):
         if self.world.config_data.border == 1 and \
-                (abs(direction_coord[0]) > self.world.get_sim_x_size() or abs(
-                    direction_coord[1]) > self.world.get_sim_y_size()):
-            direction = direction - 3 if direction > 2 else direction + 3
+                (abs(direction_coord[0]) > self.world.get_world_x_size() or abs(
+                    direction_coord[1]) > self.world.get_world_y_size()):
+            direction = MobilityModel.opposite_direction(direction)
             direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         return direction, direction_coord
 

@@ -1,5 +1,8 @@
+import math
 import random
 from enum import Enum
+
+from lib.swarm_sim_header import get_coordinates_in_direction, get_distance_from_coordinates
 
 
 class MobilityModelMode(Enum):
@@ -65,7 +68,9 @@ class MobilityModel:
         self.current_dir = self.starting_dir
         self.previous_coordinates = start_coordinates
         self.poi = poi
-        self.direction_history = [start_coordinates]
+        self._distance_to_poi = math.inf
+        self._distance_to_poi_unimproved_rounds = 0
+        self.direction_history = []
         self._direction_history_index = None
 
     def set(self, particle):
@@ -93,11 +98,16 @@ class MobilityModel:
             self.current_dir = self.random_direction()
         elif mode == MobilityModelMode.DisperseFlock:
             self.steps = 0
+        elif mode == MobilityModelMode.POI:
+            self._distance_to_poi = math.inf
+            self._distance_to_poi_unimproved_rounds = 0
+            self.direction_history = []
 
-    def next_direction(self, current_x_y_z):
+    def next_direction(self, current_x_y_z, blocked_neighbors=None):
         """
         Determines the next direction of the model.
         :param current_x_y_z: the current x, y and z coordinates of the particle as tuple
+        :param blocked_neighbors: neighbor locations blocked by particles
         :return: the next direction
         """
         if self.mode == MobilityModelMode.Back_And_Forth:
@@ -113,7 +123,7 @@ class MobilityModel:
         elif self.mode == MobilityModelMode.Zonal:
             new_direction = self.__zonal__(current_x_y_z)
         elif self.mode == MobilityModelMode.POI:
-            new_direction = self.__poi__(current_x_y_z)
+            new_direction = self.__poi__(current_x_y_z, blocked_neighbors)
         elif self.mode == MobilityModelMode.Manual:
             new_direction = self.current_dir
         elif self.mode == MobilityModelMode.DisperseFlock:
@@ -144,7 +154,6 @@ class MobilityModel:
             return None
         next_direction = self.opposite_direction(self.direction_history[self._direction_history_index])
         self._direction_history_index -= 1
-        self.direction_history.append(next_direction)
         return next_direction
 
     def __random__(self):
@@ -241,51 +250,84 @@ class MobilityModel:
         next_dir = MobilityModel.random_direction(list(directions))
         return next_dir
 
-    def __poi__(self, current_x_y_z):
+    def __poi__(self, current_x_y_z, blocked_neighbors=None):
         """
         Moves the particle to a Point of Interest, i.e. a location, step by step.
         :param current_x_y_z: the particle's current location
+        :param blocked_neighbors: neighbor locations blocked by particles
         :return: the next direction to move to, if possible
         """
         if current_x_y_z == self.poi:
             return None
-        # if the particle has not moved, because it was blocked, try moving around the obstacle
-        if current_x_y_z == self.previous_coordinates:
-            if self.direction_history is None:
-                return None
-            previous = self.direction_history[-1]
-            if previous is None:
-                return None
-            if previous == self.W:
-                return self.random_direction([self.NW, self.SW])
-            elif previous == self.E:
-                return self.random_direction([self.NE, self.SE])
-            elif previous in [self.NW, self.SW]:
-                return self.W
-            elif previous in [self.NE, self.SE]:
-                return self.E
-
-        # southern movement
-        if current_x_y_z[1] > self.poi[1]:
-            # western movement
-            if current_x_y_z[0] > self.poi[0]:
-                return self.SW
-            # eastern movement
-            elif current_x_y_z[0] < self.poi[0]:
-                return self.SE
-        # northern movement
-        elif current_x_y_z[1] < self.poi[1]:
-            # western movement
-            if current_x_y_z[0] > self.poi[0]:
-                return self.NW
-            # eastern movement
-            elif current_x_y_z[0] < self.poi[0]:
-                return self.NE
-
-        if current_x_y_z[0] < self.poi[0]:
-            return self.E
+        # assume that the blocking neighbors will continue to block the path
+        if blocked_neighbors and self.previous_coordinates == current_x_y_z and len(self.direction_history) > 0:
+            next_direction = self.__poi__(current_x_y_z)
+            directions = self.__get_preferred_directions__(next_direction)
+            new_direction = self.__first_unblocked__(directions, blocked_neighbors, current_x_y_z)
         else:
-            return self.W
+            # southern movement
+            if current_x_y_z[1] > self.poi[1]:
+                # western movement
+                if current_x_y_z[0] > self.poi[0]:
+                    return self.SW
+                # eastern movement
+                elif current_x_y_z[0] < self.poi[0]:
+                    return self.SE
+            # northern movement
+            elif current_x_y_z[1] < self.poi[1]:
+                # western movement
+                if current_x_y_z[0] > self.poi[0]:
+                    return self.NW
+                # eastern movement
+                elif current_x_y_z[0] < self.poi[0]:
+                    return self.NE
+
+            if current_x_y_z[0] < self.poi[0]:
+                return self.E
+            else:
+                return self.W
+        return None if new_direction is None else self.__check_new_coordinates_(current_x_y_z, new_direction)
+
+    def __get_preferred_directions__(self, preferred_direction):
+        if preferred_direction == self.W:
+            return [self.W, self.NW, self.SW, self.NE, self.SE, self.E]
+        elif preferred_direction == self.E:
+            return [self.E, self.NE, self.SE, self.NW, self.SW, self.W]
+        elif preferred_direction == self.NE:
+            return [self.NE, self.E, self.NW, self.SE, self.W, self.SW]
+        elif preferred_direction == self.NW:
+            return [self.NW, self.W, self.NE, self.SW, self.E, self.SE]
+        elif preferred_direction == self.SE:
+            return [self.SE, self.E, self.SW, self.NE, self.W, self.NW]
+        elif preferred_direction == self.SW:
+            return [self.SW, self.W, self.SE, self.NW, self.E, self.NE]
+        else:
+            return []
+
+    def __check_new_coordinates_(self, current_x_y_z, new_direction):
+        new_coordinates = get_coordinates_in_direction(current_x_y_z, new_direction)
+        distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
+        if distance_to_poi > self._distance_to_poi:
+            return None
+        if self._distance_to_poi_unimproved_rounds >= 12:
+            if distance_to_poi == self._distance_to_poi:
+                return random.choices([new_direction, None], [1 / 6, 5 / 6], k=1)[0]
+            else:
+                return None
+        else:
+            return new_direction
+
+    def __first_unblocked__(self, directions, blocked_neighbors, current_x_y_z):
+        for direction in directions:
+            is_blocked, next_coordinates = self.__direction_blocked__(blocked_neighbors, current_x_y_z, direction)
+            if not is_blocked:
+                return direction
+        return None
+
+    @staticmethod
+    def __direction_blocked__(blocked_neighbors, current_x_y_z, next_direction):
+        next_coordinates = get_coordinates_in_direction(current_x_y_z, next_direction)
+        return next_coordinates in blocked_neighbors, next_coordinates
 
     def __disperse_flock__(self, current_x_y_z):
         if self.steps < self.route_length:
@@ -298,8 +340,14 @@ class MobilityModel:
             self.mode = MobilityModelMode.Manual
             return None
 
-    def update_history(self):
+    def update_history(self, coordinates):
         self.direction_history.append(self.current_dir)
+        distance_to_poi = get_distance_from_coordinates(self.poi, coordinates)
+        if distance_to_poi >= self._distance_to_poi:
+            self._distance_to_poi_unimproved_rounds += 1
+        else:
+            self._distance_to_poi_unimproved_rounds = 0
+        self._distance_to_poi = distance_to_poi
 
     @staticmethod
     def random_direction(directions=None, exclude=None):

@@ -565,10 +565,24 @@ class World:
         """
         return self.remove_matter_on(coordinates, Location)
 
-    def add_predator(self, coordinates, color=None):
+    def add_predator(self, coordinates=None, color=None):
         if color is None:
             color = self.config_data.predator_color
+        if coordinates is None:
+            coordinates = self.__random_predator_coordinates__()
         return self.add_matter(Predator(self, coordinates, color, csv_generator=self.csv_generator), coordinates)
+
+    def __random_predator_coordinates__(self):
+        x_range = np.arange(-self.config_data.size_x, self.config_data.size_x + 0.5, 0.5)
+        y_range = np.arange(-self.config_data.size_y, self.config_data.size_y + 1)
+        start = time.time()
+        while True:
+            x, y = np.random.choice(x_range), np.random.choice(y_range)
+            if self.grid.are_valid_coordinates((x, y, 0)) and (x, y, 0) not in self.predator_map_coordinates \
+                    and (x, y, 0) not in self.particle_map_coordinates:
+                break
+        print('__random_predator_coordinates__() took {}'.format(time.time() - start))
+        return x, y, 0
 
     def add_matter(self, matter, coordinates):
         """
@@ -654,10 +668,8 @@ class World:
     def _update_deleted_metrics_(self, matter):
         if isinstance(matter, Location) or matter == Location:
             self.csv_round.update_metrics(location_deleted=1)
-        elif isinstance(matter, Tile) or matter == Tile:
-            self.csv_round.update_metrics(tile_deleted=1)
         else:
-            return None
+            return
 
     def remove_matter_on(self, coordinates, matter_class):
         """
