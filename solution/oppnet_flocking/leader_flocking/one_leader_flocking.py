@@ -22,7 +22,7 @@ def solution(world):
         routing.next_step(particles)
         move_to_next_direction(particles)
         if current_round % t_pick == 0:
-            initialise_leaders(t_wait, current_round)
+            send_new_instruct(current_round)
 
 
 def split_particles(particles, leader_count):
@@ -36,6 +36,13 @@ def initialise_leaders(t_wait, current_round):
     leader.set_color(red)
     leader.set_flock_member_type(FlockMemberType.leader)
     leader.set_instruction_number(current_round)
+    leader.choose_direction()
+    leader.multicast_leader_message(LeaderMessageType.instruct)
+
+
+def send_new_instruct(current_round):
+    leader.set_instruction_number(current_round)
+    leader.choose_direction()
     leader.multicast_leader_message(LeaderMessageType.instruct)
 
 

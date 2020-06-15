@@ -19,9 +19,9 @@ def solution(world):
         leaders, followers = split_particles(particles, leader_count)
         set_t_wait_values(particles, t_wait)
         initialise_leaders(t_wait, leader_count)
-        initialise_neighbourhoods(particles)
+        initialise_neighborhoods(particles)
     else:
-        check_neighbourhoods(particles)
+        check_neighborhoods(particles)
         routing.next_step(particles)
         update_particle_states(particles)
         send_direction_proposals(current_round)
@@ -68,12 +68,12 @@ def initialise_leaders(t_wait, leader_count):
                                                                               leader.next_direction_proposal_round))
 
 
-def initialise_neighbourhoods(particles):
+def initialise_neighborhoods(particles):
     for particle in particles:
-        particle.init_neighbourhood()
+        particle.init_neighborhood()
 
 
-def check_neighbourhoods(particles):
+def check_neighborhoods(particles):
     for particle in particles:
         particle.update_current_neighborhood()
 

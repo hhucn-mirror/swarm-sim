@@ -65,7 +65,7 @@ class Particle(Particle):
 
         self.commit_quorum = self.world.config_data.commit_quorum
 
-        self.__previous_neighbourhood__ = None
+        self.__previous_neighborhood__ = set()
 
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -95,9 +95,9 @@ class Particle(Particle):
     def set_flock_member_type(self, flock_member_type):
         self.__flock_member_type__ = flock_member_type
 
-    def init_neighbourhood(self):
-        neighbourhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
-        self.__previous_neighbourhood__ = neighbourhood
+    def init_neighborhood(self):
+        neighborhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
+        self.__previous_neighborhood__ = neighborhood
 
     def get_all_received_messages(self):
         received = []
@@ -182,10 +182,10 @@ class Particle(Particle):
         else:
             return False
 
-    def multicast_leader_message(self, message_type: LeaderMessageType, neighbours=None):
+    def multicast_leader_message(self, message_type: LeaderMessageType, neighbors=None):
         max_hops = self.routing_parameters.scan_radius
-        if not neighbours:
-            neighbours = self.scan_for_particles_within(hop=max_hops)
+        if not neighbors:
+            neighbors = self.scan_for_particles_within(hop=max_hops)
 
         if message_type == LeaderMessageType.instruct:
             self.instruct_round = self.t_wait + self.world.get_actual_round()
@@ -195,7 +195,7 @@ class Particle(Particle):
             receivers = self.scan_for_particles_in(hop=hop)
             number = self.__instruction_number__ if self.__instruction_number__ is not None \
                 else self.world.get_actual_round()
-            content = LeaderMessageContent(self, self.proposed_direction, neighbours, self.t_wait - hop,
+            content = LeaderMessageContent(self, self.proposed_direction, neighbors, self.t_wait - hop,
                                            message_type, number)
             multicast_message_content(self, receivers, content)
 
@@ -238,14 +238,16 @@ class Particle(Particle):
     def __flood_forward__(self, received_message):
         received_content = received_message.get_content()
         instruction_number = received_content.get_number()
-        if instruction_number is not None and (self.world.get_actual_round() - instruction_number) > self.t_wait:
-            # do not flood if the message is older than t_wait
-            return
+        try:
+            if instruction_number is not None and self.world.get_actual_round() >= self.instruct_round:
+                return
+        except TypeError:
+            pass
         max_hops = self.routing_parameters.scan_radius
-        neighbours = self.scan_for_particles_within(hop=max_hops)
+        neighbors = self.scan_for_particles_within(hop=max_hops)
         exclude = {received_message.get_sender(), received_message.get_content().get_sending_leader(),
                    received_message.get_original_sender()}.union(received_content.get_receivers())
-        all_receivers = set(neighbours).difference(exclude)
+        all_receivers = set(neighbors).difference(exclude)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
             if isinstance(received_content, LeaderMessageContent):
@@ -539,6 +541,7 @@ class Particle(Particle):
             self.proposed_direction = content.get_proposed_direction()
             self.current_instruct_message = received_message
             self.__instruction_number__ = instruction_number
+            self.t_wait = content.get_t_wait()
 
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
@@ -592,22 +595,22 @@ class Particle(Particle):
             return next_dir
         return self.mobility_model.next_direction(self.coordinates)
 
-    def check_current_neighbourhood(self):
-        lost, new = self.__neighbourhood_difference__()
+    def update_current_neighborhood(self):
+        lost, new = self.__neighborhood_difference__()
         if len(lost) != 0 or len(new) != 0:
             self.leader_contacts.remove_all_entries_with_particles(lost)
             self.set_flock_member_type(FlockMemberType.follower)
             lost_message = Message(self, None, content=LostMessageContent(LostMessageType.SeparationMessage))
             broadcast_message(self, lost_message)
-            logging.debug("round {}: opp_particle -> check_neighbourhood() neighbourhood for particle {} has changed."
+            logging.debug("round {}: opp_particle -> check_neighborhood() neighborhood for particle {} has changed."
                           .format(self.world.get_actual_round(), self.number))
 
-    def __neighbourhood_difference__(self):
-        neighbourhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
-        lost_neighbours = neighbourhood.difference(self.__previous_neighbourhood__)
-        new_neighbours = self.__previous_neighbourhood__.difference(neighbourhood)
-        self.__previous_neighbourhood__ = neighbourhood
-        return lost_neighbours, new_neighbours
+    def __neighborhood_difference__(self):
+        neighborhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
+        lost_neighbors = neighborhood.difference(self.__previous_neighborhood__)
+        new_neighbors = self.__previous_neighborhood__.difference(neighborhood)
+        self.__previous_neighborhood__ = neighborhood
+        return lost_neighbors, new_neighbors
 
     def __get_estimate_centre_from_leader_contacts__(self):
         if len(self.leader_contacts.keys()) > 0:
