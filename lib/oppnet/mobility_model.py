@@ -2,7 +2,8 @@ import math
 import random
 from enum import Enum
 
-from lib.swarm_sim_header import get_coordinates_in_direction, get_distance_from_coordinates
+from lib.swarm_sim_header import get_coordinates_in_direction, get_distance_from_coordinates, \
+    get_surrounding_coordinates
 
 
 class MobilityModelMode(Enum):
@@ -292,32 +293,30 @@ class MobilityModel:
 
     def __get_preferred_directions__(self, blocked_neighbors, current_x_y_z):
         new_direction = None
-        minimum_distance = self._distance_to_poi
+        neighbor_count = -1
         for direction in self.directions:
             new_coordinates = get_coordinates_in_direction(current_x_y_z, direction)
             if new_coordinates not in blocked_neighbors:
                 distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
-                if distance_to_poi <= minimum_distance:
+                new_neighbor_count = self.__get_number_of_neighbors__(new_coordinates, blocked_neighbors)
+                if distance_to_poi <= self._distance_to_poi and new_neighbor_count > neighbor_count:
                     new_direction = direction
+                    neighbor_count = new_neighbor_count
         return new_direction
 
+    @staticmethod
+    def __get_number_of_neighbors__(new_coordinates, blocked_neighbors):
+        surroundings = get_surrounding_coordinates(new_coordinates)
+        return len([_ for _ in surroundings if _ in blocked_neighbors])
+
     def __check_new_coordinates_(self, new_direction):
-        if self._distance_to_poi_unimproved_rounds >= 12:
+        if 6 <= self._distance_to_poi_unimproved_rounds <= 12:
             return random.choices([new_direction, None], [1 / 6, 5 / 6], k=1)[0]
+        elif self._distance_to_poi_unimproved_rounds >= 12:
+            weight = 1 / self._distance_to_poi_unimproved_rounds
+            return random.choices([new_direction, None], [weight, 1 - weight], k=1)[0]
         else:
             return new_direction
-
-    def __first_unblocked__(self, directions, blocked_neighbors, current_x_y_z):
-        for direction in directions:
-            is_blocked, next_coordinates = self.__direction_blocked__(blocked_neighbors, current_x_y_z, direction)
-            if not is_blocked:
-                return direction
-        return None
-
-    @staticmethod
-    def __direction_blocked__(blocked_neighbors, current_x_y_z, next_direction):
-        next_coordinates = get_coordinates_in_direction(current_x_y_z, next_direction)
-        return next_coordinates in blocked_neighbors, next_coordinates
 
     def __disperse_flock__(self, current_x_y_z):
         if self.steps < self.route_length:
@@ -332,12 +331,13 @@ class MobilityModel:
 
     def update_history(self, coordinates):
         self.direction_history.append(self.current_dir)
-        distance_to_poi = get_distance_from_coordinates(self.poi, coordinates)
-        if distance_to_poi >= self._distance_to_poi:
-            self._distance_to_poi_unimproved_rounds += 1
-        else:
-            self._distance_to_poi_unimproved_rounds = 0
-        self._distance_to_poi = distance_to_poi
+        if self.mode == MobilityModelMode.POI:
+            distance_to_poi = get_distance_from_coordinates(self.poi, coordinates)
+            if distance_to_poi >= self._distance_to_poi:
+                self._distance_to_poi_unimproved_rounds += 1
+            else:
+                self._distance_to_poi_unimproved_rounds = 0
+            self._distance_to_poi = distance_to_poi
 
     @staticmethod
     def random_direction(directions=None, exclude=None):

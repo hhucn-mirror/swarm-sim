@@ -263,6 +263,9 @@ class Particle(matter.Matter):
     def get_free_surrounding_locations(self, hop=1):
         return free_locations(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
 
+    def get_blocked_surrounding_locations(self, hop=1):
+        return taken_locations(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+
     def scan_for_matters_within(self, matter_type='all', hop=1):
         """
         Scans for particles, tiles, or locations on a given hop distance and all the matters within the hop distance

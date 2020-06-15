@@ -83,6 +83,7 @@ class Predator(Particle):
             next_direction = self.chase_nearby_flock()
 
         if next_direction is not None:
+            self.broadcast_warning()
             return self.move_to(next_direction)
         # if maximum number of rounds for a chase is reached, use random_walk mobility model
         elif self.world.get_actual_round() > self.max_chase:
@@ -142,6 +143,6 @@ class Predator(Particle):
         Broadcasts a message which warns particles about the predator.
         :return: nothing
         """
-        message = Message(self, None, content=PredatorSignal(),
+        message = Message(self, None, content=PredatorSignal({self.get_id()}, {self.coordinates}),
                           ttl=self.world.config_data.predator_chase_rounds)
         broadcast_message(self, message)

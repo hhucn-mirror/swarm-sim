@@ -10,7 +10,8 @@ from lib.oppnet.point import Point
 class Message:
     seq_number = 0
 
-    def __init__(self, sender, receiver, start_round=None, ttl=None, content=None, is_copy=False, actual_receiver=None):
+    def __init__(self, sender, receiver, start_round=None, ttl=None, content=None, is_copy=False, actual_receiver=None,
+                 is_broadcast=False):
         """
         Initializes a Message instance and puts it in the sender's MessageStore.
         :param sender: The particle sending the message.
@@ -23,6 +24,12 @@ class Message:
         :type ttl: int
         :param content: The content of the message.
         :type content: any
+        :param is_copy: internal flag for duplication purposes
+        :type is_copy: bool
+        :param actual_receiver: final receiver of the message, to distinguish in case of forwarding
+        :type actual_receiver: :class:`~opp_particle.Particle`
+        :param is_broadcast: flag to mark a message from a broadcast
+        :type is_broadcast: bool
         """
         self.original_sender = sender
         self.sender = sender
@@ -40,6 +47,7 @@ class Message:
         self.ttl = ttl
         self.hops = 0
         self.content = content
+        self.is_broadcast = is_broadcast
 
         if is_copy:
             self.actual_receiver = actual_receiver
@@ -233,6 +241,7 @@ def broadcast_message(sender, message):
     """
     if message.hops == message.ttl:
         return
+    message.is_broadcast = True
     memory = sender.world.memory
     message = copy.copy(message)
     current_round = sender.world.get_actual_round()

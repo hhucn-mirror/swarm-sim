@@ -573,8 +573,8 @@ class World:
         return self.add_matter(Predator(self, coordinates, color, csv_generator=self.csv_generator), coordinates)
 
     def __random_predator_coordinates__(self):
-        x_range = np.arange(-self.config_data.size_x, self.config_data.size_x + 0.5, 0.5)
-        y_range = np.arange(-self.config_data.size_y, self.config_data.size_y + 1)
+        x_range = np.arange(-self.config_data.size_x / 2, self.config_data.size_x / 2, 0.5)
+        y_range = np.arange(-self.config_data.size_y / 2, self.config_data.size_y / 2)
         start = time.time()
         while True:
             x, y = np.random.choice(x_range), np.random.choice(y_range)

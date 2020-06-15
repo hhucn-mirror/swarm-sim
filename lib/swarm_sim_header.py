@@ -48,6 +48,13 @@ def get_coordinates_in_direction(coordinates, direction):
     return coordinates[0] + direction[0], coordinates[1] + direction[1], coordinates[2] + direction[2]
 
 
+def get_surrounding_coordinates(coordinates):
+    surroundings = []
+    for direction in [(1, 0, 0), (-1, 0, 0), (0.5, 1, 0), (-0.5, 1, 0), (0.5, -1, 0), (-0.5, -1, 0)]:
+        surroundings.append(get_coordinates_in_direction(coordinates, direction))
+    return surroundings
+
+
 def get_multiple_steps_in_direction(start, direction, steps):
     """
     returns coordinates of the point from the start variable in x steps in the given direction
