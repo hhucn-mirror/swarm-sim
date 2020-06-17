@@ -163,6 +163,29 @@ def get_hexagon_coordinates(centre, r_max, exclude_centre=False):
     return locations
 
 
+def get_hexagon_ring(centre, r_max):
+    """
+    Returns all locations of a 2d-hexagon ring with centre :param centre: and radius :param r_max:.
+    :param centre: the centre location of the hexagon
+    :type centre: tuple
+    :param r_max: radius of the hexagon
+    :type r_max: int
+    :return: list of locations
+    :rtype: list
+    """
+    locations = []
+    for x, y in zip(np.arange(r_max * 0.5, r_max + 0.5, 0.5),
+                    np.arange(r_max, -1, -1)):
+        locations.append((x + centre[0], y + centre[1], centre[2]))
+        locations.append((x + centre[0], -y + centre[1], centre[2]))
+        locations.append((-x + centre[0], y + centre[1], centre[2]))
+        locations.append((-x + centre[0], -y + centre[1], centre[2]))
+    for x in np.arange(-(r_max * 0.5), r_max * 0.5, 0.5):
+        locations.append((x + centre[0], r_max + centre[1], centre[2]))
+        locations.append((x + centre[0], -r_max + centre[1], centre[2]))
+    return locations
+
+
 def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
     denominator = np.linalg.norm(u) * np.linalg.norm(v)
     if denominator == 0:

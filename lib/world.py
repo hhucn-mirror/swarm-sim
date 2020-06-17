@@ -201,6 +201,8 @@ class World:
         self._flocks = []
         Flock.instance_id = itertools.count()
 
+        self.memory = Memory()
+
         if self.config_data.visualization:
             self.vis.reset()
 
@@ -507,6 +509,7 @@ class World:
         :param coordinates: the coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccessful
         """
+        print(coordinates)
         if color is None:
             color = self.config_data.tile_color
         return_value = self.add_matter(Tile(self, coordinates, color), coordinates)
@@ -761,13 +764,15 @@ class World:
 
         return coordinates_list
 
-    def reset_particle_colors(self):
+    def reset_matter_colors(self):
         """
         Resets the color parameter of every particle in the world to its original value.
         :return: Nothing
         """
         for particle, color in self.particle_color_map.items():
             particle.set_color(color)
+        for location in self.locations:
+            location.set_color((0, 0, 0, 0))
 
     def _get_matter_list(self, matter):
         """
@@ -960,6 +965,15 @@ class World:
         :rtype: list
         """
         return [self._particle_flocks_ids[particle] for particle in particles if particle in self._particle_flocks_ids]
+
+    def draw_broadcast_ring(self, location_coordinates):
+        if self.location_map_coordinates:
+            for coordinates in location_coordinates:
+                try:
+                    location = self.location_map_coordinates[coordinates]
+                    location.set_color((0, 255, 175, 0.10))
+                except KeyError:
+                    pass
 
     @staticmethod
     def get_most_common(items):

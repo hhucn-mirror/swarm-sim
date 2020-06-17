@@ -100,7 +100,9 @@ class ConfigData:
                                                     gamma=gamma, beta=beta, p_init=p_init)
 
         self.message_ttl = config.getint("Routing", "message_ttl")
-        self.signal_velocity = config.getint("Routing", "signal_velocity")
+
+        self.signal_velocity = config.getint("Communication", "signal_velocity")
+        self.signal_range = config.getint("Communication", "signal_range")
 
         self.mobility_model_mode = MobilityModelMode(config.getint("MobilityModel", "mm_mode"))
         self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))

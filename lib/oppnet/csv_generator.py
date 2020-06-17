@@ -144,6 +144,9 @@ class CsvRoundData:
     def update_predator_num(self, predator_num):
         self.predator_num = predator_num
 
+    def update_locations_num(self, locations_num):
+        return
+
     def update_metrics(self, steps=0, memory_write=0, memory_read=0, particle_write=0, particle_read=0,
                        messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,

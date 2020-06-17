@@ -1,6 +1,5 @@
 import copy
 import logging
-import math
 import random
 
 from lib.oppnet.meta import EventType, process_event
@@ -205,7 +204,8 @@ def send_message(sender, receiver, message: Message):
 
     memory = sender.world.memory
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
-                                current_round, sender.signal_velocity, math.inf)  # TODO: add attributes to particles
+                                current_round, sender.signal_velocity,
+                                sender.signal_range)  # TODO: add attributes to particles
 
 
 def multicast_message_content(sender, receivers, message_content, ttl=None):
@@ -246,7 +246,7 @@ def broadcast_message(sender, message):
     message = copy.copy(message)
     current_round = sender.world.get_actual_round()
     memory.add_broadcast_message(message, Point(sender.coordinates[0], sender.coordinates[1]), current_round,
-                                 sender.signal_velocity, math.inf)
+                                 sender.signal_velocity, sender.signal_range)
 
 
 def ttl_expired(message, store):

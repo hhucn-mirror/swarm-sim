@@ -62,6 +62,7 @@ class Particle(Particle):
 
         self.routing_parameters = world.config_data.routing_parameters
         self.signal_velocity = world.config_data.signal_velocity
+        self.signal_range = world.config_data.signal_range
 
         self.contacts = RoutingMap()
         self.__previous_neighborhood__ = None

@@ -5,7 +5,7 @@ from lib.oppnet.communication import store_message
 from lib.oppnet.meta import process_event, EventType
 from lib.oppnet.point import Point
 from lib.oppnet.util import get_distance_from_points
-from lib.swarm_sim_header import get_hexagon_coordinates
+from lib.swarm_sim_header import get_hexagon_ring
 
 
 class MemoryMode(Enum):
@@ -37,43 +37,54 @@ class Memory:
                     p = m_particles.get(p_id)
                     p.write_memory(p_msg)
 
-    def add_delta_message_on(self, target_id, msg, position, start_round, signal_velocity, expiry_rate):
+    def add_delta_message_on(self, target_id, msg, position, start_round, signal_velocity, signal_range):
         process_event(EventType.MessageSent, msg)
         if target_id in self.delta_memory.keys():
-            self.delta_memory.get(target_id).append((msg, position, start_round, signal_velocity, expiry_rate))
+            self.delta_memory.get(target_id).append((msg, position, start_round, signal_velocity, signal_range))
         else:
-            self.delta_memory[target_id] = [(msg, position, start_round, signal_velocity, expiry_rate)]
+            self.delta_memory[target_id] = [(msg, position, start_round, signal_velocity, signal_range)]
 
     def __try_deliver_delta_messages__(self, current_round, particle_map_id):
         new_memory = {}
-        for target in self.delta_memory.keys():
+        for target in list(self.delta_memory.keys()):
             new_msgs = []
-            for m in self.delta_memory[target]:
+            for m in list(self.delta_memory[target]):
                 msg = m[0]
-                expiry_rate = m[4]
+                signal_range = m[4]
                 distance, distance_start_target = self.__calculate_distances__(current_round, m, target,
                                                                                particle_map_id)
-                if distance < expiry_rate:
+                if distance < signal_range:
                     if distance >= distance_start_target:
                         store_message(msg, msg.get_sender(), msg.get_receiver())
                     else:
                         new_msgs.append(m)
+                else:
+                    self.delta_memory[target].remove(m)
             if len(new_msgs) > 0:
                 new_memory[target] = new_msgs
         self.delta_memory = new_memory
 
-    def add_broadcast_message(self, msg, position, start_round, signal_velocity, expiry_rate):
+    def add_broadcast_message(self, msg, position, start_round, signal_velocity, signal_range):
         process_event(EventType.MessageSent, msg)
         sender = msg.get_sender()
         if sender not in self.broadcast_memory.keys():
             self.broadcast_memory[sender] = []
-        self.broadcast_memory[sender].append((msg, position, start_round, signal_velocity, expiry_rate))
+        self.broadcast_memory[sender].append((msg, position, start_round, signal_velocity, signal_range))
 
     def __try_deliver_broadcasts__(self, current_round, particle_map_coordinates):
+        locations = []
         for sender, entries in list(self.broadcast_memory.items()):
             for entry in entries:
-                receivers = self.__get_broadcast_receivers__(entry, current_round, particle_map_coordinates)
-                self.__deliver__message(entry[0], receivers)
+                message, _, start_round, signal_velocity, signal_range = entry
+                traveled_distance = signal_velocity * (current_round - start_round)
+                if traveled_distance < signal_range:
+                    receivers, coordinates = self.__get_broadcast_receivers__(entry, traveled_distance,
+                                                                              particle_map_coordinates)
+                    locations.extend(coordinates)
+                    self.__deliver__message(message, receivers)
+                else:
+                    self.broadcast_memory[sender].remove(entry)
+        return locations
 
     def __calculate_distances__(self, actual_round, m, target, particle_map_id):
         position = m[1]
@@ -94,7 +105,8 @@ class Memory:
         particle_map_id = world.get_particle_map_id()
         self.__try_deliver_scheduled_messages__(current_round, particle_map_id)
         self.__try_deliver_delta_messages__(current_round, particle_map_id)
-        self.__try_deliver_broadcasts__(current_round, world.get_particle_map_coordinates())
+        locations = self.__try_deliver_broadcasts__(current_round, world.get_particle_map_coordinates())
+        world.draw_broadcast_ring(locations)
 
     @staticmethod
     def __deliver__message(message, receivers):
@@ -104,13 +116,15 @@ class Memory:
             store_message(message, message.get_sender(), receiver)
 
     @staticmethod
-    def __get_broadcast_receivers__(entry, current_round, particle_map_coordinates):
-        msg, position, start_round, signal_velocity, expiry_rate = entry
-        traveled_distance = signal_velocity * (current_round - start_round)
-        locations = get_hexagon_coordinates((position.getx(), position.gety()), traveled_distance, True)
+    def __get_broadcast_receivers__(entry, traveled_distance, particle_map_coordinates):
+        msg, position, start_round, signal_velocity, signal_range = entry
+        new_locations = []
+        for distance in range(traveled_distance - signal_velocity + 1, traveled_distance + 1):
+            new_locations.extend(get_hexagon_ring((position.getx(), position.gety(), 0), distance))
         particle_locations = particle_map_coordinates.keys()
-        receiving_particles = [particle_map_coordinates.get(key) for key in locations if key in particle_locations]
-        return receiving_particles
+        receiving_particles = [particle_map_coordinates.get(key) for key in new_locations if key in particle_locations]
+
+        return receiving_particles, new_locations
 
     @staticmethod
     def get_point_from_vector(vector):
