@@ -5,9 +5,10 @@ import random
 import numpy as np
 
 from lib.oppnet.communication import multicast_message_content, send_message, Message, broadcast_message
-from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState
+from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState, FlockMode
 from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
 from lib.oppnet.message_types import LostMessageContent, LostMessageType
+from lib.oppnet.message_types.safe_location_added import SafeLocationAdded
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point
@@ -47,6 +48,7 @@ class Particle(Particle):
         self.routing_parameters = world.config_data.routing_parameters
 
         self.signal_velocity = world.config_data.signal_velocity
+        self.signal_range = world.config_data.signal_range
 
         self.t_wait = t_wait
         self.instruct_round = None
@@ -64,8 +66,8 @@ class Particle(Particle):
         self.__leader_states__ = dict()
 
         self.commit_quorum = self.world.config_data.commit_quorum
-
-        self.__previous_neighborhood__ = set()
+        self.flock_mode = FlockMode.Searching
+        self.__previous_neighborhood__ = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
 
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -140,9 +142,13 @@ class Particle(Particle):
             logging.debug("round {}: opp_particle -> delete_target_routes() tried deleting non-existent target_id."
                           .format(self.world.get_actual_round()))
 
-    def choose_direction(self):
-        dirs = self.world.grid.get_directions_dictionary()
-        self.proposed_direction = random.choice(list(dirs.values()))
+    def choose_direction(self, no_movement=False):
+        if self.mobility_model.mode == MobilityModelMode.POI:
+            self.mobility_model.set_mode(MobilityModelMode.Manual)
+        directions = list(self.world.grid.get_directions_dictionary().values())
+        if no_movement:
+            directions.append(None)
+        self.proposed_direction = random.choice(directions)
         return self.proposed_direction
 
     def __add_leader_state__(self, state_name: LeaderStateName, waiting_particles: set, start_round, expected_rounds):
@@ -199,15 +205,17 @@ class Particle(Particle):
                                            message_type, number)
             multicast_message_content(self, receivers, content)
 
+    def broadcast_safe_location(self):
+        message = Message(self, None, content=SafeLocationAdded(self.coordinates))
+        broadcast_message(self, message)
+
     def send_direction_proposal(self, proposed_direction=None):
-        if not proposed_direction:
+        if proposed_direction is None:
             proposed_direction = self.choose_direction()
         receiving_leaders = self.leader_contacts.keys()
         self.__instruction_number__ = self.world.get_actual_round()
         self.__send_proposal_to_leaders__(proposed_direction)
         if len(receiving_leaders) == 0:
-            self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(),
-                                      self.world.get_actual_round(), self.t_wait * 2)
             self.multicast_leader_message(LeaderMessageType.propose)
 
     def __send_proposal_to_leaders__(self, proposed_direction):
@@ -232,7 +240,11 @@ class Particle(Particle):
         multicast_message_content(self, receivers, message_content)
 
     def send_message_content_via_contacts(self, receiver, message_content):
-        for contact_particle in self.follower_contacts[receiver].keys():
+        if receiver not in self.follower_contacts:
+            receivers = self.__previous_neighborhood__
+        else:
+            receivers = self.follower_contacts[receiver].keys()
+        for contact_particle in receivers:
             send_message(self, contact_particle, Message(self, receiver, content=message_content))
 
     def __flood_forward__(self, received_message):
@@ -355,6 +367,8 @@ class Particle(Particle):
                     self.__process_propose_as_leader__(message)
             elif isinstance(content, LostMessageContent):
                 self.__process_lost_message_as_leader__(message)
+            elif isinstance(content, SafeLocationAdded):
+                self.__process_safe_location_added_as_leader(message)
 
     def __process_commit_and_ack__(self, received_messages: [Message]):
         remaining = []
@@ -483,14 +497,27 @@ class Particle(Particle):
         content = message.get_content()
         message_type = content.get_message_type()
         if message_type == LostMessageType.SeparationMessage:
-            self.proposed_direction = None
-            self.multicast_leader_message(LeaderMessageType.instruct)
+            if not self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin):
+                if len(self.leader_contacts) == 0:
+                    self.proposed_direction = None
+                    self.multicast_leader_message(LeaderMessageType.instruct)
+                else:
+                    self.send_direction_proposal(False)
+            self.__add_leader_state__(LeaderStateName.WaitingForRejoin, {message.get_original_sender()},
+                                      self.world.get_actual_round(), self.t_wait * 5)
             self.reset_random_next_direction_proposal_round()
-            self.mobility_model.set_mode(MobilityModelMode.Manual)
-            broadcast_message(self, Message(self, message.get_original_sender(),
-                                            content=LostMessageContent(LostMessageType.RejoinMessage,
-                                                                       self.__get_estimate_centre_from_leader_contacts__())))
+            broadcast_message(self, Message(self, message.get_original_sender(), content=LostMessageContent(
+                LostMessageType.RejoinMessage, self.__get_estimate_centre_from_leader_contacts__())))
+        elif message_type == LostMessageType.QueryNewLocation:
+            self.__remove_particle_from_states__(message.get_original_sender(), LeaderStateName.WaitingForRejoin)
         self.__process_lost_message_as_follower__(message)
+
+    def __process_safe_location_added_as_leader(self, message):
+        content = message.get_content()
+        self.mobility_model.set_mode(MobilityModelMode.POI)
+        self.mobility_model.poi = content.coordinates
+        self.proposed_direction = self.mobility_model.next_direction(self.coordinates)
+        self.multicast_leader_message(LeaderMessageType.instruct)
 
     def __process_as_follower__(self, received_messages: [Message]):
         self.__add__new_contacts_as_follower__(received_messages)
@@ -508,6 +535,8 @@ class Particle(Particle):
                     self.forward_to_leader_via_contacts(message)
             elif isinstance(content, LostMessageContent):
                 self.__process_lost_message_as_follower__(message)
+            elif isinstance(content, SafeLocationAdded):
+                self.__process_safe_location_added_as_follower(message)
 
     def __add__new_contacts_as_follower__(self, received_messages):
         for message in received_messages:
@@ -542,6 +571,7 @@ class Particle(Particle):
             self.current_instruct_message = received_message
             self.__instruction_number__ = instruction_number
             self.t_wait = content.get_t_wait()
+            self.mobility_model.set_mode(MobilityModelMode.Manual)
 
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
@@ -577,6 +607,13 @@ class Particle(Particle):
             except IndexError:
                 pass
 
+    def __process_safe_location_added_as_follower(self, message):
+        content = message.get_content()
+        if self.flock_mode != FlockMode.Flocking:
+            self.mobility_model.set_mode(MobilityModelMode.POI)
+            self.mobility_model.poi = content.coordinates
+            self.proposed_direction = self.mobility_model.next_direction(self.coordinates)
+
     def next_moving_direction(self):
         if self.mobility_model.mode == MobilityModelMode.Manual:
             try:
@@ -588,18 +625,27 @@ class Particle(Particle):
                 self.mobility_model.current_dir = None
                 return None
         elif self.mobility_model.mode == MobilityModelMode.POI:
-            next_dir = self.mobility_model.next_direction(self.coordinates)
-            if not next_dir:
-                self.mobility_model.set_mode(MobilityModelMode.Manual)
-                self.flood_message_content(LostMessageContent(LostMessageType.QueryNewLocation))
+            current_dir = self.mobility_model.current_dir
+            next_dir = self.mobility_model.next_direction(self.coordinates,
+                                                          self.get_blocked_surrounding_locations())
+            if self.__flock_member_type__ == FlockMemberType.leader:
+                if self.proposed_direction != next_dir:
+                    self.proposed_direction = next_dir
+                    self.multicast_leader_message(LeaderMessageType.instruct)
+                if self.world.get_actual_round() >= self.instruct_round:
+                    next_dir = self.proposed_direction
+                else:
+                    next_dir = current_dir
             return next_dir
         return self.mobility_model.next_direction(self.coordinates)
 
     def update_current_neighborhood(self):
         lost, new = self.__neighborhood_difference__()
-        if len(lost) != 0 or len(new) != 0:
+        if len(lost) > len(new) and self.flock_mode == FlockMode.Flocking:
+            self.flock_mode = FlockMode.Regrouping
+            self.proposed_direction = None
+            self.mobility_model.set_mode(MobilityModelMode.Manual)
             self.leader_contacts.remove_all_entries_with_particles(lost)
-            self.set_flock_member_type(FlockMemberType.follower)
             lost_message = Message(self, None, content=LostMessageContent(LostMessageType.SeparationMessage))
             broadcast_message(self, lost_message)
             logging.debug("round {}: opp_particle -> check_neighborhood() neighborhood for particle {} has changed."
@@ -607,8 +653,8 @@ class Particle(Particle):
 
     def __neighborhood_difference__(self):
         neighborhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
-        lost_neighbors = neighborhood.difference(self.__previous_neighborhood__)
-        new_neighbors = self.__previous_neighborhood__.difference(neighborhood)
+        lost_neighbors = self.__previous_neighborhood__.difference(neighborhood)
+        new_neighbors = neighborhood.difference(self.__previous_neighborhood__)
         self.__previous_neighborhood__ = neighborhood
         return lost_neighbors, new_neighbors
 
@@ -623,3 +669,7 @@ class Particle(Particle):
 
     def get_coordinates_as_point(self):
         return Point(self.coordinates[0], self.coordinates[1])
+
+    def move_to(self, direction):
+        super().move_to(direction)
+        self.mobility_model.update_history(self.coordinates)

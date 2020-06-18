@@ -12,7 +12,8 @@ class LeaderStateName(Enum):
     CommittedToPropose = 2,
     CommittedToInstruct = 3,
     PerformingInstruct = 4,
-    SendInstruct = 5
+    SendInstruct = 5,
+    WaitingForRejoin = 6
 
 
 class LeaderState:
@@ -43,7 +44,8 @@ class LeaderState:
 
     def is_completed(self):
         if self.leader_state_name in [LeaderStateName.WaitingForCommits, LeaderStateName.WaitingForDiscoverAck,
-                                      LeaderStateName.CommittedToInstruct, LeaderStateName.CommittedToPropose]:
+                                      LeaderStateName.CommittedToInstruct, LeaderStateName.CommittedToPropose,
+                                      LeaderStateName.WaitingForRejoin]:
             return len(self.waiting_particles) == 0
         else:
             return True
@@ -53,3 +55,13 @@ class LeaderState:
             return self.end_round <= current_round
         else:
             return False
+
+
+class FlockMode(Enum):
+    Searching = 0,
+    QueryingLocation = 1,
+    FoundLocation = 2
+    Flocking = 3,
+    Dispersing = 4,
+    Regrouping = 5,
+    Optimising = 6
