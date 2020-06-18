@@ -699,6 +699,7 @@ class World:
         particle_set = set(particle_directions.keys())
         ordered_particles = collections.OrderedDict()
         particle_map_coordinates = self.particle_map_coordinates
+        new_coordinates = set()
         i = 0
         while i < len(particle_directions) ** 2 and len(particle_set) > 0:
             i += 1
@@ -706,19 +707,13 @@ class World:
                 direction = particle_directions[particle]
                 direction_coord = get_coordinates_in_direction(particle.coordinates, direction)
                 direction, direction_coord = particle.check_within_border(direction, direction_coord)
-                # remove the particle from the set if the next coordinates are not valid
-                if not self.grid.are_valid_coordinates(direction_coord):
+                if direction_coord not in particle_map_coordinates and particle not in ordered_particles:
+                    if direction_coord not in new_coordinates:
+                        ordered_particles[particle] = direction
+                        new_coordinates.add(direction_coord)
+                        if particle.coordinates in particle_map_coordinates:
+                            del particle_map_coordinates[particle.coordinates]
                     particle_set.remove(particle)
-                    if particle.coordinates in particle_map_coordinates:
-                        del particle_map_coordinates[particle.coordinates]
-                # add it to the ordered dictionary
-                elif direction_coord not in particle_map_coordinates \
-                        and particle not in ordered_particles:
-                    particle_set.remove(particle)
-                    ordered_particles[particle] = direction
-                    if particle.coordinates in particle_map_coordinates:
-                        del particle_map_coordinates[particle.coordinates]
-
         for particle, direction in ordered_particles.items():
             particle.move_to(direction)
 

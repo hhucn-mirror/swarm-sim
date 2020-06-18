@@ -84,6 +84,8 @@ class Memory:
                     self.__deliver__message(message, receivers)
                 else:
                     self.broadcast_memory[sender].remove(entry)
+                    if len(self.broadcast_memory[sender]) == 0:
+                        del self.broadcast_memory[sender]
         return locations
 
     def __calculate_distances__(self, actual_round, m, target, particle_map_id):
@@ -122,7 +124,8 @@ class Memory:
         for distance in range(traveled_distance - signal_velocity + 1, traveled_distance + 1):
             new_locations.extend(get_hexagon_ring((position.getx(), position.gety(), 0), distance))
         particle_locations = particle_map_coordinates.keys()
-        receiving_particles = [particle_map_coordinates.get(key) for key in new_locations if key in particle_locations]
+        receiving_particles = set(
+            [particle_map_coordinates.get(key) for key in new_locations if key in particle_locations])
 
         return receiving_particles, new_locations
 

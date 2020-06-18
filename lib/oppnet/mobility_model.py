@@ -261,12 +261,13 @@ class MobilityModel:
         if current_x_y_z == self.poi:
             return None
         # assume that the blocking neighbors will continue to block the path
-        if blocked_neighbors and self.previous_coordinates == current_x_y_z and len(self.direction_history) > 0:
+        if blocked_neighbors and self.previous_coordinates == current_x_y_z and len(self.direction_history) > 0 and \
+                self.current_dir == self.direction_history[-1]:
             preferred_direction = self.__poi__(current_x_y_z)
             new_coordinates = get_coordinates_in_direction(current_x_y_z, preferred_direction)
             if new_coordinates not in blocked_neighbors:
                 return preferred_direction
-            new_direction = self.__get_preferred_directions__(blocked_neighbors, current_x_y_z)
+            new_direction = self.get_preferred_directions(blocked_neighbors, current_x_y_z)
         else:
             # southern movement
             if current_x_y_z[1] > self.poi[1]:
@@ -291,7 +292,13 @@ class MobilityModel:
                 return self.W
         return None if new_direction is None else self.__check_new_coordinates_(new_direction)
 
-    def __get_preferred_directions__(self, blocked_neighbors, current_x_y_z):
+    def get_preferred_directions(self, blocked_neighbors, current_x_y_z, prefer_neighborhood=False):
+        if prefer_neighborhood:
+            return self._get_preferred_directions_neighborhood_(blocked_neighbors, current_x_y_z)
+        else:
+            return self._get_preferred_directions_(blocked_neighbors, current_x_y_z)
+
+    def _get_preferred_directions_neighborhood_(self, blocked_neighbors, current_x_y_z):
         new_direction = None
         neighbor_count = -1
         for direction in self.directions:
@@ -299,9 +306,20 @@ class MobilityModel:
             if new_coordinates not in blocked_neighbors:
                 distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
                 new_neighbor_count = self.__get_number_of_neighbors__(new_coordinates, blocked_neighbors)
-                if distance_to_poi <= self._distance_to_poi and new_neighbor_count > neighbor_count:
+                if distance_to_poi <= self._distance_to_poi or \
+                        (new_neighbor_count > neighbor_count and distance_to_poi - 1 <= self._distance_to_poi):
                     new_direction = direction
                     neighbor_count = new_neighbor_count
+        return new_direction
+
+    def _get_preferred_directions_(self, blocked_neighbors, current_x_y_z):
+        new_direction = None
+        for direction in self.directions:
+            new_coordinates = get_coordinates_in_direction(current_x_y_z, direction)
+            if new_coordinates not in blocked_neighbors:
+                distance_to_poi = get_distance_from_coordinates(self.poi, new_coordinates)
+                if distance_to_poi <= self._distance_to_poi:
+                    new_direction = direction
         return new_direction
 
     @staticmethod
