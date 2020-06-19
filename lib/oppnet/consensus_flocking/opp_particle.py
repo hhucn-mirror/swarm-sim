@@ -10,7 +10,7 @@ from lib.oppnet.message_types.direction_message import DirectionMessageContent
 from lib.oppnet.message_types.predator_signal import PredatorSignal
 from lib.oppnet.message_types.relative_location_message import CardinalDirection, \
     RelativeLocationMessageContent
-from lib.oppnet.message_types.safe_location_added import SafeLocationAdded
+from lib.oppnet.message_types.safe_location_message import SafeLocationMessage
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point
@@ -277,7 +277,7 @@ class Particle(Particle):
                 self.__process_relative_location_message(message, content)
             elif isinstance(content, PredatorSignal):
                 self.__process_predator_signal(message, content)
-            elif isinstance(content, SafeLocationAdded):
+            elif isinstance(content, SafeLocationMessage):
                 self.__process_safe_location_added(message, content)
             else:
                 logging.debug("round {}: opp_particle -> received an unknown content type.")
@@ -706,7 +706,7 @@ class Particle(Particle):
             for predator in predators:
                 self.mobility_model.current_dir = self.__update_predator_escape_direction(predator.coordinates)
                 predator_coordinates.add(predator.coordinates)
-            multicast_message_content(self, self.get_current_neighborhood.keys(),
+            multicast_message_content(self, self.current_neighborhood.keys(),
                                       PredatorSignal(predator_ids, predator_coordinates))
             self.__detected_predator_ids__.update(predator_ids)
         return self.mobility_model.next_direction(self.coordinates)
@@ -723,9 +723,9 @@ class Particle(Particle):
         return Point(self.coordinates[0], self.coordinates[1])
 
     @property
-    def get_current_neighborhood(self):
+    def current_neighborhood(self):
         return self.__current_neighborhood__
 
     @property
-    def get_previous_neighborhood(self):
+    def previous_neighborhood(self):
         return self.__previous_neighborhood__

@@ -8,11 +8,12 @@ from lib.swarm_sim_header import red
 
 
 def solution(world):
-    global leaders, followers
+    global leaders, followers, individual_flag
 
     current_round = world.get_actual_round()
     particles = world.get_particle_list()
     t_wait = world.config_data.flock_radius * 2
+    t_pick = t_wait * 5
 
     if current_round == 1:
         leader_count = world.config_data.leader_count
@@ -20,15 +21,24 @@ def solution(world):
         set_t_wait_values(particles, t_wait)
         initialise_leaders(t_wait, leader_count)
         initialise_neighborhoods(particles)
+        individual_flag = True
     else:
         check_neighborhoods(particles)
         routing.next_step(particles)
         update_particle_states(particles)
-        send_direction_proposals(current_round)
+        # send_direction_proposals(current_round)
         if current_round == 5:
             print_all_routes(particles, current_round)
-        if current_round > t_wait * 3 + 1:
-            move_to_next_direction(particles, current_round)
+        # if current_round > t_wait * 3 + 1:
+        #    move_to_next_direction(particles, current_round)
+        move_to_next_direction(particles)
+        if current_round % 30 == 0:
+            individual_flag = True
+            leader = random.choice(leaders)
+            leader.send_safe_location_proposal()
+        if current_round % t_pick == 0:
+            send_direction_proposals(current_round)
+            individual_flag = False
 
 
 def print_all_routes(particles, current_round):
@@ -51,7 +61,7 @@ def set_t_wait_values(particles, t_wait):
 def split_particles(particles, leader_count):
     leader_set = set(random.sample(particles, leader_count))
     follower_set = set(particles).difference(leader_set)
-    return leader_set, follower_set
+    return list(leader_set), follower_set
 
 
 def initialise_leaders(t_wait, leader_count):
@@ -91,19 +101,17 @@ def send_direction_proposals(current_round):
             leader.send_direction_proposal()
 
 
-def move_to_next_direction(particles, current_round):
-    particle_directions = {}
-    first_direction = particles[0].next_moving_direction()
-    for particle in particles:
-        next_direction = particle.next_moving_direction()
-        if next_direction:
-            particle_directions[particle] = next_direction
-            if first_direction and next_direction != first_direction:
-                logging.error("round {}: multi_leader_flocking -> move_to_next_direction() " +
-                              "not all particles in the flock are moving to in the same direction!".format(
-                                  current_round))
-    if particle_directions:
-        if len(particle_directions) != len(particles):
-            logging.error("round {}: multi_leader_flocking -> move_to_next_direction() " +
-                          "not all particles returned a next_moving_direction()".format(current_round))
-        particles[0].world.move_particles(particle_directions)
+def move_to_next_direction(particles):
+    if individual_flag:
+        for particle in particles:
+            next_direction = particle.next_moving_direction()
+            if next_direction:
+                particle.move_to(next_direction)
+    else:
+        particle_directions = {}
+        for particle in particles:
+            next_direction = particle.next_moving_direction()
+            if next_direction:
+                particle_directions[particle] = next_direction
+        if particle_directions:
+            particles[0].world.move_particles(particle_directions)

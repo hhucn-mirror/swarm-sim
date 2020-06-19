@@ -1070,6 +1070,5 @@ class Particle(matter.Matter):
         if self.world.vis:
             self.world.vis.particle_changed(self)
 
-    @property
     def __exists__(self):
         return self in self.world.particles

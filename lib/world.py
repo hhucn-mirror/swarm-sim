@@ -19,7 +19,7 @@ from lib import vis3d
 from lib.location import Location
 from lib.oppnet.communication import broadcast_message, Message
 from lib.oppnet.memory import Memory
-from lib.oppnet.message_types.safe_location_added import SafeLocationAdded
+from lib.oppnet.message_types.safe_location_message import SafeLocationMessage
 from lib.oppnet.predator import Predator
 from lib.particle import Particle
 from lib.swarm_sim_header import eprint, get_coordinates_in_direction, scan_within
@@ -517,7 +517,7 @@ class World:
             dummy_particle = self.particle_mod.Particle(self, coordinates, None, csv_generator=self.csv_generator)
             broadcast_message(dummy_particle, Message(dummy_particle, None, start_round=self.get_actual_round(),
                                                       ttl=self.config_data.message_ttl,
-                                                      content=SafeLocationAdded(coordinates)))
+                                                      content=SafeLocationMessage(coordinates)))
         return return_value
 
     def remove_tile(self, tile_id):

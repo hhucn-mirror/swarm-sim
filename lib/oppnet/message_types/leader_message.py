@@ -17,43 +17,49 @@ class LeaderMessageContent:
         self.__proposed__direction = proposed_direction
         self.__receivers__ = receivers
         self.__t_wait__ = t_wait
-        self.message_type = message_type
+        self._message_type = message_type
 
-    def get_sending_leader(self):
+    @property
+    def sending_leader(self):
         return self.__sending_leader__
 
-    def get_proposed_direction(self):
+    @property
+    def proposed_direction(self):
         return self.__proposed__direction
 
-    def get_receivers(self):
+    @property
+    def receivers(self):
         return self.__receivers__
 
-    def get_t_wait(self):
+    @property
+    def t_wait(self):
         return self.__t_wait__
 
-    def get_message_type(self):
-        return self.message_type
+    @property
+    def message_type(self):
+        return self._message_type
 
-    def get_number(self):
+    @property
+    def number(self):
         return self.__number__
 
     def create_forward_copy(self, new_receivers, t_wait_decrement=1):
-        new_t_wait = self.get_t_wait() - t_wait_decrement
-        forward_copy = type(self)(self.get_sending_leader(), self.get_proposed_direction(), new_receivers, new_t_wait,
-                                  self.get_message_type(), self.__number__)
+        new_t_wait = self.t_wait - t_wait_decrement
+        forward_copy = type(self)(self.sending_leader, self.proposed_direction, new_receivers, new_t_wait,
+                                  self.message_type, self.__number__)
         return forward_copy
 
     def __eq__(self, other):
-        return self.get_number() == other.get_number()
+        return self.number == other.number
 
     def __gt__(self, other):
-        return self.get_number() > other.get_number()
+        return self.number > other.number
 
     def __ge__(self, other):
-        return self.get_number() >= other.get_number()
+        return self.number >= other.number
 
     def __lt__(self, other):
-        return self.get_number() < other.get_number()
+        return self.number < other.number
 
     def __le__(self, other):
-        return self.get_number() <= other.get_number()
+        return self.number <= other.number

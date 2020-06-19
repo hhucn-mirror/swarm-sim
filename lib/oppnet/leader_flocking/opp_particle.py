@@ -8,12 +8,13 @@ from lib.oppnet.communication import multicast_message_content, send_message, Me
 from lib.oppnet.leader_flocking.helper_classes import FlockMemberType, LeaderStateName, LeaderState, FlockMode
 from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
 from lib.oppnet.message_types import LostMessageContent, LostMessageType
-from lib.oppnet.message_types.safe_location_added import SafeLocationAdded
+from lib.oppnet.message_types.safe_location_message import SafeLocationMessage, SafeLocationMessageType
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.point import Point
 from lib.oppnet.routing import RoutingMap, RoutingContact
 from lib.particle import Particle
+from lib.swarm_sim_header import get_distance_from_coordinates
 
 
 class Particle(Particle):
@@ -68,6 +69,8 @@ class Particle(Particle):
         self.commit_quorum = self.world.config_data.commit_quorum
         self.flock_mode = FlockMode.Searching
         self.__previous_neighborhood__ = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
+
+        self.safe_locations = []
 
     def __init_message_stores__(self, ms_size, ms_strategy):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -205,9 +208,26 @@ class Particle(Particle):
                                            message_type, number)
             multicast_message_content(self, receivers, content)
 
-    def broadcast_safe_location(self):
-        message = Message(self, None, content=SafeLocationAdded(self.coordinates))
+    def broadcast_safe_location(self, safe_location=None):
+        if not safe_location:
+            safe_location = self._get_a_safe_location()
+        message = Message(self, None, content=SafeLocationMessage(safe_location))
         broadcast_message(self, message)
+
+    def _get_a_safe_location(self):
+        if not self.safe_locations:
+            return self.coordinates
+        else:
+            return random.choice(self.safe_locations)
+
+    def send_safe_location_proposal(self, safe_location=None):
+        if safe_location is None:
+            safe_location = self._get_a_safe_location()
+        content = SafeLocationMessage(safe_location, self.leader_contacts.keys(), SafeLocationMessageType.Proposal)
+        receivers = self.leader_contacts.keys()
+        self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(receivers), self.world.get_actual_round(),
+                                  self.t_wait * 2)
+        multicast_message_content(self, receivers, content)
 
     def send_direction_proposal(self, proposed_direction=None):
         if proposed_direction is None:
@@ -249,7 +269,7 @@ class Particle(Particle):
 
     def __flood_forward__(self, received_message):
         received_content = received_message.get_content()
-        instruction_number = received_content.get_number()
+        instruction_number = received_content.number
         try:
             if instruction_number is not None and self.world.get_actual_round() >= self.instruct_round:
                 return
@@ -257,8 +277,8 @@ class Particle(Particle):
             pass
         max_hops = self.routing_parameters.scan_radius
         neighbors = self.scan_for_particles_within(hop=max_hops)
-        exclude = {received_message.get_sender(), received_message.get_content().get_sending_leader(),
-                   received_message.get_original_sender()}.union(received_content.get_receivers())
+        exclude = {received_message.get_sender(), received_message.get_content().sending_leader,
+                   received_message.get_original_sender()}.union(received_content.receivers)
         all_receivers = set(neighbors).difference(exclude)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
@@ -270,8 +290,8 @@ class Particle(Particle):
             for receiver in receivers:
                 send_message(self, receiver, received_message)
                 logging.debug("round {}: opp_particle -> particle {} forwarded {} #{} to {}".format(
-                    self.world.get_actual_round(), self.number, content.get_message_type().name,
-                    content.get_number(), receiver.number))
+                    self.world.get_actual_round(), self.number, content.message_type.name,
+                    content.number, receiver.number))
 
     def forward_to_leader_via_contacts(self, received_message, receiving_leader=None):
         received_content = received_message.get_content()
@@ -281,7 +301,7 @@ class Particle(Particle):
             if receiving_leader:
                 receivers = {receiving_leader}
             elif isinstance(received_content, LeaderMessageContent):
-                receivers = set(received_content.get_receivers())
+                receivers = set(received_content.receivers)
             else:
                 receivers = set(self.leader_contacts.keys())
             receivers.difference_update(
@@ -303,7 +323,7 @@ class Particle(Particle):
                 received_message.set_actual_receiver(leader_particle)
                 send_message(self, contact.get_contact_particle(), received_message)
                 logging.debug("round {}: opp_particle -> particle {} forwarded {} to {} via {}".format(
-                    self.world.get_actual_round(), self.number, content.get_message_type().name,
+                    self.world.get_actual_round(), self.number, content.message_type.name,
                     leader_particle.number, contact.get_contact_particle().number))
 
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
@@ -358,7 +378,7 @@ class Particle(Particle):
         for message in remaining:
             content = message.get_content()
             if isinstance(content, LeaderMessageContent):
-                message_type = content.get_message_type()
+                message_type = content.message_type
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_leader__(message)
                 elif message_type == LeaderMessageType.discover:
@@ -367,8 +387,8 @@ class Particle(Particle):
                     self.__process_propose_as_leader__(message)
             elif isinstance(content, LostMessageContent):
                 self.__process_lost_message_as_leader__(message)
-            elif isinstance(content, SafeLocationAdded):
-                self.__process_safe_location_added_as_leader(message)
+            elif isinstance(content, SafeLocationMessage):
+                self.__process_safe_location_message_as_leader(message)
 
     def __process_commit_and_ack__(self, received_messages: [Message]):
         remaining = []
@@ -376,8 +396,8 @@ class Particle(Particle):
             content = message.get_content()
 
             if isinstance(content, LeaderMessageContent):
-                message_type = content.get_message_type()
-                sending_leader = content.get_sending_leader()
+                message_type = content.message_type
+                sending_leader = content.sending_leader
                 if (sending_leader not in self.leader_contacts) and sending_leader.get_id() != self.get_id():
                     self.__new_leader_found__(message, sending_leader)
                 if message_type == LeaderMessageType.commit:
@@ -389,6 +409,18 @@ class Particle(Particle):
                 if message.get_original_sender() not in self.leader_contacts:
                     self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
                                        is_leader=False)
+            elif isinstance(content, SafeLocationMessage) and message.get_actual_receiver() == self:
+                message_type = content.message_type
+                if message_type == SafeLocationMessageType.Ack:
+                    self.__remove_particle_from_states__(message.get_original_sender(),
+                                                         LeaderStateName.WaitingForCommits)
+                    if not self.__is__waiting_for_commit__():
+                        distance = get_distance_from_coordinates(self.coordinates, content.coordinates)
+                        self.__add_leader_state__(LeaderStateName.CommittedToInstruct, set(),
+                                                  self.world.get_actual_round(), distance * 2)
+                        self.broadcast_safe_location(content.coordinates)
+                else:
+                    remaining.append(message)
             else:
                 self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
                                    is_leader=False)
@@ -406,9 +438,9 @@ class Particle(Particle):
 
     def __process_instruct_as_leader__(self, message: Message):
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
-            self.world.get_actual_round(), self.number, message.get_content().get_number()))
+            self.world.get_actual_round(), self.number, message.get_content().number))
         if not self.__is_committed_to_instruct__() and self.__update__instruct_round_as_leader__(message):
-            sending_leader = message.get_content().get_sending_leader()
+            sending_leader = message.get_content().sending_leader
             self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader},
                                       self.world.get_actual_round(), message.get_hops() * 2)
             self.reset_random_next_direction_proposal_round()
@@ -418,13 +450,13 @@ class Particle(Particle):
 
     def __process_commit_as_leader__(self, message: Message):
         content = message.get_content()
-        if message.get_actual_receiver().number == self.number and self.__instruction_number__ == content.get_number():
+        if message.get_actual_receiver().number == self.number and self.__instruction_number__ == content.number:
             if self.__is_committed_to_propose__():
                 return
             logging.debug("round {}: opp_particle -> particle {} received commit #{} from particle {}"
                           .format(self.world.get_actual_round(),
-                                  self.number, content.get_number(), content.get_sending_leader().number))
-            self.__remove_particle_from_states__(content.get_sending_leader(), LeaderStateName.WaitingForCommits)
+                                  self.number, content.number, content.sending_leader.number))
+            self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForCommits)
             if self.__quorum_fulfilled__() and LeaderStateName.SendInstruct not in self.__leader_states__:
                 self.__multicast_instruct__()
         else:
@@ -451,19 +483,19 @@ class Particle(Particle):
     def __process_discover_as_leader__(self, message: Message):
         content = message.get_content()
         if message.get_actual_receiver() == self:
-            self.__send_content_to_leader_via_contacts__(self, content.get_sending_leader(),
+            self.__send_content_to_leader_via_contacts__(self, content.sending_leader,
                                                          LeaderMessageType.discover_ack)
 
     def __process_discover_ack_as_leader__(self, message: Message):
         content = message.get_content()
         if message.get_actual_receiver() == self:
-            self.__remove_particle_from_states__(content.get_sending_leader(), LeaderStateName.WaitingForDiscoverAck)
+            self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForDiscoverAck)
         else:
             self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_propose_as_leader__(self, message: Message):
         content = message.get_content()
-        sending_leader = content.get_sending_leader()
+        sending_leader = content.sending_leader
         logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
             self.world.get_actual_round(), self.number, self.__instruction_number__, sending_leader.number))
         self.forward_to_leader_via_contacts(message)
@@ -471,31 +503,31 @@ class Particle(Particle):
                 or LeaderStateName.SendInstruct in self.__leader_states__:
             return
         self.next_direction_proposal_round = None
-        self.__instruction_number__ = content.get_number()
+        self.__instruction_number__ = content.number
         self.__add_leader_state__(LeaderStateName.CommittedToPropose, {sending_leader},
                                   self.world.get_actual_round(), self.t_wait * 2)
-        self.__send_content_to_leader_via_contacts__(self, content.get_sending_leader(), LeaderMessageType.commit)
+        self.__send_content_to_leader_via_contacts__(self, content.sending_leader, LeaderMessageType.commit)
         logging.debug("round {}: opp_particle -> particle {} committed to proposal # {} from particle {}".format(
             self.world.get_actual_round(),
             self.number,
-            content.get_number(),
+            content.number,
             sending_leader.number))
 
     def __update__instruct_round_as_leader__(self, received_message: Message):
-        instruct_round = self.world.get_actual_round() + received_message.get_content().get_t_wait()
-        instruction_number = received_message.get_content().get_number()
+        instruct_round = self.world.get_actual_round() + received_message.get_content().t_wait
+        instruction_number = received_message.get_content().number
         if self.__instruction_number__ and self.instruct_round \
                 and self.__instruction_number__ == instruction_number \
                 and self.instruct_round >= instruct_round:
             return False
         self.instruct_round = instruct_round
-        self.proposed_direction = received_message.get_content().get_proposed_direction()
+        self.proposed_direction = received_message.get_content().proposed_direction
         self.current_instruct_message = received_message
         return True
 
     def __process_lost_message_as_leader__(self, message: Message):
         content = message.get_content()
-        message_type = content.get_message_type()
+        message_type = content.message_type
         if message_type == LostMessageType.SeparationMessage:
             if not self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin):
                 if len(self.leader_contacts) == 0:
@@ -512,36 +544,38 @@ class Particle(Particle):
             self.__remove_particle_from_states__(message.get_original_sender(), LeaderStateName.WaitingForRejoin)
         self.__process_lost_message_as_follower__(message)
 
-    def __process_safe_location_added_as_leader(self, message):
+    def __process_safe_location_message_as_leader(self, message):
         content = message.get_content()
-        self.mobility_model.set_mode(MobilityModelMode.POI)
-        self.mobility_model.poi = content.coordinates
-        self.proposed_direction = self.mobility_model.next_direction(self.coordinates)
-        self.multicast_leader_message(LeaderMessageType.instruct)
+        if content.message_type == SafeLocationMessageType.TileAdded:
+            self.safe_locations.append(content.coordinates)
+        elif content.message_type == SafeLocationMessageType.Proposal and not self.__is_committed_to_instruct__():
+            response_content = SafeLocationMessage(content.coordinates, [message.get_original_sender()],
+                                                   SafeLocationMessageType.Ack)
+            self.send_message_content_via_contacts(message.get_original_sender(), response_content)
 
     def __process_as_follower__(self, received_messages: [Message]):
         self.__add__new_contacts_as_follower__(received_messages)
         for message in received_messages:
             content = message.get_content()
             if isinstance(content, LeaderMessageContent):
-                message_type = content.get_message_type()
+                message_type = content.message_type
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_follower__(message)
                 elif message_type == LeaderMessageType.discover:
-                    self.forward_to_leader_via_contacts(message, content.get_receivers().pop())
+                    self.forward_to_leader_via_contacts(message, content.receivers.pop())
                 elif message_type in [LeaderMessageType.discover_ack, LeaderMessageType.commit]:
                     self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
                 else:
                     self.forward_to_leader_via_contacts(message)
             elif isinstance(content, LostMessageContent):
                 self.__process_lost_message_as_follower__(message)
-            elif isinstance(content, SafeLocationAdded):
-                self.__process_safe_location_added_as_follower(message)
+            elif isinstance(content, SafeLocationMessage):
+                self.__process_safe_location_message_as_follower(message)
 
     def __add__new_contacts_as_follower__(self, received_messages):
         for message in received_messages:
             if isinstance(message.get_content(), LeaderMessageContent):
-                sending_leader = message.get_content().get_sending_leader()
+                sending_leader = message.get_content().sending_leader
                 if sending_leader not in self.leader_contacts:
                     self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
                     logging.debug(
@@ -563,19 +597,19 @@ class Particle(Particle):
 
     def __update__instruct_round_as_follower_(self, received_message: Message):
         content = received_message.get_content()
-        new_instruction_round = self.world.get_actual_round() + content.get_t_wait()
-        instruction_number = content.get_number()
+        new_instruction_round = self.world.get_actual_round() + content.t_wait
+        instruction_number = content.number
         if self.__instruction_number__ is None or (instruction_number > self.__instruction_number__):
             self.instruct_round = new_instruction_round
-            self.proposed_direction = content.get_proposed_direction()
+            self.proposed_direction = content.proposed_direction
             self.current_instruct_message = received_message
             self.__instruction_number__ = instruction_number
-            self.t_wait = content.get_t_wait()
+            self.t_wait = content.t_wait
             self.mobility_model.set_mode(MobilityModelMode.Manual)
 
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
-        message_type = content.get_message_type()
+        message_type = content.message_type
         if message_type == LostMessageType.RejoinMessage and message.get_actual_receiver() == self:
             self.mobility_model = MobilityModel(self.coordinates, MobilityModelMode.POI,
                                                 poi=content.get_current_location())
@@ -607,7 +641,7 @@ class Particle(Particle):
             except IndexError:
                 pass
 
-    def __process_safe_location_added_as_follower(self, message):
+    def __process_safe_location_message_as_follower(self, message):
         content = message.get_content()
         if self.flock_mode != FlockMode.Flocking:
             self.mobility_model.set_mode(MobilityModelMode.POI)
