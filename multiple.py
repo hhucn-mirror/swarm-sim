@@ -5,9 +5,9 @@ import configparser
 
 
 def main(argv):
-    max_round = 10
+    max_round = 1000
     seed_start = 1
-    seed_end = 2
+    seed_end = 10
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
 

@@ -105,6 +105,8 @@ class CsvAgentData:
 
 class CsvRoundData:
     def __init__(self, task=0, scenario=0, solution=0, seed=20, directory="outputs/"):
+        self.check_count = 2
+        self.check_formation = 2
         self.task = task
         self.scenario = scenario
         self.solution = solution
@@ -196,13 +198,15 @@ class CsvRoundData:
     def success(self):
         self.success_counter = self.success_counter + 1
 
-    def update_metrics(self, steps=0,
+    def update_metrics(self, steps=0, check_count=0, check_formation=0,
                        agent_read=0, item_read=0, location_read=0, memory_read=0,
                        agent_write=0, item_write=0, location_write=0, memory_write=0,
                        agents_created=0, items_created=0, location_created=0,
                        agents_deleted=0, items_deleted=0, location_deleted=0, items_taken=0, items_dropped=0,
                        agents_taken=0, agents_dropped=0):
         logging.debug("CSV: Starting writing_rounds")
+        self.check_count = self.check_count - check_count
+        self.check_formation = self.check_formation - check_formation
         self.location_created_sum = self.location_created_sum + location_created
         self.location_deleted_sum = self.location_deleted_sum + location_deleted
         self.location_read_sum = self.location_read_sum + location_read
@@ -294,7 +298,7 @@ class CsvRoundData:
         csv_file = open(file_name, 'w', newline='')
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
-        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Rounds Total',
+        writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Rounds Total', 'Check Count', 'Check Formation',
                                'Success Rate Sum', 'Success Ratio',
                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
                                'Success Round Min', 'Success Round Max',
@@ -328,7 +332,7 @@ class CsvRoundData:
                                'Items Taken Sum', 'Items Taken Avg', 'Items Taken Min', 'Items Taken Max',
                                'Item Write Sum', 'Item Write Avg', 'Item Write Min', 'Item Write Max'])
 
-        csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
+        csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(), self.check_count, self.check_formation,
 
                          data['Success Counter'].sum(),
                          data['Success Counter'].sum() / data['Round Number'].sum(),
@@ -410,7 +414,7 @@ class CsvRoundData:
         writer_round = csv.writer(csv_file)
         """Average Min Max for all other metrics"""
         writer_round.writerow(['Scenario', 'Solution', 'Seed', 'Rounds Total',
-                               'Agent Counter',
+                               'Agent Counter', 'Check Count', 'Check Formation',
                                'Success Rate Sum', 'Success Ratio',
                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
                                'Success Round Min', 'Success Round Max',
@@ -446,7 +450,7 @@ class CsvRoundData:
 
         csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
 
-                         self.agent_num,
+                         self.agent_num, self.check_count, self.check_formation,
                          data['Success Counter'].sum(),
                          data['Success Counter'].sum() / data['Round Number'].sum(),
 

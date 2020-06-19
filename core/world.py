@@ -10,6 +10,7 @@ import random
 import threading
 import os
 import datetime
+import math
 
 from core import agent, item, location, vis3d
 from core.visualization.utils import show_msg, TopQFileDialog, VisualizationError, Level
@@ -618,3 +619,135 @@ class World:
             return self.remove_location(self.location_map_coordinates[coordinates].get_id())
         else:
             return False
+
+    def check_count(self, kachelanzahl):
+        if kachelanzahl == len(self.items):
+            self.csv_round.update_metrics(check_count=1)
+            return True
+        else:
+            self.csv_round.update_metrics(check_count=2)
+            return False
+
+    def check_formation(self):
+        kachelanzahl = len(self.items)
+        z_raute = math.sqrt(kachelanzahl)
+        z_dreieck = -0.5 + math.sqrt(0.25 + 2 * kachelanzahl)
+        z_hexagon = 0.5 + math.sqrt(0.25 - ((1 - kachelanzahl) / 3))
+
+        objekt = []
+
+        if z_dreieck.is_integer():
+            # Koordinaten des Dreiecks:
+            x = 0
+            y = 0
+            z = 0
+            z_dreieck2 = z_dreieck
+            while y < z_dreieck:
+                while x < z_dreieck2 + z:
+                    objekt.append((x, y, 0))
+                    x = x + 1
+
+                y = y + 1
+                z = z + 0.5
+                x = z
+                z_dreieck2 = z_dreieck2 - 1
+
+        elif z_raute.is_integer():
+            # Koordinaten der Raute:
+            x = 0
+            y = 0
+            z = 0
+            while y < z_raute:
+                while x < z_raute + z:
+                    objekt.append((x, y, 0))
+                    x = x + 1
+
+                y = y + 1
+                z = z + 0.5
+                x = z
+
+        elif z_hexagon.is_integer():
+            # Koordinaten des Hexagons:
+            x = 0.5
+            y = 1
+            z1 = 1
+            z2 = 1
+            z3 = 1
+
+            objekt.append((0, 0, 0))
+
+            while z1 < z_hexagon:
+                if z2 == 1:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x + 0.5
+                        y = y - 1
+                        z3 = z3 + 1
+                    z2 = 2
+                    z3 = 1
+                if z2 == 2:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x - 0.5
+                        y = y - 1
+                        z3 = z3 + 1
+                    z2 = 3
+                    z3 = 1
+                if z2 == 3:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x - 1
+                        z3 = z3 + 1
+                    z2 = 4
+                    z3 = 1
+                if z2 == 4:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x - 0.5
+                        y = y + 1
+                        z3 = z3 + 1
+                    z2 = 5
+                    z3 = 1
+                if z2 == 5:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x + 0.5
+                        y = y + 1
+                        z3 = z3 + 1
+                    z2 = 6
+                    z3 = 1
+                if z2 == 6:
+                    while z3 <= z1:
+                        objekt.append((x, y, 0))
+                        x = x + 1
+                        z3 = z3 + 1
+                    z2 = 1
+                    z3 = 1
+                z1 = z1 + 1
+                x = x + 0.5
+                y = y + 1
+
+        else:
+            # Koordinaten der Linie:
+            x = 0
+            y = 0
+            z = 0
+
+            while z < kachelanzahl:
+                objekt.append((x, y, 0))
+                x = x + 0.5
+                y = y + 1
+                z = z + 1
+
+        i = 0
+        for item in objekt:
+            if item in self.item_map_coordinates:
+                i = i + 1
+
+        if i == kachelanzahl:
+            self.csv_round.update_metrics(check_formation=1)
+            return True
+        else:
+            self.csv_round.update_metrics(check_formation=2)
+            return False
+

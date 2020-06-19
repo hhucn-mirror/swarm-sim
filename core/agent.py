@@ -1,3 +1,7 @@
+# Funktionen am Ende
+# Variablen gegangener Weg, rueckweg, gesetzte Location
+# Weg wird in der move Funktion gespeichert
+
 """
 .. module:: agent
    :platform: Unix, Windows
@@ -25,6 +29,11 @@ class Agent(matter.Matter):
         self.carried_item = None
         self.carried_agent = None
         self.steps = 0
+
+        self.gegangenerWeg = []
+        self.rueckweg = []
+        self.gesetzteLocation = []
+
         csv_generator_module = importlib.import_module('components.generators.csv.%s' % world.config_data.csv_generator)
         self.csv_agent_writer = csv_generator_module.CsvAgentData(self.get_id(), self.number)
 
@@ -91,6 +100,7 @@ class Agent(matter.Matter):
             self.world.csv_round.update_metrics(steps=1)
             self.csv_agent_writer.write_agent(steps=1)
             self.check_for_carried_matter()
+            self.gegangenerWeg.append(direction)
             return True
 
         return False
@@ -139,8 +149,7 @@ class Agent(matter.Matter):
         else:
             tmp_memory = target.read_whole_memory()
 
-        if tmp_memory is not None \
-                and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
+        if tmp_memory is not None:
             if target.type == MatterType.AGENT:
                 self.world.csv_round.update_metrics(agent_read=1)
                 self.csv_agent_writer.write_agent(agent_read=1)
@@ -901,9 +910,9 @@ class Agent(matter.Matter):
         logging.info("Going to create on position %s" % str(self.coordinates))
         new_location = self.world.add_location(self.coordinates)
         if new_location:
-            self.csv_agent_writer.write_agent(locations_created=1)
+            self.csv_agent_writer.write_agent(location_created=1)
             self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
-            self.world.csv_round.update_metrics(locations_created=1)
+            self.world.csv_round.update_metrics(location_created=1)
             return new_location
         else:
             return False
@@ -1027,3 +1036,33 @@ class Agent(matter.Matter):
         super().set_color(color)
         if self.world.vis is not None:
             self.world.vis.agent_changed(self)
+
+    def set_gegangenerWeg(self, gegangenerWeg):
+        self.gegangenerWeg = gegangenerWeg
+
+    def get_gegangenerWeg(self):
+
+        return self.gegangenerWeg
+
+    def get_rueckweg(self, gegangenerWeg):
+        WegReverse = gegangenerWeg.copy()
+        WegReverse.reverse()
+        rueckweg = []
+        for richtung in WegReverse:
+            if richtung == (1, 0, 0):
+                rueckweg.append((-1, 0, 0))
+            elif richtung == (0.5, -1, 0):
+                rueckweg.append((-0.5, 1, 0))
+            elif richtung == (-0.5, -1, 0):
+                rueckweg.append((0.5, 1, 0))
+            elif richtung == (-1, 0, 0):
+                rueckweg.append((1, 0, 0))
+            elif richtung == (-0.5, 1, 0):
+                rueckweg.append((0.5, -1, 0))
+            else:
+                rueckweg.append((-0.5, -1, 0))
+
+        return rueckweg
+
+    def get_gesetzteLocation(self):
+        return self.gesetzteLocation
