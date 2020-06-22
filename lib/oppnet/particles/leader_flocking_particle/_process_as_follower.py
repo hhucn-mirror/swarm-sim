@@ -18,11 +18,11 @@ class Mixin:
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_follower__(message)
                 elif message_type == LeaderMessageType.discover:
-                    self.forward_to_leader_via_contacts(message, content.receivers.pop())
+                    self.send_to_leader_via_contacts(message, content.receivers.pop())
                 elif message_type in [LeaderMessageType.discover_ack, LeaderMessageType.commit]:
-                    self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
+                    self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
                 else:
-                    self.forward_to_leader_via_contacts(message)
+                    self.send_to_leader_via_contacts(message)
             elif isinstance(content, LostMessageContent):
                 self.__process_lost_message_as_follower__(message)
             elif isinstance(content, SafeLocationMessage):
@@ -88,7 +88,7 @@ class Mixin:
 
     def __process_safe_location_message_as_follower(self, message):
         content = message.get_content()
-        if self.flock_mode != FlockMode.Flocking:
+        if self.flock_mode != FlockMode.Flocking or not message.is_broadcast:
             self.mobility_model.set_mode(MobilityModelMode.POI)
             self.mobility_model.poi = content.coordinates
             self.proposed_direction = self.mobility_model.next_direction(self.coordinates)

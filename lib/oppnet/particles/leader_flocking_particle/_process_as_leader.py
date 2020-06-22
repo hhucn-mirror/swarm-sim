@@ -3,6 +3,7 @@ import logging
 from lib.oppnet.communication import Message, broadcast_message
 from lib.oppnet.message_types import LostMessageType, LeaderMessageType, LostMessageContent, SafeLocationMessageType, \
     SafeLocationMessage, LeaderMessageContent
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
 from lib.swarm_sim_header import get_distance_from_coordinates
 
@@ -54,6 +55,8 @@ class Mixin:
                         self.__add_leader_state__(LeaderStateName.CommittedToInstruct, set(),
                                                   self.world.get_actual_round(), distance * 2)
                         self.broadcast_safe_location(content.coordinates)
+                        self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI,
+                                                              poi=content.coordinates))
                 else:
                     remaining.append(message)
             else:
@@ -86,7 +89,7 @@ class Mixin:
             if self.__quorum_fulfilled__() and LeaderStateName.SendInstruct not in self.__leader_states__:
                 self.__multicast_instruct__()
         else:
-            self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
+            self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_discover_as_leader__(self, message: Message):
         content = message.get_content()
@@ -99,14 +102,14 @@ class Mixin:
         if message.get_actual_receiver() == self:
             self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForDiscoverAck)
         else:
-            self.forward_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
+            self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_propose_as_leader__(self, message: Message):
         content = message.get_content()
         sending_leader = content.sending_leader
         logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
             self.world.get_actual_round(), self.number, self._instruction_number_, sending_leader.number))
-        self.forward_to_leader_via_contacts(message)
+        self.send_to_leader_via_contacts(message)
         if self.__is__waiting_for_commit__() or self.__is_committed_to_propose__() \
                 or LeaderStateName.SendInstruct in self.__leader_states__:
             return
@@ -148,6 +151,7 @@ class Mixin:
             response_content = SafeLocationMessage(content.coordinates, [message.get_original_sender()],
                                                    SafeLocationMessageType.Ack)
             self.send_message_content_via_contacts(message.get_original_sender(), response_content)
+            self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=content.coordinates))
 
     def __quorum_fulfilled__(self):
         if self.__is__waiting_for_commit__():

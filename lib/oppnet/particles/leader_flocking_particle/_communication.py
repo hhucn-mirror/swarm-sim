@@ -111,10 +111,10 @@ class Mixin:
                     self.world.get_actual_round(), self.number, content.message_type.name,
                     content.number, receiver.number))
 
-    def forward_to_leader_via_contacts(self, received_message, receiving_leader=None):
-        received_content = received_message.get_content()
+    def send_to_leader_via_contacts(self, message, receiving_leader=None):
+        received_content = message.get_content()
         if receiving_leader and receiving_leader not in self.leader_contacts:
-            self.__flood_forward__(received_message)
+            self.__flood_forward__(message)
         else:
             if receiving_leader:
                 receivers = {receiving_leader}
@@ -124,22 +124,22 @@ class Mixin:
                 receivers = set(self.leader_contacts.keys())
             receivers.difference_update(
                 {
-                    received_message.get_sender(),
-                    received_message.get_original_sender()
+                    message.get_sender(),
+                    message.get_original_sender()
                 })
-            self.__forward_via_all_contacts__(received_content, received_message, receivers)
+            self._send_via_all_contacts__(received_content, message, receivers)
 
-    def __forward_via_all_contacts__(self, received_content, received_message, receivers):
+    def _send_via_all_contacts__(self, message_content, message, receivers):
         for leader_particle in receivers:
             for contact in self.leader_contacts.get_leader_contacts(leader_particle):
                 hops = contact.get_hops()
-                if isinstance(received_content, LeaderMessageContent):
-                    content = received_content.create_forward_copy(receivers, hops)
-                    received_message.set_content(content)
+                if isinstance(message_content, LeaderMessageContent):
+                    content = message_content.create_forward_copy(receivers, hops)
+                    message.set_content(content)
                 else:
-                    content = received_content
-                received_message.set_actual_receiver(leader_particle)
-                send_message(self, contact.get_contact_particle(), received_message)
+                    content = message_content
+                message.set_actual_receiver(leader_particle)
+                send_message(self, contact.get_contact_particle(), message)
                 logging.debug("round {}: opp_particle -> particle {} forwarded {} to {} via {}".format(
                     self.world.get_actual_round(), self.number, content.message_type.name,
                     leader_particle.number, contact.get_contact_particle().number))

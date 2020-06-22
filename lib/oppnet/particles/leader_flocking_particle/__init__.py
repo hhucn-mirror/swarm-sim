@@ -69,12 +69,7 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         while len(self.rcv_store) > 0:
             received.append(self.rcv_store.pop())
         while len(self.send_store) > 0:
-            message = self.send_store.pop()
-            if message.get_receiver() == self:
-                received.append(message)
-            else:
-                to_forward.append(message)
-        self.send_store.appends(to_forward)
+            received.append(self.send_store.pop())
         return received
 
     def get_current_instruct(self):
@@ -106,6 +101,8 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         lost_neighbors = self.__previous_neighborhood__.difference(neighborhood)
         new_neighbors = neighborhood.difference(self.__previous_neighborhood__)
         self.__previous_neighborhood__ = neighborhood
+        if self.__previous_neighborhood__ is not None and self.flock_mode == FlockMode.Searching:
+            self.set_flock_mode(FlockMode.Flocking)
         return lost_neighbors, new_neighbors
 
     def __get_estimate_centre_from_leader_contacts__(self):
@@ -146,6 +143,8 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
                 if self.proposed_direction != next_dir:
                     self.proposed_direction = next_dir
                     self.multicast_leader_message(LeaderMessageType.instruct)
+                if not self.instruct_round:
+                    return None
                 if self.world.get_actual_round() >= self.instruct_round:
                     next_dir = self.proposed_direction
                 else:
