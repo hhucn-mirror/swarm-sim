@@ -1,6 +1,6 @@
 from math import copysign
 
-from lib.oppnet.leader_flocking.opp_particle import Particle
+from lib.oppnet.particles import Particle
 from lib.oppnet.point import Point
 
 

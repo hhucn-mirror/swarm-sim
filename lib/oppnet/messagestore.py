@@ -92,6 +92,15 @@ class MessageStore(deque):
             # manually raise an OverFlowError for protocol purposes
             raise OverflowError
 
+    def appends(self, messages: [Message]):
+        """
+        Appends all messsages in list :param messages: to deque and adds its key. Handles a full deque by popping
+        messages at the ends of the deque.
+        :param messages: the messages to add
+        """
+        for message in messages:
+            self.append(message)
+
     def remove(self, message):
         """
         Removes a :param message: if it exists in the deque.

@@ -26,6 +26,7 @@ class Predator(Particle):
             mm_mode = MobilityModelMode.POI
         self.mobility_model = MobilityModel(self.coordinates, mm_mode)
         self.signal_velocity = world.config_data.signal_velocity
+        self.signal_range = world.config_data.signal_range
         self.__init_message_stores__(world.config_data.message_store_size, world.config_data.message_store_strategy)
 
     def move_to(self, direction):

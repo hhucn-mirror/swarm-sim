@@ -1,7 +1,7 @@
 from enum import Enum
 
 from lib.oppnet.communication import send_message
-from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
+from lib.oppnet.particles import FlockMemberType
 
 PROB_KEY = 'PROB_KEY'
 

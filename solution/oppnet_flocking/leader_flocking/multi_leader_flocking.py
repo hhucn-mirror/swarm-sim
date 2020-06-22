@@ -2,8 +2,8 @@ import logging
 import random
 
 from lib.oppnet import routing
-from lib.oppnet.leader_flocking.helper_classes import FlockMemberType
 from lib.oppnet.message_types import LeaderMessageType
+from lib.oppnet.particles import FlockMemberType
 from lib.swarm_sim_header import red
 
 
@@ -20,7 +20,6 @@ def solution(world):
         leaders, followers = split_particles(particles, leader_count)
         set_t_wait_values(particles, t_wait)
         initialise_leaders(t_wait, leader_count)
-        initialise_neighborhoods(particles)
         individual_flag = True
     else:
         check_neighborhoods(particles)
@@ -76,11 +75,6 @@ def initialise_leaders(t_wait, leader_count):
         leader.multicast_leader_message(LeaderMessageType.discover)
         logging.debug("round 1: leader {} next_direction_proposal: {}".format(leader.number,
                                                                               leader.next_direction_proposal_round))
-
-
-def initialise_neighborhoods(particles):
-    for particle in particles:
-        particle.init_neighborhood()
 
 
 def check_neighborhoods(particles):

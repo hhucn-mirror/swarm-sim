@@ -15,6 +15,7 @@ import time
 
 import numpy as np
 
+import lib.oppnet.particles as oppnet_particles
 from lib import vis3d
 from lib.location import Location
 from lib.oppnet.communication import broadcast_message, Message
@@ -81,7 +82,7 @@ class Flock:
 
 
 class World:
-    matter_classes = [Particle, Tile, Location, Predator]
+    matter_classes = [Particle, Tile, Location, Predator, oppnet_particles.Particle]
 
     def __init__(self, config_data):
         """
@@ -509,7 +510,6 @@ class World:
         :param coordinates: the coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccessful
         """
-        print(coordinates)
         if color is None:
             color = self.config_data.tile_color
         return_value = self.add_matter(Tile(self, coordinates, color), coordinates)
