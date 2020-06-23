@@ -6,11 +6,11 @@ import numpy as np
 
 import lib.oppnet.particles as particles
 from lib.oppnet.communication import Message, broadcast_message
-from lib.oppnet.message_types import LostMessageContent, LostMessageType, LeaderMessageType
+from lib.oppnet.message_types import LostMessageContent, LostMessageType
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.routing import RoutingMap
 from . import _leader_states, _process_as_follower, _process_as_leader, _communication, _routing
-from .. import FlockMemberType, FlockMode
+from .. import FlockMode
 
 
 class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mixin, _process_as_leader.Mixin,
@@ -86,7 +86,7 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
 
     def update_current_neighborhood(self):
         lost, new = self.__neighborhood_difference__()
-        if len(lost) > len(new) and self.flock_mode == FlockMode.Flocking:
+        if len(lost) > 0 and len(self.__previous_neighborhood__) == 0 and self.flock_mode == FlockMode.Flocking:
             self.flock_mode = FlockMode.Regrouping
             self.proposed_direction = None
             self.mobility_model.set_mode(MobilityModelMode.Manual)
@@ -136,18 +136,5 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
                 self.mobility_model.current_dir = None
                 return None
         elif self.mobility_model.mode == MobilityModelMode.POI:
-            current_dir = self.mobility_model.current_dir
-            next_dir = self.mobility_model.next_direction(self.coordinates,
-                                                          self.get_blocked_surrounding_locations())
-            if self._flock_member_type == FlockMemberType.leader:
-                if self.proposed_direction != next_dir:
-                    self.proposed_direction = next_dir
-                    self.multicast_leader_message(LeaderMessageType.instruct)
-                if not self.instruct_round:
-                    return None
-                if self.world.get_actual_round() >= self.instruct_round:
-                    next_dir = self.proposed_direction
-                else:
-                    next_dir = current_dir
-            return next_dir
+            return self.mobility_model.next_direction(self.coordinates, self.get_blocked_surrounding_locations())
         return self.mobility_model.next_direction(self.coordinates)

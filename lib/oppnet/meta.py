@@ -28,6 +28,8 @@ def process_event(event_type, message):
     """
     sender = message.sender
     receiver = message.receiver
+    if sender not in sender.world.particles:
+        return
     if event_type == EventType.MessageSent:
         sender.csv_particle_writer.write_particle(messages_sent=1)
         sender.world.csv_round.update_metrics(messages_sent=1)

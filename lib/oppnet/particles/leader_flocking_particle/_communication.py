@@ -45,7 +45,7 @@ class Mixin:
         receivers = self.leader_contacts.keys()
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(receivers), self.world.get_actual_round(),
                                   self.t_wait * 2)
-        multicast_message_content(self, receivers, content)
+        self._send_via_all_contacts__(content, receivers)
 
     def send_direction_proposal(self, proposed_direction=None):
         if proposed_direction is None:
@@ -55,6 +55,7 @@ class Mixin:
         self.__send_proposal_to_leaders__(proposed_direction)
         if len(receiving_leaders) == 0:
             self.multicast_leader_message(LeaderMessageType.propose)
+        self.reset_random_next_direction_proposal_round()
 
     def __send_proposal_to_leaders__(self, proposed_direction):
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(self.leader_contacts.keys()),
@@ -78,25 +79,31 @@ class Mixin:
         multicast_message_content(self, receivers, message_content)
 
     def send_message_content_via_contacts(self, receiver, message_content):
-        if receiver not in self.follower_contacts:
-            receivers = self.__previous_neighborhood__
-        else:
+        if receiver in self.leader_contacts:
+            receivers = self.leader_contacts[receiver].keys()
+        elif receiver in self.follower_contacts:
             receivers = self.follower_contacts[receiver].keys()
+        else:
+            receivers = self.__previous_neighborhood__.keys()
         for contact_particle in receivers:
             send_message(self, contact_particle, Message(self, receiver, content=message_content))
 
     def __flood_forward__(self, received_message):
         received_content = received_message.get_content()
-        instruction_number = received_content.number
-        try:
-            if instruction_number is not None and self.world.get_actual_round() >= self.instruct_round:
-                return
-        except TypeError:
-            pass
+        if isinstance(received_content, LeaderMessageContent):
+            exclude = {received_message.get_sender(), received_message.get_content().sending_leader,
+                       received_message.get_original_sender()}.union(received_content.receivers)
+            try:
+                instruction_number = received_content.number
+                if instruction_number is not None and self.world.get_actual_round() >= self.instruct_round:
+                    return
+            except TypeError:
+                pass
+        else:
+            exclude = {received_message.get_sender(), received_message.get_original_sender()}
         max_hops = self.routing_parameters.scan_radius
         neighbors = self.scan_for_particles_within(hop=max_hops)
-        exclude = {received_message.get_sender(), received_message.get_content().sending_leader,
-                   received_message.get_original_sender()}.union(received_content.receivers)
+
         all_receivers = set(neighbors).difference(exclude)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
@@ -107,9 +114,8 @@ class Mixin:
             received_message.set_content(content)
             for receiver in receivers:
                 send_message(self, receiver, received_message)
-                logging.debug("round {}: opp_particle -> particle {} forwarded {} #{} to {}".format(
-                    self.world.get_actual_round(), self.number, content.message_type.name,
-                    content.number, receiver.number))
+                logging.debug("round {}: opp_particle -> particle {} forwarded to {}".format(
+                    self.world.get_actual_round(), self.number, receiver.number))
 
     def send_to_leader_via_contacts(self, message, receiving_leader=None):
         received_content = message.get_content()
@@ -127,22 +133,23 @@ class Mixin:
                     message.get_sender(),
                     message.get_original_sender()
                 })
-            self._send_via_all_contacts__(received_content, message, receivers)
+            self._send_via_all_contacts__(received_content, receivers)
 
-    def _send_via_all_contacts__(self, message_content, message, receivers):
+    def _send_via_all_contacts__(self, message_content, receivers):
+        message = Message(self, None)
         for leader_particle in receivers:
             for contact in self.leader_contacts.get_leader_contacts(leader_particle):
                 hops = contact.get_hops()
                 if isinstance(message_content, LeaderMessageContent):
                     content = message_content.create_forward_copy(receivers, hops)
-                    message.set_content(content)
                 else:
                     content = message_content
+                message.set_content(content)
                 message.set_actual_receiver(leader_particle)
                 send_message(self, contact.get_contact_particle(), message)
-                logging.debug("round {}: opp_particle -> particle {} forwarded {} to {} via {}".format(
-                    self.world.get_actual_round(), self.number, content.message_type.name,
-                    leader_particle.number, contact.get_contact_particle().number))
+                logging.debug("round {}: opp_particle -> particle {} forwarded to {} via {}".format(
+                    self.world.get_actual_round(), self.number, leader_particle.number,
+                    contact.get_contact_particle().number))
 
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
                                                 message_type: LeaderMessageType,

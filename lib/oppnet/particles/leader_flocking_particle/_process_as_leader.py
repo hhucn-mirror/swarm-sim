@@ -4,6 +4,7 @@ from lib.oppnet.communication import Message, broadcast_message
 from lib.oppnet.message_types import LostMessageType, LeaderMessageType, LostMessageContent, SafeLocationMessageType, \
     SafeLocationMessage, LeaderMessageContent
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
+from lib.oppnet.particles import FlockMode
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
 from lib.swarm_sim_header import get_distance_from_coordinates
 
@@ -54,7 +55,7 @@ class Mixin:
                         distance = get_distance_from_coordinates(self.coordinates, content.coordinates)
                         self.__add_leader_state__(LeaderStateName.CommittedToInstruct, set(),
                                                   self.world.get_actual_round(), distance * 2)
-                        self.broadcast_safe_location(content.coordinates)
+                        self.flood_message_content(content.coordinates)
                         self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI,
                                                               poi=content.coordinates))
                 else:
@@ -109,7 +110,7 @@ class Mixin:
         sending_leader = content.sending_leader
         logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
             self.world.get_actual_round(), self.number, self._instruction_number_, sending_leader.number))
-        self.send_to_leader_via_contacts(message)
+        # self.send_to_leader_via_contacts(message)
         if self.__is__waiting_for_commit__() or self.__is_committed_to_propose__() \
                 or LeaderStateName.SendInstruct in self.__leader_states__:
             return
@@ -147,10 +148,15 @@ class Mixin:
         content = message.get_content()
         if content.message_type == SafeLocationMessageType.TileAdded:
             self.safe_locations.append(content.coordinates)
+            if self.flock_mode != FlockMode.Flocking:
+                self.mobility_model.set_mode(MobilityModelMode.POI)
+                self.mobility_model.poi = content.coordinates
+                self.proposed_direction = self.mobility_model.next_direction(self.coordinates)
         elif content.message_type == SafeLocationMessageType.Proposal and not self.__is_committed_to_instruct__():
             response_content = SafeLocationMessage(content.coordinates, [message.get_original_sender()],
                                                    SafeLocationMessageType.Ack)
-            self.send_message_content_via_contacts(message.get_original_sender(), response_content)
+            self.send_to_leader_via_contacts(Message(self, message.get_original_sender(), content=response_content),
+                                             message.get_original_sender())
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=content.coordinates))
 
     def __quorum_fulfilled__(self):

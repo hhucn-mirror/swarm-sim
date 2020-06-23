@@ -98,7 +98,8 @@ class Particle(matter.Matter):
             self.world.particle_map_coordinates[self.coordinates] = self
             if self.world.vis:
                 self.world.vis.particle_changed(self)
-            logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
+            logging.info("round {}: particle {} successfully moved to {}".format(self.world.get_actual_round(),
+                                                                                 self.number, direction))
             self.world.csv_round.update_metrics(steps=1)
             self.csv_particle_writer.write_particle(steps=1)
             self.check_for_carried_tile_or_particle()

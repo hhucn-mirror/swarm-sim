@@ -17,8 +17,8 @@ class Mixin:
                 message_type = content.message_type
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_follower__(message)
-                elif message_type == LeaderMessageType.discover:
-                    self.send_to_leader_via_contacts(message, content.receivers.pop())
+                # elif message_type == LeaderMessageType.discover:
+                #    self.send_to_leader_via_contacts(message)
                 elif message_type in [LeaderMessageType.discover_ack, LeaderMessageType.commit]:
                     self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
                 else:
@@ -46,9 +46,9 @@ class Mixin:
                                    is_leader=False)
 
     def __process_instruct_as_follower__(self, message: Message):
-        self.__update__instruct_round_as_follower_(message)
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
             self.world.get_actual_round(), self.number, self._instruction_number_))
+        self.__update__instruct_round_as_follower_(message)
         self.__flood_forward__(message)
 
     def __update__instruct_round_as_follower_(self, received_message: Message):
@@ -62,6 +62,7 @@ class Mixin:
             self._instruction_number_ = instruction_number
             self.t_wait = content.t_wait
             self.mobility_model.set_mode(MobilityModelMode.Manual)
+            return True
 
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
@@ -89,6 +90,7 @@ class Mixin:
     def __process_safe_location_message_as_follower(self, message):
         content = message.get_content()
         if self.flock_mode != FlockMode.Flocking or not message.is_broadcast:
+            self.flock_mode = FlockMode.Searching
             self.mobility_model.set_mode(MobilityModelMode.POI)
             self.mobility_model.poi = content.coordinates
             self.proposed_direction = self.mobility_model.next_direction(self.coordinates)

@@ -1,9 +1,8 @@
-import random
 from collections import Counter
 
 import lib.oppnet.particles as particles
 from lib.oppnet.routing import RoutingMap
-from lib.swarm_sim_header import scan_within, free_locations_within_hops, get_distance_from_coordinates
+from lib.swarm_sim_header import free_locations_within_hops, get_distance_from_coordinates
 from . import _communication, _movement, _predator_escape, _process_messages, _routing
 from ...message_types import CardinalDirection
 from ...mobility_model import MobilityModel, MobilityModelMode
@@ -29,9 +28,6 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
         self.relative_flock_location = None
         self.relative_cardinal_location = None
         self.__max_cardinal_direction_hops__ = {}
-
-        self.__detected_predator_ids__ = set()
-        self.safe_locations = [(0, 0, 0)]
         self.flock_mode = particles.FlockMode.Searching
 
     def reset_neighborhood_direction_counter(self):
@@ -39,12 +35,6 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
 
     def reset_max_cardinal_direction_hops(self):
         self.__max_cardinal_direction_hops__ = {}
-
-    def predators_nearby(self):
-        return self.scan_for_predators_within(self.routing_parameters.scan_radius)
-
-    def scan_for_predators_within(self, hop):
-        return scan_within(self.world.predator_map_coordinates, self.coordinates, hop, self.world.grid)
 
     def get_particles_in_cardinal_direction_hop(self, cardinal_direction, hops):
         """
@@ -105,8 +95,7 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
         if len(self.__current_neighborhood__) == 0 and self.flock_mode != particles.FlockMode.Dispersing:
             return self.go_to_safe_location()
         if self.mobility_model.mode == MobilityModelMode.POI:
-            return self.mobility_model.next_direction(self.coordinates,
-                                                      self.get_blocked_surrounding_locations())
+            return self.mobility_model.next_direction(self.coordinates, self.get_blocked_surrounding_locations())
         else:
             mm_next_direction = self.mobility_model.next_direction(self.coordinates)
         if self.flock_mode == particles.FlockMode.QueryingLocation:
@@ -114,20 +103,11 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
         elif self.flock_mode == particles.FlockMode.FoundLocation:
             return self.try_and_fill_flock_holes()
         elif self.flock_mode == particles.FlockMode.Optimising:
-            if mm_next_direction is None:
-                self.flock_mode = particles.FlockMode.Flocking
-                self.mobility_model.current_dir = MobilityModel.random_direction()
-                return None
-            else:
-                self.query_relative_location()
-            return mm_next_direction
+            return self._get_next_direction_optimising(mm_next_direction)
         elif self.flock_mode == particles.FlockMode.Flocking:
             return self.set_most_common_direction()
         elif self.flock_mode == particles.FlockMode.Dispersing:
-            # if the particle stopped moving, try and go to a safe_location
-            if self.mobility_model.mode == MobilityModelMode.Manual:
-                return self.go_to_safe_location()
-            return mm_next_direction
+            return self._get_next_direction_dispersing(mm_next_direction)
         elif self.flock_mode == particles.FlockMode.Searching:
             self.query_relative_location()
             return None
@@ -136,6 +116,21 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
                 self.query_relative_location()
             return mm_next_direction
 
+    def _get_next_direction_dispersing(self, mm_next_direction):
+        # if the particle stopped moving, try and go to a safe_location
+        if self.mobility_model.mode == MobilityModelMode.Manual:
+            return self.go_to_safe_location()
+        return mm_next_direction
+
+    def _get_next_direction_optimising(self, mm_next_direction):
+        if mm_next_direction is None:
+            self.flock_mode = particles.FlockMode.Flocking
+            self.mobility_model.current_dir = MobilityModel.random_direction()
+            return None
+        else:
+            self.query_relative_location()
+        return mm_next_direction
+
     @property
     def current_neighborhood(self):
         return self.__current_neighborhood__
@@ -143,12 +138,3 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _preda
     @property
     def previous_neighborhood(self):
         return self.__previous_neighborhood__
-
-    @staticmethod
-    def __weighted_direction_choice__(preferred_direction, weight_scale=0.5):
-        population = [MobilityModel.NW, MobilityModel.SW, MobilityModel.NE, MobilityModel.SE]
-        if preferred_direction == MobilityModel.W:
-            weights = [0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale, 0.25, 0.25]
-        else:
-            weights = [0.25, 0.25, 0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale]
-        return random.choices(population, weights, k=1)[0]

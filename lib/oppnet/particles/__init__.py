@@ -1,10 +1,12 @@
 import logging
+import random
 
 import lib.particle
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from ._helper_classes import *
 from ..point import Point
+from ...swarm_sim_header import scan_within
 
 
 class Particle(lib.particle.Particle):
@@ -38,6 +40,8 @@ class Particle(lib.particle.Particle):
         self.signal_velocity = world.config_data.signal_velocity
         self.signal_range = world.config_data.signal_range
         self.flock_mode = None
+        self.__detected_predator_ids__ = set()
+        self.safe_locations = [(0, 0, 0)]
 
     def _init_message_stores__(self, ms_size, ms_strategy):
         """
@@ -75,6 +79,21 @@ class Particle(lib.particle.Particle):
     def set_flock_mode(self, flock_mode):
         self.flock_mode = flock_mode
 
+    def scan_for_predators_within(self, hop):
+        return scan_within(self.world.predator_map_coordinates, self.coordinates, hop, self.world.grid)
+
+    def predators_nearby(self):
+        return self.scan_for_predators_within(self.routing_parameters.scan_radius)
+
     def move_to(self, direction):
         super().move_to(direction)
         self.mobility_model.update_history(self.coordinates)
+
+    @staticmethod
+    def __weighted_direction_choice__(preferred_direction, weight_scale=0.5):
+        population = [MobilityModel.NW, MobilityModel.SW, MobilityModel.NE, MobilityModel.SE]
+        if preferred_direction == MobilityModel.W:
+            weights = [0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale, 0.25, 0.25]
+        else:
+            weights = [0.25, 0.25, 0.25 * 1 + weight_scale, 0.25 * 1 + weight_scale]
+        return random.choices(population, weights, k=1)[0]

@@ -11,13 +11,15 @@ class LeaderMessageType(Enum):
 
 class LeaderMessageContent:
 
-    def __init__(self, sending_leader, proposed_direction, receivers, t_wait, message_type, number):
+    def __init__(self, sending_leader, proposed_direction, receivers, t_wait, message_type, number,
+                 instruct_override=False):
         self.__number__ = number
         self.__sending_leader__ = sending_leader
         self.__proposed__direction = proposed_direction
         self.__receivers__ = receivers
         self.__t_wait__ = t_wait
         self._message_type = message_type
+        self._instruct_override = instruct_override
 
     @property
     def sending_leader(self):
@@ -42,6 +44,10 @@ class LeaderMessageContent:
     @property
     def number(self):
         return self.__number__
+
+    @property
+    def instruct_override(self):
+        return self._instruct_override
 
     def create_forward_copy(self, new_receivers, t_wait_decrement=1):
         new_t_wait = self.t_wait - t_wait_decrement

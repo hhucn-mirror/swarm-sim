@@ -115,6 +115,7 @@ class Memory:
         for receiver in receivers:
             message.set_receiver(receiver)
             message.set_actual_receiver(receiver)
+            message.is_broadcast = True
             store_message(message, message.get_sender(), receiver)
 
     @staticmethod
