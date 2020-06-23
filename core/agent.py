@@ -1,5 +1,5 @@
 # Funktionen am Ende
-# Variablen gegangener Weg, rueckweg, gesetzte Location
+# Variablen gegangener Weg, wayback, gesetzte Location
 # Weg wird in der move Funktion gespeichert
 
 """
@@ -30,9 +30,9 @@ class Agent(matter.Matter):
         self.carried_agent = None
         self.steps = 0
 
-        self.gegangenerWeg = []
-        self.rueckweg = []
-        self.gesetzteLocation = []
+        self.walkedPath = []
+        self.wayback = []
+        self.setLocation = []
 
         csv_generator_module = importlib.import_module('components.generators.csv.%s' % world.config_data.csv_generator)
         self.csv_agent_writer = csv_generator_module.CsvAgentData(self.get_id(), self.number)
@@ -100,7 +100,7 @@ class Agent(matter.Matter):
             self.world.csv_round.update_metrics(steps=1)
             self.csv_agent_writer.write_agent(steps=1)
             self.check_for_carried_matter()
-            self.gegangenerWeg.append(direction)
+            self.walkedPath.append(direction)
             return True
 
         return False
@@ -1037,32 +1037,32 @@ class Agent(matter.Matter):
         if self.world.vis is not None:
             self.world.vis.agent_changed(self)
 
-    def set_gegangenerWeg(self, gegangenerWeg):
-        self.gegangenerWeg = gegangenerWeg
+    def set_walkedPath(self, walkedPath):
+        self.walkedPath = walkedPath
 
-    def get_gegangenerWeg(self):
+    def get_walkedPath(self):
 
-        return self.gegangenerWeg
+        return self.walkedPath
 
-    def get_rueckweg(self, gegangenerWeg):
-        WegReverse = gegangenerWeg.copy()
-        WegReverse.reverse()
-        rueckweg = []
-        for richtung in WegReverse:
+    def get_wayback(self, walkedPath):
+        pathReverse = walkedPath.copy()
+        pathReverse.reverse()
+        wayback = []
+        for richtung in pathReverse:
             if richtung == (1, 0, 0):
-                rueckweg.append((-1, 0, 0))
+                wayback.append((-1, 0, 0))
             elif richtung == (0.5, -1, 0):
-                rueckweg.append((-0.5, 1, 0))
+                wayback.append((-0.5, 1, 0))
             elif richtung == (-0.5, -1, 0):
-                rueckweg.append((0.5, 1, 0))
+                wayback.append((0.5, 1, 0))
             elif richtung == (-1, 0, 0):
-                rueckweg.append((1, 0, 0))
+                wayback.append((1, 0, 0))
             elif richtung == (-0.5, 1, 0):
-                rueckweg.append((0.5, -1, 0))
+                wayback.append((0.5, -1, 0))
             else:
-                rueckweg.append((-0.5, -1, 0))
+                wayback.append((-0.5, -1, 0))
 
-        return rueckweg
+        return wayback
 
-    def get_gesetzteLocation(self):
-        return self.gesetzteLocation
+    def get_setLocation(self):
+        return self.setLocation

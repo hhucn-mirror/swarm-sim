@@ -620,8 +620,8 @@ class World:
         else:
             return False
 
-    def check_count(self, kachelanzahl):
-        if kachelanzahl == len(self.items):
+    def check_count(self, numberoftiles):
+        if numberoftiles == len(self.items):
             self.csv_round.update_metrics(check_count=1)
             return True
         else:
@@ -629,37 +629,37 @@ class World:
             return False
 
     def check_formation(self):
-        kachelanzahl = len(self.items)
-        z_raute = math.sqrt(kachelanzahl)
-        z_dreieck = -0.5 + math.sqrt(0.25 + 2 * kachelanzahl)
-        z_hexagon = 0.5 + math.sqrt(0.25 - ((1 - kachelanzahl) / 3))
+        numberoftiles = len(self.items)
+        s_rhombus = math.sqrt(numberoftiles)
+        s_triangle = -0.5 + math.sqrt(0.25 + 2 * numberoftiles)
+        z_hexagon = 0.5 + math.sqrt(0.25 - ((1 - numberoftiles) / 3))
 
-        objekt = []
+        object = []
 
-        if z_dreieck.is_integer():
-            # Koordinaten des Dreiecks:
+        if s_triangle.is_integer():
+            # Coordinates of the triangle:
             x = 0
             y = 0
             z = 0
-            z_dreieck2 = z_dreieck
-            while y < z_dreieck:
-                while x < z_dreieck2 + z:
-                    objekt.append((x, y, 0))
+            s_triangle2 = s_triangle
+            while y < s_triangle:
+                while x < s_triangle2 + z:
+                    object.append((x, y, 0))
                     x = x + 1
 
                 y = y + 1
                 z = z + 0.5
                 x = z
-                z_dreieck2 = z_dreieck2 - 1
+                s_triangle2 = s_triangle2 - 1
 
-        elif z_raute.is_integer():
-            # Koordinaten der Raute:
+        elif s_rhombus.is_integer():
+            # Coordinates of the rhombus:
             x = 0
             y = 0
             z = 0
-            while y < z_raute:
-                while x < z_raute + z:
-                    objekt.append((x, y, 0))
+            while y < s_rhombus:
+                while x < s_rhombus + z:
+                    object.append((x, y, 0))
                     x = x + 1
 
                 y = y + 1
@@ -667,19 +667,19 @@ class World:
                 x = z
 
         elif z_hexagon.is_integer():
-            # Koordinaten des Hexagons:
+            # Coordinates of the hexagon:
             x = 0.5
             y = 1
             z1 = 1
             z2 = 1
             z3 = 1
 
-            objekt.append((0, 0, 0))
+            object.append((0, 0, 0))
 
             while z1 < z_hexagon:
                 if z2 == 1:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x + 0.5
                         y = y - 1
                         z3 = z3 + 1
@@ -687,7 +687,7 @@ class World:
                     z3 = 1
                 if z2 == 2:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x - 0.5
                         y = y - 1
                         z3 = z3 + 1
@@ -695,14 +695,14 @@ class World:
                     z3 = 1
                 if z2 == 3:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x - 1
                         z3 = z3 + 1
                     z2 = 4
                     z3 = 1
                 if z2 == 4:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x - 0.5
                         y = y + 1
                         z3 = z3 + 1
@@ -710,7 +710,7 @@ class World:
                     z3 = 1
                 if z2 == 5:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x + 0.5
                         y = y + 1
                         z3 = z3 + 1
@@ -718,7 +718,7 @@ class World:
                     z3 = 1
                 if z2 == 6:
                     while z3 <= z1:
-                        objekt.append((x, y, 0))
+                        object.append((x, y, 0))
                         x = x + 1
                         z3 = z3 + 1
                     z2 = 1
@@ -728,23 +728,23 @@ class World:
                 y = y + 1
 
         else:
-            # Koordinaten der Linie:
+            # Coordinates of the line:
             x = 0
             y = 0
             z = 0
 
-            while z < kachelanzahl:
-                objekt.append((x, y, 0))
+            while z < numberoftiles:
+                object.append((x, y, 0))
                 x = x + 0.5
                 y = y + 1
                 z = z + 1
 
         i = 0
-        for item in objekt:
+        for item in object:
             if item in self.item_map_coordinates:
                 i = i + 1
 
-        if i == kachelanzahl:
+        if i == numberoftiles:
             self.csv_round.update_metrics(check_formation=1)
             return True
         else:

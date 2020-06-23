@@ -92,39 +92,37 @@ def solution(sim):
 ############################# methods of phases ###############################################################
 
 def startCounting(sim, particle):
-    moegricht = possibleDirections(sim, particle)
+    possible_directions = possibleDirections(sim, particle)
 
     if particle.number == 3:
-        print(moegricht)
+        print(possible_directions)
 
-    if not moegricht:
+    if not possible_directions:
         particle.phase = phase_backtracking
     else:
-        rand = random.choice(moegricht)
-        if particle.number == 3:
-            print("rand: ", rand)
-        print(particle.move_to(rand))
+        rand = random.choice(possible_directions)
+        particle.move_to(rand)
         particle.create_location()
         particle.write_to_with(sim.get_item_map_coordinates()[particle.coordinates], "tile", "counted")
         particle.countedTiles.append(particle.coordinates)
 
 def backtracking(sim, particle):
-    gegangenerWeg = particle.get_gegangenerWeg()
-    #print(gegangenerWeg)
+    walkedPath = particle.get_walkedPath()
+    #print(walkedPath)
 
-    if not gegangenerWeg:
+    if not walkedPath:
         particle.phase = phase_startCounting
-        moegricht = possibleDirections(sim, particle)
+        possible_directions = possibleDirections(sim, particle)
 
-        if not moegricht:
+        if not possible_directions:
             particle.phase = phase_countingFinished
 
     else:
-        rueckweg = particle.get_rueckweg(gegangenerWeg)
-        particle.move_to(rueckweg[0])
-        gegangenerWeg.pop()
-        gegangenerWeg.pop()
-        particle.set_gegangenerWeg(gegangenerWeg)
+        wayback = particle.get_wayback(walkedPath)
+        particle.move_to(wayback[0])
+        walkedPath.pop()
+        walkedPath.pop()
+        particle.set_walkedPath(walkedPath)
         particle.phase = phase_startCounting
 
 def countupObjects(sim, particle):
@@ -137,12 +135,12 @@ def countupObjects(sim, particle):
         else:
             print("Count unsuccessful")
 
-        objekt = objectcoordinates(particle)
+        object = objectcoordinates(particle)
         i = 0
         j = 10000
         while i < particle.numberoftiles:
-            particle.write_to_with(sim.get_agent_list()[0], j, objekt[i])
-            #print(j, objekt[i], sep=":")
+            particle.write_to_with(sim.get_agent_list()[0], j, object[i])
+            #print(j, object[i], sep=":")
             i = i + 1
             j = j + 1
         particle.write_to_with(sim.get_agent_list()[0], j, "end")
@@ -278,15 +276,15 @@ def end(sim, particle):
 ################################### other methods ##########################################################
 
 def possibleDirections(sim, particle):
-    richtungen = [move_east, move_southwest, move_southeast, move_west, move_northeast, move_northwest]
-    moegricht = []
-    for richtung in richtungen:
+    directions = [move_east, move_southwest, move_southeast, move_west, move_northeast, move_northwest]
+    possible_directions = []
+    for richtung in directions:
         if not particle.agent_in(richtung) and particle.item_in(richtung) and not particle.read_from_with(
                 sim.get_item_map_coordinates()[get_coordinates_in_direction(particle.coordinates, richtung)],
                 "tile") == "counted":
-            moegricht.append(richtung)
+            possible_directions.append(richtung)
 
-    return moegricht
+    return possible_directions
 
 
 def waitingforparticles(sim, waitphase, continuationphase):
@@ -306,7 +304,7 @@ def objectcoordinates(particle):
     s_triangle = -0.5 + math.sqrt(0.25 + 2 * particle.numberoftiles)
     s_hexagon = 0.5 + math.sqrt(0.25 - ((1 - particle.numberoftiles) / 3))
 
-    objekt = []
+    object = []
 
     if s_triangle.is_integer():
         # Koordinaten des Dreiecks:
@@ -316,7 +314,7 @@ def objectcoordinates(particle):
         s_triangle2 = s_triangle
         while y < s_triangle:
             while x < s_triangle2 + z:
-                objekt.append((x, y, 0))
+                object.append((x, y, 0))
                 x = x + 1
 
             y = y + 1
@@ -331,7 +329,7 @@ def objectcoordinates(particle):
         z = 0
         while y < s_rhombus:
             while x < s_rhombus + z:
-                objekt.append((x, y, 0))
+                object.append((x, y, 0))
                 x = x + 1
 
             y = y + 1
@@ -345,13 +343,13 @@ def objectcoordinates(particle):
         i = 1
         phase = 1
 
-        objekt.append((0, 0, 0))
+        object.append((0, 0, 0))
 
         while i < s_hexagon:
             j = 1
             while j <= i:
                 if not phase == 7:
-                    objekt.append((x, y, 0))
+                    object.append((x, y, 0))
                 if phase == 1:
                     x = x + 0.5
                     y = y - 1
@@ -384,12 +382,12 @@ def objectcoordinates(particle):
         z = 0
 
         while z < particle.numberoftiles:
-            objekt.append((x, y, 0))
+            object.append((x, y, 0))
             x = x + 0.5
             y = y + 1
             z = z + 1
 
-    return objekt
+    return object
 
 
 def countuptiles(sim, particle):
@@ -407,45 +405,45 @@ def countuptiles(sim, particle):
 
 
 def movetocoordinate(particle, aktPos, coordinate):
-    richtungen = [move_northeast, move_east, move_southeast, move_northwest, move_west, move_southwest]
+    directions = [move_northeast, move_east, move_southeast, move_northwest, move_west, move_southwest]
     if aktPos[0] <= coordinate[0] and aktPos[1] < coordinate[1]:
         if particle.agent_in(move_northeast):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_northeast)
 
     elif aktPos[0] >= coordinate[0] and aktPos[1] < coordinate[1]:
         if particle.agent_in(move_northwest):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_northwest)
 
     elif aktPos[0] <= coordinate[0] and aktPos[1] > coordinate[1]:
         if particle.agent_in(move_southeast):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_southeast)
 
     elif aktPos[0] >= coordinate[0] and aktPos[1] > coordinate[1]:
         if particle.agent_in(move_southwest):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_southwest)
 
     elif aktPos[0] > coordinate[0]:
         if particle.agent_in(move_west):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_west)
 
     elif aktPos[0] < coordinate[0]:
         if particle.agent_in(move_east):
-            particle.move_to(random.choice(richtungen))
+            particle.move_to(random.choice(directions))
 
         else:
             particle.move_to(move_east)
