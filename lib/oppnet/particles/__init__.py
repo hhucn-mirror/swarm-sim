@@ -5,11 +5,12 @@ import lib.particle
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel
 from ._helper_classes import *
+from ._predator_escape import Mixin
 from ..point import Point
 from ...swarm_sim_header import scan_within
 
 
-class Particle(lib.particle.Particle):
+class Particle(lib.particle.Particle, Mixin):
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, ms_size=None,
                  ms_strategy=None, mm_mode=None, mm_length=None, mm_zone=None, mm_starting_dir=None,
                  ):
@@ -83,7 +84,7 @@ class Particle(lib.particle.Particle):
         return scan_within(self.world.predator_map_coordinates, self.coordinates, hop, self.world.grid)
 
     def predators_nearby(self):
-        return self.scan_for_predators_within(self.routing_parameters.scan_radius)
+        return self.scan_for_predators_within(self.routing_parameters.scan_radius * 3)
 
     def move_to(self, direction):
         super().move_to(direction)

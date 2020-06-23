@@ -9,7 +9,7 @@ from lib.particle import Particle
 
 
 class Mixin:
-    def multicast_leader_message(self, message_type: LeaderMessageType, neighbors=None):
+    def multicast_leader_message(self, message_type: LeaderMessageType, neighbors=None, instruct_override=False):
         max_hops = self.routing_parameters.scan_radius
         if not neighbors:
             neighbors = self.scan_for_particles_within(hop=max_hops)
@@ -23,7 +23,7 @@ class Mixin:
             number = self._instruction_number_ if self._instruction_number_ is not None \
                 else self.world.get_actual_round()
             content = LeaderMessageContent(self, self.proposed_direction, neighbors, self.t_wait - hop,
-                                           message_type, number)
+                                           message_type, number, instruct_override)
             multicast_message_content(self, receivers, content)
 
     def broadcast_safe_location(self, safe_location=None):
@@ -172,11 +172,11 @@ class Mixin:
                                            self._instruction_number_)
             send_message(self, contact.get_contact_particle(), Message(self, receiving_leader, content=content))
 
-    def __multicast_instruct__(self):
-        self.reset_random_next_direction_proposal_round()
-        self.multicast_leader_message(LeaderMessageType.instruct)
+    def __multicast_instruct__(self, instruct_override=False):
+        self.multicast_leader_message(LeaderMessageType.instruct, instruct_override=instruct_override)
         self.__add_leader_state__(LeaderStateName.SendInstruct, set(), self.world.get_actual_round(),
                                   self.t_wait * 2)
+        self.reset_random_next_direction_proposal_round()
         logging.debug("round {}: opp_particle -> particle {} broadcast instruct # {}".format(
             self.world.get_actual_round(),
             self.number,

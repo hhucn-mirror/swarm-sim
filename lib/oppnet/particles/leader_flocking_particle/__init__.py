@@ -9,12 +9,12 @@ from lib.oppnet.communication import Message, broadcast_message
 from lib.oppnet.message_types import LostMessageContent, LostMessageType
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.routing import RoutingMap
-from . import _leader_states, _process_as_follower, _process_as_leader, _communication, _routing
+from . import _leader_states, _process_as_follower, _process_as_leader, _communication, _routing, _predator_escape
 from .. import FlockMode
 
 
 class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mixin, _process_as_leader.Mixin,
-               _communication.Mixin, _routing.Mixin):
+               _communication.Mixin, _routing.Mixin, _predator_escape.Mixin):
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, ms_size=None,
                  ms_strategy=None, mm_mode=None, mm_length=None, mm_zone=None, mm_starting_dir=None,
                  t_wait=0):

@@ -2,7 +2,7 @@ import logging
 
 from lib.oppnet.communication import Message, broadcast_message
 from lib.oppnet.message_types import LostMessageType, LeaderMessageType, LostMessageContent, SafeLocationMessageType, \
-    SafeLocationMessage, LeaderMessageContent
+    SafeLocationMessage, LeaderMessageContent, PredatorSignal
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.particles import FlockMode
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
@@ -26,6 +26,8 @@ class Mixin:
                 self.__process_lost_message_as_leader__(message)
             elif isinstance(content, SafeLocationMessage):
                 self.__process_safe_location_message_as_leader(message)
+            elif isinstance(content, PredatorSignal):
+                self.__process_predator_signal_message_as_leader(message)
 
     def __process_commit_and_ack__(self, received_messages: [Message]):
         remaining = []
@@ -69,8 +71,10 @@ class Mixin:
     def __process_instruct_as_leader__(self, message: Message):
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
             self.world.get_actual_round(), self.number, message.get_content().number))
-        if not self.__is_committed_to_instruct__() and self.__update__instruct_round_as_leader__(message):
-            sending_leader = message.get_content().sending_leader
+        content = message.get_content()
+        if (not self.__is_committed_to_instruct__() and self._is_new_instruct(message)) or content.instruct_override:
+            self.__update__instruct_round_as_leader__(message)
+            sending_leader = content.sending_leader
             self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader},
                                       self.world.get_actual_round(), message.get_hops() * 2)
             self.reset_random_next_direction_proposal_round()
@@ -159,6 +163,14 @@ class Mixin:
                                              message.get_original_sender())
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=content.coordinates))
 
+    def __process_predator_signal_message_as_leader(self, message):
+        content = message.get_content()
+        for predator_coordinates in content.predator_coordinates:
+            self.mobility_model.current_dir = self.__update_predator_escape_direction(predator_coordinates)
+        self.__detected_predator_ids__.update(content.predator_ids)
+        self.proposed_direction = self.mobility_model.current_dir
+        self.__multicast_instruct__(instruct_override=True)
+
     def __quorum_fulfilled__(self):
         if self.__is__waiting_for_commit__():
             waiting_count = self.__leader_states__[LeaderStateName.WaitingForCommits].waiting_count()
@@ -169,12 +181,13 @@ class Mixin:
 
     def __update__instruct_round_as_leader__(self, received_message: Message):
         instruct_round = self.world.get_actual_round() + received_message.get_content().t_wait
-        instruction_number = received_message.get_content().number
-        if self._instruction_number_ and self.instruct_round \
-                and self._instruction_number_ == instruction_number \
-                and self.instruct_round >= instruct_round:
-            return False
         self.instruct_round = instruct_round
         self.proposed_direction = received_message.get_content().proposed_direction
         self._current_instruct_message = received_message
-        return True
+
+    def _is_new_instruct(self, received_message):
+        instruct_round = self.world.get_actual_round() + received_message.get_content().t_wait
+        instruction_number = received_message.get_content().number
+        return not (self._instruction_number_ and self.instruct_round
+                    and self._instruction_number_ == instruction_number
+                    and self.instruct_round >= instruct_round)

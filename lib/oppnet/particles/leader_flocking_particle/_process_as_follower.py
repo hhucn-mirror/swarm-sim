@@ -3,7 +3,7 @@ import logging
 
 from lib.oppnet.communication import Message
 from lib.oppnet.message_types import LeaderMessageType, LeaderMessageContent, SafeLocationMessage, LostMessageContent, \
-    LostMessageType
+    LostMessageType, PredatorSignal
 from lib.oppnet.mobility_model import MobilityModelMode, MobilityModel
 from lib.oppnet.particles import FlockMode
 
@@ -27,6 +27,8 @@ class Mixin:
                 self.__process_lost_message_as_follower__(message)
             elif isinstance(content, SafeLocationMessage):
                 self.__process_safe_location_message_as_follower(message)
+            elif isinstance(content, PredatorSignal):
+                self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __add__new_contacts_as_follower__(self, received_messages):
         for message in received_messages:
@@ -48,21 +50,24 @@ class Mixin:
     def __process_instruct_as_follower__(self, message: Message):
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
             self.world.get_actual_round(), self.number, self._instruction_number_))
-        self.__update__instruct_round_as_follower_(message)
-        self.__flood_forward__(message)
+        message_content = message.get_content()
+        if self._is_new_instruct_as_follower_(message_content) or message_content.instruct_override:
+            self.__update__instruct_round_as_follower_(message)
+            self.__flood_forward__(message)
 
     def __update__instruct_round_as_follower_(self, received_message: Message):
         content = received_message.get_content()
         new_instruction_round = self.world.get_actual_round() + content.t_wait
         instruction_number = content.number
-        if self._instruction_number_ is None or (instruction_number > self._instruction_number_):
-            self.instruct_round = new_instruction_round
-            self.proposed_direction = content.proposed_direction
-            self._current_instruct_message = received_message
-            self._instruction_number_ = instruction_number
-            self.t_wait = content.t_wait
-            self.mobility_model.set_mode(MobilityModelMode.Manual)
-            return True
+        self.instruct_round = new_instruction_round
+        self.proposed_direction = content.proposed_direction
+        self._current_instruct_message = received_message
+        self._instruction_number_ = instruction_number
+        self.t_wait = content.t_wait
+        self.mobility_model.set_mode(MobilityModelMode.Manual)
+
+    def _is_new_instruct_as_follower_(self, message_content):
+        return self._instruction_number_ is None or (message_content.number > self._instruction_number_)
 
     def __process_lost_message_as_follower__(self, message: Message):
         content = message.get_content()
