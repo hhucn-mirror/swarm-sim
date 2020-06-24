@@ -1,5 +1,3 @@
-from math import copysign
-
 from lib.oppnet.particles import Particle
 from lib.oppnet.point import Point
 
@@ -25,13 +23,13 @@ def optimal_flock_distance(flock_radius):
     """
     optimal_distance = 0
     for flock_radius_in in range(0, flock_radius + 1):
-        optimal_distance += optimal_flock_in_in_distance(flock_radius_in)
+        optimal_distance += optimal_flock_in_distance(flock_radius_in)
         for flock_radius_out in [radius for radius in range(0, flock_radius) if radius != flock_radius_in]:
             optimal_distance += optimal_flock_in_out_distance(flock_radius_in, flock_radius_out)
     return optimal_distance
 
 
-def optimal_flock_in_in_distance(flock_radius):
+def optimal_flock_in_distance(flock_radius):
     """
     Calculates the all pairs distance sum between particles in a hexagon ring with radius :param flock_radius.
     :param flock_radius: the radius of the hexagon ring
@@ -74,17 +72,4 @@ def get_distance_from_points(position1: Point, position2: Point):
     else:
         return y_diff
 
-
-def get_direction_between_coordinates(coordinates1, coordinates2):
-    x_diff, y_diff = coordinates1[0] - coordinates2[0], coordinates1[1] - coordinates2[1]
-    # north
-    if y_diff != 0:
-        y_diff = copysign(1, y_diff)
-    else:
-        y_diff = 0
-    if x_diff != 0:
-        x_diff = copysign(1 - (abs(y_diff) * 0.5), x_diff)
-    else:
-        x_diff = 0
-    return x_diff, y_diff, 0
 

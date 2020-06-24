@@ -86,7 +86,7 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
 
     def update_current_neighborhood(self):
         lost, new = self.__neighborhood_difference__()
-        if len(lost) > 0 and len(self.__previous_neighborhood__) == 0 and self.flock_mode == FlockMode.Flocking:
+        if len(lost) > len(new) and self.flock_mode == FlockMode.Flocking:
             self.flock_mode = FlockMode.Regrouping
             self.proposed_direction = None
             self.mobility_model.set_mode(MobilityModelMode.Manual)
@@ -101,8 +101,6 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         lost_neighbors = self.__previous_neighborhood__.difference(neighborhood)
         new_neighbors = neighborhood.difference(self.__previous_neighborhood__)
         self.__previous_neighborhood__ = neighborhood
-        if self.__previous_neighborhood__ is not None and self.flock_mode == FlockMode.Searching:
-            self.set_flock_mode(FlockMode.Flocking)
         return lost_neighbors, new_neighbors
 
     def __get_estimate_centre_from_leader_contacts__(self):

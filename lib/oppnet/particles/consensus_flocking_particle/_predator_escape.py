@@ -26,15 +26,16 @@ class Mixin:
             self.flock_mode = FlockMode.Dispersing
             self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
         if not predator_ids.issubset(self.__detected_predator_ids__):
-            predator_coordinates = set()
+            predator_coordinates = {}
             # take all predators into account
             for predator in predators:
-                self.mobility_model.current_dir = self.__update_predator_escape_direction(predator.coordinates)
+                new_escape_direction = self.__update_predator_escape_direction(predator.coordinates)
+                self.mobility_model.current_dir = new_escape_direction
                 if predator.get_id() not in self.__detected_predator_ids__:
-                    predator_coordinates.add(predator.coordinates)
+                    predator_coordinates[predator.get_id()] = predator.coordinates
                 else:
                     predator_ids.remove(predator.get_id())
             multicast_message_content(self, self.current_neighborhood.keys(),
-                                      PredatorSignal(predator_ids, predator_coordinates))
+                                      PredatorSignal(predator_coordinates))
             self.__detected_predator_ids__ = new_predator_ids
         return self.mobility_model.next_direction(self.coordinates)

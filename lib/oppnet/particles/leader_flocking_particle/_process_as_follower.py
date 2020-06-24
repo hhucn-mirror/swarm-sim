@@ -94,8 +94,12 @@ class Mixin:
 
     def __process_safe_location_message_as_follower(self, message):
         content = message.get_content()
-        if self.flock_mode != FlockMode.Flocking or not message.is_broadcast:
+        sender_is_leader = message.get_original_sender() in self.leader_contacts
+        if self.flock_mode != FlockMode.Flocking or not message.is_broadcast or sender_is_leader:
             self.flock_mode = FlockMode.Searching
             self.mobility_model.set_mode(MobilityModelMode.POI)
             self.mobility_model.poi = content.coordinates
             self.proposed_direction = self.mobility_model.next_direction(self.coordinates)
+        else:
+            logging.debug("round {}: particle {} ignored SafeLocationMessage from {}"
+                          .format(self.world.get_actual_round(), self.number, message.get_original_sender().number))

@@ -15,6 +15,8 @@ class Mixin:
             neighbors = self.scan_for_particles_within(hop=max_hops)
 
         if message_type == LeaderMessageType.instruct:
+            if self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin):
+                return
             self.instruct_round = self.t_wait + self.world.get_actual_round()
             self._instruction_number_ = self.world.get_actual_round()
 
@@ -31,9 +33,10 @@ class Mixin:
             safe_location = self._get_a_safe_location()
         message = Message(self, None, content=SafeLocationMessage(safe_location))
         broadcast_message(self, message)
+        return safe_location
 
     def _get_a_safe_location(self):
-        if not self.safe_locations:
+        if not self.safe_locations or not self.__previous_neighborhood__:
             return self.coordinates
         else:
             return random.choice(self.safe_locations)
@@ -119,7 +122,7 @@ class Mixin:
 
     def send_to_leader_via_contacts(self, message, receiving_leader=None):
         received_content = message.get_content()
-        if receiving_leader and receiving_leader not in self.leader_contacts:
+        if not receiving_leader or (receiving_leader and receiving_leader not in self.leader_contacts):
             self.__flood_forward__(message)
         else:
             if receiving_leader:
@@ -150,6 +153,7 @@ class Mixin:
                 logging.debug("round {}: opp_particle -> particle {} forwarded to {} via {}".format(
                     self.world.get_actual_round(), self.number, leader_particle.number,
                     contact.get_contact_particle().number))
+        self.send_store.remove(message)
 
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
                                                 message_type: LeaderMessageType,

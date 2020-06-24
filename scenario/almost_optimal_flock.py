@@ -11,7 +11,7 @@ def scenario(world: World):
     else:
         particle_color = world.config_data.particle_color
 
-    for _ in range(0, 2):
+    for _ in range(0, 1):
         centre = ((_ - 1) * radius * 2 + 20, 0)
         hexagon = get_hexagon_coordinates(centre, radius)
         # remove a percentage of particles from the optimal flock

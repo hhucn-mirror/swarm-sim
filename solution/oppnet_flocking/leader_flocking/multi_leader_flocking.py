@@ -3,6 +3,7 @@ import random
 
 from lib.oppnet import routing
 from lib.oppnet.message_types import LeaderMessageType
+from lib.oppnet.mobility_model import MobilityModelMode
 from lib.oppnet.particles import FlockMemberType
 from lib.swarm_sim_header import red
 
@@ -24,12 +25,28 @@ def solution(world):
         check_neighborhoods(particles)
         routing.next_step(particles)
         update_particle_states(particles)
+        if current_round % 10 == 0:
+            create_random_predator(world)
         if current_round == 5:
             print_all_routes(particles, current_round)
         if current_round > t_wait * 3 + 1:
             move_to_next_direction(particles)
-        move_to_next_direction(particles)
+            predators_chase(world.get_predators_list())
         send_direction_proposals(current_round)
+        detect_predators(particles)
+
+
+def create_random_predator(world):
+    leader = random.choice(leaders)
+    x, y, z = leader.coordinates
+    world.add_predator((x + 5, y, z))
+
+
+def detect_predators(particles):
+    for particle in particles:
+        predators_nearby = particle.predators_nearby()
+        if predators_nearby:
+            return particle.__predators_detected__(predators_nearby)
 
 
 def print_all_routes(particles, current_round):
@@ -90,6 +107,14 @@ def move_to_next_direction(particles):
     for particle in particles:
         next_direction = particle.next_moving_direction()
         if next_direction:
-            particle_directions[particle] = next_direction
+            if particle.mobility_model.mode == MobilityModelMode.POI:
+                particle.move_to(next_direction)
+            else:
+                particle_directions[particle] = next_direction
     if particle_directions:
         particles[0].world.move_particles(particle_directions)
+
+
+def predators_chase(predators):
+    for predator in predators:
+        predator.chase()

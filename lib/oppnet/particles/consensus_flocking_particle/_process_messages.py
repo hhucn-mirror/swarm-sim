@@ -5,7 +5,7 @@ from lib.oppnet.message_types import DirectionMessageContent, RelativeLocationMe
     SafeLocationMessage
 from lib.oppnet.mobility_model import MobilityModelMode
 from lib.oppnet.particles import FlockMode
-from lib.oppnet.util import get_direction_between_coordinates
+from lib.swarm_sim_header import get_direction_between_coordinates
 
 
 class Mixin:
@@ -81,10 +81,11 @@ class Mixin:
         :param content: the content of the message
         :type content: PredatorSignal
         """
-        if self.__detected_predator_ids__ and self.__detected_predator_ids__.issuperset(content.predator_ids):
+        predator_ids = set(content.predator_coordinates.keys())
+        if self.__detected_predator_ids__ and self.__detected_predator_ids__.issuperset(predator_ids):
             return
-        self.__detected_predator_ids__.update(content.predator_ids)
-        escape_direction = self.__extract_escape_direction__(content.predator_coordinates, message)
+        self.__detected_predator_ids__.update(predator_ids)
+        escape_direction = self.__extract_escape_direction__(content.predator_coordinates.values(), message)
         self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
         self.mobility_model.current_dir = escape_direction
         self.set_flock_mode(FlockMode.Dispersing)

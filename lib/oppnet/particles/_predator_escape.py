@@ -1,10 +1,9 @@
 import logging
 import random
 
-import numpy as np
-
 from lib.oppnet.message_types import CardinalDirection
 from lib.oppnet.mobility_model import MobilityModel
+from lib.swarm_sim_header import get_direction_between_coordinates
 
 
 class Mixin:
@@ -18,8 +17,12 @@ class Mixin:
         :return: an updated escape direction
         """
         current_escape_direction = self.mobility_model.current_dir
-        new_escape_direction = self.__get_predator_escape_direction(predator_coordinates, use_cardinal_location,
-                                                                    use_relative_location)
+        if use_relative_location:
+            new_escape_direction = self.__get_relative_predator_escape_direction(predator_coordinates,
+                                                                                 use_cardinal_location)
+        else:
+            new_escape_direction = self.__get_absolute_predator_escape_direction(predator_coordinates)
+
         if not current_escape_direction:
             return new_escape_direction
         if current_escape_direction == new_escape_direction:
@@ -46,8 +49,7 @@ class Mixin:
         else:
             return MobilityModel.random_direction(exclude=[current_escape_direction, new_escape_direction])
 
-    def __get_predator_escape_direction(self, predator_coordinates, use_cardinal_location=False,
-                                        use_relative_location=True):
+    def __get_relative_predator_escape_direction(self, predator_coordinates, use_cardinal_location=False):
         """
         Returns a escape direction from a Predator approaching from :param approaching_direction. This will
         be close to a 180 degree angle from the approaching_direction.
@@ -60,23 +62,18 @@ class Mixin:
         :return: escape direction
         :rtype: tuple
         """
-
-        approaching_direction = CardinalDirection.get_direction_between_locations(predator_coordinates,
-                                                                                  self.coordinates)
+        location = self.relative_location
         if not use_cardinal_location:
+            approaching_direction = CardinalDirection.get_direction_between_locations(predator_coordinates, location)
             return CardinalDirection.get_opposite_direction(approaching_direction).value
-        if not use_relative_location:
-            location = self.coordinates
-        else:
-            location = self.relative_location
+        location = self.relative_location
+        approaching_direction = get_direction_between_coordinates(predator_coordinates, location)
         if not location:
             logging.debug('round {}: opp_particle -> __get_predator_escape_direction() relative_cardinal_location '
                           'of particle {} not set!'.format(self.world.get_actual_round(), self.number))
             return MobilityModel.random_direction()
-        if approaching_direction.value[0] != 0:
-            if location[1] != 0:
-                return approaching_direction.value[0] * -0.5, location[1], 0
-            else:
-                return approaching_direction.value[0] * -1, location[1], 0
-        else:
-            return np.copysign(0.5, location[0]), approaching_direction.value[1] * -1, 0
+        return MobilityModel.opposite_direction(approaching_direction)
+
+    def __get_absolute_predator_escape_direction(self, predator_coordinates):
+        approaching_direction = get_direction_between_coordinates(predator_coordinates, self.coordinates)
+        return MobilityModel.opposite_direction(approaching_direction)

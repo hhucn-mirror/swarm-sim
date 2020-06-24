@@ -23,8 +23,8 @@ def solution(world):
         if relative_location_propagated == 1:
             query_relative_locations(particles)
     # move only after all messages should have propagated
-    # if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
-    #    move_to_next_direction(particles)
+    if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
+        move_to_next_direction(particles)
 
 
 def update_particle_neighbourhoods(particles):

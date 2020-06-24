@@ -2,7 +2,7 @@ import random
 
 from lib.oppnet import routing
 from lib.oppnet.message_types import LeaderMessageType
-from lib.oppnet.mobility_model import MobilityModelMode
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.particles import FlockMemberType
 from lib.swarm_sim_header import red
 
@@ -22,7 +22,10 @@ def solution(world):
     else:
         routing.next_step(particles)
         move_to_next_direction(particles)
-        if current_round % 20 == 0:
+        if current_round % 30 == 0:
+            safe_location = leader.broadcast_safe_location()
+            leader.set_mobility_model(MobilityModel(leader.coordinates, MobilityModelMode.POI, poi=safe_location))
+        elif current_round % 20 == 0:
             leader.broadcast_safe_location(leader.coordinates)
         if current_round % t_pick == 0:
             send_new_instruct()

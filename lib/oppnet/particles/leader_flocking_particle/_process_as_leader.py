@@ -140,7 +140,7 @@ class Mixin:
                 else:
                     self.send_direction_proposal(False)
             self.__add_leader_state__(LeaderStateName.WaitingForRejoin, {message.get_original_sender()},
-                                      self.world.get_actual_round(), self.t_wait * 5)
+                                      self.world.get_actual_round(), self.t_wait * 10)
             self.reset_random_next_direction_proposal_round()
             broadcast_message(self, Message(self, message.get_original_sender(), content=LostMessageContent(
                 LostMessageType.RejoinMessage, self.__get_estimate_centre_from_leader_contacts__())))
@@ -165,11 +165,16 @@ class Mixin:
 
     def __process_predator_signal_message_as_leader(self, message):
         content = message.get_content()
-        for predator_coordinates in content.predator_coordinates:
-            self.mobility_model.current_dir = self.__update_predator_escape_direction(predator_coordinates)
-        self.__detected_predator_ids__.update(content.predator_ids)
-        self.proposed_direction = self.mobility_model.current_dir
-        self.__multicast_instruct__(instruct_override=True)
+        predator_ids = set(content.predator_coordinates.keys())
+        new_predator_ids = predator_ids.difference(self.__detected_predator_ids__)
+        if new_predator_ids:
+            for predator_id in new_predator_ids:
+                new_escape_direction = self.__update_predator_escape_direction(
+                    content.predator_coordinates[predator_id], use_relative_location=False)
+                self.mobility_model.current_dir = new_escape_direction
+            self.__detected_predator_ids__.update(predator_ids)
+            self.proposed_direction = self.mobility_model.current_dir
+            self.__multicast_instruct__(instruct_override=True)
 
     def __quorum_fulfilled__(self):
         if self.__is__waiting_for_commit__():
