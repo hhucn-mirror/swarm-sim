@@ -632,7 +632,7 @@ class World:
         numberoftiles = len(self.items)
         s_rhombus = math.sqrt(numberoftiles)
         s_triangle = -0.5 + math.sqrt(0.25 + 2 * numberoftiles)
-        z_hexagon = 0.5 + math.sqrt(0.25 - ((1 - numberoftiles) / 3))
+        s_hexagon = 0.5 + math.sqrt(0.25 - ((1 - numberoftiles) / 3))
 
         object = []
 
@@ -666,66 +666,44 @@ class World:
                 z = z + 0.5
                 x = z
 
-        elif z_hexagon.is_integer():
+        elif s_hexagon.is_integer():
             # Coordinates of the hexagon:
             x = 0.5
             y = 1
-            z1 = 1
-            z2 = 1
-            z3 = 1
+            i = 1
+            phase = 1
 
             object.append((0, 0, 0))
 
-            while z1 < z_hexagon:
-                if z2 == 1:
-                    while z3 <= z1:
+            while i < s_hexagon:
+                j = 1
+                while j <= i:
+                    if not phase == 7:
                         object.append((x, y, 0))
+                    if phase == 1:
                         x = x + 0.5
                         y = y - 1
-                        z3 = z3 + 1
-                    z2 = 2
-                    z3 = 1
-                if z2 == 2:
-                    while z3 <= z1:
-                        object.append((x, y, 0))
+                    elif phase == 2:
                         x = x - 0.5
                         y = y - 1
-                        z3 = z3 + 1
-                    z2 = 3
-                    z3 = 1
-                if z2 == 3:
-                    while z3 <= z1:
-                        object.append((x, y, 0))
+                    elif phase == 3:
                         x = x - 1
-                        z3 = z3 + 1
-                    z2 = 4
-                    z3 = 1
-                if z2 == 4:
-                    while z3 <= z1:
-                        object.append((x, y, 0))
+                    elif phase == 4:
                         x = x - 0.5
                         y = y + 1
-                        z3 = z3 + 1
-                    z2 = 5
-                    z3 = 1
-                if z2 == 5:
-                    while z3 <= z1:
-                        object.append((x, y, 0))
+                    elif phase == 5:
                         x = x + 0.5
                         y = y + 1
-                        z3 = z3 + 1
-                    z2 = 6
-                    z3 = 1
-                if z2 == 6:
-                    while z3 <= z1:
-                        object.append((x, y, 0))
+                    elif phase == 6:
                         x = x + 1
-                        z3 = z3 + 1
-                    z2 = 1
-                    z3 = 1
-                z1 = z1 + 1
-                x = x + 0.5
-                y = y + 1
+                    else:
+                        i = i + 1
+                        j = i
+                        x = x + 0.5
+                        y = y + 1
+                        phase = 0
+                    j = j + 1
+                phase = phase + 1
 
         else:
             # Coordinates of the line:
