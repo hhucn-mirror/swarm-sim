@@ -328,13 +328,11 @@ class MobilityModel:
         return len([_ for _ in surroundings if _ in blocked_neighbors])
 
     def __check_new_coordinates_(self, new_direction):
-        if 6 <= self._distance_to_poi_unimproved_rounds <= 12:
-            return random.choices([new_direction, None], [1 / 6, 5 / 6], k=1)[0]
-        elif self._distance_to_poi_unimproved_rounds >= 12:
-            weight = 1 / self._distance_to_poi_unimproved_rounds
-            return random.choices([new_direction, None], [weight, 1 - weight], k=1)[0]
-        else:
+        if self._distance_to_poi_unimproved_rounds <= 12:
             return new_direction
+        else:
+            exp_weight = 1 / math.exp(0.3 * (self._distance_to_poi_unimproved_rounds - 12))
+            return random.choices([None, new_direction], [exp_weight, 1 - exp_weight])[0]
 
     def __disperse_flock__(self, current_x_y_z):
         if self.steps < self.route_length:
