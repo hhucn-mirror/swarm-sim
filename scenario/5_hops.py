@@ -5,6 +5,7 @@ def scenario(world):
     while part_num <= 40:
         ant = world.add_particle(0, 0)
         setattr(ant, "way_home_list", [])
+        setattr(ant, "phero_counter", 1)
         part_num += 1
 
     # Food

@@ -65,10 +65,10 @@ def decrease_food_stack(food, particle):
         food.set_alpha(food.get_alpha() - food_stack_decrease_rate)
 
 
-def start_dead_count(world):
-    global dead_count
-    if (world.get_actual_round() == 1):
-        dead_count = 0
+# def start_dead_count(world):
+#     global dead_count
+#     if (world.get_actual_round() == 1):
+#         dead_count = 0
 
 
 def delete_track(marker, world):
@@ -80,9 +80,10 @@ def delete_track(marker, world):
 def kill_ant(particle, world):
     if (particle.get_alpha() == 0):
         world.remove_particle(particle.get_id())
-        dead_count += 1
+#        dead_count += 1
 
 
+# When in search mode, search rendom
 def search_food_mode(particle):
     if (particle.get_color() == search_mode_color):
         next_step = random.choice(filter_search_track(particle))
@@ -100,21 +101,26 @@ def home_mode(particle, world):
         # Reduce food stack, when take food
         for food in world.get_tiles_list():
             decrease_food_stack(food, particle)
-            # Delete food when gone
-            if (food.get_alpha() == 0):
-                world.remove_tile_on(food.coords)
+            delete_food(food, world)
         # Restore life span
         particle.set_alpha(1)
 
-        
+# Delete food when gone
+def delete_food(food, world):
+    if (food.get_alpha() == 0):
+        world.remove_tile_on(food.coords)
+
+
 def delete_search_track(particle, world):
     if (particle.check_on_marker() == True and particle.get_marker().get_color() == search_track_color):
         world.remove_marker(particle.get_marker().get_id())
 
 
+# Lay new track or reinsorce old track
 def lay_track(particle):
     if (particle.check_on_marker() == False):
         track = particle.create_marker(track_color)
+        # If creating a new track, set attribute
         if (track != False):
             setattr(track, 'layer', 0)
     else:
@@ -125,8 +131,9 @@ def lay_track(particle):
 
 # Go home the way you came
 def go_home(particle):
-    particle.move_to(particle.way_home_list[-1])
-    del (particle.way_home_list[-1])
+    if (particle.way_home_list != []):
+        particle.move_to(particle.way_home_list[-1])
+        del (particle.way_home_list[-1])
 
 
 # If found track, follow
@@ -214,10 +221,10 @@ deads = []
 def solution(world):
     global dead_count
 
-    start_dead_count(world)
+#    start_dead_count(world)
     respawn(world)
     rounds.append(world.get_actual_round())
-    deads.append(dead_count)
+#    deads.append(dead_count)
 
     for marker in world.get_marker_list():
         evaporate(marker)
@@ -233,9 +240,7 @@ def solution(world):
         if (particle.get_color() == home_mode_color):
             delete_search_track(particle, world)
             lay_track(particle)
-            # Go home
-            if (particle.way_home_list != []):
-                go_home(particle)
+            go_home(particle)
 
         follow_mode(particle)
         reset_if_home(particle)
@@ -245,8 +250,8 @@ def solution(world):
     if (len(world.get_tiles_list()) == 0):
         world.success_termination()
         print("Rounds:", rounds[-1])
-        print("Deads:", deads[-1])
-        plot(rounds, deads)
+#        print("Deads:", deads[-1])
+#        plot(rounds, deads)
 
 
 

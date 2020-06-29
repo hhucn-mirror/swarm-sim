@@ -36,6 +36,7 @@ def respawn(world):
     while len(world.get_particle_list()) <= ant_number:
         ant = world.add_particle(0, 0)
         setattr(ant, "way_home_list", [])
+        setattr(ant, "phero_counter", 1)
 
 
 # Decrease lifespan of a track
@@ -61,10 +62,10 @@ def decrease_food_stack(food, particle):
         food.set_alpha(food.get_alpha() - food_stack_decrease_rate)
 
 
-def start_dead_count(world):
-    global dead_count
-    if (world.get_actual_round() == 1):
-        dead_count = 0
+# def start_dead_count(world):
+#     global dead_count
+#     if (world.get_actual_round() == 1):
+#         dead_count = 0
 
 
 def delete_track(marker, world):
@@ -76,9 +77,10 @@ def delete_track(marker, world):
 def kill_ant(particle, world):
     if (particle.get_alpha() == 0):
         world.remove_particle(particle.get_id())
-        dead_count += 1
+#        dead_count += 1
 
 
+# When in search mode, search rendom
 def search_food_mode(particle):
     if (particle.get_color() == search_mode_color):
         next_step = random.choice(DIRECTIONS)
@@ -94,20 +96,25 @@ def home_mode(particle, world):
         # Reduce food stack, when take food
         for food in world.get_tiles_list():
             decrease_food_stack(food, particle)
-            # Delete food when gone
-            if (food.get_alpha() == 0):
-                world.remove_tile_on(food.coords)
+            delete_food(food, world)
         # Restore ant life span
         particle.set_alpha(1)
 
+# Delete food when gone
+def delete_food(food, world):
+    if (food.get_alpha() == 0):
+        world.remove_tile_on(food.coords)
 
+
+# Lay new track or reinsorce old track
 def lay_track(counter, particle):
     if (particle.check_on_marker() == False):
         track = particle.create_marker(track_color)
+        # If creating a new track, set attribute
         if (track != False):
             setattr(track, 'layer', 0)
-            setattr(track, 'counter', counter)
-            counter += 1
+            setattr(track, 'phero_counter', particle.phero_counter)
+            particle.phero_counter += 1
     else:
         current_marker = particle.get_marker()
         current_marker.set_color(multi_layer_track_color)
@@ -117,8 +124,9 @@ def lay_track(counter, particle):
 
 # Go home the way you came
 def go_home(particle):
-    particle.move_to(particle.way_home_list[-1])
-    del (particle.way_home_list[-1])
+    if (particle.way_home_list != []):
+        particle.move_to(particle.way_home_list[-1])
+        del (particle.way_home_list[-1])
 
 
 # If found track, follow
@@ -140,7 +148,7 @@ def reset_if_home(particle):
         # Restore ant life span
         particle.set_alpha(1)
         # Reset counter
-        counter = 1
+        particle.phero_counter = 1
 
 
 # If track die, go back in search-mode
@@ -155,7 +163,7 @@ def get_track(particle):
     for dir in DIRECTIONS:
         if (particle.marker_in(dir) == True and particle.get_marker_in(dir).get_color() != base_color):
             pheromone_dict.update(
-                {dir: [particle.get_marker_in(dir).layer, particle.get_marker_in(dir).counter]})
+                {dir: [particle.get_marker_in(dir).layer, particle.get_marker_in(dir).phero_counter]})
         if (particle.way_home_list != None):
             pheromone_dict.pop(particle.way_home_list[-1], None)
     return pheromone_dict
@@ -171,9 +179,9 @@ def compare_pheromones(pheromones_dict):
         # Filter all directions which have max layer
         max_layer_directions = [direction for direction, value in pheromones_dict.items() if value[0] == max_layer]
         # Get counter of max layer directions
-        counter_of_max_layer_directions = [value[1] for direction, value in pheromones_dict.items() if direction in max_layer_directions]
+        phero_counter_of_max_layer_directions = [value[1] for direction, value in pheromones_dict.items() if direction in max_layer_directions]
         # Filter all directions which have min counter
-        resulting_directions = [direction for direction, value in pheromones_dict.items() if value[1] == min(counter_of_max_layer_directions)]
+        resulting_directions = [direction for direction, value in pheromones_dict.items() if value[1] == min(phero_counter_of_max_layer_directions)]
         return random.choice(resulting_directions)
 
 
@@ -205,10 +213,10 @@ def solution(world):
     global dead_count
     counter = 1
 
-    start_dead_count(world)
+#    start_dead_count(world)
     respawn(world)
     rounds.append(world.get_actual_round())
-    deads.append(dead_count)
+#    deads.append(dead_count)
 
     for marker in world.get_marker_list():
         evaporate(marker)
@@ -223,9 +231,7 @@ def solution(world):
         # If in home-mode, go home and lay track
         if (particle.get_color() == home_mode_color):
             lay_track(counter, particle)
-            # Go home
-            if (particle.way_home_list != []):
-                go_home(particle)
+            go_home(particle)
 
         follow_mode(particle)
         reset_if_home(particle)
@@ -235,7 +241,7 @@ def solution(world):
     if (len(world.get_tiles_list()) == 0):
         world.success_termination()
         print("Rounds:", rounds[-1])
-        print("Deads:", deads[-1])
-        plot(rounds, deads)
+#        print("Deads:", deads[-1])
+#       plot(rounds, deads)
 
 
