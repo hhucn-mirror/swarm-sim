@@ -14,6 +14,8 @@ import os
 import pandas as pd
 
 from lib.oppnet.communication import Message
+from lib.oppnet.util import get_max_flock_radius, all_pairs_flock_distance, flock_uniformity, flock_spread, \
+    eucledian_norm, get_distance_from_coordinates
 
 
 class CsvParticleFile:
@@ -425,3 +427,82 @@ class MessageData:
         :return: hops of the first delivery
         """
         return self.first_hops
+
+
+class CsvFlockRoundData:
+    """
+    Collects metrics about a flock for each round.
+    Contains :class:`~csv_generator.FlockData` objects.
+    """
+
+    def __init__(self, grid, directory="outputs/", solution=""):
+        """
+        :param grid: the simulation grid object
+        :param solution: The simulator solution used
+        :type: solution: str
+        :param directory: The directory for the csv to be put in.
+        :type directory: str
+        """
+        self.solution = solution
+        self.flock_data = []
+        self.directory = directory
+        self.grid = grid
+
+    def add_flock(self, flock):
+        self.flock_data.append(FlockRoundData(flock))
+
+    def __del__(self):
+        """
+        Destructor that writes the csv rows.
+        """
+        self.write_rows()
+
+    def write_rows(self):
+        """
+        Writes rows for all flocks.
+        """
+        for flock_number, flock_round_data in enumerate(self.flock_data):
+            file_name = self.directory + '/flock_{}.csv'.format(flock_number)
+            self.write_flock_file(file_name, flock_round_data)
+
+    def write_flock_file(self, file_name, flock_round_data):
+        with open(file_name, 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(self.get_header_row())
+            for sim_round, round_data in enumerate(flock_round_data):
+                data_row = self.get_data_row(sim_round, flock_round_data.get_round_coordinates(sim_round),
+                                             flock_round_data.get_round_directions(sim_round))
+                csv_writer.writerow(data_row)
+
+    def get_data_row(self, sim_round, particle_directions, particle_coordinates):
+        particles_count = len(particle_directions)
+        theoretical_flock_radius = get_max_flock_radius(particles_count)
+        return [sim_round, particles_count, theoretical_flock_radius, all_pairs_flock_distance(particles_count),
+                flock_uniformity(particle_coordinates), flock_spread(particle_coordinates, eucledian_norm, self.grid),
+                flock_spread(particle_coordinates, get_distance_from_coordinates, self.grid)]
+
+    def update_metrics(self):
+        for flock_round_data in self.flock_data:
+            flock_round_data.update()
+
+    @staticmethod
+    def get_header_row():
+        return ['Round', 'Flock Size', 'Optimal all-pairs distance', 'Actual all-pairs distance',
+                'Uniformity', 'Eucledian Spread', 'Hop Spread']
+
+
+class FlockRoundData:
+    def __init__(self, particles):
+        self._particles = particles
+        self.particles_round_coordinates = [[particle.coordinates for particle in particles]]
+        self.particles_directions = [[particle.mobility_model.current_dir for particle in particles]]
+
+    def update(self):
+        self.particles_round_coordinates.append([particle.coordinates for particle in self._particles])
+        self.particles_directions.append([particle.mobility_model.current_dir for particle in self._particles])
+
+    def get_round_coordinates(self, sim_round):
+        return self.particles_round_coordinates[sim_round]
+
+    def get_round_directions(self, sim_round):
+        return self.particles_directions[sim_round]
