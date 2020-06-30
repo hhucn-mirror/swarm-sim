@@ -171,19 +171,19 @@ def get_hexagon_ring(centre, r_max):
     :type centre: tuple
     :param r_max: radius of the hexagon
     :type r_max: int
-    :return: list of locations
-    :rtype: list
+    :return: set of locations
+    :rtype: set
     """
-    locations = []
+    locations = set()
     for x, y in zip(np.arange(r_max * 0.5, r_max + 0.5, 0.5),
                     np.arange(r_max, -1, -1)):
-        locations.append((x + centre[0], y + centre[1], centre[2]))
-        locations.append((x + centre[0], -y + centre[1], centre[2]))
-        locations.append((-x + centre[0], y + centre[1], centre[2]))
-        locations.append((-x + centre[0], -y + centre[1], centre[2]))
-    for x in np.arange(-(r_max * 0.5), r_max * 0.5, 0.5):
-        locations.append((x + centre[0], r_max + centre[1], centre[2]))
-        locations.append((x + centre[0], -r_max + centre[1], centre[2]))
+        locations.add((x + centre[0], y + centre[1], centre[2]))
+        locations.add((x + centre[0], -y + centre[1], centre[2]))
+        locations.add((-x + centre[0], y + centre[1], centre[2]))
+        locations.add((-x + centre[0], -y + centre[1], centre[2]))
+    for x in np.arange(-r_max * 0.5, r_max * 0.5 + 0.5, 1.0):
+        locations.add((x + centre[0], centre[1] + r_max, centre[2]))
+        locations.add((x + centre[0], centre[1] - r_max, centre[2]))
     return locations
 
 

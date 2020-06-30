@@ -1,8 +1,10 @@
 import math
+from itertools import product
 
 import numpy as np
 
 from lib.oppnet.point import Point
+from lib.swarm_sim_header import get_hexagon_ring
 
 
 def all_pairs_flock_distance(flock_coordinates):
@@ -12,7 +14,7 @@ def all_pairs_flock_distance(flock_coordinates):
     :return: all pairs distances sum for a flock
     """
     all_pairs_distance = 0
-    for coordinates1, coordinates2 in zip(flock_coordinates, flock_coordinates):
+    for coordinates1, coordinates2 in product(flock_coordinates, repeat=2):
         all_pairs_distance += get_distance_from_coordinates(coordinates1, coordinates2)
     return all_pairs_distance
 
@@ -33,9 +35,10 @@ def optimal_flock_distance(flock_radius):
     :return: all pair distances sum for all particles in a flock
     """
     optimal_distance = 0
+    flock_radius = int(flock_radius)
     for flock_radius_in in range(0, flock_radius + 1):
         optimal_distance += optimal_flock_in_distance(flock_radius_in)
-        for flock_radius_out in [radius for radius in range(0, flock_radius) if radius != flock_radius_in]:
+        for flock_radius_out in [radius for radius in range(0, flock_radius + 1) if radius != flock_radius_in]:
             optimal_distance += optimal_flock_in_out_distance(flock_radius_in, flock_radius_out)
     return optimal_distance
 
@@ -58,10 +61,17 @@ def optimal_flock_in_out_distance(flock_radius_in, flock_radius_out):
     :param flock_radius_out: radius of the larger, outer ring in a hexagon
     :return: the sum of all pair distances between outer and inner hexagon ring
     """
-    if flock_radius_in != 0:
-        return 2 * (5 * flock_radius_in ** 3 + (18 * flock_radius_out ** 2 + 1) * flock_radius_in)
-    else:
-        return 6 * flock_radius_out ** 2
+    ring_in = get_hexagon_ring((0, 0, 0), flock_radius_in)
+    ring_out = get_hexagon_ring((0, 0, 0), flock_radius_out)
+    all_pairs_distance = 0
+    for l1 in ring_in:
+        for l2 in ring_out:
+            all_pairs_distance += get_distance_from_coordinates(l1, l2)
+    return all_pairs_distance
+    # if flock_radius_in != 0 and flock_radius_out != 0:
+    #     return 2 * (5 * flock_radius_in ** 3 + (18 * flock_radius_out ** 2 + 1) * flock_radius_in)
+    # else:
+    #     return 6 * (flock_radius_out + flock_radius_in) ** 2
 
 
 def flock_uniformity(flock_directions):
@@ -72,7 +82,10 @@ def flock_uniformity(flock_directions):
     """
     x_sum = y_sum = 0
     for particle_direction in flock_directions:
-        x, y, _ = particle_direction
+        if particle_direction is None:
+            x = y = 0
+        else:
+            x, y, _ = particle_direction
         x_sum += x
         y_sum += y
     if len(flock_directions) > 0:
@@ -81,20 +94,21 @@ def flock_uniformity(flock_directions):
         return 0, 0
 
 
-def flock_spread(flock_coordinates, norm, grid):
+def flock_spread(flock_coordinates, grid):
     """
-    Calculates the spread of particles in terms of distance to the center and uses :param norm as norm.
+    Calculates the spread of particles in terms of distance to the center and uses both eucledian and hops distance
+    as norm.
     :param flock_coordinates: iterable of particle coordinates
-    :param norm: the norm to calculate a pairwise distance
     :param grid: a grid object
-    :return: the flock's spread
+    :return: the flock's spread with eucledian norm and hop distance norm
     """
-    spread = 0
+    spread_eucledian = spread_hops = 0
     center_coordinates = get_coordinates_center(flock_coordinates, grid)
     for particle_coordinates in flock_coordinates:
-        spread += norm(particle_coordinates, center_coordinates)
+        spread_eucledian += eucledian_norm(particle_coordinates, center_coordinates)
+        spread_hops += get_distance_from_coordinates(particle_coordinates, center_coordinates)
     if len(flock_coordinates) > 0:
-        return spread / len(flock_coordinates)
+        return spread_eucledian / len(flock_coordinates), spread_hops / len(flock_coordinates), center_coordinates
     else:
         return 0
 
@@ -106,8 +120,8 @@ def eucledian_norm(coordinates1, coordinates2):
     :param coordinates2: second coordinates
     :return: eucledian norm
     """
-    x_1, y_1 = coordinates1
-    x_2, y_2 = coordinates2
+    x_1, y_1, _ = coordinates1
+    x_2, y_2, _ = coordinates2
     return math.sqrt((x_1 - x_2) ** 2 + (y_1 - y_2) ** 2)
 
 

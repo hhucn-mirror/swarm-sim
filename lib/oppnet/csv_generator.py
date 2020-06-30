@@ -15,7 +15,7 @@ import pandas as pd
 
 from lib.oppnet.communication import Message
 from lib.oppnet.util import get_max_flock_radius, all_pairs_flock_distance, flock_uniformity, flock_spread, \
-    eucledian_norm, get_distance_from_coordinates
+    optimal_flock_distance
 
 
 class CsvParticleFile:
@@ -245,7 +245,7 @@ class CsvRoundData:
 class CsvMessageData:
     """
     Collects sending, forwarding and delivery information for a dictionary of message objects in a csv.
-    Contains :class:`~csv_generatore.MessageData` objects.
+    Contains :class:`~csv_generator.MessageData` objects.
     """
 
     def __init__(self, directory="outputs/", solution=""):
@@ -469,17 +469,24 @@ class CsvFlockRoundData:
         with open(file_name, 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(self.get_header_row())
-            for sim_round, round_data in enumerate(flock_round_data):
-                data_row = self.get_data_row(sim_round, flock_round_data.get_round_coordinates(sim_round),
-                                             flock_round_data.get_round_directions(sim_round))
+            for sim_round in range(0, flock_round_data.get_recorded_rounds()):
+                data_row = self.get_data_row(sim_round, flock_round_data.get_round_directions(sim_round),
+                                             flock_round_data.get_round_coordinates(sim_round))
                 csv_writer.writerow(data_row)
 
     def get_data_row(self, sim_round, particle_directions, particle_coordinates):
         particles_count = len(particle_directions)
-        theoretical_flock_radius = get_max_flock_radius(particles_count)
-        return [sim_round, particles_count, theoretical_flock_radius, all_pairs_flock_distance(particles_count),
-                flock_uniformity(particle_coordinates), flock_spread(particle_coordinates, eucledian_norm, self.grid),
-                flock_spread(particle_coordinates, get_distance_from_coordinates, self.grid)]
+        flock_radius = get_max_flock_radius(particles_count)
+
+        optimal_all_pairs_distance = optimal_flock_distance(flock_radius)
+        all_pairs_distance = all_pairs_flock_distance(particle_coordinates)
+        all_pairs_optimality = optimal_all_pairs_distance / all_pairs_distance
+
+        spread_eucledian, spread_hops, center_coordinates = flock_spread(particle_coordinates, self.grid)
+
+        return [sim_round, particles_count, flock_radius, optimal_all_pairs_distance,
+                all_pairs_distance, all_pairs_optimality, flock_uniformity(particle_directions),
+                spread_eucledian, spread_hops, center_coordinates]
 
     def update_metrics(self):
         for flock_round_data in self.flock_data:
@@ -487,8 +494,8 @@ class CsvFlockRoundData:
 
     @staticmethod
     def get_header_row():
-        return ['Round', 'Flock Size', 'Optimal all-pairs distance', 'Actual all-pairs distance',
-                'Uniformity', 'Eucledian Spread', 'Hop Spread']
+        return ['Round', 'Flock Size', 'Flock Radius', 'Optimal All-Pairs Distance', 'Actual All-Pairs Distance',
+                'All-Pairs Distance Optimality', 'Uniformity', 'Eucledian Spread', 'Hop Spread', 'Flock Center']
 
 
 class FlockRoundData:
@@ -506,3 +513,6 @@ class FlockRoundData:
 
     def get_round_directions(self, sim_round):
         return self.particles_directions[sim_round]
+
+    def get_recorded_rounds(self):
+        return len(self.particles_directions)
