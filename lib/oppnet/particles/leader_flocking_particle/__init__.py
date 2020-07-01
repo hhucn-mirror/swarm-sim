@@ -69,8 +69,8 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         while len(self.rcv_store) > 0:
             received.append(self.rcv_store.pop())
         while len(self.send_store) > 0:
-            received.append(self.send_store.pop())
-        return received
+            to_forward.append(self.send_store.pop())
+        return received, to_forward
 
     def get_current_instruct(self):
         return self._current_instruct_message

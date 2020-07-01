@@ -145,22 +145,23 @@ def __next_step_manet_epidemic__(particle):
 
 
 def __next_step_one_leader_flocking__(particle):
-    all_messages = particle.get_all_received_messages()
+    received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
     if particle.get_flock_member_type() == FlockMemberType.follower:
-        particle.__process_as_follower__(all_messages)
+        particle.__process_as_follower__(received + to_forward)
     else:
         particle.update_leader_states()
 
 
 def __next_step_multi_leader_flocking__(particle):
-    all_messages = particle.get_all_received_messages()
+    received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
     if particle.get_flock_member_type() == FlockMemberType.follower:
-        particle.__process_as_follower__(all_messages)
+        particle.__process_as_follower__(received + to_forward)
     elif particle.get_flock_member_type() == FlockMemberType.leader:
         particle.update_leader_states()
-        particle.__process_as_leader__(all_messages)
+        particle.__process_as_leader__(received)
+        particle.__process_as_follower__(to_forward)
 
 
 def __next_step_average_consensus_flocking__(particle):

@@ -50,8 +50,10 @@ class Message:
 
         if is_copy:
             self.actual_receiver = actual_receiver
+            process_event(EventType.MessageReplicated, self)
         else:
             self.actual_receiver = receiver
+            process_event(EventType.MessageCreated, self)
             try:
                 self.sender.send_store.append(self)
             except OverflowError:
@@ -227,7 +229,11 @@ def multicast_message_content(sender, receivers, message_content, ttl=None):
 
     for receiver in receivers:
         message = Message(sender, receiver, content=message_content, ttl=ttl)
-        send_message(sender, receiver, message)
+        current_round = sender.world.get_actual_round()
+        memory = sender.world.memory
+        memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
+                                    current_round, sender.signal_velocity,
+                                    sender.signal_range)
 
 
 def broadcast_message(sender, message):
@@ -284,7 +290,13 @@ def store_message(message, sender, receiver):
         store = receiver.rcv_store  # chose receive-store
         process_event(EventType.MessageDelivered, message)  # process csv event
         if message.original_sender == message.sender:
-            process_event(EventType.MessageDeliveredDirect, message)
+            if store.contains_key(message.key):
+                process_event(EventType.MessageDeliveredDirect, message)
+            else:
+                process_event(EventType.MessageDeliveredFirstDirect, message)
+        else:
+            if not store.contains_key(message.key):
+                process_event(EventType.MessageDeliveredFirst, message)
     else:
         store = receiver.send_store
         if not (store.contains_key(message.key)):

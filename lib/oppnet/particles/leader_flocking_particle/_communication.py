@@ -110,6 +110,7 @@ class Mixin:
                 content = received_content
             received_message.set_content(content)
             for receiver in receivers:
+                received_message.set_actual_receiver(receiver)
                 send_message(self, receiver, received_message)
                 logging.debug("round {}: opp_particle -> particle {} forwarded to {}".format(
                     self.world.get_actual_round(), self.number, receiver.number))
