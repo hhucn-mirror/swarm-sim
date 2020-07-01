@@ -86,7 +86,7 @@ def create_direction_for_data(config_data):
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                                      str(config_data.seed_value)
 
-        config_data.direction_name = "./outputs/mulitple/" + config_data.direction_name
+        config_data.direction_name = "./outputs/multiple/" + config_data.direction_name
 
     else:
         config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \

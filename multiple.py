@@ -1,7 +1,9 @@
-import sys, getopt, subprocess
-from datetime import datetime
-import os
 import configparser
+import getopt
+import os
+import subprocess
+import sys
+from datetime import datetime
 
 
 def main(argv):
@@ -12,20 +14,21 @@ def main(argv):
     config.read("config.ini")
 
     try:
-        scenario_file = config.get ("File", "scenario")
-    except (configparser.NoOptionError) as noe:
+        scenario_file = config.get("File", "scenario")
+    except configparser.NoOptionError:
         scenario_file = "init_scenario.py"
 
     try:
         solution_file = config.get("File", "solution")
-    except (configparser.NoOptionError) as noe:
+    except configparser.NoOptionError:
         solution_file = "solution.py"
 
     n_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
+        opts, args = getopt.getopt(argv, "hs:w:b:e:n:v:", ["scenario=", "solution=", "seed-start=", "seed-end="])
     except getopt.GetoptError:
-        print('Error: multiple.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
+        print(
+            'Error: multiple.py -ss <randomSeedStart> --se <randomSeedEnd> -w <scenario> -sf <solution> -n <maxRounds>')
         sys.exit(2)
 
     for opt, arg in opts:
@@ -36,23 +39,23 @@ def main(argv):
             solution_file = arg
         elif opt in ("-w", "--scenario"):
             scenario_file = arg
-        elif opt in ("-ss", "--seed_start"):
+        elif opt in ("-ss", "--seed-start"):
             seed_start = int(arg)
-        elif opt in ("-se", "--seed_end"):
+        elif opt in ("-se", "--seed-end"):
             seed_end = int(arg)
         elif opt in ("-n", "--maxrounds"):
             max_round = int(arg)
 
-    direction = "./outputs/mulitple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" + \
-          solution_file.rsplit('.', 1)[0]
+    direction = "./outputs/multiple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" \
+                + solution_file.rsplit('.', 1)[0]
     if not os.path.exists(direction):
         os.makedirs(direction)
     out = open(direction + "/multiprocess.txt", "w")
     child_processes = []
-    process_cnt=0
-    for seed in range(seed_start, seed_end+1):
-        process ="python3.6", "swarm-sim.py", "-n"+ str(max_round), "-m 1", "-d"+str(n_time),\
-                              "-r"+ str(seed), "-v" + str(0)
+    process_cnt = 0
+    for seed in range(seed_start, seed_end + 1):
+        process = "python3.6", "swarm-sim.py", "-n" + str(max_round), "-m 1", "-d" + str(n_time), \
+                  "-r" + str(seed), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
@@ -64,14 +67,12 @@ def main(argv):
 
     for cp in child_processes:
         cp.wait()
-    fout = open(direction+"/all_aggregates.csv","w+")
-    for seed in range(seed_start, seed_end+1):
-        f = open(direction+"/"+str(seed)+"/aggregate_rounds.csv")
-        f.__next__() # skip the header
-        for line in f:
-            fout.write(line)
-        f.close() # not really needed
-    fout.close()
+    with open(direction + "/all_aggregates.csv", "w+") as fout:
+        for seed in range(seed_start, seed_end + 1):
+            with open(direction + "/" + str(seed) + "/aggregate_rounds.csv") as f:
+                f.__next__()  # skip the header
+                for line in f:
+                    fout.write(line)
 
 
 if __name__ == "__main__":
