@@ -160,8 +160,7 @@ def __next_step_multi_leader_flocking__(particle):
         particle.__process_as_follower__(received + to_forward)
     elif particle.get_flock_member_type() == FlockMemberType.leader:
         particle.update_leader_states()
-        particle.__process_as_leader__(received)
-        particle.__process_as_follower__(to_forward)
+        particle.__process_as_leader__(received + to_forward)
 
 
 def __next_step_average_consensus_flocking__(particle):

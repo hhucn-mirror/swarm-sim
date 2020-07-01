@@ -101,7 +101,7 @@ class Mixin:
         max_hops = self.routing_parameters.scan_radius
         neighbors = self.scan_for_particles_within(hop=max_hops)
 
-        all_receivers = set(neighbors).difference(exclude)
+        all_receivers = set(neighbors)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
             if isinstance(received_content, LeaderMessageContent):

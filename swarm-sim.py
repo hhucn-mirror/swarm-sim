@@ -83,14 +83,14 @@ def read_cmd_args(argv, config_data):
 def create_direction_for_data(config_data):
     if config_data.multiple_sim == 1:
         config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                                     "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
+                                     "_" + config_data.solution + "/" + \
                                      str(config_data.seed_value)
 
         config_data.direction_name = "./outputs/multiple/" + config_data.direction_name
 
     else:
         config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                                     "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
+                                     "_" + config_data.solution + "_" + \
                                      str(config_data.seed_value)
         config_data.direction_name = "./outputs/" + config_data.direction_name
     if not os.path.exists(config_data.direction_name):

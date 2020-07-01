@@ -17,8 +17,8 @@ class Mixin:
                 message_type = content.message_type
                 if message_type == LeaderMessageType.instruct:
                     self.__process_instruct_as_follower__(message)
-                # elif message_type == LeaderMessageType.discover:
-                #    self.send_to_leader_via_contacts(message)
+                elif message_type == LeaderMessageType.discover:
+                    self.__flood_forward__(message)
                 elif message_type in [LeaderMessageType.discover_ack, LeaderMessageType.commit]:
                     self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
                 else:
