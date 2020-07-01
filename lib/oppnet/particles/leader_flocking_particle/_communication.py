@@ -1,5 +1,4 @@
 import logging
-import random
 
 from lib.oppnet.communication import multicast_message_content, send_message, Message, broadcast_message
 from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
@@ -30,20 +29,15 @@ class Mixin:
 
     def broadcast_safe_location(self, safe_location=None):
         if not safe_location:
-            safe_location = self._get_a_safe_location()
+            safe_location = self.get_a_safe_location()
         message = Message(self, None, content=SafeLocationMessage(safe_location))
         broadcast_message(self, message)
+        logging.debug("round {}: leader sent new SafeLocationMessage".format(self.world.get_actual_round()))
         return safe_location
-
-    def _get_a_safe_location(self):
-        if not self.safe_locations or not self.__previous_neighborhood__:
-            return self.coordinates
-        else:
-            return random.choice(self.safe_locations)
 
     def send_safe_location_proposal(self, safe_location=None):
         if safe_location is None:
-            safe_location = self._get_a_safe_location()
+            safe_location = self.get_a_safe_location()
         content = SafeLocationMessage(safe_location, self.leader_contacts.keys(), SafeLocationMessageType.Proposal)
         receivers = self.leader_contacts.keys()
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(receivers), self.world.get_actual_round(),
@@ -122,21 +116,21 @@ class Mixin:
 
     def send_to_leader_via_contacts(self, message, receiving_leader=None):
         received_content = message.get_content()
-        if not receiving_leader or (receiving_leader and receiving_leader not in self.leader_contacts):
-            self.__flood_forward__(message)
+        if receiving_leader and receiving_leader not in self.leader_contacts:
+            return self.__flood_forward__(message)
+
+        if receiving_leader:
+            receivers = {receiving_leader}
+        elif isinstance(received_content, LeaderMessageContent):
+            receivers = set(received_content.receivers)
         else:
-            if receiving_leader:
-                receivers = {receiving_leader}
-            elif isinstance(received_content, LeaderMessageContent):
-                receivers = set(received_content.receivers)
-            else:
-                receivers = set(self.leader_contacts.keys())
-            receivers.difference_update(
-                {
-                    message.get_sender(),
-                    message.get_original_sender()
-                })
-            self._send_via_all_contacts__(received_content, receivers)
+            receivers = set(self.leader_contacts.keys())
+        receivers.difference_update(
+            {
+                message.get_sender(),
+                message.get_original_sender()
+            })
+        self._send_via_all_contacts__(received_content, receivers)
 
     def _send_via_all_contacts__(self, message_content, receivers):
         message = Message(self, None)

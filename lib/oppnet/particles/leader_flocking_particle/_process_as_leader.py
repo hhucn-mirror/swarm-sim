@@ -132,18 +132,20 @@ class Mixin:
     def __process_lost_message_as_leader__(self, message: Message):
         content = message.get_content()
         message_type = content.message_type
-        if message_type == LostMessageType.SeparationMessage:
-            if not self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin):
-                if len(self.leader_contacts) == 0:
-                    self.proposed_direction = None
-                    self.multicast_leader_message(LeaderMessageType.instruct)
-                else:
-                    self.send_direction_proposal(False)
+        if message_type == LostMessageType.SeparationMessage and not self.__is_in_leader_states__(
+                LeaderStateName.WaitingForRejoin):
+            if len(self.leader_contacts) == 0:
+                self.proposed_direction = None
+                self.multicast_leader_message(LeaderMessageType.instruct)
+            else:
+                self.send_direction_proposal(False)
+            distance = get_distance_from_coordinates(self.coordinates, message.get_original_sender().coordinates)
             self.__add_leader_state__(LeaderStateName.WaitingForRejoin, {message.get_original_sender()},
-                                      self.world.get_actual_round(), self.t_wait * 10)
+                                      self.world.get_actual_round(), distance * 2 + 1)
             self.reset_random_next_direction_proposal_round()
             broadcast_message(self, Message(self, message.get_original_sender(), content=LostMessageContent(
                 LostMessageType.RejoinMessage, self.__get_estimate_centre_from_leader_contacts__())))
+            logging.debug("round {}: leader responded to SeparationMessage.".format(self.world.get_actual_round()))
         elif message_type == LostMessageType.QueryNewLocation:
             self.__remove_particle_from_states__(message.get_original_sender(), LeaderStateName.WaitingForRejoin)
         self.__process_lost_message_as_follower__(message)

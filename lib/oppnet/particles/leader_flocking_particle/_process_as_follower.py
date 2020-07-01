@@ -46,6 +46,8 @@ class Mixin:
             else:
                 self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
                                    is_leader=False)
+        if self.leader_contacts:
+            self.flock_mode = FlockMode.Flocking
 
     def __process_instruct_as_follower__(self, message: Message):
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
@@ -78,6 +80,8 @@ class Mixin:
         elif message_type == LostMessageType.SeparationMessage:
             self.leader_contacts.remove_all_entries_with_particle(message.get_original_sender())
             self.follower_contacts.remove_all_entries_with_particle(message.get_original_sender())
+            if not message.is_broadcast:
+                self.send_to_leader_via_contacts(message)
         elif message_type == LostMessageType.QueryNewLocation:
             self.flood_message_content(content)
             self.__add_route__(message.get_sender(), message.get_original_sender(), message.hops, is_leader=False)
@@ -91,6 +95,10 @@ class Mixin:
             for location in content.get_free_locations():
                 free_locations[location] += 1
             setattr(self, 'free_locations', free_locations)
+            if free_locations.most_common(1):
+                next_location = free_locations.most_common(1)[0][0]
+                self.mobility_model.set_mode(MobilityModelMode.POI)
+                self.mobility_model.poi = next_location
 
     def __process_safe_location_message_as_follower(self, message):
         content = message.get_content()

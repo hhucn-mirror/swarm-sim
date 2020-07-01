@@ -86,15 +86,20 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
 
     def update_current_neighborhood(self):
         lost, new = self.__neighborhood_difference__()
-        if len(lost) > len(new) and self.flock_mode == FlockMode.Flocking:
+        if len(self.__previous_neighborhood__) == 0 and len(lost) > 0 and self.flock_mode == FlockMode.Flocking:
             self.flock_mode = FlockMode.Regrouping
             self.proposed_direction = None
             self.mobility_model.set_mode(MobilityModelMode.Manual)
             self.leader_contacts.remove_all_entries_with_particles(lost)
             lost_message = Message(self, None, content=LostMessageContent(LostMessageType.SeparationMessage))
-            broadcast_message(self, lost_message)
+            if len(new) > 0:
+                self.flood_message_content(lost_message.get_content())
+            else:
+                broadcast_message(self, lost_message)
             logging.debug("round {}: opp_particle -> check_neighborhood() neighborhood for particle {} has changed."
                           .format(self.world.get_actual_round(), self.number))
+        elif len(new) > 0 and self.flock_mode == FlockMode.Regrouping:
+            self.flood_message_content(LostMessageContent(LostMessageType.QueryNewLocation))
 
     def __neighborhood_difference__(self):
         neighborhood = set(self.scan_for_particles_within(self.routing_parameters.scan_radius))
@@ -123,6 +128,12 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
             except IndexError:
                 pass
 
+    def get_a_safe_location(self):
+        if not self.safe_locations or not self.__previous_neighborhood__:
+            return self.coordinates
+        else:
+            return random.choice(self.safe_locations)
+
     def next_moving_direction(self):
         if self.mobility_model.mode == MobilityModelMode.Manual:
             try:
@@ -134,5 +145,10 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
                 self.mobility_model.current_dir = None
                 return None
         elif self.mobility_model.mode == MobilityModelMode.POI:
-            return self.mobility_model.next_direction(self.coordinates, self.get_blocked_surrounding_locations())
+            next_direction = self.mobility_model.next_direction(self.coordinates,
+                                                                self.get_blocked_surrounding_locations())
+            if next_direction is False and self.flock_mode == FlockMode.Regrouping:
+                self.flock_mode = FlockMode.Flocking
+                self.mobility_model.set_mode(MobilityModelMode.Manual)
+            return next_direction
         return self.mobility_model.next_direction(self.coordinates)
