@@ -135,7 +135,10 @@ class World:
         self.csv_round = self.csv_generator.CsvRoundData(sim=self,
                                                          solution=config_data.solution,
                                                          seed=config_data.seed_value,
-                                                         directory=config_data.direction_name)
+                                                         directory=config_data.direction_name
+                                                         )
+        self.csv_flock_round = self.csv_generator.CsvFlockRoundData(self.grid, directory=config_data.direction_name,
+                                                                    solution=config_data.solution)
 
         self._particle_flocks_ids = {}
         self._flocks = []
@@ -248,6 +251,8 @@ class World:
         for p in self.particles:
             particle_csv.write_particle(p)
         particle_csv.csv_file.close()
+        self.csv_flock_round = None
+        self.csv_round = None
 
     def set_successful_end(self):
         self.csv_round.success()
@@ -701,7 +706,7 @@ class World:
         particle_map_coordinates = self.particle_map_coordinates
         new_coordinates = set()
         i = 0
-        while i < len(particle_directions) ** 2 and len(particle_set) > 0:
+        while i < len(particle_directions) * 2 and len(particle_set) > 0:
             i += 1
             for particle in list(particle_set):
                 direction = particle_directions[particle]

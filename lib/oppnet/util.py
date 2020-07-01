@@ -36,11 +36,40 @@ def optimal_flock_distance(flock_radius):
     """
     optimal_distance = 0
     flock_radius = int(flock_radius)
+    hexagon_rings = get_all_hexagon_rings_as_list(range(0, flock_radius + 1))
     for flock_radius_in in range(0, flock_radius + 1):
         optimal_distance += optimal_flock_in_distance(flock_radius_in)
         for flock_radius_out in [radius for radius in range(0, flock_radius + 1) if radius != flock_radius_in]:
-            optimal_distance += optimal_flock_in_out_distance(flock_radius_in, flock_radius_out)
+            optimal_distance += optimal_in_out_distance_locations(hexagon_rings[flock_radius_in],
+                                                                  hexagon_rings[flock_radius_out])
     return optimal_distance
+
+
+def get_all_hexagon_rings_as_list(radius_range):
+    """
+    Returns a list of hexagon rings with radii defined by range :param radius_range.
+    :param radius_range: range object of radii
+    :return: a list of hexagon rings as location sets
+    """
+    rings = []
+    for radius in radius_range:
+        rings.append(get_hexagon_ring((0, 0, 0), radius))
+    return rings
+
+
+def optimal_in_out_distance_locations(hexagon_1, hexagon_2):
+    """
+    Calculates the optimal distance sum between all pairs of particles between two hexagon rings
+    (grids/TriangularGrid.py) :param hexagon_1 and radius :param hexagon_2.
+    :param hexagon_1: the first hexagon as set of locations
+    :param hexagon_2: the second hexagon as set of locations
+    :return: all pairs distance sum
+    """
+    all_pairs_distance = 0
+    for l1 in hexagon_1:
+        for l2 in hexagon_2:
+            all_pairs_distance += get_distance_from_coordinates(l1, l2)
+    return all_pairs_distance
 
 
 def optimal_flock_in_distance(flock_radius):
@@ -68,10 +97,6 @@ def optimal_flock_in_out_distance(flock_radius_in, flock_radius_out):
         for l2 in ring_out:
             all_pairs_distance += get_distance_from_coordinates(l1, l2)
     return all_pairs_distance
-    # if flock_radius_in != 0 and flock_radius_out != 0:
-    #     return 2 * (5 * flock_radius_in ** 3 + (18 * flock_radius_out ** 2 + 1) * flock_radius_in)
-    # else:
-    #     return 6 * (flock_radius_out + flock_radius_in) ** 2
 
 
 def flock_uniformity(flock_directions):
@@ -96,29 +121,29 @@ def flock_uniformity(flock_directions):
 
 def flock_spread(flock_coordinates, grid):
     """
-    Calculates the spread of particles in terms of distance to the center and uses both eucledian and hops distance
+    Calculates the spread of particles in terms of distance to the center and uses both euclidean and hops distance
     as norm.
     :param flock_coordinates: iterable of particle coordinates
     :param grid: a grid object
-    :return: the flock's spread with eucledian norm and hop distance norm
+    :return: the flock's spread with euclidean norm and hop distance norm
     """
-    spread_eucledian = spread_hops = 0
+    spread_euclidean = spread_hops = 0
     center_coordinates = get_coordinates_center(flock_coordinates, grid)
     for particle_coordinates in flock_coordinates:
-        spread_eucledian += eucledian_norm(particle_coordinates, center_coordinates)
+        spread_euclidean += euclidean_norm(particle_coordinates, center_coordinates)
         spread_hops += get_distance_from_coordinates(particle_coordinates, center_coordinates)
     if len(flock_coordinates) > 0:
-        return spread_eucledian / len(flock_coordinates), spread_hops / len(flock_coordinates), center_coordinates
+        return spread_euclidean / len(flock_coordinates), spread_hops / len(flock_coordinates), center_coordinates
     else:
         return 0
 
 
-def eucledian_norm(coordinates1, coordinates2):
+def euclidean_norm(coordinates1, coordinates2):
     """
-    Returns the eucledian norm of :param coordinates1 and :param coordinates2.
+    Returns the euclidean norm of :param coordinates1 and :param coordinates2.
     :param coordinates1: first coordinates
     :param coordinates2: second coordinates
-    :return: eucledian norm
+    :return: euclidean norm
     """
     x_1, y_1, _ = coordinates1
     x_2, y_2, _ = coordinates2
@@ -134,8 +159,8 @@ def get_coordinates_center(particle_coordinates, grid):
     """
     max_values = np.max(particle_coordinates, axis=0)
     min_values = np.min(particle_coordinates, axis=0)
-    x = (max_values[0] - min_values[0]) / 2
-    y = (max_values[1] - min_values[0]) / 2
+    x = (max_values[0] + min_values[0]) / 2
+    y = (max_values[1] + min_values[1]) / 2
     return grid.get_nearest_valid_coordinates((x, y, 0))
 
 
