@@ -19,11 +19,10 @@ def solution(world):
     if current_round == 1:
         leader, followers = split_particles(particles, 1)
         initialise_leaders(t_wait)
+        world.csv_flock_round.add_flock(particles)
     else:
         routing.next_step(particles)
         move_to_next_direction(particles)
-        if current_round % 20 == 0:
-            leader.broadcast_safe_location(leader.coordinates)
         if current_round % t_pick == 0:
             send_new_instruct()
 
@@ -38,7 +37,7 @@ def initialise_leaders(t_wait):
     leader.set_t_wait(t_wait)
     leader.set_color(red)
     leader.set_flock_member_type(FlockMemberType.leader)
-    leader.broadcast_safe_location()
+    send_new_instruct()
 
 
 def send_new_instruct():

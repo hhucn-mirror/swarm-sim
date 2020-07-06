@@ -23,7 +23,7 @@ def main(argv):
     except configparser.NoOptionError:
         solution_file = "solution.py"
 
-    n_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
+    n_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')[:-1]
     try:
         opts, args = getopt.getopt(argv, "hs:w:b:e:n:v:", ["scenario=", "solution=", "seed-start=", "seed-end="])
     except getopt.GetoptError:
@@ -31,6 +31,7 @@ def main(argv):
             'Error: multiple.py -ss <randomSeedStart> --se <randomSeedEnd> -w <scenario> -sf <solution> -n <maxRounds>')
         sys.exit(2)
 
+    total_seeds = None
     for opt, arg in opts:
         if opt == '-h':
             print('multiple.py -ss <seed_start> -se <seed_end> -w <scenario> -s <solution>  -n <maxRounds>')
@@ -46,16 +47,17 @@ def main(argv):
         elif opt in ("-n", "--maxrounds"):
             max_round = int(arg)
 
-    direction = "./outputs/multiple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" \
-                + solution_file.rsplit('.', 1)[0]
-    if not os.path.exists(direction):
-        os.makedirs(direction)
-    out = open(direction + "/multiprocess.txt", "w")
+    directory = "./outputs/multiple/{}_{}_{}".format(n_time, scenario_file, solution_file)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    out = open(directory + "/multiprocess.txt", "w")
     child_processes = []
     process_cnt = 0
-    for seed in range(seed_start, seed_end + 1):
-        process = "python3.6", "swarm-sim.py", "-n" + str(max_round), "-m 1", "-d" + str(n_time), \
-                  "-r" + str(seed), "-v" + str(0)
+    seed_range = range(seed_start, seed_end + 1)
+
+    for seed in seed_range:
+        process = "python3.6", "swarm-sim.py", "-n {}".format(max_round), "-m 1", "-d{}".format(n_time), \
+                  "-r {}".format(seed), "-v 0"
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
         process_cnt += 1
@@ -67,10 +69,11 @@ def main(argv):
 
     for cp in child_processes:
         cp.wait()
-    with open(direction + "/all_aggregates.csv", "w+") as fout:
-        for seed in range(seed_start, seed_end + 1):
-            with open(direction + "/" + str(seed) + "/aggregate_rounds.csv") as f:
-                f.__next__()  # skip the header
+    with open(directory + "/all_aggregates.csv", "w+") as fout:
+        for seed in seed_range:
+            with open("{}/{}/aggregate_rounds.csv".format(directory, seed)) as f:
+                if seed > seed_start:
+                    f.__next__()  # skip the header
                 for line in f:
                     fout.write(line)
 

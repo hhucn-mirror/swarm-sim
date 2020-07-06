@@ -173,7 +173,7 @@ class CsvRoundData:
                                'Message Delivery Success ζ', 'Message Delivery Efficiency η', 'Message Overhead σ',
                                'Receiver Out Of Mem Sum', 'Particles Caught Sum'
                                ])
-
+        sent_sum = data['Messages Sent'].sum()
         created_sum = data['Messages Created'].sum()
         replicated_sum = data['Message Replication Counter'].sum()
         delivered_sum = data['Messages Delivered Total'].sum()
@@ -183,11 +183,11 @@ class CsvRoundData:
         csv_iterator = [self.seed, data['Round Number'].count(),
                         self.solution,
                         created_sum, replicated_sum,
-                        data['Messages Sent'].sum(), data['Messages Forwarded'].sum(),
+                        sent_sum, data['Messages Forwarded'].sum(),
                         delivered_sum, data['Messages Delivered Directly'].sum(),
                         data['Messages Received'].sum(), data['Messages TTL Expired'].sum(),
                         data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
-                        delivered_sum / (created_sum + replicated_sum), delivered_unique_sum / delivered_sum,
+                        delivered_sum / sent_sum, delivered_unique_sum / delivered_sum,
                         replicated_sum / created_sum,
                         data['Receiver Out Of Mem'].sum(), data['Particles Caught'].sum()
                         ]
