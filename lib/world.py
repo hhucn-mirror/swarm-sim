@@ -135,9 +135,9 @@ class World:
         self.csv_round = self.csv_generator.CsvRoundData(sim=self,
                                                          solution=config_data.solution,
                                                          seed=config_data.seed_value,
-                                                         directory=config_data.direction_name
+                                                         directory=config_data.directory_name
                                                          )
-        self.csv_flock_round = self.csv_generator.CsvFlockRoundData(self.grid, directory=config_data.direction_name,
+        self.csv_flock_round = self.csv_generator.CsvFlockRoundData(self.grid, directory=config_data.directory_name,
                                                                     solution=config_data.solution)
 
         self._particle_flocks_ids = {}
@@ -247,7 +247,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = self.csv_generator.CsvParticleFile(self.config_data.direction_name)
+        particle_csv = self.csv_generator.CsvParticleFile(self.config_data.directory_name)
         for p in self.particles:
             particle_csv.write_particle(p)
         particle_csv.csv_file.close()

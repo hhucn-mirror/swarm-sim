@@ -177,8 +177,9 @@ class CsvRoundData:
         created_sum = data['Messages Created'].sum()
         replicated_sum = data['Message Replication Counter'].sum()
         delivered_sum = data['Messages Delivered Total'].sum()
-        delivered_unique_sum = data['Messages Delivered Directly Unique'].sum() + data[
-            'Messages Delivered Unique'].sum()
+        delivered_unique_sum = data['Messages Delivered Unique'].sum()
+        delivered_directly_unique_sum = data['Messages Delivered Directly Unique'].sum()
+        delivered_unique_total = delivered_unique_sum + delivered_directly_unique_sum
 
         csv_iterator = [self.seed, data['Round Number'].count(),
                         self.solution,
@@ -186,8 +187,8 @@ class CsvRoundData:
                         sent_sum, data['Messages Forwarded'].sum(),
                         delivered_sum, data['Messages Delivered Directly'].sum(),
                         data['Messages Received'].sum(), data['Messages TTL Expired'].sum(),
-                        data['Messages Delivered Unique'].sum(), data['Messages Delivered Directly Unique'].sum(),
-                        delivered_sum / sent_sum, delivered_unique_sum / delivered_sum,
+                        delivered_unique_sum, delivered_directly_unique_sum,
+                        delivered_unique_total / created_sum, delivered_unique_total / delivered_sum,
                         replicated_sum / created_sum,
                         data['Receiver Out Of Mem'].sum(), data['Particles Caught'].sum()
                         ]
