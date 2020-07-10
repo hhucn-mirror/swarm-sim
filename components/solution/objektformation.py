@@ -26,6 +26,7 @@ phase_waitforsubjects2 = 10
 phase_end = 11
 
 # NONE TYPE BEI NEXT TARGET!!!! NOCHMAL ÜBERPRÜFEN!!!
+# WENN MAN PARTIKEL ENTFERNT UND WIEDER HINZUFÜGT GIBT ES KEINEN LEADER MEHR!!!
 def solution(world):
     global numberoftiles
     for particle in world.get_agent_list():
@@ -40,7 +41,7 @@ def solution(world):
             setattr(particle, "countedTiles", [])
 
             particle.phase = phase_startCounting
-            particle.create_location()
+           # particle.create_location()
             particle.write_to_with(world.get_item_map_coordinates()[particle.coordinates], "tile", "counted")
             particle.countedTiles.append(particle.coordinates)
 
@@ -97,7 +98,7 @@ def startCounting(world, particle):
         particle.phase = phase_backtracking
     else:
         particle.move_to(random.choice(possible_directions))
-        particle.create_location()
+        #particle.create_location()
         particle.write_to_with(world.get_item_map_coordinates()[particle.coordinates], "tile", "counted")
         particle.countedTiles.append(particle.coordinates)
 

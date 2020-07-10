@@ -101,7 +101,7 @@ def create_directory_for_data(config_data, unique_descriptor):
     if config_data.multiple_sim == 1:
         config_data.directory_name = "%s/%s" % (unique_descriptor, str(config_data.seed_value))
 
-        config_data.directory_name = "./outputs/csv/mulitple/" + config_data.directory_name
+        config_data.directory_csv = "./outputs/mulitple/" + config_data.directory_name
         config_data.directory_plot = "./outputs/plot/mulitple/" + config_data.directory_name
 
 
