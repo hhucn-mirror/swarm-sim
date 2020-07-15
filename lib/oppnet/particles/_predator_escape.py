@@ -1,14 +1,17 @@
 import logging
+import math
 import random
 
-from lib.oppnet.message_types import CardinalDirection
-from lib.oppnet.mobility_model import MobilityModel
+from lib.oppnet.communication import multicast_message_content
+from lib.oppnet.message_types import CardinalDirection, PredatorSignal
+from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
+from lib.oppnet.particles import FlockMode
 from lib.swarm_sim_header import get_direction_between_coordinates
 
 
 class Mixin:
     def __update_predator_escape_direction(self, predator_coordinates, use_cardinal_location=False,
-                                           use_relative_location=True):
+                                           use_relative_location=False):
         """
         Calculates an updated escape direction depending on the current escape direction.
         :param predator_coordinates: the coordinates of the predator
@@ -23,22 +26,21 @@ class Mixin:
         else:
             new_escape_direction = self.__get_absolute_predator_escape_direction(predator_coordinates)
 
-        if not current_escape_direction:
+        if not current_escape_direction or current_escape_direction == new_escape_direction:
             return new_escape_direction
-        if current_escape_direction == new_escape_direction:
-            return current_escape_direction
         x_sum = new_escape_direction[0] + current_escape_direction[0]
         y_sum = new_escape_direction[1] + current_escape_direction[1]
         # x value will be equal for pairs (NE, SE) and (NW, SW) -> return E or W respectively
         if current_escape_direction[0] == new_escape_direction[0]:
-            return current_escape_direction[0] * 2, 0, 0
-        elif current_escape_direction[1] == 0 and new_escape_direction[1] == 0:
+            return math.copysign(1, current_escape_direction[0]), 0, 0
+        elif current_escape_direction in [MobilityModel.E, MobilityModel.W] \
+                and new_escape_direction in [MobilityModel.E, MobilityModel.W]:
             # E and W -> any of SE, SW, NE, SW, but prefer newer value
             return self.__weighted_direction_choice__(new_escape_direction)
         elif current_escape_direction[1] == 0 or new_escape_direction[1] == 0:
             # E and SE/NE or W and SW/NW -> E or W respectively
             if abs(x_sum) == 1.5:
-                return x_sum % 1 * 2, 0, 0
+                return math.copysign(1, x_sum), 0, 0
             # E and SW/NW or W and SE/NE
             else:
                 return random.choice([(x_sum, -y_sum, 0), (-x_sum, y_sum, 0)])
@@ -76,4 +78,49 @@ class Mixin:
 
     def __get_absolute_predator_escape_direction(self, predator_coordinates):
         approaching_direction = get_direction_between_coordinates(predator_coordinates, self.coordinates)
-        return MobilityModel.opposite_direction(approaching_direction)
+        if approaching_direction == (0, 0, 0):
+            return MobilityModel.random_direction()
+        opposite = MobilityModel.opposite_direction(approaching_direction)
+        return opposite
+
+    def predators_detected_disperse(self, predators):
+        new_predator_ids = predator_ids = set([predator.get_id() for predator in predators])
+
+        if self.flock_mode != FlockMode.Dispersing:
+            self.recent_safe_location = self.coordinates
+
+        self.set_flock_mode(FlockMode.Dispersing)
+        self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
+        predator_coordinates = {}
+
+        # take all predators into account
+        for predator in predators:
+            new_escape_direction = self.__update_predator_escape_direction(predator.coordinates, False, False)
+            self.mobility_model.current_dir = new_escape_direction
+            if predator.get_id() not in self.__detected_predator_ids__:
+                predator_coordinates[predator.get_id()] = predator.coordinates
+            else:
+                predator_ids.remove(predator.get_id())
+        if self.propagate_predator_signal and not predator_ids.issubset(self.__detected_predator_ids__):
+            multicast_message_content(self, self.current_neighborhood, PredatorSignal(predator_coordinates))
+        self.__detected_predator_ids__ = new_predator_ids
+        return self.mobility_model.next_direction(self.coordinates)
+
+    def _extract_escape_direction(self, predator_coordinates, use_cardinal_location=False, use_relative_location=False):
+        # if it's a warning sent from a particle, process the list of predator coordinates
+        for coordinates in predator_coordinates:
+            self.mobility_model.current_dir = self.__update_predator_escape_direction(coordinates,
+                                                                                      use_relative_location,
+                                                                                      use_cardinal_location)
+        return self.mobility_model.current_dir
+
+    def go_to_safe_location(self):
+        self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=self.get_a_safe_location()))
+        self.set_flock_mode(FlockMode.Regrouping)
+        return self.mobility_model.next_direction(self.coordinates, self.get_blocked_surrounding_locations())
+
+    def get_a_safe_location(self):
+        if self.recent_safe_location is None:
+            return self.coordinates
+        else:
+            return self.recent_safe_location

@@ -111,9 +111,9 @@ class Mixin:
         :return: a collections.Counter of shared neighbour directions.
         """
         shared_neighbours_directions = Counter()
-        for neighbours_neighbour in self.__current_neighborhood__[neighbour].get_neighbourhood():
+        for neighbours_neighbour in self.current_neighborhood[neighbour].get_neighbourhood():
             try:
-                direction = self.__current_neighborhood__[neighbours_neighbour].get_direction()
+                direction = self.current_neighborhood[neighbours_neighbour].get_direction()
                 shared_neighbours_directions[direction] += 1
             except KeyError:
                 pass
@@ -156,7 +156,7 @@ class Mixin:
     def _is_edge_of_flock_(self):
         for cardinal_direction in CardinalDirection.get_cardinal_directions_list():
             if len(self.get_particles_in_cardinal_direction_hop(
-                    cardinal_direction, self.routing_parameters.scan_radius)) == 0:
+                    cardinal_direction, self.routing_parameters.interaction_radius)) == 0:
                 return True
         return False
 
@@ -167,12 +167,12 @@ class Mixin:
         :return: the next direction for the particle to move to
         """
         self.set_flock_mode(FlockMode.Searching)
-        if len(self.__current_neighborhood__) < len(self.__previous_neighborhood__):
+        if len(self.current_neighborhood) < len(self.previous_neighborhood):
             # if the particle had neighbours previously and now less, go in the opposite direction
             self.mobility_model.turn_around()
-        elif len(self.__current_neighborhood__) == 0:
+        elif len(self.current_neighborhood) == 0:
             # scan with max scan radius if the particle hasn't had a neighbour
-            surrounding = self.scan_for_locations_within(self.routing_parameters.scan_radius)
+            surrounding = self.scan_for_locations_within(self.routing_parameters.interaction_radius)
             if not surrounding:
                 self.mobility_model.set_mode(MobilityModelMode.Random)
             else:

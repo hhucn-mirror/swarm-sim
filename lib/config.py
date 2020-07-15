@@ -7,7 +7,7 @@ from datetime import datetime
 from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import MobilityModelMode
-from lib.oppnet.predator import ChaseMode
+from lib.oppnet.predator import PursuitMode
 from lib.oppnet.routing import Algorithm, RoutingParameters
 
 
@@ -91,12 +91,12 @@ class ConfigData:
         self.message_store_size = config.getint("Routing", "ms_size")
         self.message_store_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
         routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
-        scan_radius = config.getint("Routing", "scan_radius")
+        interaction_radius = config.getint("Routing", "interaction_radius")
         l_encounter = config.getfloat("Routing", "l_encounter")
         gamma = config.getfloat("Routing", "gamma")
         beta = config.getfloat("Routing", "beta")
         p_init = config.getfloat("Routing", "p_init")
-        self.routing_parameters = RoutingParameters(routing_algorithm, scan_radius, l_encounter=l_encounter,
+        self.routing_parameters = RoutingParameters(routing_algorithm, interaction_radius, l_encounter=l_encounter,
                                                     gamma=gamma, beta=beta, p_init=p_init)
 
         self.message_ttl = config.getint("Routing", "message_ttl")
@@ -121,10 +121,12 @@ class ConfigData:
         self.flock_radius = config.getint("Flocking", "flock_radius")
         self.leader_count = config.getint("Flocking", "leader_count")
         self.commit_quorum = config.getfloat("Flocking", "commit_quorum")
+        self.propagate_predator_signal = config.getboolean("Flocking", "propagate_predator_signal")
         # predator config
-        self.predator_scan_radius = config.getint("Flocking", "predator_scan_radius")
-        self.predator_chase_mode = ChaseMode(config.getint("Flocking", "predator_chase_mode"))
-        self.predator_chase_rounds = config.getint("Flocking", "predator_chase_rounds")
+        self.predator_interaction_radius = config.getint("Flocking", "predator_interaction_radius")
+        self.predator_pursuit_mode = PursuitMode(config.getint("Flocking", "predator_pursuit_mode"))
+        self.predator_pursuit_rounds = config.getint("Flocking", "predator_pursuit_rounds")
+        self.predator_initial_amount = config.getint("Flocking", "predator_initial_amount")
         try:
             self.scenario = config.get("File", "scenario")
         except configparser.NoOptionError as noe:

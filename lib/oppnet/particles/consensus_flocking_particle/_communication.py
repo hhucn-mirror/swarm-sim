@@ -11,8 +11,8 @@ class Mixin:
         """
         self.reset_neighborhood_direction_counter()
         self.__neighborhood_direction_counter__[self.mobility_model.current_dir] += 1
-        content = DirectionMessageContent(self.mobility_model.current_dir, list(self.__current_neighborhood__.keys()))
-        for neighbour in self.__current_neighborhood__.keys():
+        content = DirectionMessageContent(self.mobility_model.current_dir, list(self.current_neighborhood.keys()))
+        for neighbour in self.current_neighborhood.keys():
             message = Message(self, neighbour, self.world.get_actual_round(), content=content)
             send_message(self, neighbour, message)
 
@@ -41,7 +41,7 @@ class Mixin:
                                                                                  queried_directions_per_particle)
             # scan with maximum scan radius to detect whether the particle is actually at the edge of the flock
             elif len(self.get_particles_in_cardinal_direction_hop(cardinal_direction,
-                                                                  self.routing_parameters.scan_radius)) == 0:
+                                                                  self.routing_parameters.interaction_radius)) == 0:
                 self.__max_cardinal_direction_hops__[cardinal_direction] = 0
         self.__send_relative_location_queries__(queried_directions_per_particle)
 

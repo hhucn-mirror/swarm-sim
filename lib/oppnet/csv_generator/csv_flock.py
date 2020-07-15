@@ -1,8 +1,9 @@
 import csv
 import logging
+import math
 
 from lib.oppnet.util import get_max_flock_radius, optimal_flock_distance, all_pairs_flock_distance, flock_spread, \
-    flock_uniformity
+    flock_uniformity, get_distance_from_coordinates
 
 
 class CsvFlockRoundData:
@@ -23,9 +24,14 @@ class CsvFlockRoundData:
         self.flock_data = []
         self.directory = directory
         self.grid = grid
+        self._predators = set()
+        self._predator_coordinates = []
 
     def add_flock(self, flock):
         self.flock_data.append(FlockRoundData(flock))
+
+    def add_predator(self, predator):
+        self._predators.add(predator)
 
     def __del__(self):
         """
@@ -63,29 +69,43 @@ class CsvFlockRoundData:
         all_pairs_distance = all_pairs_flock_distance(particle_coordinates)
         all_pairs_optimality = optimal_all_pairs_distance / all_pairs_distance
         if all_pairs_distance < optimal_all_pairs_distance:
-            logging.debug("WARNING: csv_generator -> get_data_row(): all_pairs_distance < optimal_all_pairs_distance")
+            logging.warning("WARNING: csv_generator -> get_data_row(): all_pairs_distance < optimal_all_pairs_distance")
 
         spread_euclidean, spread_hops, center_coordinates = flock_spread(particle_coordinates, self.grid)
 
-        return [sim_round, particles_count, flock_radius, optimal_all_pairs_distance,
+        min_predator_distance = self._get_min_predator_distance(sim_round, particle_coordinates)
+
+        return [sim_round + 1, particles_count, flock_radius, optimal_all_pairs_distance,
                 all_pairs_distance, all_pairs_optimality, flock_uniformity(particle_directions),
-                spread_euclidean, spread_hops, center_coordinates]
+                spread_euclidean, spread_hops, center_coordinates, min_predator_distance]
 
     def update_metrics(self):
         for flock_round_data in self.flock_data:
             flock_round_data.update()
+        self._predator_coordinates.append([predator.coordinates for predator in self._predators])
+
+    def _get_min_predator_distance(self, sim_round, particle_coordinates):
+        predator_coordinates = self._predator_coordinates[sim_round]
+        min_distance = math.inf
+        for p_1 in predator_coordinates:
+            for p_2 in particle_coordinates:
+                distance = get_distance_from_coordinates(p_1, p_2)
+                if distance < min_distance:
+                    min_distance = distance
+        return min_distance
 
     @staticmethod
     def get_header_row():
         return ['Round', 'Flock Size', 'Flock Radius', 'Optimal All-Pairs Distance', 'Actual All-Pairs Distance',
-                'All-Pairs Distance Optimality', 'Uniformity', 'Euclidean Spread', 'Hop Spread', 'Flock Center']
+                'All-Pairs Distance Optimality', 'Uniformity', 'Euclidean Spread', 'Hop Spread', 'Flock Center',
+                'Minimum Distance flock member to predators']
 
 
 class FlockRoundData:
     def __init__(self, particles):
         self._particles = particles
-        self.particles_round_coordinates = [[particle.coordinates for particle in particles]]
-        self.particles_directions = [[particle.mobility_model.current_dir for particle in particles]]
+        self.particles_round_coordinates = []
+        self.particles_directions = []
 
     def update(self):
         self.particles_round_coordinates.append([particle.coordinates for particle in self._particles])

@@ -5,7 +5,8 @@ from ._helper_classes import LeaderStateName, LeaderState
 
 class Mixin:
     def __add_leader_state__(self, state_name, waiting_particles, start_round, expected_rounds):
-        if state_name not in self.__leader_states__ or self.__leader_states__[state_name] is None:
+        if state_name not in self.__leader_states__ or self.__leader_states__[state_name] is None \
+                or state_name == LeaderStateName.WaitingForRejoin:
             self.__leader_states__[state_name] = LeaderState(state_name, waiting_particles, start_round,
                                                              expected_rounds)
         elif state_name in [LeaderStateName.WaitingForCommits, LeaderStateName.WaitingForDiscoverAck]:

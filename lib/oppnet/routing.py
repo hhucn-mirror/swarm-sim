@@ -28,14 +28,14 @@ class MANeTRole(Enum):
 
 class RoutingParameters:
 
-    def __init__(self, algorithm, scan_radius, manet_role=None, manet_group=0,
+    def __init__(self, algorithm, interaction_radius, manet_role=None, manet_group=0,
                  l_encounter=.75, gamma=.99, beta=.25, p_init=.75):
         """
         Constructor
         :param algorithm: The routing algorithm to be used.
         :type algorithm: :class:`~routing.Algorithm`
-        :param scan_radius: Scan radius for particle scanning.
-        :type scan_radius: int
+        :param interaction_radius: Scan radius for particle scanning.
+        :type interaction_radius: int
         :param manet_role: Role of the particle in an MANeT island.
         :type manet_role: :class:`~routing.MANeTRole`
         :param manet_group: Group the particle belongs to.
@@ -57,7 +57,7 @@ class RoutingParameters:
         self.manet_group = manet_group
         if manet_role is None:
             self.manet_role = MANeTRole.Node
-        self.scan_radius = scan_radius
+        self.interaction_radius = interaction_radius
         self.l_encounter = l_encounter
         self.gamma = gamma
         self.beta = beta
@@ -78,18 +78,18 @@ class RoutingParameters:
         return rp1.manet_group == rp2.manet_group
 
 
-def next_step(particles, scan_radius=None):
+def next_step(particles, interaction_radius=None):
     """
     Executes the next routing steps for each particle in order.
     :param particles: List of particles
     :type particles: list
-    :param scan_radius: Particle scan radius.
-    :type scan_radius: int
+    :param interaction_radius: Particle scan radius.
+    :type interaction_radius: int
     """
     for particle in particles:
         routing_params = particle.routing_parameters
-        if scan_radius is not None:
-            routing_params.scan_radius = scan_radius
+        if interaction_radius is not None:
+            routing_params.interaction_radius = interaction_radius
 
         if routing_params.algorithm == Algorithm.Epidemic_MANeT:
             __next_step_manet_epidemic__(particle)
@@ -116,13 +116,13 @@ def __next_step_epidemic__(sender, nearby=None):
 
     routing_params = sender.routing_parameters
     if nearby is None:
-        nearby = sender.scan_for_particles_within(hop=routing_params.scan_radius)
+        nearby = sender.scan_for_particles_within(hop=routing_params.interaction_radius)
         if nearby is None:
             return
 
     for msg in list(sender.send_store):
         for neighbour in nearby:
-            send_message(sender, neighbour, msg)
+            send_message(sender, neighbour, msg, remove_immediately=False)
 
 
 def __next_step_manet_epidemic__(particle):
@@ -132,7 +132,7 @@ def __next_step_manet_epidemic__(particle):
     :type particle: :class:`~particle.Particle`
     """
     routing_params = particle.routing_parameters
-    nearby = particle.scan_for_particles_within(hop=routing_params.scan_radius)
+    nearby = particle.scan_for_particles_within(hop=routing_params.interaction_radius)
     if nearby is None:
         return
 
@@ -150,6 +150,7 @@ def __next_step_one_leader_flocking__(particle):
     if particle.get_flock_member_type() == FlockMemberType.follower:
         particle.__process_as_follower__(received + to_forward)
     else:
+        particle.__process_as_leader__(received)
         particle.update_leader_states()
 
 
@@ -176,7 +177,7 @@ def __next_step_prophet__(particle):
     :type particle: :class:`~particle.Particle`
     """
     routing_params = particle.routing_parameters
-    nearby = particle.scan_for_particles_within(hop=routing_params.scan_radius)
+    nearby = particle.scan_for_particles_within(hop=routing_params.interaction_radius)
     probabilities = __age_delivery_probability__(particle)
     if nearby:
         for encounter in nearby:
@@ -240,7 +241,7 @@ def __try_and_transfer_messages__(particle, probabilities, particle_probability_
         (encounter_probability_for_receiver, _) = probabilities_encounter.get(receiver_id)
         # if the encounter is at least as likely to deliver the message, then transfer it
         if encounter_probability_for_receiver >= particle_probability_for_receiver:
-            send_message(particle, encounter, message)
+            send_message(particle, encounter, message, remove_immediately=False)
         # regardless update probability for particle with receiver_id
         particle_probability_for_receiver += (1 - particle_probability_for_receiver) * \
             particle_probability_for_encounter * encounter_probability_for_receiver * particle.routing_parameters.beta

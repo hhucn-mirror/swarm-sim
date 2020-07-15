@@ -90,22 +90,22 @@ class Particle(matter.Matter):
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction, direction_coord = self.check_within_border(direction, direction_coord)
-        if self.world.grid.are_valid_coordinates(direction_coord) \
-        and direction_coord not in self.world.particle_map_coordinates:
+        within_border = self.world.grid.are_valid_coordinates(direction_coord)
+        valid_coordinates = direction_coord not in self.world.particle_map_coordinates
+        if valid_coordinates and within_border:
             if self.coordinates in self.world.particle_map_coordinates:
                 del self.world.particle_map_coordinates[self.coordinates]
             self.coordinates = direction_coord
             self.world.particle_map_coordinates[self.coordinates] = self
             if self.world.vis:
                 self.world.vis.particle_changed(self)
-            logging.info("round {}: particle {} successfully moved to {}".format(self.world.get_actual_round(),
-                                                                                 self.number, direction))
+            # logging.info("round {}: particle {} successfully moved to {}".format(self.world.get_actual_round(),
+            #                                                                     self.number, direction))
             self.world.csv_round.update_metrics(steps=1)
             self.csv_particle_writer.write_particle(steps=1)
             self.check_for_carried_tile_or_particle()
-            return True
 
-        return False
+        return valid_coordinates, within_border
 
     def check_for_carried_tile_or_particle(self):
         if self.carried_tile is not None:

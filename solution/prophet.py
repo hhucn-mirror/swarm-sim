@@ -2,27 +2,23 @@ import lib.oppnet.routing
 from lib.oppnet import routing
 from lib.oppnet.communication import generate_random_messages
 
-new_message_interval = 10
-messages_per_interval = 2
-
 
 def solution(world):
     particles = world.get_particle_list()
-    config_data = world.config_data
-
     current_round = world.get_actual_round()
-    if world.get_actual_round() == 1:
-        # initially generate messages per particle
-        generate_random_messages(particles, messages_per_interval, world)
+
+    if current_round == 1:
+        # initially generate 5 messages per particle
+        generate_random_messages(particles, amount=2, world=world)
         initialize_delivery_probabilities(particles)
     else:
-        # generated new messages per particle
-        if current_round % new_message_interval == 0:
-            generate_random_messages(particles, amount=messages_per_interval, world=world)
+        # generate 2 messages per particle, every 20 rounds
+        if current_round % 20 == 0:
+            generate_random_messages(particles, amount=2, world=world)
         # move in every round starting from the second one
         for particle in particles:
             next_direction = particle.mobility_model.next_direction(current_x_y_z=particle.coordinates)
-            if next_direction is not False:
+            if next_direction:
                 particle.move_to(next_direction)
 
         lib.oppnet.routing.next_step(particles)

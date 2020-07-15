@@ -1,9 +1,8 @@
 import logging
 
-from lib.oppnet.communication import Message, multicast_message_content
+from lib.oppnet.communication import Message
 from lib.oppnet.message_types import DirectionMessageContent, RelativeLocationMessageContent, PredatorSignal, \
     SafeLocationMessage
-from lib.oppnet.mobility_model import MobilityModelMode
 from lib.oppnet.particles import FlockMode
 from lib.swarm_sim_header import get_direction_between_coordinates
 
@@ -23,9 +22,9 @@ class Mixin:
             elif isinstance(content, RelativeLocationMessageContent):
                 self.__process_relative_location_message(message, content)
             elif isinstance(content, PredatorSignal):
-                self.__process_predator_signal(message, content)
+                self.process_predator_signal(message, content, use_relative_location=True)
             elif isinstance(content, SafeLocationMessage):
-                self.__process_safe_location_added(message, content)
+                self.__process_safe_location_added(content)
             else:
                 logging.debug("round {}: opp_particle -> received an unknown content type.")
 
@@ -36,9 +35,9 @@ class Mixin:
         :param content: the content of the message.
         :return: nothing
         """
-        if message.get_sender() not in self.__current_neighborhood__:
+        if message.get_sender() not in self.current_neighborhood:
             logging.debug("round {}: opp_particle -> received direction from a non-neighbour.")
-        self.__current_neighborhood__[message.get_sender()] = content
+        self.current_neighborhood[message.get_sender()] = content
         self.__neighborhood_direction_counter__[content.get_direction()] += 1
 
     def __process_relative_location_message(self, message, content):
@@ -67,42 +66,11 @@ class Mixin:
 
         updated_location = RelativeLocationMessageContent.get_relative_location(self.__max_cardinal_direction_hops__)
         if updated_location:
-            self.flock_mode = FlockMode.FoundLocation
+            self.set_flock_mode(FlockMode.FoundLocation)
             if self.relative_flock_location != updated_location:
                 self.relative_flock_location = updated_location
                 self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,
                                                                                     (0, 0, 0))
 
-    def __process_predator_signal(self, message, content: PredatorSignal):
-        """
-        Processes a PredatorSignal message.
-        :param message: the message to process
-        :type message: Message
-        :param content: the content of the message
-        :type content: PredatorSignal
-        """
-        predator_ids = set(content.predator_coordinates.keys())
-        if self.__detected_predator_ids__ and self.__detected_predator_ids__.issuperset(predator_ids):
-            return
-        self.__detected_predator_ids__.update(predator_ids)
-        escape_direction = self.__extract_escape_direction__(content.predator_coordinates.values(), message)
-        self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
-        self.mobility_model.current_dir = escape_direction
-        self.set_flock_mode(FlockMode.Dispersing)
-        # forward to all neighbors not in the receiver list, if the message wasn't a broadcast
-        if not message.is_broadcast:
-            neighbors = set(self.__current_neighborhood__.keys()).union({self})
-            new_receivers = content.receivers.symmetric_difference(neighbors)
-            content.update_receivers(neighbors)
-            if new_receivers:
-                multicast_message_content(self, new_receivers, content)
-
-    def __extract_escape_direction__(self, predator_coordinates, message):
-        # if it's a warning sent from a particle, process the list of predator coordinates
-        for coordinates in predator_coordinates:
-            self.mobility_model.current_dir = self.__update_predator_escape_direction(coordinates)
-        return self.mobility_model.current_dir
-
-    def __process_safe_location_added(self, message, content):
-        if content.coordinates not in self.safe_locations:
-            self.safe_locations.append(content.coordinates)
+    def __process_safe_location_added(self, content):
+        self.recent_safe_location = content.coordinates

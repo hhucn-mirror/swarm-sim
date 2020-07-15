@@ -37,7 +37,8 @@ class Mixin:
             if isinstance(content, LeaderMessageContent):
                 message_type = content.message_type
                 sending_leader = content.sending_leader
-                if (sending_leader not in self.leader_contacts) and sending_leader.get_id() != self.get_id():
+                if not message.is_broadcast and sending_leader not in self.leader_contacts \
+                        and sending_leader.get_id() != self.get_id():
                     self.__new_leader_found__(message, sending_leader)
                 if message_type == LeaderMessageType.commit:
                     self.__process_commit_as_leader__(message)
@@ -141,11 +142,12 @@ class Mixin:
                 self.send_direction_proposal(False)
             distance = get_distance_from_coordinates(self.coordinates, message.get_original_sender().coordinates)
             self.__add_leader_state__(LeaderStateName.WaitingForRejoin, {message.get_original_sender()},
-                                      self.world.get_actual_round(), distance * 2 + 1)
+                                      self.world.get_actual_round(), distance)
             self.reset_random_next_direction_proposal_round()
             broadcast_message(self, Message(self, message.get_original_sender(), content=LostMessageContent(
                 LostMessageType.RejoinMessage, self.__get_estimate_centre_from_leader_contacts__())))
-            logging.debug("round {}: leader responded to SeparationMessage.".format(self.world.get_actual_round()))
+            logging.debug("round {}: leader responded to SeparationMessage from {}"
+                          .format(self.world.get_actual_round(), message.get_original_sender().number))
         elif message_type == LostMessageType.QueryNewLocation:
             self.__remove_particle_from_states__(message.get_original_sender(), LeaderStateName.WaitingForRejoin)
         self.__process_lost_message_as_follower__(message)
@@ -153,7 +155,7 @@ class Mixin:
     def __process_safe_location_message_as_leader(self, message):
         content = message.get_content()
         if content.message_type == SafeLocationMessageType.TileAdded:
-            self.safe_locations.append(content.coordinates)
+            self.recent_safe_location = content.coordinates
             if self.flock_mode != FlockMode.Flocking:
                 self.mobility_model.set_mode(MobilityModelMode.POI)
                 self.mobility_model.poi = content.coordinates
@@ -170,12 +172,16 @@ class Mixin:
         predator_ids = set(content.predator_coordinates.keys())
         new_predator_ids = predator_ids.difference(self.__detected_predator_ids__)
         if new_predator_ids:
+            new_escape_direction = current_direction = self.mobility_model.current_dir
             for predator_id in new_predator_ids:
                 new_escape_direction = self.__update_predator_escape_direction(
                     content.predator_coordinates[predator_id], use_relative_location=False)
                 self.mobility_model.current_dir = new_escape_direction
+            # reset mobility model current_dir
+            self.mobility_model.current_dir = current_direction
             self.__detected_predator_ids__.update(predator_ids)
-            self.proposed_direction = self.mobility_model.current_dir
+            # only set the proposed_direction to force waiting for propagation
+            self.proposed_direction = new_escape_direction
             self.__multicast_instruct__(instruct_override=True)
 
     def __quorum_fulfilled__(self):

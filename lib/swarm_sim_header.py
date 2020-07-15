@@ -227,6 +227,8 @@ def get_direction_between_coordinates(coordinates1, coordinates2):
         y_diff = 0
     if x_diff != 0:
         x_diff = copysign(1 - (abs(y_diff) * 0.5), x_diff)
-    else:
+    elif y_diff == 0:
         x_diff = 0
+    else:
+        x_diff = 0.5
     return x_diff, y_diff, 0

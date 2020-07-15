@@ -1,4 +1,4 @@
-import logging
+import math
 import random
 from enum import Enum
 
@@ -6,11 +6,12 @@ from lib.oppnet.communication import broadcast_message, Message
 from lib.oppnet.message_types.predator_signal import PredatorSignal
 from lib.oppnet.messagestore import MessageStore
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
+from lib.oppnet.particles import FlockMemberType
 from lib.particle import Particle
 from lib.swarm_sim_header import scan_within_per_hop, get_coordinates_in_direction
 
 
-class ChaseMode(Enum):
+class PursuitMode(Enum):
     FocusFlock = 1
     FocusParticle = 2
 
@@ -19,17 +20,18 @@ class Predator(Particle):
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, mm_mode=None):
         super().__init__(world=world, coordinates=coordinates, color=color, particle_counter=particle_counter,
                          csv_generator=csv_generator)
-        self.scan_radius = self.world.config_data.predator_scan_radius
-        self.chase_mode = self.world.config_data.predator_chase_mode
-        self.max_chase = None
+        self.interaction_radius = self.world.config_data.predator_interaction_radius
+        self.pursuit_mode = self.world.config_data.predator_pursuit_mode
         if not mm_mode:
             mm_mode = MobilityModelMode.POI
         self.mobility_model = MobilityModel(self.coordinates, mm_mode)
         self.signal_velocity = world.config_data.signal_velocity
         self.signal_range = world.config_data.signal_range
         self.__init_message_stores__(world.config_data.message_store_size, world.config_data.message_store_strategy)
-        self._chase_rounds = self.world.config_data.predator_chase_rounds
-        self._deactivated_rounds = 0
+        self._pursuit_rounds = self.world.config_data.predator_pursuit_rounds
+        self.max_pursuit = self._pursuit_rounds
+        self._pause_rounds = int(self._pursuit_rounds / 2)
+        self._deactivated_rounds = math.inf
 
     def move_to(self, direction):
         """
@@ -50,7 +52,8 @@ class Predator(Particle):
             self.world.predator_map_coordinates[self.coordinates] = self
             if self.world.vis:
                 self.world.vis.predator_changed(self)
-            logging.info("predator %s successfully moved to %s", str(self.get_id()), direction)
+            # logging.info("round {} predator {} successfully moved to {}"
+            #            .format(self.world.get_actual_round(), self.number, direction))
             return True
 
         return False
@@ -68,63 +71,60 @@ class Predator(Particle):
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
 
-    def chase(self):
+    def pursuit(self):
         """
-        Moves the predator depending on chase_mode.
+        Moves the predator depending on pursuit_mode.
         :return: the result of move_to()
         """
-        # if the chase is paused, simply move by mobility model
-        if self.mobility_model.mode != MobilityModelMode.POI:
-            self.move_to(self.mobility_model.next_direction(self.coordinates))
-            return None
-        if self.max_chase is None:
-            if self._deactivated_rounds == self._chase_rounds:
-                self._deactivated_rounds = 0
-                self.max_chase = self.world.get_actual_round() + self.world.config_data.predator_chase_rounds
-            else:
-                self._deactivated_rounds += 1
-                return None
-        # if maximum number of rounds for a chase is reached, use random_walk mobility model
-        elif self.world.get_actual_round() > self.max_chase:
-            self.deactivate_chase()
-            return None
+        # if the pursuit is paused, simply move by mobility model
+        if self.world.get_actual_round() == self.max_pursuit:
+            return self.deactivate_pursuit()
+        elif self._deactivated_rounds == self._pause_rounds:
+            self.activate_pursuit()
+        elif self._deactivated_rounds < self._pause_rounds:
+            self._deactivated_rounds += 1
+            return
 
-        # else execute the chase mode by scanning for nearby particles/flocks
-        if self.chase_mode == ChaseMode.FocusParticle:
-            next_direction = self.chase_nearest_particle()
+        # else execute the pursuit mode by scanning for nearby particles/flocks
+        if self.pursuit_mode == PursuitMode.FocusParticle:
+            next_direction = self.pursuit_nearest_particle()
         else:
-            next_direction = self.chase_nearby_flock()
+            next_direction = self.pursuit_nearby_flock()
 
-        if next_direction is not None:
-            self.broadcast_warning()
+        if next_direction:
+            # self.broadcast_warning()
             return self.move_to(next_direction)
         else:
             return self.move_to(MobilityModel.random_direction())
 
     def catch_particle(self, caught_particle):
         self.world.remove_particle(caught_particle.get_id())
+        if caught_particle.get_flock_member_type() == FlockMemberType.leader:
+            remaining_particles = self.world.get_particle_list()
+            particle = random.choice(remaining_particles)
+            particle.set_flock_member_type(FlockMemberType.leader)
         self.world.csv_round.update_metrics(particles_caught=1)
 
-    def activate_chase(self):
+    def activate_pursuit(self):
         """
-        Resets the max_chase field to the maximum number of rounds to chase + the current simulator round.
+        Resets the max_pursuit field to the maximum number of rounds to pursuit + the current simulator round.
         """
-        self.max_chase = self.world.config_data.predator_chase_rounds + self.world.get_actual_round()
+        self.max_pursuit = self._pursuit_rounds + self.world.get_actual_round()
         self.mobility_model.set_mode(MobilityModelMode.POI)
+        self._deactivated_rounds = math.inf
 
-    def deactivate_chase(self):
-        self.max_chase = None
-        self.mobility_model.set_mode(MobilityModelMode.Random_Walk)
-        self.move_to(self.mobility_model.next_direction(self.coordinates))
+    def deactivate_pursuit(self):
+        self._deactivated_rounds = 1
+        self.mobility_model.set_mode(MobilityModelMode.Static)
 
-    def chase_nearest_particle(self):
+    def pursuit_nearest_particle(self):
         """
-        Returns the nearest particle within the predator's scan_radius or None if no particle is close enough.
+        Returns the nearest particle within the predator's interaction_radius or None if no particle is close enough.
         :return: nearest particle or None
         :rtype: Particle
         """
         nearest_particles = scan_within_per_hop(self.world.particle_map_coordinates, self.coordinates,
-                                                self.scan_radius, self.world.grid)
+                                                self.interaction_radius, self.world.grid)
         if nearest_particles:
             if len(nearest_particles[0]) > 0:
                 self.mobility_model.poi = random.choice(nearest_particles[0]).coordinates
@@ -132,16 +132,16 @@ class Predator(Particle):
                 self.mobility_model.poi = nearest_particles[0][0].coordinates
             return self.mobility_model.next_direction(self.coordinates)
         else:
-            return None
+            return self.mobility_model.random_direction()
 
-    def chase_nearby_flock(self):
+    def pursuit_nearby_flock(self):
         """
-        Tries to find a nearby flock within the scan_radius of the predator and move towards its center.
+        Tries to find a nearby flock within the interaction_radius of the predator and move towards its center.
         :return: the next direction to move to
         """
         try:
             self.mobility_model.poi = self.world.get_nearby_flock_center_by_coordinates(self.coordinates,
-                                                                                        self.scan_radius)
+                                                                                        self.interaction_radius)
             return self.mobility_model.next_direction(self.coordinates)
         except IndexError:
             return None
@@ -154,5 +154,5 @@ class Predator(Particle):
         :return: nothing
         """
         message = Message(self, None, content=PredatorSignal({self.get_id(): self.coordinates}),
-                          ttl=self.world.config_data.predator_chase_rounds)
+                          ttl=self.world.config_data.predator_pursuit_rounds)
         broadcast_message(self, message)

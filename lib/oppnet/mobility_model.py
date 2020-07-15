@@ -98,6 +98,7 @@ class MobilityModel:
         elif mode == MobilityModelMode.Random or mode == MobilityModelMode.Random_Walk:
             self.current_dir = self.random_direction()
         elif mode == MobilityModelMode.DisperseFlock:
+            self.current_dir = None
             self.steps = 0
         elif mode == MobilityModelMode.POI:
             self._distance_to_poi = math.inf

@@ -508,17 +508,18 @@ class World:
         """
         return self.remove_matter_on(coordinates, Particle)
 
-    def add_tile(self, coordinates, color=None):
+    def add_tile(self, coordinates, color=None, broadcast_coordinates=False):
         """
         Adds a tile to the world database
         :param color: color of the tile (None for config default)
         :param coordinates: the coordinates on which the tile should be added
+        :param broadcast_coordinates: Whether to send the tile's coordinates as a broadcast
         :return: Successful added matter; False: Unsuccessful
         """
         if color is None:
             color = self.config_data.tile_color
         return_value = self.add_matter(Tile(self, coordinates, color), coordinates)
-        if return_value:
+        if broadcast_coordinates and return_value:
             dummy_particle = self.particle_mod.Particle(self, coordinates, None, csv_generator=self.csv_generator)
             broadcast_message(dummy_particle, Message(dummy_particle, None, start_round=self.get_actual_round(),
                                                       ttl=self.config_data.message_ttl,
@@ -578,7 +579,9 @@ class World:
             color = self.config_data.predator_color
         if coordinates is None:
             coordinates = self.__random_predator_coordinates__()
-        return self.add_matter(Predator(self, coordinates, color, csv_generator=self.csv_generator), coordinates)
+        predator = Predator(self, coordinates, color, csv_generator=self.csv_generator)
+        self.csv_flock_round.add_predator(predator)
+        return self.add_matter(predator, coordinates)
 
     def __random_predator_coordinates__(self):
         x_range = np.arange(-self.config_data.size_x / 2, self.config_data.size_x / 2, 0.5)

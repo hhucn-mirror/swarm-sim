@@ -1,6 +1,6 @@
 import logging
 
-from lib.oppnet.communication import multicast_message_content, send_message, Message, broadcast_message
+from lib.oppnet.communication import multicast_message_content, send_message, Message
 from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
 from lib.oppnet.message_types.safe_location_message import SafeLocationMessage, SafeLocationMessageType
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
@@ -9,7 +9,7 @@ from lib.particle import Particle
 
 class Mixin:
     def multicast_leader_message(self, message_type: LeaderMessageType, neighbors=None, instruct_override=False):
-        max_hops = self.routing_parameters.scan_radius
+        max_hops = self.routing_parameters.interaction_radius
         if not neighbors:
             neighbors = self.scan_for_particles_within(hop=max_hops)
 
@@ -26,14 +26,6 @@ class Mixin:
             content = LeaderMessageContent(self, self.proposed_direction, neighbors, self.t_wait - hop,
                                            message_type, number, instruct_override)
             multicast_message_content(self, receivers, content)
-
-    def broadcast_safe_location(self, safe_location=None):
-        if not safe_location:
-            safe_location = self.get_a_safe_location()
-        message = Message(self, None, content=SafeLocationMessage(safe_location))
-        broadcast_message(self, message)
-        logging.debug("round {}: leader sent new SafeLocationMessage".format(self.world.get_actual_round()))
-        return safe_location
 
     def send_safe_location_proposal(self, safe_location=None):
         if safe_location is None:
@@ -72,7 +64,7 @@ class Mixin:
                     contact_particle.number))
 
     def flood_message_content(self, message_content):
-        receivers = self.scan_for_particles_within(hop=self.routing_parameters.scan_radius)
+        receivers = self.scan_for_particles_within(hop=self.routing_parameters.interaction_radius)
         multicast_message_content(self, receivers, message_content)
 
     def send_message_content_via_contacts(self, receiver, message_content):
@@ -81,7 +73,7 @@ class Mixin:
         elif receiver in self.follower_contacts:
             receivers = self.follower_contacts[receiver].keys()
         else:
-            receivers = self.__previous_neighborhood__.keys()
+            receivers = self.current_neighborhood
         for contact_particle in receivers:
             send_message(self, contact_particle, Message(self, receiver, content=message_content))
 
@@ -98,7 +90,7 @@ class Mixin:
                 pass
         else:
             exclude = {received_message.get_sender(), received_message.get_original_sender()}
-        max_hops = self.routing_parameters.scan_radius
+        max_hops = self.routing_parameters.interaction_radius
         neighbors = self.scan_for_particles_within(hop=max_hops)
 
         all_receivers = set(neighbors)

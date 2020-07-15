@@ -179,7 +179,7 @@ class Message:
         self.ttl = ttl
 
 
-def send_message(sender, receiver, message: Message):
+def send_message(sender, receiver, message: Message, remove_immediately=True):
     """
     Sends :param message: from :param sender: to :param receiver: by giving it to the memory module.
     Checks beforehand if ttl has expired and in such case does not send it.
@@ -189,6 +189,8 @@ def send_message(sender, receiver, message: Message):
     :type receiver: :class:`~opp_particle.Particle`
     :param message: The message to send.
     :type message: :class:`~communication.Message`
+    :param remove_immediately: Whether to remove the message from the senders store immediately after sending.
+    :type remove_immediately: bool
     """
 
     current_round = sender.world.get_actual_round()
@@ -208,9 +210,11 @@ def send_message(sender, receiver, message: Message):
     memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
                                 current_round, sender.signal_velocity,
                                 sender.signal_range)  # TODO: add attributes to particles
+    if remove_immediately:
+        msg_store.remove(original)
 
 
-def multicast_message_content(sender, receivers, message_content, ttl=None):
+def multicast_message_content(sender, receivers, message_content, ttl=None, remove_immediately=True):
     """
     Sends :param message_content: from :param sender: to all :param receivers: by giving it to the memory module.
     Checks beforehand if ttl has expired and in such case does not send it.
@@ -222,6 +226,8 @@ def multicast_message_content(sender, receivers, message_content, ttl=None):
     :type message_content: any
     :param ttl: time to live of the messages
     :type ttl: int
+    :param remove_immediately: Whether to remove the message from the senders store immediately after sending.
+    :type remove_immediately: bool
     """
 
     if not ttl:
@@ -234,6 +240,8 @@ def multicast_message_content(sender, receivers, message_content, ttl=None):
         memory.add_delta_message_on(receiver.get_id(), message, Point(sender.coordinates[0], sender.coordinates[1]),
                                     current_round, sender.signal_velocity,
                                     sender.signal_range)
+        if remove_immediately:
+            sender.send_store.remove(message)
 
 
 def broadcast_message(sender, message):
@@ -253,6 +261,7 @@ def broadcast_message(sender, message):
     current_round = sender.world.get_actual_round()
     memory.add_broadcast_message(message, Point(sender.coordinates[0], sender.coordinates[1]), current_round,
                                  sender.signal_velocity, sender.signal_range)
+    sender.send_store.remove(message)
 
 
 def ttl_expired(message, store):
@@ -292,15 +301,20 @@ def store_message(message, sender, receiver):
         if message.original_sender == message.sender:
             if store.contains_key(message.key):
                 process_event(EventType.MessageDeliveredDirect, message)
+                return
             else:
                 process_event(EventType.MessageDeliveredFirstDirect, message)
         else:
             if not store.contains_key(message.key):
                 process_event(EventType.MessageDeliveredFirst, message)
+            else:
+                return
     else:
         store = receiver.send_store
         if not (store.contains_key(message.key)):
             process_event(EventType.MessageForwarded, message)  # TODO: remove receiver sender
+        else:
+            return
     try:
         store.append(message)
     except OverflowError:

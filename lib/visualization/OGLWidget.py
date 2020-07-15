@@ -314,7 +314,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
                 if nl in self.world.tile_map_coordinates:
                     self.world.remove_tile_on(nl)
                 else:
-                    self.world.add_tile(nl)
+                    self.world.add_tile(nl, broadcast_coordinates=True)
             elif self.cursor_type == 'particle':
                 if nl in self.world.particle_map_coordinates:
                     self.world.remove_particle_on(nl)
