@@ -20,33 +20,17 @@ def solution(world):
         leader_count = world.config_data.leader_count
         leaders, followers = split_particles(particles, leader_count)
         set_t_wait_values(particles, t_wait)
-        initialise_leaders(t_wait, leader_count)
+        world.csv_flock_round.add_flock(particles)
+        initialize_leaders(t_wait)
     else:
         check_neighborhoods(particles)
         routing.next_step(particles)
         update_particle_states(particles)
-        if current_round % 10 == 0:
-            create_random_predator(world)
         if current_round == 5:
             print_all_routes(particles, current_round)
         if current_round > t_wait * 3 + 1:
             move_to_next_direction(particles)
-            predators_chase(world.get_predators_list())
         send_direction_proposals(current_round)
-        detect_predators(particles)
-
-
-def create_random_predator(world):
-    leader = random.choice(leaders)
-    x, y, z = leader.coordinates
-    world.add_predator((x + 5, y, z))
-
-
-def detect_predators(particles):
-    for particle in particles:
-        predators_nearby = particle.predators_nearby()
-        if predators_nearby:
-            return particle.__predators_detected__(predators_nearby)
 
 
 def print_all_routes(particles, current_round):
@@ -70,15 +54,12 @@ def split_particles(particles, leader_count):
     return list(leader_set), follower_set
 
 
-def initialise_leaders(t_wait, leader_count):
+def initialize_leaders(t_wait):
     left_bound = t_wait * 3 + 1
-    right_bound = left_bound * (leader_count + 1)
-    next_direction_proposal_rounds = range(left_bound, right_bound, left_bound)
     for index, leader in enumerate(leaders):
         leader.set_color(red)
-        leader.set_flock_member_type(FlockMemberType.leader)
-        # leader.set_next_direction_proposal_round(next_direction_proposal_rounds[index])
-        leader.set_next_direction_proposal_round(left_bound * (index % 2 + 1))
+        leader.set_flock_member_type(FlockMemberType.Leader)
+        leader.set_next_direction_proposal_round(left_bound * (index % 2))
         leader.multicast_leader_message(LeaderMessageType.discover)
         logging.debug("round 1: leader {} next_direction_proposal: {}".format(leader.number,
                                                                               leader.next_direction_proposal_round))
@@ -90,8 +71,6 @@ def check_neighborhoods(particles):
 
 
 def update_particle_states(particles):
-    for leader in leaders:
-        leader.update_leader_states()
     for particle in particles:
         particle.update_free_locations()
 
@@ -105,7 +84,7 @@ def send_direction_proposals(current_round):
 def move_to_next_direction(particles):
     particle_directions = {}
     for particle in particles:
-        next_direction = particle.next_moving_direction()
+        next_direction = particle.get_next_direction()
         if next_direction:
             if particle.mobility_model.mode == MobilityModelMode.POI:
                 particle.move_to(next_direction)
@@ -113,8 +92,3 @@ def move_to_next_direction(particles):
                 particle_directions[particle] = next_direction
     if particle_directions:
         particles[0].world.move_particles(particle_directions)
-
-
-def predators_chase(predators):
-    for predator in predators:
-        predator.chase()

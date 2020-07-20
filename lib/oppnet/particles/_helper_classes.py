@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class FlockMemberType(Enum):
-    leader = 0
-    follower = 1
+    Leader = 0
+    Follower = 1
 
 
 class FlockMode(Enum):
@@ -13,4 +13,4 @@ class FlockMode(Enum):
     Flocking = 3,
     Dispersing = 4,
     Regrouping = 5,
-    Optimising = 6
+    Optimizing = 6

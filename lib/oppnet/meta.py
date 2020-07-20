@@ -1,6 +1,6 @@
 from enum import Enum
 
-from lib.swarm_sim_header import green, blue, orange, yellow, red
+from lib.swarm_sim_header import green, blue, orange, yellow, red, cyan
 
 
 class EventType(Enum):
@@ -16,8 +16,10 @@ class EventType(Enum):
     MessageTTLExpired = 6
     MessageCreated = 7
     MessageReplicated = 8
+    BroadcastSent = 9
+    BroadcastDelivered = 10
     #
-    ReceiverOutOfMem = 10
+    ReceiverOutOfMem = 11
 
 
 def process_event(event_type, message):
@@ -108,3 +110,15 @@ def process_event(event_type, message):
         receiver.csv_particle_writer.write_particle(out_of_mem=1)
         # color receiver
         receiver.set_color(red)
+    elif event_type == EventType.BroadcastSent:
+        # update round metrics
+        sender.world.csv_round.update_metrics(broadcasts_sent=1)
+        # update particle metrics for the sender
+        sender.csv_particle_writer.write_particle(broadcasts_sent=1)
+    elif event_type == EventType.BroadcastDelivered:
+        # update round metrics
+        sender.world.csv_round.update_metrics(broadcasts_delivered=1)
+        # update particle metrics for the sender
+        sender.csv_particle_writer.write_particle(broadcasts_delivered=1)
+        # color receiver
+        receiver.set_color(cyan)

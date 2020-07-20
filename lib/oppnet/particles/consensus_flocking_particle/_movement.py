@@ -12,40 +12,41 @@ from lib.swarm_sim_header import vector_angle, get_distance_from_coordinates
 
 class Mixin:
 
-    def set_most_common_direction(self, weighted_choice=False, centralisation_force=False):
+    def set_most_common_direction(self, weighted_choice=False, centralization_force=False):
         """
-        Sets the current_dir value of the particle's MobilityModel to the most common value it received from neighbours,
-        with a weighted probability of 1/neighbourhood_size, i.e. the size of the current neighbourhood it received
+        Sets the current_dir value of the particle's MobilityModel to the most common value it received from neighbors,
+        with a weighted probability of 1/neighborhood_size, i.e. the size of the current neighborhood it received
         directions from. The other possibility is for the direction not to change with the inverse probability.
-        Furthermore, if :param centralisation_force is set, then the angle between the vector pointing from the particle
+        Furthermore, if :param centralization_force is set, then the angle between the vector pointing from the particle
         to the flock's relative centre and the most common direction vector will be used as "countering-force"
         to pull the particle towards the centre.
 
         :param weighted_choice: whether to use weighted choice or not.
         :type weighted_choice: bool
-        :param centralisation_force: whether to use a centralisation force or not
-        :type centralisation_force: bool
+        :param centralization_force: whether to use a centralisation force or not
+        :type centralization_force: bool
         :return: the most common direction
         """
-        neighbourhood_size = len(self.__neighborhood_direction_counter__)
-        choice = self.__neighborhood_direction_counter__.most_common(1)[0][0]
+        neighborhood_size = len(self.__neighborhood_direction_counter__)
+        if neighborhood_size == 0:
+            return
+        choice = self.__neighborhood_direction_counter__.most_common(1)[0]
         if weighted_choice:
-            choice = random.choices([choice, self.mobility_model.current_dir],
-                                    [1 / neighbourhood_size, 1 - 1 / neighbourhood_size])[0]
+            choice = random.choices([choice, (self.mobility_model.current_dir, 1 - 1 / neighborhood_size)],
+                                    [1 / neighborhood_size, 1 - 1 / neighborhood_size])[0]
         logging.info("round {}: particle #{} most common: {}".format(self.world.get_actual_round(),
                                                                      self.number, choice))
-        if centralisation_force and self.relative_flock_location:
-            choice = self.__get_choice_from_consensus_and_centralisation_force(choice)
+        if centralization_force and self.relative_flock_location:
+            choice = self.__get_choice_from_consensus_and_centralization_force(choice)
             if choice and self.mobility_model.current_dir != choice:
                 logging.info("round {}: particle #{} changing direction from {} to {}"
                              .format(self.world.get_actual_round(), self.number,
                                      self.mobility_model.current_dir, choice))
-        self.reset_neighborhood_direction_counter()
-        # initialise with current direction
-        self.__neighborhood_direction_counter__[choice] += 1
-        return choice
+        elif choice:
+            choice = choice[0]
+        self.mobility_model.current_dir = choice
 
-    def __get_choice_from_consensus_and_centralisation_force(self, choice: tuple):
+    def __get_choice_from_consensus_and_centralization_force(self, choice: tuple):
         """
         Takes the choice tuple and combines it with a no movement vector as population in random.choices. Takes the
         inverse of the angle between the particles relative location vector and :param choice as a probability for
@@ -60,9 +61,12 @@ class Mixin:
         except TypeError:
             return None
         alpha = vector_angle(u, v)
-        population = [choice[0], False]
+        population = [choice[0], None]
         probabilities = [choice[1] / len(self.__neighborhood_direction_counter__), abs(alpha) / np.pi]
-        return random.choices(population, probabilities, k=1)[0]
+        try:
+            return random.choices(population, probabilities, k=1)[0]
+        except IndexError:
+            return None
 
     def set_random_weighted_direction(self):
         """
@@ -71,21 +75,19 @@ class Mixin:
         direction.
         :return: nothing
         """
-        neighbourhood_size = len(self.__neighborhood_direction_counter__)
-        if neighbourhood_size > 0:
+        neighborhood_size = len(self.__neighborhood_direction_counter__)
+        if neighborhood_size > 0:
             weights = 1 / np.asarray(list(self.__neighborhood_direction_counter__.values()))
             choice = random.choices(self.__neighborhood_direction_counter__.keys(), weights)
             self.mobility_model.current_dir = choice[0]
-            self.reset_neighborhood_direction_counter()
 
     def set_average_direction(self):
         """
-        Sets the current_dir value of the particles MobilityModel to the average value it received from neighbours.
+        Sets the current_dir value of the particles MobilityModel to the average value it received from neighbors.
         :return: nothing
         """
         if len(self.__neighborhood_direction_counter__) > 0:
             self.mobility_model.current_dir = self.__average_coordinates__(self.__neighborhood_direction_counter__)
-            self.reset_neighborhood_direction_counter()
 
     def __average_coordinates__(self, directions_counter: Counter):
         """
@@ -96,47 +98,51 @@ class Mixin:
         :return: average direction
         """
         total_x, total_y, total_z, total_count = 0, 0, 0, 0
-        for (x, y, z), count in directions_counter.items():
-            total_x += x * count
-            total_y += y * count
-            total_z += z * count
+        for direction, count in directions_counter.items():
+            try:
+                (x, y, z) = direction
+                total_x += x * count
+                total_y += y * count
+                total_z += z * count
+            except TypeError:
+                pass
             total_count += count
         average_coordinates = total_x / total_count, total_y / total_count, total_z / total_count
         return self.world.grid.get_nearest_valid_coordinates(average_coordinates)
 
-    def __shared_neighbours_directions__(self, neighbour):
+    def __shared_neighbors_directions__(self, neighbor):
         """
-        Creates a collections.Counter of the directions of particles that are shared neighbours with :param neighbour.
-        :param neighbour: the neighbour to check.
-        :return: a collections.Counter of shared neighbour directions.
+        Creates a collections.Counter of the directions of particles that are shared neighbors with :param neighbor.
+        :param neighbor: the neighbor to check.
+        :return: a collections.Counter of shared neighbor directions.
         """
-        shared_neighbours_directions = Counter()
-        for neighbours_neighbour in self.current_neighborhood[neighbour].get_neighbourhood():
+        shared_neighbors_directions = Counter()
+        for neighbors_neighbor in self.current_neighborhood[neighbor].get_neighborhood():
             try:
-                direction = self.current_neighborhood[neighbours_neighbour].get_direction()
-                shared_neighbours_directions[direction] += 1
+                direction = self.current_neighborhood[neighbors_neighbor].get_direction()
+                shared_neighbors_directions[direction] += 1
             except KeyError:
                 pass
-        return shared_neighbours_directions
+        return shared_neighbors_directions
 
     def try_and_fill_flock_holes(self, hops=2):
         """
-        Tries to find a free location within the surrounding neighbourhood with maximum :param hops,
+        Tries to find a free location within the surrounding neighborhood with maximum :param hops,
         which is closer to the estimated centre of the flock, and move there afterwards
         :param hops: number of hops to scan within for free locations
         :return: the next direction for the particle to move to
         """
         is_edge = self._is_edge_of_flock_()
-        free_neighbour_locations = self.get_free_surrounding_locations_within_hops(hops=hops)
+        free_neighbor_locations = self.get_free_surrounding_locations_within_hops(hops=hops)
         new_ring = self.get_estimated_flock_ring()
         if new_ring is None:
             return self.try_and_find_flock()
         if new_ring == 0:
             self.set_flock_mode(FlockMode.Flocking)
-            self.mobility_model.current_dir = MobilityModel.random_direction()
+            # self.mobility_model.current_dir = MobilityModel.random_direction()
             return None
         new_location = None
-        for free_location in free_neighbour_locations:
+        for free_location in free_neighbor_locations:
             tmp = get_distance_from_coordinates(free_location, (0, 0, 0))
             if tmp < new_ring:
                 new_ring = tmp
@@ -145,15 +151,20 @@ class Mixin:
                 new_location = free_location
                 new_ring = tmp
         if new_location:
-            self.set_flock_mode(FlockMode.Optimising)
+            self.set_flock_mode(FlockMode.Optimizing)
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=new_location))
             return self.mobility_model.next_direction(self.coordinates)
         else:
             self.set_flock_mode(FlockMode.Flocking)
-            self.mobility_model.current_dir = MobilityModel.random_direction()
+            #self.mobility_model.current_dir = MobilityModel.random_direction()
             return None
 
     def _is_edge_of_flock_(self):
+        """
+        Determines if a particle is at the edge of a flock by scanning its surroundings.
+        Assumes no holes in the flock formation.
+        :return: whether or not the particle is assumed to be at the edge of the formation
+        """
         for cardinal_direction in CardinalDirection.get_cardinal_directions_list():
             if len(self.get_particles_in_cardinal_direction_hop(
                     cardinal_direction, self.routing_parameters.interaction_radius)) == 0:
@@ -168,10 +179,10 @@ class Mixin:
         """
         self.set_flock_mode(FlockMode.Searching)
         if len(self.current_neighborhood) < len(self.previous_neighborhood):
-            # if the particle had neighbours previously and now less, go in the opposite direction
+            # if the particle had neighbors previously and now less, go in the opposite direction
             self.mobility_model.turn_around()
         elif len(self.current_neighborhood) == 0:
-            # scan with max scan radius if the particle hasn't had a neighbour
+            # scan with max scan radius if the particle hasn't had a neighbor
             surrounding = self.scan_for_locations_within(self.routing_parameters.interaction_radius)
             if not surrounding:
                 self.mobility_model.set_mode(MobilityModelMode.Random)

@@ -19,29 +19,64 @@ def all_pairs_flock_distance(flock_coordinates):
     return all_pairs_distance
 
 
+def all_pairs_flock_distance_metrics(flock_coordinates):
+    """
+    Calculates the all pairs distance sum, minimum, maximum and median of a iterable of coordinates
+    :param flock_coordinates.
+
+    :param flock_coordinates: iterable of particle coordinates
+    :return: all pairs distances sum, minimum, maximum and median for the flock
+    """
+    all_distances = []
+    for coordinates1 in flock_coordinates:
+        distances = []
+        for coordinates2 in flock_coordinates:
+            distances.append(get_distance_from_coordinates(coordinates1, coordinates2))
+        all_distances.append(distances)
+    all_distances = np.array(all_distances)
+    distance_sum = all_distances.sum(axis=1)
+    return distance_sum.sum(), distance_sum.min(), distance_sum.max(), np.median(distance_sum)
+
+
 def get_max_flock_radius(particles_count):
     """
     Calculates the maximum flock radius of an optimally shaped flock with :param particles_count many particles.
+    Also calculates the number of particles missing to fill the outer ring.
     :param particles_count: the number of particles
-    :return: maximum radius of an optimally shaped flock
+    :return: maximum radius of an optimally shaped flock and number of particles missing from outer ring
     """
-    return math.sqrt(particles_count / 3 - 1 / 12) - 1 / 2
+    radius = math.sqrt(particles_count / 3 - 1 / 12) - 1 / 2
+    max_radius = round(radius)
+    if max_radius == radius:
+        return radius, None
+    else:
+        return radius, (3 * max_radius * (max_radius + 1) + 1) - particles_count
 
 
-def optimal_flock_distance(flock_radius):
+def optimal_flock_distance(flock_radius, missing_particles=None):
     """
     Calculates the all pairs distance sum for every particle in a flock with radius :param flock_radius.
     :param flock_radius: the radius of the flock
+    :param missing_particles: number of particles missing from an optimal flock
     :return: all pair distances sum for all particles in a flock
     """
     optimal_distance = 0
-    flock_radius = int(flock_radius)
+    flock_radius = math.ceil(flock_radius)
     hexagon_rings = get_all_hexagon_rings_as_list(range(0, flock_radius + 1))
     for flock_radius_in in range(0, flock_radius + 1):
-        optimal_distance += optimal_flock_in_distance(flock_radius_in)
-        for flock_radius_out in [radius for radius in range(0, flock_radius + 1) if radius != flock_radius_in]:
+        if missing_particles and flock_radius_in == flock_radius:
             optimal_distance += optimal_in_out_distance_locations(hexagon_rings[flock_radius_in],
-                                                                  hexagon_rings[flock_radius_out])
+                                                                  hexagon_rings[flock_radius_in], missing_particles)
+        else:
+            optimal_distance += optimal_flock_in_distance(flock_radius_in)
+        for flock_radius_out in [radius for radius in range(0, flock_radius + 1) if radius != flock_radius_in]:
+            if missing_particles and flock_radius_out == flock_radius:
+                optimal_distance += optimal_in_out_distance_locations(hexagon_rings[flock_radius_in],
+                                                                      hexagon_rings[flock_radius_out],
+                                                                      missing_particles)
+            else:
+                optimal_distance += optimal_in_out_distance_locations(hexagon_rings[flock_radius_in],
+                                                                      hexagon_rings[flock_radius_out])
     return optimal_distance
 
 
@@ -57,18 +92,27 @@ def get_all_hexagon_rings_as_list(radius_range):
     return rings
 
 
-def optimal_in_out_distance_locations(hexagon_1, hexagon_2):
+def optimal_in_out_distance_locations(hexagon_1, hexagon_2, missing_particles=None):
     """
     Calculates the optimal distance sum between all pairs of particles between two hexagon rings
     (grids/TriangularGrid.py) :param hexagon_1 and radius :param hexagon_2.
     :param hexagon_1: the first hexagon as set of locations
     :param hexagon_2: the second hexagon as set of locations
+    :param missing_particles: number of particles missing from an optimal flock
     :return: all pairs distance sum
     """
     all_pairs_distance = 0
-    for l1 in hexagon_1:
-        for l2 in hexagon_2:
-            all_pairs_distance += get_distance_from_coordinates(l1, l2)
+    distances = []
+    for index, l1 in enumerate(hexagon_2):
+        distances.append(0)
+        for l2 in hexagon_1:
+            pair_distance = get_distance_from_coordinates(l1, l2)
+            all_pairs_distance += pair_distance
+            distances[index] += pair_distance
+    if isinstance(missing_particles, int):
+        distances.sort(reverse=True)
+        for distance in distances[0:missing_particles]:
+            all_pairs_distance -= distance
     return all_pairs_distance
 
 

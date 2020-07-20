@@ -3,6 +3,7 @@ import random
 
 from lib.oppnet import routing
 from lib.oppnet.message_types import LeaderMessageType
+from lib.oppnet.mobility_model import MobilityModelMode
 from lib.oppnet.particles import FlockMemberType
 from lib.swarm_sim_header import red
 
@@ -19,21 +20,17 @@ def solution(world):
         leader_count = world.config_data.leader_count
         leaders, followers = split_particles(particles, leader_count)
         set_t_wait_values(particles, t_wait)
-        initialise_leaders()
+        world.csv_flock_round.add_flock(particles)
+        initialise_leaders(t_wait)
     else:
         check_neighborhoods(particles)
         routing.next_step(particles)
         update_particle_states(particles)
-        if current_round > t_wait * 3 + 1:
-            move_to_next_direction(particles)
         if current_round == 5:
             print_all_routes(particles, current_round)
-        if current_round % 30 == 0:
-            leader = random.choice(leaders)
-            leader.send_safe_location_proposal()
-        if current_round % 100 == 0:
-            for leader in leaders:
-                leader.broadcast_safe_location()
+        if current_round > t_wait * 3 + 1:
+            move_to_next_direction(particles)
+        send_direction_proposals(current_round)
 
 
 def print_all_routes(particles, current_round):
@@ -57,10 +54,14 @@ def split_particles(particles, leader_count):
     return list(leader_set), follower_set
 
 
-def initialise_leaders():
+def initialise_leaders(t_wait):
+    left_bound = t_wait + 1
+    right_bound = left_bound ** 3
     for index, leader in enumerate(leaders):
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.Leader)
+        next_proposal = random.randint(left_bound, right_bound)
+        leader.set_next_direction_proposal_round(next_proposal)
         leader.multicast_leader_message(LeaderMessageType.discover)
         logging.debug("round 1: leader {} next_direction_proposal: {}".format(leader.number,
                                                                               leader.next_direction_proposal_round))
@@ -72,14 +73,24 @@ def check_neighborhoods(particles):
 
 
 def update_particle_states(particles):
-    for leader in leaders:
-        leader.update_leader_states()
     for particle in particles:
         particle.update_free_locations()
 
 
+def send_direction_proposals(current_round):
+    for leader in leaders:
+        if leader.next_direction_proposal_round == current_round:
+            leader.send_direction_proposal()
+
+
 def move_to_next_direction(particles):
+    particle_directions = {}
     for particle in particles:
         next_direction = particle.get_next_direction()
         if next_direction:
-            particle.move_to(next_direction)
+            if particle.mobility_model.mode == MobilityModelMode.POI:
+                particle.move_to(next_direction)
+            else:
+                particle_directions[particle] = next_direction
+    if particle_directions:
+        particles[0].world.move_particles(particle_directions)

@@ -1,6 +1,6 @@
 import logging
 
-from lib.oppnet.message_types import LeaderMessageType
+from lib.oppnet.message_types import LeaderMessageType, LeaderMessageContent
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
 from lib.oppnet.routing import RoutingContact
 
@@ -50,3 +50,21 @@ class Mixin:
         except KeyError:
             t_wait = self.t_wait
         return t_wait
+
+    def __add_new_contacts_as_follower__(self, received_messages):
+        for message in received_messages:
+            if not message.is_broadcast:
+                if isinstance(message.get_content(), LeaderMessageContent):
+                    sending_leader = message.get_content().sending_leader
+                    if sending_leader not in self.leader_contacts:
+                        self.__add_route__(message.get_sender(), sending_leader, message.get_hops(), is_leader=True)
+                        logging.debug(
+                            "round {}: opp_particle -> particle #{} found a new leader #{} with {} hops."
+                                .format(self.world.get_actual_round(), self.number, sending_leader.number,
+                                        message.get_hops()))
+                    if message.get_original_sender() not in self.leader_contacts:
+                        self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
+                                           is_leader=True)
+                else:
+                    self.__add_route__(message.get_sender(), message.get_original_sender(), message.get_hops(),
+                                       is_leader=False)

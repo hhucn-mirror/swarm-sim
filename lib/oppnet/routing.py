@@ -121,8 +121,8 @@ def __next_step_epidemic__(sender, nearby=None):
             return
 
     for msg in list(sender.send_store):
-        for neighbour in nearby:
-            send_message(sender, neighbour, msg, remove_immediately=False)
+        for neighbor in nearby:
+            send_message(sender, neighbor, msg, remove_immediately=False)
 
 
 def __next_step_manet_epidemic__(particle):
@@ -137,7 +137,7 @@ def __next_step_manet_epidemic__(particle):
         return
 
     if routing_params.manet_role == MANeTRole.Node:
-        nearby = [neighbour for neighbour in nearby if RoutingParameters.same_manet_group(particle, neighbour)]
+        nearby = [neighbor for neighbor in nearby if RoutingParameters.same_manet_group(particle, neighbor)]
         __next_step_epidemic__(particle, nearby)
 
     elif routing_params.manet_role == MANeTRole.Router:
@@ -147,7 +147,7 @@ def __next_step_manet_epidemic__(particle):
 def __next_step_one_leader_flocking__(particle):
     received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
-    if particle.get_flock_member_type() == FlockMemberType.follower:
+    if particle.get_flock_member_type() == FlockMemberType.Follower:
         particle.__process_as_follower__(received + to_forward)
     else:
         particle.__process_as_leader__(received)
@@ -157,11 +157,11 @@ def __next_step_one_leader_flocking__(particle):
 def __next_step_multi_leader_flocking__(particle):
     received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
-    if particle.get_flock_member_type() == FlockMemberType.follower:
+    if particle.get_flock_member_type() == FlockMemberType.Follower:
         particle.__process_as_follower__(received + to_forward)
-    elif particle.get_flock_member_type() == FlockMemberType.leader:
-        particle.update_leader_states()
+    elif particle.get_flock_member_type() == FlockMemberType.Leader:
         particle.__process_as_leader__(received + to_forward)
+        particle.update_leader_states()
 
 
 def __next_step_average_consensus_flocking__(particle):

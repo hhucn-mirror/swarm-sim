@@ -1,9 +1,8 @@
 import csv
-import logging
 import math
 
-from lib.oppnet.util import get_max_flock_radius, optimal_flock_distance, all_pairs_flock_distance, flock_spread, \
-    flock_uniformity, get_distance_from_coordinates
+from lib.oppnet.util import get_max_flock_radius, flock_spread, \
+    flock_uniformity, get_distance_from_coordinates, all_pairs_flock_distance_metrics
 
 
 class CsvFlockRoundData:
@@ -63,21 +62,18 @@ class CsvFlockRoundData:
 
     def get_data_row(self, sim_round, particle_directions, particle_coordinates):
         particles_count = len(particle_directions)
-        flock_radius = get_max_flock_radius(particles_count)
+        flock_radius, _ = get_max_flock_radius(particles_count)
 
-        optimal_all_pairs_distance = optimal_flock_distance(flock_radius)
-        all_pairs_distance = all_pairs_flock_distance(particle_coordinates)
-        all_pairs_optimality = optimal_all_pairs_distance / all_pairs_distance
-        if all_pairs_distance < optimal_all_pairs_distance:
-            logging.warning("WARNING: csv_generator -> get_data_row(): all_pairs_distance < optimal_all_pairs_distance")
-
+        sum_all_pairs, min_all_pairs, max_all_pairs, median_all_pairs = \
+            all_pairs_flock_distance_metrics(particle_coordinates)
         spread_euclidean, spread_hops, center_coordinates = flock_spread(particle_coordinates, self.grid)
 
         min_predator_distance = self._get_min_predator_distance(sim_round, particle_coordinates)
 
-        return [sim_round + 1, particles_count, flock_radius, optimal_all_pairs_distance,
-                all_pairs_distance, all_pairs_optimality, flock_uniformity(particle_directions),
-                spread_euclidean, spread_hops, center_coordinates, min_predator_distance]
+        return [sim_round + 1, particles_count, flock_radius,
+                sum_all_pairs, min_all_pairs, max_all_pairs, median_all_pairs,
+                flock_uniformity(particle_directions), spread_euclidean, spread_hops, center_coordinates,
+                min_predator_distance]
 
     def update_metrics(self):
         for flock_round_data in self.flock_data:
@@ -96,8 +92,9 @@ class CsvFlockRoundData:
 
     @staticmethod
     def get_header_row():
-        return ['Round', 'Flock Size', 'Flock Radius', 'Optimal All-Pairs Distance', 'Actual All-Pairs Distance',
-                'All-Pairs Distance Optimality', 'Uniformity', 'Euclidean Spread', 'Hop Spread', 'Flock Center',
+        return ['Round', 'Flock Size', 'Flock Radius', 'Actual All-Pairs Distance', 'Minimum Pairs Distance',
+                'Maximum Pairs Distance', 'Median Pairs Distance',
+                'Uniformity', 'Euclidean Spread', 'Hop Spread', 'Flock Center',
                 'Minimum Distance flock member to predators']
 
 

@@ -4,7 +4,8 @@ from enum import Enum
 class SafeLocationMessageType(Enum):
     TileAdded = 0,
     Proposal = 1,
-    Ack = 2
+    Ack = 2,
+    Regroup = 3
 
 
 class SafeLocationMessage:

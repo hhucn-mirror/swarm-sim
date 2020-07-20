@@ -129,7 +129,7 @@ class MobilityModel:
         elif self.mode == MobilityModelMode.Manual:
             new_direction = self.current_dir
         elif self.mode == MobilityModelMode.DisperseFlock:
-            new_direction = self.__disperse_flock__(current_x_y_z)
+            new_direction = self.__disperse_flock__()
         else:
             new_direction = None
         self.current_dir = new_direction
@@ -268,7 +268,7 @@ class MobilityModel:
             new_coordinates = get_coordinates_in_direction(current_x_y_z, preferred_direction)
             if new_coordinates not in blocked_neighbors:
                 return preferred_direction
-            new_direction = self.get_preferred_directions(blocked_neighbors, current_x_y_z)
+            new_direction = self._get_preferred_directions(blocked_neighbors, current_x_y_z)
         else:
             # southern movement
             if current_x_y_z[1] > self.poi[1]:
@@ -293,7 +293,7 @@ class MobilityModel:
                 return self.W
         return None if new_direction is None else self.__check_new_coordinates_(new_direction)
 
-    def get_preferred_directions(self, blocked_neighbors, current_x_y_z, prefer_neighborhood=False):
+    def _get_preferred_directions(self, blocked_neighbors, current_x_y_z, prefer_neighborhood=False):
         if prefer_neighborhood:
             return self._get_preferred_directions_neighborhood_(blocked_neighbors, current_x_y_z)
         else:
@@ -335,7 +335,7 @@ class MobilityModel:
             exp_weight = 1 / math.exp(0.3 * (self._distance_to_poi_unimproved_rounds - 12))
             return random.choices([None, new_direction], [exp_weight, 1 - exp_weight])[0]
 
-    def __disperse_flock__(self, current_x_y_z):
+    def __disperse_flock__(self):
         if self.steps < self.route_length:
             self.steps += 1
             return self.current_dir

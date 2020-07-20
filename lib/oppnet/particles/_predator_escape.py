@@ -86,8 +86,10 @@ class Mixin:
     def predators_detected_disperse(self, predators):
         new_predator_ids = predator_ids = set([predator.get_id() for predator in predators])
 
-        if self.flock_mode != FlockMode.Dispersing:
-            self.recent_safe_location = self.coordinates
+        try:
+            self.reset_routing_and_instructs()
+        except AttributeError:
+            pass
 
         self.set_flock_mode(FlockMode.Dispersing)
         self.mobility_model.set_mode(MobilityModelMode.DisperseFlock)
@@ -117,6 +119,7 @@ class Mixin:
     def go_to_safe_location(self):
         self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=self.get_a_safe_location()))
         self.set_flock_mode(FlockMode.Regrouping)
+        self.instruct_round = None
         return self.mobility_model.next_direction(self.coordinates, self.get_blocked_surrounding_locations())
 
     def get_a_safe_location(self):

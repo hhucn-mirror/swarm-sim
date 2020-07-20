@@ -1,4 +1,5 @@
 import logging
+import math
 
 from lib.oppnet import routing
 from lib.oppnet.mobility_model import MobilityModel
@@ -7,36 +8,53 @@ from lib.oppnet.mobility_model import MobilityModel
 def solution(world):
     current_round = world.get_actual_round()
     particles = world.get_particle_list()
-    # send direction every round
-    send_current_directions(particles)
+    t_pick = world.config_data.flock_radius * 10
+
+    reset_neighborhood_counters(particles)
+
+    if current_round == 1:
+        world.csv_flock_round.add_flock(particles)
     # route messages every round
-    if current_round > 1:
+    elif current_round > 1:
         routing.next_step(particles)
-    # move only after all messages should have propagated
-    if current_round % (world.config_data.routing_parameters.scan_radius + 1) == 0:
-        move_to_next_direction(particles)
+    # send direction every round
+    if current_round % t_pick == 0 or current_round == 1:
+        send_random_next_directions(particles)
+    else:
+        send_current_directions(particles)
+
+    move_to_next_direction(particles)
+
+
+def reset_neighborhood_counters(particles):
+    for particle in particles:
+        particle.reset_neighborhood_direction_counter()
 
 
 def send_current_directions(particles):
     for particle in particles:
         particle.update_current_neighborhood()
-        particle.send_direction_message()
+        particle.send_direction_message(particle.mobility_model.current_dir)
+        logging.debug("round {}: send current particle {} direction {}"
+                      .format(particle.world.get_actual_round(), particle.number, particle.mobility_model.current_dir))
 
 
-def set_random_direction(particles):
+def send_random_next_directions(particles, split=.5):
+    per_split = math.ceil(len(particles) * split)
     random_direction = MobilityModel.random_direction()
-    for particle in particles:
-        particle.mobility_model.current_dir = random_direction
-        print("round {}: updated particle {} direction {}".format(particle.world.get_actual_round(), particle.number,
-                                                                  particle.mobility_model.current_dir))
+    for i, particle in enumerate(particles):
+        if i % per_split == 0:
+            random_direction = MobilityModel.random_direction()
+        particle.update_current_neighborhood()
+        particle.send_direction_message(random_direction)
+        logging.debug("round {}: send next particle {} direction {}"
+                      .format(particle.world.get_actual_round(), particle.number, random_direction))
 
 
 def move_to_next_direction(particles):
     particle_directions = {}
     for particle in particles:
-        particle.set_average_direction()
-        next_direction = particle.mobility_model.next_direction(particle.coordinates)
-
+        next_direction = particle.get_next_direction()
         if next_direction:
             particle_directions[particle] = next_direction
         else:

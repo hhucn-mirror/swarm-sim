@@ -36,7 +36,7 @@ class Flock:
         self._max_coordinates = None
         self._min_coordinates = None
 
-    def add_particle(self, particle: Particle):
+    def add_particle(self, particle):
         """
         Adds :param particle to its set of particles.
         :param particle: the particle to add
@@ -44,11 +44,10 @@ class Flock:
         """
         self._particles.add(particle)
 
-    def remove_particle(self, particle: Particle):
+    def remove_particle(self, particle):
         """
         Removes :param particle from its set of particles.
         :param particle: the particle to remove
-        :type particle: Particle
         """
         self._particles.remove(particle)
 
@@ -142,6 +141,7 @@ class World:
 
         self._particle_flocks_ids = {}
         self._flocks = []
+        self._leader_map_id = {}
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -161,6 +161,7 @@ class World:
             random.shuffle(self.particles)
 
         self.memory = Memory()
+        np.random.seed(config_data.seed_value)
 
     def reset(self):
         """
@@ -204,6 +205,7 @@ class World:
         self._particle_flocks_ids = {}
         self._flocks = []
         Flock.instance_id = itertools.count()
+        self._leader_map_id = {}
 
         self.memory = Memory()
 
@@ -497,6 +499,8 @@ class World:
         :param particle_id: particle id
         :return: True: Successful removed; False: Unsuccessful
         """
+        if particle_id in self._leader_map_id:
+            del self._leader_map_id[particle_id]
         return self.remove_matter(particle_id, Particle)
 
     def remove_particle_on(self, coordinates):
@@ -586,13 +590,11 @@ class World:
     def __random_predator_coordinates__(self):
         x_range = np.arange(-self.config_data.size_x / 2, self.config_data.size_x / 2, 0.5)
         y_range = np.arange(-self.config_data.size_y / 2, self.config_data.size_y / 2)
-        start = time.time()
         while True:
             x, y = np.random.choice(x_range), np.random.choice(y_range)
             if self.grid.are_valid_coordinates((x, y, 0)) and (x, y, 0) not in self.predator_map_coordinates \
                     and (x, y, 0) not in self.particle_map_coordinates:
                 break
-        print('__random_predator_coordinates__() took {}'.format(time.time() - start))
         return x, y, 0
 
     def add_matter(self, matter, coordinates):
@@ -977,6 +979,14 @@ class World:
                     location.set_color((0, 255, 175, 0.10))
                 except KeyError:
                     pass
+
+    def add_leaders(self, leaders):
+        for leader in leaders:
+            self._leader_map_id[leader.get_id()] = leader
+
+    @property
+    def leaders(self):
+        return list(self._leader_map_id.values())
 
     @staticmethod
     def get_most_common(items):

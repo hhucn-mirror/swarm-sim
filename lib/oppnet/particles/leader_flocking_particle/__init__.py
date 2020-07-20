@@ -5,8 +5,8 @@ from collections import Counter
 import numpy as np
 
 import lib.oppnet.particles as particles
-from lib.oppnet.communication import Message, broadcast_message, multicast_message_content
-from lib.oppnet.message_types import LostMessageContent, LostMessageType
+from lib.oppnet.communication import Message, broadcast_message
+from lib.oppnet.message_types import LostMessageContent, LostMessageType, LeaderMessageType
 from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from lib.oppnet.routing import RoutingMap
 from . import _leader_states, _process_as_follower, _process_as_leader, _communication, _routing
@@ -18,11 +18,12 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
                _communication.Mixin, _routing.Mixin):
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, ms_size=None,
                  ms_strategy=None, mm_mode=None, mm_length=None, mm_zone=None, mm_starting_dir=None,
-                 t_wait=0):
+                 t_wait=None):
         super().__init__(world=world, coordinates=coordinates, color=color, particle_counter=particle_counter,
                          csv_generator=csv_generator, ms_size=ms_size, ms_strategy=ms_strategy, mm_mode=mm_mode,
                          mm_length=mm_length, mm_zone=mm_zone, mm_starting_dir=mm_starting_dir)
-
+        if not t_wait or t_wait == 0:
+            t_wait = world.config_data.flock_radius * 2
         self.t_wait = t_wait
         self.instruct_round = None
         self._instruction_number_ = None
@@ -44,20 +45,29 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         self.current_neighborhood = set()
         self.previous_neighborhood = set()
 
+        self.instruct_override = self.world.config_data.instruct_override
+
     def set_t_wait(self, t_wait):
         self.t_wait = t_wait
 
     def set_next_direction_proposal_round(self, next_round):
         self.next_direction_proposal_round = next_round
         self._next_proposal_seed = next_round
-        random.seed(next_round)
 
     def set_instruction_number(self, instruction_number):
         self._instruction_number_ = instruction_number
 
     def reset_random_next_direction_proposal_round(self):
+        # make sure t_wait is set if this particle was selected as new leader
+        self.t_wait = self.world.config_data.flock_radius * 2
         self._next_proposal_seed += random.randint(1, self.t_wait * 10)
         self.next_direction_proposal_round = self._next_proposal_seed + self.world.get_actual_round()
+
+    def reset_routing_and_instructs(self):
+        self.proposed_direction = None
+        self.instruct_round = None
+        self.leader_contacts = RoutingMap()
+        self.follower_contacts = RoutingMap()
 
     def get_all_received_messages(self):
         received, to_forward = [], []
@@ -81,39 +91,43 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
 
     def update_current_neighborhood(self):
         lost, new = self.__neighborhood_difference__()
-        if self._flock_member_type == FlockMemberType.leader:
+        self.follower_contacts.remove_all_entries_with_particles(lost)
+        self.leader_contacts.remove_all_entries_with_particles(lost)
+        if self._flock_member_type == FlockMemberType.Leader:
             self._wait_for_flock_rejoin()
-        if len(lost) > 0 and self.flock_mode == FlockMode.Flocking:
-            self.set_flock_mode(FlockMode.Regrouping)
-            self.proposed_direction = None
-            self.mobility_model.set_mode(MobilityModelMode.Manual)
-            self.leader_contacts.remove_all_entries_with_particles(lost)
-            message_content = LostMessageContent(LostMessageType.SeparationMessage)
-            if len(new) == 0:
-                broadcast_message(self, Message(self, None, content=message_content))
-                logging.debug("round {}: neighborhood for particle {} has changed. broadcast a SeparationMessage"
-                              .format(self.world.get_actual_round(), self.number))
-            elif len(lost) > len(new):
-                multicast_message_content(self, new, message_content)
-                logging.debug("round {}: neighborhood for particle {} has changed. multicast a SeparationMessage"
-                              .format(self.world.get_actual_round(), self.number))
-
-        elif len(new) > 0 and self.flock_mode == FlockMode.Regrouping:
+        if len(self.current_neighborhood) == 0 or ((len(lost) > 1 and len(new) == 0) and self.flock_mode not in [
+            FlockMode.Regrouping, FlockMode.Optimizing]):
+            self.go_to_safe_location()
+            self._lost_particle()
+            self.reset_routing_and_instructs()
+        elif len(new) > 0 and self.flock_mode == FlockMode.Regrouping \
+                and self.mobility_model.mode == MobilityModelMode.Manual:
             self.flood_message_content(LostMessageContent(LostMessageType.QueryNewLocation))
-            self.set_flock_mode(FlockMode.Optimising)
+            self.set_flock_mode(FlockMode.Optimizing)
+
+    def _lost_particle(self):
+        self.set_flock_mode(FlockMode.Regrouping)
+        message_content = LostMessageContent(LostMessageType.SeparationMessage)
+        broadcast_message(self, Message(self, None, content=message_content))
+        logging.debug("round {}: neighborhood for particle {} has changed. broadcast a SeparationMessage"
+                      .format(self.world.get_actual_round(), self.number))
 
     def _wait_for_flock_rejoin(self):
         predators = self.predators_nearby()
-        if len(predators) == 0 or len(self.current_neighborhood) == 0:
-            if not self.__is_in_leader_states__(
-                    LeaderStateName.WaitingForRejoin) and self.flock_mode != FlockMode.Flocking:
-                self.broadcast_safe_location(self.coordinates)
-                self.set_flock_mode(FlockMode.Regrouping)
-                self.mobility_model.set_mode(MobilityModelMode.Manual)
-                self.__add_leader_state__(LeaderStateName.WaitingForRejoin, set(self.previous_neighborhood),
-                                          self.world.get_actual_round(), 20)
-            elif len(self.current_neighborhood) > 1:
-                self.set_flock_mode(FlockMode.Flocking)
+        if len(predators) == 0 and self.flock_mode == FlockMode.Regrouping and not self.__is_in_leader_states__(
+                LeaderStateName.WaitingForRejoin):
+            self.broadcast_safe_location(self.recent_safe_location)
+            self.set_flock_mode(FlockMode.Searching)
+            self.__add_leader_state__(LeaderStateName.WaitingForRejoin, set(self.previous_neighborhood),
+                                      self.world.get_actual_round(), 20)
+        elif len(self.current_neighborhood) == 6 and not self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin) \
+                and self.flock_mode != FlockMode.Flocking:
+            self.set_flock_mode(FlockMode.Flocking)
+            self.multicast_leader_message(LeaderMessageType.discover)
+            self.broadcast_safe_location(self.recent_safe_location)
+            self.__add_leader_state__(LeaderStateName.WaitingForRejoin, set(self.previous_neighborhood),
+                                      self.world.get_actual_round(), 20)
+            self.set_next_direction_proposal_round(self.world.get_actual_round() + 20)
 
     def __neighborhood_difference__(self):
         neighborhood = set(self.scan_for_particles_within(self.routing_parameters.interaction_radius))
@@ -123,7 +137,7 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
         self.current_neighborhood = neighborhood
         return lost_neighbors, new_neighbors
 
-    def __get_estimate_centre_from_leader_contacts__(self):
+    def __get_estimate_center_from_leader_contacts__(self):
         if len(self.leader_contacts.keys()) > 0:
             x_sum, y_sum, _ = np.sum([leader.coordinates for leader in self.leader_contacts.keys()], axis=0)
             x_sum += self.coordinates[0]
@@ -164,6 +178,6 @@ class Particle(particles.Particle, _leader_states.Mixin, _process_as_follower.Mi
                                                                 self.get_blocked_surrounding_locations())
             # reached POI or did not move any closer
             if not next_direction and self.flock_mode == FlockMode.Regrouping:
-                return self.go_to_safe_location()
+                self.mobility_model.set_mode(MobilityModelMode.Manual)
             return next_direction
         return self.mobility_model.next_direction(self.coordinates)

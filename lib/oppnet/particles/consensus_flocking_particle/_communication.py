@@ -4,17 +4,17 @@ from lib.oppnet.particles import FlockMode
 
 
 class Mixin:
-    def send_direction_message(self):
+    def send_direction_message(self, direction):
         """
-        Sends a DirectionMessageContent with the current_dir of the particle's mobility_model and its current neighbours
+        Sends a DirectionMessageContent with :param direction of the particle's mobility_model
+        and its current neighbors.
+        :param direction: direction to send
         :return: nothing
         """
-        self.reset_neighborhood_direction_counter()
-        self.__neighborhood_direction_counter__[self.mobility_model.current_dir] += 1
-        content = DirectionMessageContent(self.mobility_model.current_dir, list(self.current_neighborhood.keys()))
-        for neighbour in self.current_neighborhood.keys():
-            message = Message(self, neighbour, self.world.get_actual_round(), content=content)
-            send_message(self, neighbour, message)
+        content = DirectionMessageContent(direction, list(self.current_neighborhood.keys()))
+        for neighbor in self.current_neighborhood.keys():
+            message = Message(self, neighbor, self.world.get_actual_round(), content=content)
+            send_message(self, neighbor, message)
 
     def send_all_to_forward(self):
         """

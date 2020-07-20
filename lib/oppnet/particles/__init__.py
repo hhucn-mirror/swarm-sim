@@ -7,7 +7,7 @@ from lib.oppnet.mobility_model import MobilityModel, MobilityModelMode
 from ._helper_classes import *
 from ._predator_escape import Mixin
 from ..communication import broadcast_message, Message, multicast_message_content
-from ..message_types import PredatorSignal, SafeLocationMessage
+from ..message_types import PredatorSignal, SafeLocationMessage, SafeLocationMessageType
 from ..point import Point
 from ...swarm_sim_header import scan_within
 
@@ -47,8 +47,9 @@ class Particle(lib.particle.Particle, Mixin):
         self.recent_safe_location = None
         self.previous_neighborhood = None
         self.current_neighborhood = {}
-        self._flock_member_type = FlockMemberType.follower
+        self._flock_member_type = FlockMemberType.Follower
         self.propagate_predator_signal = world.config_data.propagate_predator_signal
+        self.passive_scan_radius = world.config_data.passive_scan_radius
 
     def _init_message_stores__(self, ms_size, ms_strategy):
         """
@@ -90,18 +91,17 @@ class Particle(lib.particle.Particle, Mixin):
         return scan_within(self.world.predator_map_coordinates, self.coordinates, hop, self.world.grid)
 
     def predators_nearby(self):
-        return self.scan_for_predators_within(self.routing_parameters.interaction_radius * 5)
+        return self.scan_for_predators_within(self.passive_scan_radius)
 
     def move_to(self, direction):
-        _, within_border = super().move_to(direction)
-        if not within_border and self._flock_member_type == FlockMemberType.leader:
-            self.broadcast_safe_location(self.coordinates)
+        super().move_to(direction)
         self.mobility_model.update_history(self.coordinates)
 
     def broadcast_safe_location(self, safe_location=None):
         if not safe_location:
             safe_location = self.get_a_safe_location()
-        message = Message(self, None, content=SafeLocationMessage(safe_location))
+        message = Message(self, None,
+                          content=SafeLocationMessage(safe_location, message_type=SafeLocationMessageType.Regroup))
         broadcast_message(self, message)
         logging.debug("round {}: leader sent new SafeLocationMessage".format(self.world.get_actual_round()))
         return safe_location

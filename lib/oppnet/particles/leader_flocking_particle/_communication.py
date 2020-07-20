@@ -3,6 +3,7 @@ import logging
 from lib.oppnet.communication import multicast_message_content, send_message, Message
 from lib.oppnet.message_types import LeaderMessageContent, LeaderMessageType
 from lib.oppnet.message_types.safe_location_message import SafeLocationMessage, SafeLocationMessageType
+from lib.oppnet.particles import FlockMode
 from lib.oppnet.particles.leader_flocking_particle._helper_classes import LeaderStateName
 from lib.particle import Particle
 
@@ -17,12 +18,17 @@ class Mixin:
             if self.__is_in_leader_states__(LeaderStateName.WaitingForRejoin):
                 return
             self.instruct_round = self.t_wait + self.world.get_actual_round()
-            self._instruction_number_ = self.world.get_actual_round()
+            number = self._instruction_number_ = self.world.get_actual_round()
+        elif message_type == LeaderMessageType.discover:
+            number = self._instruction_number_ = None
+        elif self._instruction_number_ is not None:
+            number = self._instruction_number_
+        else:
+            number = self.world.get_actual_round()
 
         for hop in range(1, max_hops + 1):
             receivers = self.scan_for_particles_in(hop=hop)
-            number = self._instruction_number_ if self._instruction_number_ is not None \
-                else self.world.get_actual_round()
+
             content = LeaderMessageContent(self, self.proposed_direction, neighbors, self.t_wait - hop,
                                            message_type, number, instruct_override)
             multicast_message_content(self, receivers, content)
@@ -39,6 +45,9 @@ class Mixin:
     def send_direction_proposal(self, proposed_direction=None):
         if proposed_direction is None:
             proposed_direction = self.choose_direction()
+        if self.__is_committed_to_propose__() or self.__is_committed_to_instruct__():
+            self.reset_random_next_direction_proposal_round()
+            return
         receiving_leaders = self.leader_contacts.keys()
         self._instruction_number_ = self.world.get_actual_round()
         self.__send_proposal_to_leaders__(proposed_direction)
@@ -48,11 +57,11 @@ class Mixin:
 
     def __send_proposal_to_leaders__(self, proposed_direction):
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(self.leader_contacts.keys()),
-                                  self.world.get_actual_round(), self.t_wait * 2)
+                                  self.world.get_actual_round(), self.t_wait * 2 + 1)
         for leader, contacts in self.leader_contacts.items():
             for contact_particle, contact in contacts.items():
                 content = LeaderMessageContent(self, proposed_direction,
-                                               set(self.leader_contacts.keys()),
+                                               self.current_neighborhood,
                                                self.t_wait - contact.get_hops(),
                                                LeaderMessageType.propose,
                                                self._instruction_number_)
@@ -82,6 +91,7 @@ class Mixin:
         if isinstance(received_content, LeaderMessageContent):
             exclude = {received_message.get_sender(), received_message.get_content().sending_leader,
                        received_message.get_original_sender()}.union(received_content.receivers)
+            message_type = received_content.message_type
             try:
                 instruction_number = received_content.number
                 if instruction_number is not None and self.world.get_actual_round() >= self.instruct_round:
@@ -89,11 +99,12 @@ class Mixin:
             except TypeError:
                 pass
         else:
+            message_type = received_content.__class__
             exclude = {received_message.get_sender(), received_message.get_original_sender()}
         max_hops = self.routing_parameters.interaction_radius
         neighbors = self.scan_for_particles_within(hop=max_hops)
 
-        all_receivers = set(neighbors)
+        all_receivers = set(neighbors).union(exclude)
         for hop in range(1, max_hops + 1):
             receivers = set(self.scan_for_particles_in(hop=hop)).difference(exclude)
             if isinstance(received_content, LeaderMessageContent):
@@ -104,8 +115,8 @@ class Mixin:
             for receiver in receivers:
                 received_message.set_actual_receiver(receiver)
                 send_message(self, receiver, received_message)
-                logging.debug("round {}: opp_particle -> particle {} forwarded to {}".format(
-                    self.world.get_actual_round(), self.number, receiver.number))
+                logging.debug("round {}: opp_particle -> particle {} forwarded {} to {}".format(
+                    self.world.get_actual_round(), self.number, message_type, receiver.number))
 
     def send_to_leader_via_contacts(self, message, receiving_leader=None):
         received_content = message.get_content()
@@ -123,6 +134,10 @@ class Mixin:
                 message.get_sender(),
                 message.get_original_sender()
             })
+        for receiver in receivers:
+            if receiver not in self.leader_contacts and self.flock_mode != FlockMode.Flocking:
+                self.__flood_forward__(message)
+                break
         self._send_via_all_contacts__(received_content, receivers)
 
     def _send_via_all_contacts__(self, message_content, receivers):
@@ -132,13 +147,15 @@ class Mixin:
                 hops = contact.get_hops()
                 if isinstance(message_content, LeaderMessageContent):
                     content = message_content.create_forward_copy(receivers, hops)
+                    message_type = message_content.message_type
                 else:
+                    message_type = message_content.__class__
                     content = message_content
                 message.set_content(content)
                 message.set_actual_receiver(leader_particle)
                 send_message(self, contact.get_contact_particle(), message)
-                logging.debug("round {}: opp_particle -> particle {} forwarded to {} via {}".format(
-                    self.world.get_actual_round(), self.number, leader_particle.number,
+                logging.debug("round {}: opp_particle -> particle {} forwarded {} to {} via {}".format(
+                    self.world.get_actual_round(), self.number, message_type, leader_particle.number,
                     contact.get_contact_particle().number))
         self.send_store.remove(message)
 

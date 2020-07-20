@@ -19,9 +19,14 @@ class Mixin:
     def __remove_particle_from_states__(self, waiting_particle, state_name):
         if state_name in self.__leader_states__:
             try:
-                self.__leader_states__[state_name].remove_from_waiting(waiting_particle)
+                leader_state = self.__leader_states__[state_name]
             except KeyError:
                 del self.__leader_states__[state_name]
+                return
+            try:
+                leader_state.remove_from_waiting(waiting_particle)
+            except KeyError:
+                pass
 
     def update_leader_states(self):
         keys_to_delete = []

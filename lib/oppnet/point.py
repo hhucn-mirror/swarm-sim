@@ -25,3 +25,7 @@ class Point(object):
         :return: y coordinate
         """
         return self.y
+
+    @staticmethod
+    def get_point_from_vector(vector):
+        return Point(vector[0], vector[1])

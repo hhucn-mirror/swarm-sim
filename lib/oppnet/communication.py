@@ -40,7 +40,6 @@ class Message:
             start_round = sender.world.get_actual_round()
         self.start_round = start_round
         self.delivery_round = 0
-        self.forwarder = None
         if not ttl:
             ttl = sender.world.get_message_ttl()
         self.ttl = ttl
@@ -152,12 +151,6 @@ class Message:
         """
         return id(self)
 
-    def inc_hops(self):
-        """
-        Increments message hop count
-        """
-        self.hops += 1
-
     def set_sender(self, sender):
         """
         Updates the sender.
@@ -174,9 +167,6 @@ class Message:
 
     def set_content(self, content):
         self.content = content
-
-    def set_ttl(self, ttl):
-        self.ttl = ttl
 
 
 def send_message(sender, receiver, message: Message, remove_immediately=True):
@@ -304,16 +294,14 @@ def store_message(message, sender, receiver):
                 return
             else:
                 process_event(EventType.MessageDeliveredFirstDirect, message)
+        elif not store.contains_key(message.key):
+            process_event(EventType.MessageDeliveredFirst, message)
         else:
-            if not store.contains_key(message.key):
-                process_event(EventType.MessageDeliveredFirst, message)
-            else:
-                return
+            return
     else:
         store = receiver.send_store
-        if not (store.contains_key(message.key)):
-            process_event(EventType.MessageForwarded, message)  # TODO: remove receiver sender
-        else:
+        process_event(EventType.MessageForwarded, message)
+        if store.contains_key(message.key):
             return
     try:
         store.append(message)

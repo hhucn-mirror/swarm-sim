@@ -38,8 +38,10 @@ class Mixin:
                 message_type = content.message_type
                 sending_leader = content.sending_leader
                 if not message.is_broadcast and sending_leader not in self.leader_contacts \
-                        and sending_leader.get_id() != self.get_id():
+                        and message_type != LeaderMessageType.discover and sending_leader.get_id() != self.get_id():
                     self.__new_leader_found__(message, sending_leader)
+                elif message_type == LeaderMessageType.discover:
+                    remaining.append(message)
                 if message_type == LeaderMessageType.commit:
                     self.__process_commit_as_leader__(message)
                 elif message_type == LeaderMessageType.discover_ack:
@@ -77,7 +79,7 @@ class Mixin:
             self.__update__instruct_round_as_leader__(message)
             sending_leader = content.sending_leader
             self.__add_leader_state__(LeaderStateName.CommittedToInstruct, {sending_leader},
-                                      self.world.get_actual_round(), message.get_hops() * 2)
+                                      self.world.get_actual_round(), self.t_wait * 2 + 1)
             self.reset_random_next_direction_proposal_round()
             self.__flood_forward__(message)
             logging.debug("round {}: opp_particle -> particle {} committed to instruct # {}".format(
@@ -86,27 +88,32 @@ class Mixin:
     def __process_commit_as_leader__(self, message: Message):
         content = message.get_content()
         if message.get_actual_receiver().number == self.number and self._instruction_number_ == content.number:
-            if self.__is_committed_to_propose__():
+            if self.__is_committed_to_propose__() or self.__is_committed_to_instruct__() \
+                    or not self.__is__waiting_for_commit__():
                 return
             logging.debug("round {}: opp_particle -> particle {} received commit #{} from particle {}"
                           .format(self.world.get_actual_round(),
                                   self.number, content.number, content.sending_leader.number))
             self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForCommits)
             if self.__quorum_fulfilled__() and LeaderStateName.SendInstruct not in self.__leader_states__:
-                self.__multicast_instruct__()
+                self.__multicast_instruct__(instruct_override=self.instruct_override)
         else:
             self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_discover_as_leader__(self, message: Message):
         content = message.get_content()
-        if message.get_actual_receiver() == self:
+        if message.get_actual_receiver() == self and content.sending_leader not in self.leader_contacts:
             self.__send_content_to_leader_via_contacts__(self, content.sending_leader,
                                                          LeaderMessageType.discover_ack)
+            self.__flood_forward__(message)
+        self.set_flock_mode(FlockMode.Flocking)
+        self.__add_route__(message.get_sender(), content.sending_leader, message.get_hops(), is_leader=True)
 
     def __process_discover_ack_as_leader__(self, message: Message):
         content = message.get_content()
         if message.get_actual_receiver() == self:
             self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForDiscoverAck)
+            self.set_flock_mode(FlockMode.Flocking)
         else:
             self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
@@ -115,14 +122,14 @@ class Mixin:
         sending_leader = content.sending_leader
         logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
             self.world.get_actual_round(), self.number, self._instruction_number_, sending_leader.number))
-        # self.send_to_leader_via_contacts(message)
+        self.__flood_forward__(message)
         if self.__is__waiting_for_commit__() or self.__is_committed_to_propose__() \
-                or LeaderStateName.SendInstruct in self.__leader_states__:
+                or LeaderStateName.SendInstruct in self.__leader_states__ or self.__is_committed_to_instruct__():
             return
         self.next_direction_proposal_round = None
         self._instruction_number_ = content.number
         self.__add_leader_state__(LeaderStateName.CommittedToPropose, {sending_leader},
-                                  self.world.get_actual_round(), self.t_wait * 2)
+                                  self.world.get_actual_round(), self.t_wait * 2 + 1)
         self.__send_content_to_leader_via_contacts__(self, content.sending_leader, LeaderMessageType.commit)
         logging.debug("round {}: opp_particle -> particle {} committed to proposal # {} from particle {}".format(
             self.world.get_actual_round(),
@@ -135,17 +142,17 @@ class Mixin:
         message_type = content.message_type
         if message_type == LostMessageType.SeparationMessage and not self.__is_in_leader_states__(
                 LeaderStateName.WaitingForRejoin):
-            if len(self.leader_contacts) == 0:
-                self.proposed_direction = None
-                self.multicast_leader_message(LeaderMessageType.instruct)
-            else:
-                self.send_direction_proposal(False)
+            if self.flock_mode == FlockMode.Flocking:
+                if len(self.leader_contacts) == 0:
+                    self.proposed_direction = None
+                    self.multicast_leader_message(LeaderMessageType.instruct)
+                else:
+                    self.send_direction_proposal(False)
             distance = get_distance_from_coordinates(self.coordinates, message.get_original_sender().coordinates)
             self.__add_leader_state__(LeaderStateName.WaitingForRejoin, {message.get_original_sender()},
                                       self.world.get_actual_round(), distance)
-            self.reset_random_next_direction_proposal_round()
             broadcast_message(self, Message(self, message.get_original_sender(), content=LostMessageContent(
-                LostMessageType.RejoinMessage, self.__get_estimate_centre_from_leader_contacts__())))
+                LostMessageType.RejoinMessage, self.__get_estimate_center_from_leader_contacts__())))
             logging.debug("round {}: leader responded to SeparationMessage from {}"
                           .format(self.world.get_actual_round(), message.get_original_sender().number))
         elif message_type == LostMessageType.QueryNewLocation:
@@ -166,6 +173,10 @@ class Mixin:
             self.send_to_leader_via_contacts(Message(self, message.get_original_sender(), content=response_content),
                                              message.get_original_sender())
             self.set_mobility_model(MobilityModel(self.coordinates, MobilityModelMode.POI, poi=content.coordinates))
+        elif content.message_type == SafeLocationMessageType.Regroup \
+                and content.coordinates != self.recent_safe_location:
+            self.__process_safe_location_message_as_follower(message)
+            self.next_direction_proposal_round = self.world.get_actual_round() + self.t_wait
 
     def __process_predator_signal_message_as_leader(self, message):
         content = message.get_content()
@@ -188,7 +199,7 @@ class Mixin:
         if self.__is__waiting_for_commit__():
             waiting_count = self.__leader_states__[LeaderStateName.WaitingForCommits].waiting_count()
             leader_count = len(self.leader_contacts.keys())
-            return (1 - waiting_count / leader_count) > self.commit_quorum
+            return (1 - waiting_count / leader_count) >= self.commit_quorum
         else:
             return True
 

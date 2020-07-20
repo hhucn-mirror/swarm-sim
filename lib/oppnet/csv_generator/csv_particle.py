@@ -12,6 +12,7 @@ class CsvParticleFile:
             self.writer.writerow(['Particle ID', 'Particle Number', 'Particle Steps',
                                   'Messages Sent', 'Messages Forwarded', 'Messages Delivered',
                                   'Messages Delivered Directly', 'Messages Received',
+                                  'Broadcasts Sent', 'Broadcasts Delivered',
                                   'Messages TTL Expired', 'Out of Memory'
                                   ])
 
@@ -22,6 +23,8 @@ class CsvParticleFile:
                         particle.csv_particle_writer.messages_delivered,
                         particle.csv_particle_writer.messages_delivered_directly,
                         particle.csv_particle_writer.messages_received,
+                        particle.csv_particle_writer.broadcasts_sent,
+                        particle.csv_particle_writer.broadcasts_delivered,
                         particle.csv_particle_writer.messages_ttl_expired,
                         particle.csv_particle_writer.out_of_mem,
                         ]
@@ -39,11 +42,14 @@ class CsvParticleData:
         self.messages_delivered = 0
         self.messages_delivered_directly = 0
         self.messages_received = 0
+        self.broadcasts_sent = 0
+        self.broadcasts_delivered = 0
         self.messages_ttl_expired = 0
         self.out_of_mem = 0
 
     def write_particle(self, steps=0, particle_write=0, messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
+                       broadcasts_sent=0, broadcasts_delivered=0,
                        messages_ttl_expired=0, out_of_mem=0):
         self.steps += steps
         self.particle_write += particle_write
@@ -52,5 +58,7 @@ class CsvParticleData:
         self.messages_delivered += messages_delivered
         self.messages_delivered_directly += messages_delivered_directly
         self.messages_received += messages_received
+        self.broadcasts_sent += broadcasts_sent
+        self.broadcasts_delivered += broadcasts_delivered
         self.messages_ttl_expired += messages_ttl_expired
         self.out_of_mem += out_of_mem

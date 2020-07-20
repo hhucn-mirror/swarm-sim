@@ -5,7 +5,7 @@ from lib.oppnet.particles import FlockMemberType
 
 class Mixin:
     def __predators_detected__(self, predators):
-        if self._flock_member_type == FlockMemberType.follower:
+        if self._flock_member_type == FlockMemberType.Follower:
             self.__predators_detected_follower(predators)
         else:
             self.__predators_detected_leader(predators)

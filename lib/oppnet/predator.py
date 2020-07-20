@@ -99,10 +99,11 @@ class Predator(Particle):
 
     def catch_particle(self, caught_particle):
         self.world.remove_particle(caught_particle.get_id())
-        if caught_particle.get_flock_member_type() == FlockMemberType.leader:
+        if caught_particle.get_flock_member_type() == FlockMemberType.Leader:
             remaining_particles = self.world.get_particle_list()
             particle = random.choice(remaining_particles)
-            particle.set_flock_member_type(FlockMemberType.leader)
+            particle.set_flock_member_type(FlockMemberType.Leader)
+            self.world.add_leaders([particle])
         self.world.csv_round.update_metrics(particles_caught=1)
 
     def activate_pursuit(self):

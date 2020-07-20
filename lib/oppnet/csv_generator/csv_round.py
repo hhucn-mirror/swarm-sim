@@ -6,20 +6,18 @@ from lib.oppnet.csv_generator import CsvMessageData
 
 
 class CsvRoundData:
-    def __init__(self, sim, task=0, solution=0, seed=20,
+    def __init__(self, sim, solution=0, seed=20,
                  steps=0, tiles_num=0, particle_num=0, predator_num=0, directory='outputs/'):
         self.sim = sim
         self.tiles_num = tiles_num
 
         self.csv_msg_writer = CsvMessageData(directory)
-        self.task = task
         self.solution = solution
         self.actual_round = sim.get_actual_round()
         self.seed = seed
         self.steps = steps
         self.steps_sum = steps
         self.particle_num = particle_num
-        self.tile_num = tiles_num
         self.predator_num = predator_num
         self.success_counter = 0
 
@@ -39,6 +37,9 @@ class CsvRoundData:
         self.messages_delivered_directly_unique = 0
         self.receiver_out_of_mem = 0
 
+        self.broadcasts_sent = 0
+        self.broadcasts_delivered = 0
+
         self.particles_caught = 0
 
         self.directory = directory
@@ -52,6 +53,7 @@ class CsvRoundData:
             'Messages Forwarded', 'Messages Delivered Total', 'Messages Delivered Directly',
             'Messages Received', 'Messages TTL Expired',
             'Messages Delivered Unique', 'Messages Delivered Directly Unique',
+            'Broadcasts Sent', 'Broadcast Messages Delivered',
             'Receiver Out Of Mem', 'Predator Counter', 'Particles Caught', 'Solution Success'
         ])
 
@@ -89,7 +91,8 @@ class CsvRoundData:
                        messages_created=0, messages_replicated=0, messages_sent=0, messages_forwarded=0,
                        messages_delivered=0, messages_delivered_directly=0, messages_received=0,
                        messages_delivered_unique=0, messages_delivered_directly_unique=0,
-                       message_ttl_expired=0, receiver_out_of_mem=0, particles_caught=0):
+                       message_ttl_expired=0, broadcasts_sent=0, broadcasts_delivered=0, receiver_out_of_mem=0,
+                       particles_caught=0):
 
         self.steps_sum += steps
 
@@ -110,6 +113,8 @@ class CsvRoundData:
             self.messages_delivered_directly_unique += messages_delivered_directly_unique
             self.receiver_out_of_mem += receiver_out_of_mem
             self.particles_caught += particles_caught
+            self.broadcasts_sent += broadcasts_sent
+            self.broadcasts_delivered += broadcasts_delivered
 
         elif self.actual_round != self.sim.get_actual_round():
             self.actual_round = self.sim.get_actual_round()
@@ -130,6 +135,8 @@ class CsvRoundData:
             self.messages_delivered_directly_unique = messages_delivered_directly_unique
             self.receiver_out_of_mem = receiver_out_of_mem
             self.particles_caught = particles_caught
+            self.broadcasts_sent = broadcasts_sent
+            self.broadcasts_delivered = broadcasts_delivered
 
     def next_line(self, simulator_round):
         csv_iterator = [simulator_round, self.seed, self.solution, self.particle_num,
@@ -137,7 +144,8 @@ class CsvRoundData:
                         self.messages_created, self.messages_replicated, self.messages_sent, self.messages_forwarded,
                         self.messages_delivered, self.messages_delivered_directly, self.messages_received,
                         self.message_ttl_expired, self.messages_delivered_unique,
-                        self.messages_delivered_directly_unique, self.receiver_out_of_mem,
+                        self.messages_delivered_directly_unique,
+                        self.broadcasts_sent, self.broadcasts_delivered, self.receiver_out_of_mem,
                         self.predator_num, self.particles_caught, self.success_counter]
         self.writer_round.writerow(csv_iterator)
         self.actual_round = simulator_round
@@ -155,6 +163,8 @@ class CsvRoundData:
         self.receiver_out_of_mem = 0
         self.particles_caught = 0
         self.success_counter = 0
+        self.broadcasts_sent = 0
+        self.broadcasts_delivered = 0
 
     def aggregate_metrics(self):
         self.csv_file.close()
@@ -170,6 +180,7 @@ class CsvRoundData:
                                'Messages Delivered Total Sum', 'Messages Delivered Directly Sum',
                                'Messages Received Sum', 'Messages TTL Expired',
                                'Messages Delivered Unique Sum', 'Messages Delivered Directly Unique Sum',
+                               'Broadcasts Sent Sum', 'Broadcast Messages Delivered Sum',
                                'Message Delivery Success ζ', 'Message Delivery Efficiency η', 'Message Overhead σ',
                                'Receiver Out Of Mem Sum', 'Particles Caught Sum'
                                ])
@@ -180,6 +191,7 @@ class CsvRoundData:
         delivered_unique_sum = data['Messages Delivered Unique'].sum()
         delivered_directly_unique_sum = data['Messages Delivered Directly Unique'].sum()
         delivered_unique_total = delivered_unique_sum + delivered_directly_unique_sum
+        broadcasts_sent = data['Broadcasts Sent'].sum()
 
         csv_iterator = [self.seed, data['Round Number'].count(),
                         self.solution,
@@ -188,7 +200,8 @@ class CsvRoundData:
                         delivered_sum, data['Messages Delivered Directly'].sum(),
                         data['Messages Received'].sum(), data['Messages TTL Expired'].sum(),
                         delivered_unique_sum, delivered_directly_unique_sum,
-                        delivered_unique_total / created_sum, delivered_unique_total / delivered_sum,
+                        broadcasts_sent, data['Broadcast Messages Delivered'].sum(),
+                        delivered_sum / sent_sum, delivered_unique_total / delivered_sum,
                         replicated_sum / created_sum,
                         data['Receiver Out Of Mem'].sum(), data['Particles Caught'].sum()
                         ]

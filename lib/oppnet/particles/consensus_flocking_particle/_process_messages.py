@@ -36,7 +36,7 @@ class Mixin:
         :return: nothing
         """
         if message.get_sender() not in self.current_neighborhood:
-            logging.debug("round {}: opp_particle -> received direction from a non-neighbour.")
+            logging.debug("round {}: opp_particle -> received direction from a non-neighbor.")
         self.current_neighborhood[message.get_sender()] = content
         self.__neighborhood_direction_counter__[content.get_direction()] += 1
 
@@ -66,7 +66,8 @@ class Mixin:
 
         updated_location = RelativeLocationMessageContent.get_relative_location(self.__max_cardinal_direction_hops__)
         if updated_location:
-            self.set_flock_mode(FlockMode.FoundLocation)
+            if self.flock_mode != FlockMode.Flocking:
+                self.set_flock_mode(FlockMode.FoundLocation)
             if self.relative_flock_location != updated_location:
                 self.relative_flock_location = updated_location
                 self.relative_cardinal_location = get_direction_between_coordinates(self.relative_flock_location,

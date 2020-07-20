@@ -11,6 +11,26 @@ def main(argv):
     seed_start = 1
     seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
+
+    n_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')[:-1]
+    try:
+        opts, args = getopt.getopt(argv, "hs:w:b:e:n:v:", ["seed-start=", "seed-end="])
+    except getopt.GetoptError:
+        print(
+            'Error: multiple.py -ss <randomSeedStart> --se <randomSeedEnd> -n <maxRounds>')
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print('Error: multiple.py -ss <randomSeedStart> --se <randomSeedEnd> -n <maxRounds>')
+            sys.exit()
+        elif opt in ("-ss", "--seed-start"):
+            seed_start = int(arg)
+        elif opt in ("-se", "--seed-end"):
+            seed_end = int(arg)
+        elif opt in ("-n", "--maxrounds"):
+            max_round = int(arg)
+
     config.read("config.ini")
 
     try:
@@ -22,30 +42,6 @@ def main(argv):
         solution_file = config.get("File", "solution")
     except configparser.NoOptionError:
         solution_file = "solution.py"
-
-    n_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')[:-1]
-    try:
-        opts, args = getopt.getopt(argv, "hs:w:b:e:n:v:", ["scenario=", "solution=", "seed-start=", "seed-end="])
-    except getopt.GetoptError:
-        print(
-            'Error: multiple.py -ss <randomSeedStart> --se <randomSeedEnd> -w <scenario> -sf <solution> -n <maxRounds>')
-        sys.exit(2)
-
-    total_seeds = None
-    for opt, arg in opts:
-        if opt == '-h':
-            print('multiple.py -ss <seed_start> -se <seed_end> -w <scenario> -s <solution>  -n <maxRounds>')
-            sys.exit()
-        elif opt in ("-s", "--solution"):
-            solution_file = arg
-        elif opt in ("-w", "--scenario"):
-            scenario_file = arg
-        elif opt in ("-ss", "--seed-start"):
-            seed_start = int(arg)
-        elif opt in ("-se", "--seed-end"):
-            seed_end = int(arg)
-        elif opt in ("-n", "--maxrounds"):
-            max_round = int(arg)
 
     directory = "./outputs/multiple/{}_{}_{}".format(n_time, scenario_file, solution_file)
     if not os.path.exists(directory):
@@ -63,12 +59,12 @@ def main(argv):
         process_cnt += 1
         print("Process Nr. ", process_cnt, "started")
         if len(child_processes) == os.cpu_count():
-            for cp in child_processes:
-                cp.wait()
+            for process_no, cp in enumerate(child_processes):
+                print("Process Nr. {} returncode: {}".format(process_no, cp.wait()))
             child_processes.clear()
 
-    for cp in child_processes:
-        cp.wait()
+    for process_no, cp in enumerate(child_processes):
+        print("Process Nr. {} returncode: {}".format(process_no, cp.wait()))
     with open(directory + "/all_aggregates.csv", "w+") as fout:
         for seed in seed_range:
             with open("{}/{}/aggregate_rounds.csv".format(directory, seed)) as f:

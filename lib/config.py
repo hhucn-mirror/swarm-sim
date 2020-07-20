@@ -3,10 +3,11 @@ import importlib
 import json
 from ast import literal_eval as make_tuple
 from datetime import datetime
+from json.decoder import JSONDecodeError
 
-from lib.oppnet.memory import MemoryMode
 from lib.oppnet.messagestore import BufferStrategy
 from lib.oppnet.mobility_model import MobilityModelMode
+from lib.oppnet.particles.consensus_flocking_particle import ConsensusProtocol
 from lib.oppnet.predator import PursuitMode
 from lib.oppnet.routing import Algorithm, RoutingParameters
 
@@ -92,6 +93,7 @@ class ConfigData:
         self.message_store_strategy = BufferStrategy(config.getint("Routing", "ms_strategy"))
         routing_algorithm = Algorithm(config.getint("Routing", "algorithm"))
         interaction_radius = config.getint("Routing", "interaction_radius")
+        self.passive_scan_radius = config.getint("Routing", "passive_scan_radius")
         l_encounter = config.getfloat("Routing", "l_encounter")
         gamma = config.getfloat("Routing", "gamma")
         beta = config.getfloat("Routing", "beta")
@@ -108,20 +110,36 @@ class ConfigData:
         self.mobility_model_length = json.loads(config.get("MobilityModel", "mm_length"))
         self.mobility_model_zone = json.loads(config.get("MobilityModel", "mm_zone"))
         if config.has_option("MobilityModel", "mm_starting_dir"):
-            self.mobility_model_starting_dir = json.loads(config.get("MobilityModel", "mm_starting_dir"))
-            if type(self.mobility_model_starting_dir) is list:
-                self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
-            elif type(self.mobility_model_starting_dir) == str and self.mobility_model_starting_dir == 'random':
-                self.mobility_model_starting_dir = 'random'
+            starting_dir = config.get("MobilityModel", "mm_starting_dir")
+            try:
+                self.mobility_model_starting_dir = json.loads(starting_dir)
+                if type(self.mobility_model_starting_dir) is list:
+                    self.mobility_model_starting_dir = tuple(self.mobility_model_starting_dir)
+            except JSONDecodeError:
+                self.mobility_model_starting_dir = starting_dir
         else:
             self.mobility_model_starting_dir = None
-
-        self.memory_mode = MemoryMode(config.getint("Memory", "memory_mode"))
 
         self.flock_radius = config.getint("Flocking", "flock_radius")
         self.leader_count = config.getint("Flocking", "leader_count")
         self.commit_quorum = config.getfloat("Flocking", "commit_quorum")
         self.propagate_predator_signal = config.getboolean("Flocking", "propagate_predator_signal")
+        if config.has_option("Flocking", "instruct_override"):
+            self.instruct_override = config.getboolean("Flocking", "instruct_override")
+        else:
+            self.instruct_override = False
+        if config.has_option("Flocking", "consensus_protocol"):
+            self.consensus_protocol = ConsensusProtocol(config.getint("Flocking", "consensus_protocol"))
+        else:
+            self.consensus_protocol = ConsensusProtocol.MostCommon
+        if config.has_option("Flocking", "weighted_choice"):
+            self.weighted_choice = config.getboolean("Flocking", "weighted_choice")
+        else:
+            self.weighted_choice = False
+        if config.has_option("Flocking", "centralization_force"):
+            self.centralization_force = config.getboolean("Flocking", "centralization_force")
+        else:
+            self.centralization_force = config.getboolean("Flocking", "centralization_force")
         # predator config
         self.predator_interaction_radius = config.getint("Flocking", "predator_interaction_radius")
         self.predator_pursuit_mode = PursuitMode(config.getint("Flocking", "predator_pursuit_mode"))
