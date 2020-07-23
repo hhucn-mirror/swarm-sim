@@ -32,8 +32,8 @@ home = (0.0, 0.0)
 
 # Particle respawn
 def respawn(world):
-    ant_number = 40
-    while len(world.get_particle_list()) <= ant_number:
+    ant_number = 32
+    while len(world.get_particle_list()) < ant_number:
         ant = world.add_particle(0, 0)
         setattr(ant, "way_home_list", [])
         setattr(ant, "phero_counter", 1)
@@ -61,11 +61,6 @@ def decrease_food_stack(food, particle):
     if (particle.coords == food.coords):
         food.set_alpha(food.get_alpha() - food_stack_decrease_rate)
 
-
-# def start_dead_count(world):
-#     global dead_count
-#     if (world.get_actual_round() == 1):
-#         dead_count = 0
 
 
 def delete_track(marker, world):
@@ -193,13 +188,19 @@ def invert_dir(dir):
         return dir + 3
 
 
+# def start_dead_count(world):
+#     global dead_count
+#     if (world.get_actual_round() == 1):
+#         dead_count = 0
+
+
 # Making a plot
-def plot(rounds, deads):
-    plt.plot(rounds, deads)
-    plt.xlabel("rounds")
-    plt.ylabel("dead ants")
-    # plt.title("Rounds: ", str(rounds[-1]), "Deads:", str(deads[-1]))
-    plt.show()
+# def plot(rounds, deads):
+#     plt.plot(rounds, deads)
+#     plt.xlabel("rounds")
+#     plt.ylabel("dead ants")
+#     # plt.title("Rounds: ", str(rounds[-1]), "Deads:", str(deads[-1]))
+#     plt.show()
 
 
 # Start
@@ -210,13 +211,14 @@ deads = []
 
 
 def solution(world):
-    global dead_count
+#    global dead_count
     counter = 1
 
 #    start_dead_count(world)
-    respawn(world)
-    rounds.append(world.get_actual_round())
+#    rounds.append(world.get_actual_round())
 #    deads.append(dead_count)
+
+    respawn(world)
 
     for marker in world.get_marker_list():
         evaporate(marker)
@@ -240,7 +242,7 @@ def solution(world):
     # If all food is collected, success
     if (len(world.get_tiles_list()) == 0):
         world.success_termination()
-        print("Rounds:", rounds[-1])
+#        print("Rounds:", rounds[-1])
 #        print("Deads:", deads[-1])
 #       plot(rounds, deads)
 

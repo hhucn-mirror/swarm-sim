@@ -33,8 +33,8 @@ home = (0.0, 0.0)
 
 # Particle respawn
 def respawn(world):
-    ant_number = 40
-    while len(world.get_particle_list()) <= ant_number:
+    ant_number = 32
+    while len(world.get_particle_list()) < ant_number:
         ant = world.add_particle(0, 0)
         setattr(ant, "way_home_list", [])
 
@@ -63,12 +63,6 @@ def decrease_food_stack(food, particle):
     food_stack_decrease_rate = 0.1
     if (particle.coords == food.coords):
         food.set_alpha(food.get_alpha() - food_stack_decrease_rate)
-
-
-# def start_dead_count(world):
-#     global dead_count
-#     if (world.get_actual_round() == 1):
-#         dead_count = 0
 
 
 def delete_track(marker, world):
@@ -112,7 +106,9 @@ def delete_food(food, world):
 
 
 def delete_search_track(particle, world):
-    if (particle.check_on_marker() == True and particle.get_marker().get_color() == search_track_color):
+    if (particle.check_on_marker() == True
+    and particle.get_marker().get_color() == search_track_color
+    and particle.get_color() == home_mode_color):
         world.remove_marker(particle.get_marker().get_id())
 
 
@@ -138,7 +134,8 @@ def go_home(particle):
 
 # If found track, follow
 def follow_mode(particle):
-    if (particle.coords != home and particle.check_on_marker() == True and particle.get_color() != home_mode_color):
+    if (particle.coords != home and particle.check_on_marker() == True
+    and particle.get_color() != home_mode_color and particle.get_marker().get_color() != search_track_color):
         particle.set_color(track_follow_mode_color)
         pheromone_to_follow = compare_pheromones(get_track(particle))
         particle.move_to(pheromone_to_follow)
@@ -179,10 +176,8 @@ def compare_pheromones(pheromones_dict):
     if (len(pheromones_dict) == 0):
         return random.choice(DIRECTIONS)
     else:
-        # Filter all entries which have max layer
-        max_layer = max([value[0] for direction, value in pheromones_dict.items()])
-        # Filter all directions which have max layer
-        resulting_directions  = [direction for direction, value in pheromones_dict.items() if value[0] == max_layer]
+        # Give every entry in the dictioinary a probability by duplicating the directions
+        resulting_directions = [item for sublist in [[direction] * value[0] for direction, value in pheromones_dict.items()] for item in sublist]
         return random.choice(resulting_directions)
 
 
@@ -194,13 +189,19 @@ def invert_dir(dir):
         return dir + 3
 
 
+# def start_dead_count(world):
+#     global dead_count
+#     if (world.get_actual_round() == 1):
+#         dead_count = 0
+
+
 # Making a plot
-def plot(rounds, deads):
-    plt.plot(rounds, deads)
-    plt.xlabel("rounds")
-    plt.ylabel("dead ants")
-    # plt.title("Rounds: ", str(rounds[-1]), "Deads:", str(deads[-1]))
-    plt.show()
+# def plot(rounds, deads):
+#     plt.plot(rounds, deads)
+#     plt.xlabel("rounds")
+#     plt.ylabel("dead ants")
+#     # plt.title("Rounds: ", str(rounds[-1]), "Deads:", str(deads[-1]))
+#     plt.show()
 
 def filter_search_track (particle):
     selected_directions = []
@@ -219,12 +220,13 @@ deads = []
 
 
 def solution(world):
-    global dead_count
+#    global dead_count
 
 #    start_dead_count(world)
-    respawn(world)
-    rounds.append(world.get_actual_round())
+#    rounds.append(world.get_actual_round())
 #    deads.append(dead_count)
+
+    respawn(world)
 
     for marker in world.get_marker_list():
         evaporate(marker)
@@ -249,7 +251,7 @@ def solution(world):
     # If all food is collected, success
     if (len(world.get_tiles_list()) == 0):
         world.success_termination()
-        print("Rounds:", rounds[-1])
+#        print("Rounds:", rounds[-1])
 #        print("Deads:", deads[-1])
 #        plot(rounds, deads)
 
