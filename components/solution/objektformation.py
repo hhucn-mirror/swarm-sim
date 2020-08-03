@@ -61,13 +61,13 @@ def solution(world):
             particle.phase = phase_waitforsubjects1
 
         elif particle.phase == phase_waitforsubjects1:
-            waitingforparticles(world, phase_waitforsubjects1, phase_countupObjects)
+            waitingforagents(world, phase_waitforsubjects1, phase_countupObjects)
 
         elif particle.phase == phase_countupObjects:
             countupObjects(world, particle)
 
         elif particle.phase == phase_waitforsubjects2:
-            waitingforparticles(world, phase_waitforsubjects2, phase_startObject)
+            waitingforagents(world, phase_waitforsubjects2, phase_startObject)
 
         elif particle.phase == phase_startObject:
             startObject(world, particle)
@@ -294,7 +294,7 @@ def possibleDirections(world, particle):
     return possible_directions
 
 
-def waitingforparticles(world, waitphase, continuationphase):
+def waitingforagents(world, waitphase, continuationphase):
     # wait for all particles until they all are in this phases
     check = True
     for particle in world.agents:

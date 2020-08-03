@@ -7,7 +7,7 @@ import configparser
 def main(argv):
     max_round = 1000
     seed_start = 1
-    seed_end = 4
+    seed_end = 10
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
 
@@ -21,7 +21,8 @@ def main(argv):
     except (configparser.NoOptionError) as noe:
         solution_file = "solution.py"
 
-    n_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
+    #n_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
+    n_time = datetime.now().strftime('%Y-%m-%d')
     try:
         opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
     except getopt.GetoptError:

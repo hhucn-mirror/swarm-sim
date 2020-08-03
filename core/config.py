@@ -124,6 +124,7 @@ class ConfigData:
         if self.solution is None:
             self.solution = "solution.py"
 
-        self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
+        #self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
+        self.local_time = datetime.now().strftime('%Y-%m-%d')
         self.multiple_sim = 0
         self.directory_name = ""
