@@ -27,11 +27,21 @@ def solution(world):
 
 
 def reset_neighborhood_counters(particles):
+    """
+    Resets the neighborhood direction counters of particles.
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         particle.reset_neighborhood_direction_counter()
 
 
 def send_current_directions(particles):
+    """
+    Sends the current direction of particles.
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         particle.update_current_neighborhood()
         particle.send_direction_message(particle.mobility_model.current_dir)
@@ -40,6 +50,13 @@ def send_current_directions(particles):
 
 
 def send_random_next_directions(particles, split=.5):
+    """
+    Sends a random next direction for particles. Splits the list by :param split such that by default half
+    the particles will use the same random direction.
+    :param particles: list of particles
+    :param split: how to split the list
+    :return: None
+    """
     per_split = math.ceil(len(particles) * split)
     random_direction = MobilityModel.random_direction()
     for i, particle in enumerate(particles):
@@ -52,6 +69,11 @@ def send_random_next_directions(particles, split=.5):
 
 
 def move_to_next_direction(particles):
+    """
+    Moves particle to their next direction.
+    :param particles: list of particles
+    :return: None
+    """
     particle_directions = {}
     for particle in particles:
         next_direction = particle.get_next_direction()

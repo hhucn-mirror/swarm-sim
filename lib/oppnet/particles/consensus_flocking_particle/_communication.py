@@ -9,7 +9,7 @@ class Mixin:
         Sends a DirectionMessageContent with :param direction of the particle's mobility_model
         and its current neighbors.
         :param direction: direction to send
-        :return: nothing
+        :return: None
         """
         content = DirectionMessageContent(direction, list(self.current_neighborhood.keys()))
         for neighbor in self.current_neighborhood.keys():
@@ -19,7 +19,7 @@ class Mixin:
     def send_all_to_forward(self):
         """
         Tries to forward each message in the send_store.
-        :return: nothing
+        :return: None
         """
         while len(self.send_store) > 0:
             self.forward_via_contact(self.send_store.pop())
@@ -28,7 +28,7 @@ class Mixin:
         """
         Sends a message with RelativeLocationMessageContent to each surrounding particle, querying the amount of hops
         in each cardinal direction for a message to reach the outer ring of a flock.
-        :return: nothing
+        :return: None
         """
         self.set_flock_mode(FlockMode.QueryingLocation)
         self.reset_max_cardinal_direction_hops()
@@ -75,7 +75,7 @@ class Mixin:
 
         :param queried_directions_per_particle: dict of particles to send a RelativeMessageContent message to
         :type queried_directions_per_particle: dict
-        :return: nothing
+        :return: None
         """
         for particle, queried_locations in queried_directions_per_particle.items():
             content = RelativeLocationMessageContent(queried_locations, False, self.__hops_per_direction_for_neighbor())
@@ -85,7 +85,7 @@ class Mixin:
         """
         Sends a RelativeLocationMessageContent response. This will set the hops inside
         the content to the maximum it knows itself + 1.
-        :return: nothing
+        :return: None
         """
         for receiver, queried_directions in list(self.__received_queried_directions__.items()):
             hops_per_direction = self.__hops_per_direction_for_neighbor(queried_directions)

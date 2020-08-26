@@ -11,6 +11,11 @@ from lib.swarm_sim_header import get_distance_from_coordinates
 
 class Mixin:
     def __process_as_leader__(self, received_messages: [Message]):
+        """
+        Processes messages as a leader. Calls the specific methods depending on content.
+        :param received_messages: list of received messages
+        :return: None
+        """
         remaining = self.__process_commit_and_ack__(received_messages)
         for message in remaining:
             content = message.get_content()
@@ -30,6 +35,12 @@ class Mixin:
                 self.__process_predator_signal_message_as_leader(message)
 
     def __process_commit_and_ack__(self, received_messages: [Message]):
+        """
+        Responds to commit and ack messages. Will return all none commits or acks. Will also use messages to determine
+        routing contacts.
+        :param received_messages: list of messages received
+        :return: list of remaining messages
+        """
         remaining = []
         for message in received_messages:
             content = message.get_content()
@@ -72,6 +83,12 @@ class Mixin:
         return remaining
 
     def __process_instruct_as_leader__(self, message: Message):
+        """
+        Updates the particles instruct message if its a new instruct. Will then also flood this message to neighbors.
+        Will ignore messages if the particle is already committed to another instruct.
+        :param message: the instruct message received
+        :return: None
+        """
         logging.debug("round {}: opp_particle -> particle {} received instruct # {}".format(
             self.world.get_actual_round(), self.number, message.get_content().number))
         content = message.get_content()
@@ -86,6 +103,13 @@ class Mixin:
                 self.world.get_actual_round(), self.number, self._instruction_number_))
 
     def __process_commit_as_leader__(self, message: Message):
+        """
+        Processes a commit message by either forwarding or removing the sender from the set of waiting particles
+        in the waiting state. If the quorum of leaders is fulfilled, the particle sends an instruct message to all
+        neighbors.
+        :param message: message received
+        :return: None
+        """
         content = message.get_content()
         if message.get_actual_receiver().number == self.number and self._instruction_number_ == content.number:
             if self.__is_committed_to_propose__() or self.__is_committed_to_instruct__() \
@@ -101,6 +125,11 @@ class Mixin:
             self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_discover_as_leader__(self, message: Message):
+        """
+        Processes a discover message by responding with a discover_ack if it is a newly detected leader.
+        :param message:
+        :return: None
+        """
         content = message.get_content()
         if message.get_actual_receiver() == self and content.sending_leader not in self.leader_contacts:
             self.__send_content_to_leader_via_contacts__(self, content.sending_leader,
@@ -110,6 +139,12 @@ class Mixin:
         self.__add_route__(message.get_sender(), content.sending_leader, message.get_hops(), is_leader=True)
 
     def __process_discover_ack_as_leader__(self, message: Message):
+        """
+        Processes a discover ack by removing the sender from the set of waiting particles in the corresponding
+        state.
+        :param message: the discover_ack message
+        :return: None
+        """
         content = message.get_content()
         if message.get_actual_receiver() == self:
             self.__remove_particle_from_states__(content.sending_leader, LeaderStateName.WaitingForDiscoverAck)
@@ -118,6 +153,12 @@ class Mixin:
             self.send_to_leader_via_contacts(message, receiving_leader=message.get_actual_receiver())
 
     def __process_propose_as_leader__(self, message: Message):
+        """
+        Processes a proposal by determining whether to respond with a commit message or not. Will commit, if not already
+        committed or waiting for commits itself.
+        :param message: the proposal message received
+        :return: None
+        """
         content = message.get_content()
         sending_leader = content.sending_leader
         logging.debug("round {}: opp_particle -> particle {} received propose # {} from #{}".format(
@@ -138,6 +179,14 @@ class Mixin:
             sending_leader.number))
 
     def __process_lost_message_as_leader__(self, message: Message):
+        """
+        Processes a lost message from another particle by responding accordingly. Similar to method for followers,
+        however only the leader is capable to respond with a RejoinMessage. If the leader is not already waiting for
+        a particle, it will instruct the flock to halt and wait and also broadcast a rejoin message to allow the
+        particle to track back to the flock.
+        :param message: the lost message received
+        :return: None
+        """
         content = message.get_content()
         message_type = content.message_type
         if message_type == LostMessageType.SeparationMessage and not self.__is_in_leader_states__(
@@ -160,6 +209,13 @@ class Mixin:
         self.__process_lost_message_as_follower__(message)
 
     def __process_safe_location_message_as_leader(self, message):
+        """
+        Processes a safe location by setting it as POI if it is newly created or respond to a proposal of a
+        safelocation. If it is a call for regrouping of another leader, the leader will also set this location
+        as POI.
+        :param message: the received safe location message
+        :return: None
+        """
         content = message.get_content()
         if content.message_type == SafeLocationMessageType.TileAdded:
             self.recent_safe_location = content.coordinates
@@ -179,6 +235,12 @@ class Mixin:
             self.next_direction_proposal_round = self.world.get_actual_round() + self.t_wait
 
     def __process_predator_signal_message_as_leader(self, message):
+        """
+        Processes a predator signal message. Responds according to whether the predator is new and update
+        the particles moving direction according to the warning. Will also cast a new instruct in such case.
+        :param message: received predator signal message
+        :return: None
+        """
         content = message.get_content()
         predator_ids = set(content.predator_coordinates.keys())
         new_predator_ids = predator_ids.difference(self.__detected_predator_ids__)
@@ -196,6 +258,10 @@ class Mixin:
             self.__multicast_instruct__(instruct_override=True)
 
     def __quorum_fulfilled__(self):
+        """
+        Determines whether the commit quorum for a direction proposal is fulfilled.
+        :return: boolean
+        """
         if self.__is__waiting_for_commit__():
             waiting_count = self.__leader_states__[LeaderStateName.WaitingForCommits].waiting_count()
             leader_count = len(self.leader_contacts.keys())
@@ -204,12 +270,22 @@ class Mixin:
             return True
 
     def __update__instruct_round_as_leader__(self, received_message: Message):
+        """
+        Updates the leaders instructs.
+        :param received_message: instruct message received
+        :return: None
+        """
         instruct_round = self.world.get_actual_round() + received_message.get_content().t_wait
         self.instruct_round = instruct_round
         self.proposed_direction = received_message.get_content().proposed_direction
         self._current_instruct_message = received_message
 
     def _is_new_instruct(self, received_message):
+        """
+        Determines whether a received message is a new instruct.
+        :param received_message: instruct message received
+        :return: None
+        """
         instruct_round = self.world.get_actual_round() + received_message.get_content().t_wait
         instruction_number = received_message.get_content().number
         return not (self._instruction_number_ and self.instruct_round

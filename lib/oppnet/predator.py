@@ -12,12 +12,28 @@ from lib.swarm_sim_header import scan_within_per_hop, get_coordinates_in_directi
 
 
 class PursuitMode(Enum):
+    """
+    Enum to distinguish predator pursuit modes.
+    """
     FocusFlock = 1
     FocusParticle = 2
 
 
 class Predator(Particle):
+    """
+    Predator class that preys on flocks.
+    """
+
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, mm_mode=None):
+        """
+        Constructor. Initializes variables.
+        :param world: simulator world reference
+        :param coordinates: particle coordinates
+        :param color: particle color
+        :param particle_counter: particle number
+        :param csv_generator: csv generator object
+        :param mm_mode: MobilityModelMode
+        """
         super().__init__(world=world, coordinates=coordinates, color=color, particle_counter=particle_counter,
                          csv_generator=csv_generator)
         self.interaction_radius = self.world.config_data.predator_interaction_radius
@@ -66,7 +82,7 @@ class Predator(Particle):
         Initialises the particles two MessageStores for forwarding and receiving.
         :param ms_size: the size of the two stores
         :param ms_strategy: the strategy to implement for buffer-management.
-        :return: nothing
+        :return: None
         """
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -92,12 +108,16 @@ class Predator(Particle):
             next_direction = self.pursuit_nearby_flock()
 
         if next_direction:
-            # self.broadcast_warning()
             return self.move_to(next_direction)
         else:
             return self.move_to(MobilityModel.random_direction())
 
     def catch_particle(self, caught_particle):
+        """
+        Removes the caught particle from the world. Sets a new particle as leader if the removed particle was a leader.
+        :param caught_particle: particle caught by the predator
+        :return: None
+        """
         self.world.remove_particle(caught_particle.get_id())
         if caught_particle.get_flock_member_type() == FlockMemberType.Leader:
             remaining_particles = self.world.get_particle_list()
@@ -152,7 +172,7 @@ class Predator(Particle):
     def broadcast_warning(self):
         """
         Broadcasts a message which warns particles about the predator.
-        :return: nothing
+        :return: None
         """
         message = Message(self, None, content=PredatorSignal({self.get_id(): self.coordinates}),
                           ttl=self.world.config_data.predator_pursuit_rounds)

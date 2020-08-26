@@ -11,7 +11,7 @@ class Mixin:
     def process_received(self):
         """
         Processes each message in the rcv_store of the particle.
-        :return: nothing.
+        :return: None.
         """
         while len(self.rcv_store) > 0:
             message = self.rcv_store.pop()
@@ -33,7 +33,7 @@ class Mixin:
         Processes a :param message with :param content.
         :param message: the message to process.
         :param content: the content of the message.
-        :return: nothing
+        :return: None
         """
         if message.get_sender() not in self.current_neighborhood:
             logging.debug("round {}: opp_particle -> received direction from a non-neighbor.")
@@ -48,7 +48,7 @@ class Mixin:
         :type message: Message
         :param content: the content of the message
         :type content: RelativeLocationMessageContent
-        :return: nothing
+        :return: None
         """
 
         for direction, hops in content.hops_per_direction.items():
@@ -74,4 +74,9 @@ class Mixin:
                                                                                     (0, 0, 0))
 
     def __process_safe_location_added(self, content):
+        """
+        Sets the recent_safe_location variable to the contents indicated coordinates.
+        :param content: SafeLocationMessageContent
+        :return: None
+        """
         self.recent_safe_location = content.coordinates

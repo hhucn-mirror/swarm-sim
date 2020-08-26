@@ -30,11 +30,21 @@ def solution(world):
 
 
 def reset_neighborhood_counters(particles):
+    """
+    Resets the neighborhood direction counters of particles.
+    :param particles: list of particles
+    :return: None
+"""
     for particle in particles:
         particle.reset_neighborhood_direction_counter()
 
 
 def send_current_directions(particles):
+    """
+    Sends the current direction of particles.
+    :param particles: list of particles
+    :return: None
+"""
     for particle in particles:
         particle.update_current_neighborhood()
         particle.send_direction_message(particle.mobility_model.current_dir)
@@ -43,6 +53,13 @@ def send_current_directions(particles):
 
 
 def send_random_next_directions(particles, split=.5):
+    """
+    Sends a random next direction for particles. Splits the list by :param split such that by default half
+    the particles will use the same random direction.
+    :param particles: list of particles
+    :param split: how to split the list
+    :return: None
+"""
     per_split = math.ceil(len(particles) * split)
     random_direction = MobilityModel.random_direction()
     for i, particle in enumerate(particles):
@@ -55,11 +72,21 @@ def send_random_next_directions(particles, split=.5):
 
 
 def query_relative_locations(particles):
+    """
+    Queries relative location for particles.
+    :param particles: list of particles
+    :return: None
+"""
     for particle in particles:
         particle.query_relative_location()
 
 
 def log_relative_locations(particles):
+    """
+    Logs the relative location of particles.
+    :param particles: list of particles
+    :return: None
+"""
     for particle in particles:
         relative = particle.relative_flock_location
         actual = particle.coordinates
@@ -71,6 +98,13 @@ def log_relative_locations(particles):
 
 
 def move_to_next_direction(particles, use_weighted_choice=True, use_centralization_force=False):
+    """
+    Moves particle to their next direction.
+    :param particles: list of particles
+    :param use_weighted_choice: whether to use weighted choice
+    :param use_centralization_force: whether to use centralization force
+    :return: None
+"""
     particle_directions = {}
     for particle in particles:
         particle.set_most_common_direction(use_weighted_choice, use_centralization_force)

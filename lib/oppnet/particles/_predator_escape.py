@@ -64,11 +64,11 @@ class Mixin:
         :return: escape direction
         :rtype: tuple
         """
-        location = self.relative_location
+        location = self.relative_flock_location
         if not use_cardinal_location:
             approaching_direction = CardinalDirection.get_direction_between_locations(predator_coordinates, location)
             return CardinalDirection.get_opposite_direction(approaching_direction).value
-        location = self.relative_location
+        location = self.relative_flock_location
         approaching_direction = get_direction_between_coordinates(predator_coordinates, location)
         if not location:
             logging.debug('round {}: opp_particle -> __get_predator_escape_direction() relative_cardinal_location '
@@ -97,7 +97,7 @@ class Mixin:
 
         # take all predators into account
         for predator in predators:
-            new_escape_direction = self.__update_predator_escape_direction(predator.coordinates, False, False)
+            new_escape_direction = self.__update_predator_escape_direction(predator.coordinates, False, True)
             self.mobility_model.current_dir = new_escape_direction
             if predator.get_id() not in self.__detected_predator_ids__:
                 predator_coordinates[predator.get_id()] = predator.coordinates

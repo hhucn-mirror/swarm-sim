@@ -10,6 +10,13 @@ from lib.particle import Particle
 
 class Mixin:
     def multicast_leader_message(self, message_type: LeaderMessageType, neighbors=None, instruct_override=False):
+        """
+        Multicast for a LeaderMessageContent of type :param message_type to :param neighbors.
+        :param message_type: LeaderMessageType
+        :param neighbors: receiving neighbors
+        :param instruct_override: indicate an important instruction
+        :return:
+        """
         max_hops = self.routing_parameters.interaction_radius
         if not neighbors:
             neighbors = self.scan_for_particles_within(hop=max_hops)
@@ -34,6 +41,11 @@ class Mixin:
             multicast_message_content(self, receivers, content)
 
     def send_safe_location_proposal(self, safe_location=None):
+        """
+        Sends a safe location proposal message
+        :param safe_location: proposed safe location coordinates
+        :return: None
+        """
         if safe_location is None:
             safe_location = self.get_a_safe_location()
         content = SafeLocationMessage(safe_location, self.leader_contacts.keys(), SafeLocationMessageType.Proposal)
@@ -43,6 +55,11 @@ class Mixin:
         self._send_via_all_contacts__(content, receivers)
 
     def send_direction_proposal(self, proposed_direction=None):
+        """
+        Sends a direction proposal to neighbors but prefers sending to leaders of the RoutingMap
+        :param proposed_direction: the direction to propose
+        :return: None
+        """
         if proposed_direction is None:
             proposed_direction = self.choose_direction()
         if self.__is_committed_to_propose__() or self.__is_committed_to_instruct__():
@@ -56,6 +73,11 @@ class Mixin:
         self.reset_random_next_direction_proposal_round()
 
     def __send_proposal_to_leaders__(self, proposed_direction):
+        """
+        Sends a proposal to leaders in the particles RoutingMap.
+        :param proposed_direction: the direction to propose
+        :return: None
+        """
         self.__add_leader_state__(LeaderStateName.WaitingForCommits, set(self.leader_contacts.keys()),
                                   self.world.get_actual_round(), self.t_wait * 2 + 1)
         for leader, contacts in self.leader_contacts.items():
@@ -73,10 +95,21 @@ class Mixin:
                     contact_particle.number))
 
     def flood_message_content(self, message_content):
+        """
+        Multicast a message with :param message_content to all neighbors with the maximum particle interaction radius.
+        :param message_content: content of the message
+        :return: None
+        """
         receivers = self.scan_for_particles_within(hop=self.routing_parameters.interaction_radius)
         multicast_message_content(self, receivers, message_content)
 
     def send_message_content_via_contacts(self, receiver, message_content):
+        """
+        Sends a message via contacts of the particles routing maps.
+        :param receiver: the receiver of the message
+        :param message_content: content of the message to send
+        :return: None
+        """
         if receiver in self.leader_contacts:
             receivers = self.leader_contacts[receiver].keys()
         elif receiver in self.follower_contacts:
@@ -87,6 +120,12 @@ class Mixin:
             send_message(self, contact_particle, Message(self, receiver, content=message_content))
 
     def __flood_forward__(self, received_message):
+        """
+        Forwards a message using flooding but will exclude receivers that are already set inside the
+        content of the message and will also exclude the sender and original sender.
+        :param received_message: Message to forward
+        :return: None
+        """
         received_content = received_message.get_content()
         if isinstance(received_content, LeaderMessageContent):
             exclude = {received_message.get_sender(), received_message.get_content().sending_leader,
@@ -119,6 +158,13 @@ class Mixin:
                     self.world.get_actual_round(), self.number, message_type, receiver.number))
 
     def send_to_leader_via_contacts(self, message, receiving_leader=None):
+        """
+        Tries to send a message to a leader via the particles routing maps. If the receiving leader is not set,
+        it will be send to all leaders that the particle is aware of.
+        :param message: message to send
+        :param receiving_leader: the receiving leader
+        :return: None
+        """
         received_content = message.get_content()
         if receiving_leader and receiving_leader not in self.leader_contacts:
             return self.__flood_forward__(message)
@@ -141,6 +187,12 @@ class Mixin:
         self._send_via_all_contacts__(received_content, receivers)
 
     def _send_via_all_contacts__(self, message_content, receivers):
+        """
+        Sends a message with :param message_content to a list of :param receivers.
+        :param message_content: the content of the message
+        :param receivers: the receivers of the message
+        :return: None
+        """
         message = Message(self, None)
         for leader_particle in receivers:
             for contact in self.leader_contacts.get_leader_contacts(leader_particle):
@@ -162,6 +214,17 @@ class Mixin:
     def __send_content_to_leader_via_contacts__(self, sending_leader: Particle, receiving_leader: Particle,
                                                 message_type: LeaderMessageType,
                                                 contacts=None, proposed_direction=None):
+        """
+        Tries to send a new LeaderMessageContent message to :param receiving_leader as :param sending_leader. This
+        will prefer using leader contacts. If the neither :param contacts nor :param receiving_leader are set, this
+        will cancel. If the particle has no entry for :param receiving_leader, it will flood the message.
+        :param sending_leader: sending leader to use
+        :param receiving_leader: leader to receive the message
+        :param message_type: type of LeaderMessageContent to create
+        :param contacts: RoutingMap to use
+        :param proposed_direction: proposed direction of the content
+        :return: None
+        """
         if not contacts:
             if receiving_leader in self.leader_contacts:
                 contacts = self.leader_contacts[receiving_leader]
@@ -181,6 +244,11 @@ class Mixin:
             send_message(self, contact.get_contact_particle(), Message(self, receiving_leader, content=content))
 
     def __multicast_instruct__(self, instruct_override=False):
+        """
+        Multicast an instruct LeaderMessageContent message.
+        :param instruct_override: boolean
+        :return: None
+        """
         self.multicast_leader_message(LeaderMessageType.instruct, instruct_override=instruct_override)
         self.__add_leader_state__(LeaderStateName.SendInstruct, set(), self.world.get_actual_round(),
                                   self.t_wait * 2)

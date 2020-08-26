@@ -56,7 +56,7 @@ class Particle(lib.particle.Particle, Mixin):
         Initialises the particles two MessageStores for forwarding and receiving.
         :param ms_size: the size of the two stores
         :param ms_strategy: the strategy to implement for buffer-management.
-        :return: nothing
+        :return: None
         """
         self.send_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
         self.rcv_store = MessageStore(maxlen=ms_size, strategy=ms_strategy)
@@ -65,7 +65,7 @@ class Particle(lib.particle.Particle, Mixin):
         """
         Sets the mobility_model of the particle to :param mobility_model.
         :param mobility_model: the mobility model.
-        :return: nothing
+        :return: None
         """
         self.mobility_model = mobility_model
 
@@ -73,7 +73,7 @@ class Particle(lib.particle.Particle, Mixin):
         """
         Sets the routing_parameters of the particle to :param routing_parameters.
         :param routing_parameters: the routing parameters.
-        :return: nothing
+        :return: None
         """
         self.routing_parameters = routing_parameters
 
