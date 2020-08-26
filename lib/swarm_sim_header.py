@@ -188,6 +188,14 @@ def get_hexagon_ring(centre, r_max):
 
 
 def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
+    """
+    Determines the vector angle between to vectors. Returns radians per default.
+    :param u: first vector
+    :param v: second vector
+    :param beta: whether the angle is a beta angle
+    :param degrees: whether to convert to degrees
+    :return: angle between :param u and :param v
+    """
     denominator = np.linalg.norm(u) * np.linalg.norm(v)
     if denominator == 0:
         phi = 1 / 2 * np.pi
@@ -202,10 +210,10 @@ def vector_angle(u: np.ndarray, v: np.ndarray, beta=False, degrees=False):
 
 def get_distance_from_coordinates(coordinates1: tuple, coordinates2: tuple):
     """
-    Calculates the hop distance between two coordinate tuples.
+    Calculates the hop distance from two coordinate tuples.
     :param coordinates1: first coordinates
     :param coordinates2: second coordinates
-    :return: hop distance between two coordinates
+    :return: hop distance from two coordinates
     """
     x_diff = abs(coordinates2[0] - coordinates1[0])
     y_diff = abs(coordinates2[1] - coordinates1[1])
@@ -219,6 +227,12 @@ def get_distance_from_coordinates(coordinates1: tuple, coordinates2: tuple):
 
 
 def get_direction_between_coordinates(coordinates1, coordinates2):
+    """
+    Calculates the hop distance between two coordinate tuples.
+    :param coordinates1: first coordinates
+    :param coordinates2: second coordinates
+    :return: hop distance between two coordinates
+    """
     x_diff, y_diff = coordinates1[0] - coordinates2[0], coordinates1[1] - coordinates2[1]
     # north
     if y_diff != 0:

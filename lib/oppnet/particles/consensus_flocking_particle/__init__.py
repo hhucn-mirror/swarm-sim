@@ -16,9 +16,27 @@ class ConsensusProtocol(Enum):
 
 
 class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _process_messages.Mixin, _routing.Mixin):
+    """
+    Class for particles in consensus flocking solutions.
+    """
+
     def __init__(self, world, coordinates, color, particle_counter=0, csv_generator=None, ms_size=None,
                  ms_strategy=None, mm_mode=None, mm_length=None, mm_zone=None, mm_starting_dir=None,
                  ):
+        """
+        Constructor. Initializes variables
+        :param world: simulator world reference
+        :param coordinates: particle coordinates
+        :param color: particle color
+        :param particle_counter: particle number
+        :param csv_generator: csv generator object
+        :param ms_size: size of the MessageStore
+        :param ms_strategy: strategy of the MessageStore
+        :param mm_mode: MobilityModelMode
+        :param mm_length: length of a walk for specific MobilityModelModes
+        :param mm_zone: zone for Zonal MobilityModelMode
+        :param mm_starting_dir: starting direction of the particles MobilityModel
+        """
         super().__init__(world=world, coordinates=coordinates, color=color, particle_counter=particle_counter,
                          csv_generator=csv_generator, ms_size=ms_size, ms_strategy=ms_strategy, mm_mode=mm_mode,
                          mm_length=mm_length, mm_zone=mm_zone, mm_starting_dir=mm_starting_dir)
@@ -40,9 +58,17 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _proce
         self.recent_safe_location = (0, 0, 0)
 
     def reset_neighborhood_direction_counter(self):
+        """
+        Resets the neighborhood direction counter.
+        :return: None
+        """
         self.__neighborhood_direction_counter__ = Counter()
 
     def reset_max_cardinal_direction_hops(self):
+        """
+        Resets the maximum cardinal direction hops dictionary.
+        :return: None
+        """
         self.__max_cardinal_direction_hops__ = {}
 
     def get_particles_in_cardinal_direction_hop(self, cardinal_direction, hops):
@@ -98,6 +124,11 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _proce
         return ring
 
     def get_next_direction(self):
+        """
+        Determines the next moving direction based on the particles flock_mode and surroundings such as predators
+        and particles which may block a moving direction.
+        :return:
+        """
         predators_nearby = self.predators_nearby()
         if predators_nearby:
             return self.predators_detected_disperse(predators_nearby)
@@ -134,6 +165,11 @@ class Particle(particles.Particle, _communication.Mixin, _movement.Mixin, _proce
             return mm_next_direction
 
     def _get_next_direction_optimising(self, mm_next_direction):
+        """
+        Gets the next moving direction for optimizing a particles position in a flock
+        :param mm_next_direction: current moving direction
+        :return: direction value or None for no movement
+        """
         if mm_next_direction is None:
             self.set_flock_mode(particles.FlockMode.Flocking)
             return None

@@ -9,7 +9,7 @@ class Mixin:
         """
         Adds the sender of the :param message as contact for the message's original sender.
         :param message: the message.
-        :return: nothing
+        :return: None
         """
         self.contacts.add_contact(message.get_sender(), message.get_original_sender(), message.get_hops())
         self.world.update_flock_id_for_particles([message.get_sender(), message.get_original_sender(), self])
@@ -38,7 +38,7 @@ class Mixin:
         """
         Tries to forward a :param message via the particle's RoutingMap contacts.
         :param message: the message.
-        :return: nothing
+        :return: None
         """
         try:
             for contact_particle in self.contacts[message.actual_receiver].keys():

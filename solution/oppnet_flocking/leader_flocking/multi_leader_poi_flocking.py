@@ -37,6 +37,12 @@ def solution(world):
 
 
 def print_all_routes(particles, current_round):
+    """
+    Logs routes of particles.
+    :param current_round: simulator round
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         for target_particle, contacts in particle.leader_contacts.items():
             for contact in contacts.values():
@@ -47,17 +53,33 @@ def print_all_routes(particles, current_round):
 
 
 def set_t_wait_values(particles, t_wait):
+    """
+    Sets the t_wait of particles to :param t_wait.
+    :param particles: list of particles
+    :param t_wait: t_wait value to set
+    :return: None
+    """
     for particle in particles:
         particle.set_t_wait(t_wait)
 
 
 def split_particles(particles, leader_count):
+    """
+    Splits the list of particles in two followers and leaders.
+    :param particles: the list of particles.
+    :param leader_count: the number of leaders
+    :return: list of leaders, set of followers
+    """
     leader_set = set(random.sample(particles, leader_count))
     follower_set = set(particles).difference(leader_set)
     return list(leader_set), follower_set
 
 
 def initialise_leaders():
+    """
+    Initializes all leaders by setting color and proposal rounds.
+    :return: None
+    """
     for index, leader in enumerate(leaders):
         leader.set_color(red)
         leader.set_flock_member_type(FlockMemberType.Leader)
@@ -67,11 +89,21 @@ def initialise_leaders():
 
 
 def check_neighborhoods(particles):
+    """
+    Updates the neighbourhood of particles.
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         particle.update_current_neighborhood()
 
 
 def update_particle_states(particles):
+    """
+    Updates the free locations of the particles.
+    :param particles: list of particles
+    :return:
+    """
     for leader in leaders:
         leader.update_leader_states()
     for particle in particles:
@@ -79,6 +111,11 @@ def update_particle_states(particles):
 
 
 def move_to_next_direction(particles):
+    """
+    Moves particle to their next direction.
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         next_direction = particle.get_next_direction()
         if next_direction:

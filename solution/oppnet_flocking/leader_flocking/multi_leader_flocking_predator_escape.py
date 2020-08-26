@@ -32,6 +32,11 @@ def solution(world):
 
 
 def get_leaders(world):
+    """
+    Gets the list of leaders
+    :param world: simulator world
+    :return: list of leaders
+    """
     leaders = world.leaders
     if len(leaders) > world.config_data.leader_count:
         logging.warning("round {}: more than leaders ({}) than set in config ({})"
@@ -40,11 +45,22 @@ def get_leaders(world):
 
 
 def predators_pursuit(predators):
+    """
+    Activate pursuit of predators
+    :param predators: list of predators
+    :return: None
+    """
     for predator in predators:
         predator.pursuit()
 
 
 def log_all_routes(particles, current_round):
+    """
+    Logs routes of particles.
+    :param current_round: simulator round
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         for target_particle, contacts in particle.leader_contacts.items():
             for contact in contacts.values():
@@ -55,12 +71,23 @@ def log_all_routes(particles, current_round):
 
 
 def split_particles(particles, leader_count):
+    """
+    Splits the list of particles in two followers and leaders.
+    :param particles: the list of particles.
+    :param leader_count: the number of leaders
+    :return: list of leaders, set of followers
+    """
     leader_set = set(random.sample(particles, leader_count))
     follower_set = set(particles).difference(leader_set)
     return list(leader_set), follower_set
 
 
 def initialise_leaders(t_wait, leaders):
+    """
+    Initializes all leaders by setting color t_wait and proposal rounds.
+    :param t_wait: the t_wait value to use.
+    :return: None
+    """
     left_bound = t_wait * 3 + 1
     for index, leader in enumerate(leaders):
         leader.set_t_wait(t_wait)
@@ -73,11 +100,21 @@ def initialise_leaders(t_wait, leaders):
 
 
 def check_neighborhoods(particles):
+    """
+    Updates the neighbourhood of particles.
+    :param particles: list of particles
+    :return: None
+    """
     for particle in particles:
         particle.update_current_neighborhood()
 
 
 def send_direction_proposals(current_round, leaders):
+    """
+    Sends the direction proposals of leaders.
+    :param current_round: current simulator round
+    :return: None
+    """
     for leader in leaders:
         if leader.next_direction_proposal_round == current_round:
             if leader.flock_mode == FlockMode.Flocking:
@@ -89,6 +126,11 @@ def send_direction_proposals(current_round, leaders):
 
 
 def move_to_next_direction(particles):
+    """
+    Moves particle to their next direction.
+    :param particles: list of particles
+    :return: None
+    """
     particle_directions = {}
     for particle in particles:
         next_direction = particle.get_next_direction()

@@ -73,7 +73,7 @@ class Mixin:
         Sets the current_dir value of the particle's MobilityModel to one of the values it received by interpreting it
         as weighted probability distribution. Weights are proportional to number of times the particle received a
         direction.
-        :return: nothing
+        :return: None
         """
         neighborhood_size = len(self.__neighborhood_direction_counter__)
         if neighborhood_size > 0:
@@ -84,7 +84,7 @@ class Mixin:
     def set_average_direction(self):
         """
         Sets the current_dir value of the particles MobilityModel to the average value it received from neighbors.
-        :return: nothing
+        :return: None
         """
         if len(self.__neighborhood_direction_counter__) > 0:
             self.mobility_model.current_dir = self.__average_coordinates__(self.__neighborhood_direction_counter__)

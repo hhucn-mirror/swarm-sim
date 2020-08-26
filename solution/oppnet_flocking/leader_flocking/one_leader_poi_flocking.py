@@ -18,7 +18,7 @@ def solution(world):
     if current_round == 1:
         particles = world.get_particle_list()
         leader, followers = split_particles(1)
-        initialise_leaders(t_wait)
+        initialize_leaders(t_wait)
     else:
         routing.next_step(particles)
         move_particles_to_next_direction()
@@ -32,12 +32,22 @@ def solution(world):
 
 
 def split_particles(leader_count):
+    """
+    Splits the list of particles in two followers and leaders.
+    :param leader_count: the number of leaders
+    :return: list of leaders, set of followers
+    """
     leader_particle = random.sample(particles, leader_count)[0]
     follower_set = set(particles).difference({leader_particle})
     return leader_particle, list(follower_set)
 
 
-def initialise_leaders(t_wait):
+def initialize_leaders(t_wait):
+    """
+    Initializes all leaders by setting color t_wait and proposal rounds.
+    :param t_wait: the t_wait value to use.
+    :return: None
+    """
     leader.set_t_wait(t_wait)
     leader.set_color(red)
     leader.set_flock_member_type(FlockMemberType.Leader)
@@ -45,6 +55,10 @@ def initialise_leaders(t_wait):
 
 
 def send_new_instruct(choose_new_direction):
+    """
+    Leader sends a new direction instruct.
+    :return: None
+    """
     if choose_new_direction:
         leader.choose_direction(True)
         leader.multicast_leader_message(LeaderMessageType.instruct)
@@ -53,11 +67,13 @@ def send_new_instruct(choose_new_direction):
         if not leader.proposed_direction or leader.proposed_direction != next_direction:
             leader.proposed_direction = next_direction
             leader.multicast_leader_message(LeaderMessageType.instruct)
-    # else:
-    #    leader.broadcast_safe_location(leader.coordinates)
 
 
 def move_particles_to_next_direction():
+    """
+    Moves particle to their next direction.
+    :return: None
+    """
     particle_directions = {}
     for particle in followers:
         next_direction = particle.get_next_direction()

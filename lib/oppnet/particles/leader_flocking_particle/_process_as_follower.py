@@ -10,6 +10,11 @@ from lib.oppnet.particles import FlockMode
 
 class Mixin:
     def __process_as_follower__(self, received_messages: [Message]):
+        """
+        Processes messages as a follower. Calls the specific methods depending on content.
+        :param received_messages: list of received messages
+        :return: None
+        """
         self.__add_new_contacts_as_follower__(received_messages)
         for message in received_messages:
             content = message.get_content()
@@ -32,6 +37,11 @@ class Mixin:
                 self.process_predator_signal(message, content)
 
     def __process_instruct_as_follower__(self, message: Message):
+        """
+        Updates the particles instruct message if its a new instruct. Will then also flood this message to neighbors.
+        :param message: the instruct message received
+        :return: None
+        """
         message_content = message.get_content()
         if self._instruction_number_ is None or (message_content.number > self._instruction_number_) \
                 or message_content.instruct_override:
@@ -43,6 +53,11 @@ class Mixin:
                                   self.proposed_direction, self.instruct_round))
 
     def __update__instruct_round_as_follower_(self, received_message: Message):
+        """
+        Updates the instruct variables of the particle. Determining the round to move and setting the mobility model.
+        :param received_message: the instruct message received
+        :return: None
+        """
         content = received_message.get_content()
         new_instruction_round = self.world.get_actual_round() + content.t_wait
         instruction_number = content.number
@@ -54,6 +69,13 @@ class Mixin:
         self.mobility_model.set_mode(MobilityModelMode.Manual)
 
     def __process_lost_message_as_follower__(self, message: Message):
+        """
+        Processes a lost message and responds accordingly. Will use a rejoin message to determine a location to regroup
+        with the flock, remove a particle from its contacts if it separated from the flock, respond with a
+        free surrounding locations if queried or apply a counter of free locations as coordinates to move to.
+        :param message: received lost message
+        :return:
+        """
         content = message.get_content()
         message_type = content.message_type
         if message_type == LostMessageType.RejoinMessage:
@@ -92,6 +114,11 @@ class Mixin:
                 self.set_flock_mode(FlockMode.Flocking)
 
     def __process_safe_location_message_as_follower(self, message):
+        """
+        Applies the safe location in the message as POI to move to.
+        :param message: the received safe location message
+        :return: None
+        """
         content = message.get_content()
         self.recent_safe_location = content.coordinates
         self.set_flock_mode(FlockMode.Searching)

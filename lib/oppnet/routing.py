@@ -145,6 +145,11 @@ def __next_step_manet_epidemic__(particle):
 
 
 def __next_step_one_leader_flocking__(particle):
+    """
+    Executes the next step for one leader flocking.
+    :param particle: the particle to execute the next routing step for
+    :return: None
+    """
     received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
     if particle.get_flock_member_type() == FlockMemberType.Follower:
@@ -155,6 +160,11 @@ def __next_step_one_leader_flocking__(particle):
 
 
 def __next_step_multi_leader_flocking__(particle):
+    """
+    Executes the next step for multi leader flocking.
+    :param particle: the particle to execute the next routing step for
+    :return: None
+    """
     received, to_forward = particle.get_all_received_messages()
     particle.update_current_neighborhood()
     if particle.get_flock_member_type() == FlockMemberType.Follower:
@@ -165,6 +175,11 @@ def __next_step_multi_leader_flocking__(particle):
 
 
 def __next_step_average_consensus_flocking__(particle):
+    """
+    Executes the next step for average consensus flocking.
+    :param particle: the particle to execute the next routing step for
+    :return: None
+    """
     particle.update_current_neighborhood()
     particle.send_all_to_forward()
     particle.process_received()
@@ -250,29 +265,65 @@ def __try_and_transfer_messages__(particle, probabilities, particle_probability_
 
 
 class RoutingContact:
+    """
+    A routing contact used for RoutingMap.
+    """
+
     def __init__(self, contact_particle, target_particle, hops):
+        """
+        Constructor. Initializes variables.
+        :param contact_particle: the particle the target can be reached by
+        :param target_particle: the target particle of the route
+        :param hops: the number of hops between sender and target
+        """
         self.__contact_particle__ = contact_particle
         self.__target_particle__ = target_particle
         self.__hops__ = hops
 
     def get_contact_particle(self):
+        """
+        Gets the contact particle
+        :return: particle
+        """
         return self.__contact_particle__
 
     def get_target_particle(self):
+        """
+        Gets the target particle
+        :return: particle
+        """
         return self.__target_particle__
 
     def get_hops(self):
+        """
+        Gets the hops of the route
+        :return: int
+        """
         return self.__hops__
 
 
 class RoutingMap(dict):
+    """
+    Class based on dict to collect RoutingContacts
+    """
 
     def __init__(self):
+        """
+        Constructor. Initializes values.
+        """
         super(RoutingMap, self).__init__()
         self.__max_hops_contact__ = None
         self.__max_hops__ = -1
 
     def add_contact(self, contact_particle, target_particle, hops, contact=None):
+        """
+        Adds a contact to the map.
+        :param contact_particle: the contact
+        :param target_particle: the target
+        :param hops: the hops to the target
+        :param contact: the contact object
+        :return: None
+        """
         if not contact:
             contact = RoutingContact(contact_particle, target_particle, hops)
 
@@ -287,25 +338,61 @@ class RoutingMap(dict):
             self.__max_hops_contact__ = contact
 
     def get_contact(self, target_particle, contact_particle):
+        """
+        Gets the contact object for a target and contact.
+        :param target_particle: target
+        :param contact_particle: contact
+        :return: RoutingContact
+        """
         return self[target_particle][contact_particle]
 
     def get_max_hops_(self):
+        """
+        Maximum number of hops in the map.
+        :return: int
+        """
         return self.__max_hops__
 
     def get_max_hops_contact(self):
+        """
+        Gets the maximum hops for contacts.
+        :return: int
+        """
         return self.__max_hops_contact__
 
     def update_contact(self, contact_particle, target_particle, hops):
+        """
+        Updates a contact.
+        :param contact_particle: contact
+        :param target_particle: target
+        :param hops: hops to target
+        :return: None
+        """
         self.add_contact(contact_particle, target_particle, hops)
 
     def remove_contact(self, contact: RoutingContact):
+        """"
+        Removes a contact.
+        :param contact: the contact to remove
+        :return: None
+        """
         target_entry = self[contact.get_target_particle()]
         del target_entry[contact]
 
     def remove_target(self, target_particle):
+        """
+        Removes all contacts for a target.
+        :param target_particle: the target to remove
+        :return: None
+        """
         del self[target_particle]
 
     def remove_all_entries_with_particle(self, particle_to_remove):
+        """
+        Removes all entries for a particle. Contacts and targets are considered.
+        :param particle_to_remove: particle to remove
+        :return: number of contacts deleted
+        """
         delete_count = 0
         try:
             self.remove_target(particle_to_remove)
@@ -321,16 +408,30 @@ class RoutingMap(dict):
         return delete_count
 
     def remove_all_entries_with_particles(self, particles_to_remove):
+        """
+        Removes a list of particles from the map.
+        :param particles_to_remove: list of particles
+        :return: None
+        """
         for particle in particles_to_remove:
             self.remove_all_entries_with_particle(particle)
 
     def get_all_contact_particles(self):
+        """
+        Gets a list of all contacts in the map.
+        :return: list of particles
+        """
         all_contacts = []
         for _, contacts in self.items():
             all_contacts.extend(contacts.keys())
         return all_contacts
 
     def get_leader_contacts(self, leader_particle):
+        """
+        Gets the leader contacts for a leader particle as target.
+        :param leader_particle: target
+        :return: list of contacts
+        """
         try:
             return self[leader_particle].values()
         except KeyError:

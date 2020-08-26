@@ -5,12 +5,23 @@ from lib.oppnet.particles import FlockMemberType
 
 class Mixin:
     def __predators_detected__(self, predators):
+        """
+        Calls the specific methods for a Follower or Leader Particle.
+        :param predators: list of predators detected
+        :return: None
+        """
         if self._flock_member_type == FlockMemberType.Follower:
             self.__predators_detected_follower(predators)
         else:
             self.__predators_detected_leader(predators)
 
     def __predators_detected_follower(self, predators):
+        """
+        Updates the dictionary of detected predators and sends a PredatorSignal message
+        to all leaders if there are newly detected ones.
+        :param predators: list of predators detected
+        :return: None
+        """
         predator_coordinates = {}
         for predator in predators:
             if predator.get_id() not in self.__detected_predator_ids__:
@@ -21,6 +32,12 @@ class Mixin:
             self._send_via_all_contacts__(content, self.leader_contacts.keys())
 
     def __predators_detected_leader(self, predators):
+        """
+        Updates the dictionary of detected predators and determines an escape direction. Will instruct the flock
+        to move in this direction.
+        :param predators: list of predators detected
+        :return: None
+        """
         self.mobility_model.set_mode(MobilityModelMode.Manual)
         predator_ids = set()
         for predator in predators:
