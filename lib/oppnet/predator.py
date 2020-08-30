@@ -74,6 +74,7 @@ class Predator(Particle):
 
         return False
 
+    @NotImplemented
     def set_color(self, color):
         return
 

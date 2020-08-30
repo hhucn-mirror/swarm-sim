@@ -135,6 +135,7 @@ class CsvRoundData:
         """
         self.predator_num = predator_num
 
+    @NotImplemented
     def update_locations_num(self, locations_num):
         return
 
